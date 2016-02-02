@@ -7,6 +7,11 @@ module.exports = {
             unique: true,
             alphanumericdashed: true
         },*/
+        id: {
+          type: 'integer',
+          unique: true,
+          primaryKey: true
+        },
         password: {
             type: 'string'
         },
@@ -17,22 +22,12 @@ module.exports = {
         },
         firstName: {
             type: 'string',
-            defaultsTo: ''
+            defaultsTo: '',
         },
         lastName: {
             type: 'string',
             defaultsTo: ''
         },
-        photo: {
-            type: 'string',
-            defaultsTo: '',
-            url: true
-        },
-        socialProfiles: {
-            type: 'object',
-            defaultsTo: {}
-        },
-
         toJSON: function () {
             var obj = this.toObject();
             delete obj.password;
@@ -41,11 +36,11 @@ module.exports = {
         }
     },
     beforeUpdate: function (values, next) {
-        CipherService.hashPassword(values);
+        CipherService.hashPasswordUser(values);
         next();
     },
     beforeCreate: function (values, next) {
-        CipherService.hashPassword(values);
+        CipherService.hashPasswordUser(values);
         next();
     }
 };

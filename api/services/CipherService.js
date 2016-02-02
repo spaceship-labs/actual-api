@@ -8,11 +8,18 @@ module.exports = {
 
 
   /**
+  * Hash any password
+  */
+  hashPassword: function(password){
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+  },
+
+  /**
   * Hash the password field of the passed user.
   */
-  hashPassword: function(user){
+  hashPasswordUser: function(user){
     if(user.password){
-      user.password = bcrypt.hashSync(user.password);
+      user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
     }
   },
 
