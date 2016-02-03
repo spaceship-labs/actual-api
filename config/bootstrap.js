@@ -15,7 +15,7 @@ module.exports.bootstrap = function(cb) {
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
   console.log(process.env.DB_HOST);
   console.log(process.env.DB_USER);
-  console.log((process.env.DB_USER);
+  console.log(process.env.DB_USER);
   console.log(process.env.DB_PASS);
   console.log(process.env.DB_NAME);
   cb();
