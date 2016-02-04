@@ -52,5 +52,9 @@ module.exports = {
       _onPassportAuth.bind(this, req, res))(req, res);
   },
 
+  homeStatus: function(req, res){
+    res.ok({status:'ok'});
+  }
+
 };
 
