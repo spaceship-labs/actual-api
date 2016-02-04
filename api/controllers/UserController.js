@@ -44,17 +44,17 @@ module.exports = {
           User.update({email:email},{password: password}).exec(function(err, user){
             if(err || typeof user == 'undefined'){
               console.log(err);
-              return res.ok({result:'f'});
+              return res.ok({success:false});
             }else{
-              return res.ok({result:'s'});
+              return res.ok({success:true});
             }
           });
         });
       }else{
-        return res.ok({result:'f'});
+        return res.ok({success:false});
       }
     }else{
-      return res.ok({result:'f'});
+      return res.ok({success:false});
     }
   }
 
@@ -74,10 +74,10 @@ function sendPasswordRecoveryEmail(params, res, req){
     "passwordRecovery", data, head, function(err){
       if(err){
         console.log(err);
-        return res.ok({result:'f'});
+        return res.ok({success:false});
       }
       return res.ok({
-        result:'s',
+        success:true,
         recoverURL: data.recoverURL//REMOVE IN PRODUCTION
       });
   });
