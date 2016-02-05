@@ -28,6 +28,8 @@ module.exports = {
             type: 'string',
             defaultsTo: ''
         },
+        lastLogin : 'datetime',
+
         toJSON: function () {
             var obj = this.toObject();
             delete obj.password;

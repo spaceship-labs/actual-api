@@ -38,7 +38,11 @@ function _onLocalStrategyAuth(email, password, next){
       });
     }
 
-    return next(null, user, {});
+    User.update({id : user.id},{ lastLogin : new Date() }).exec(function(err,ruser){
+        delete user.password;
+        return next(null, user, {});
+    });
+
   });
 }
 

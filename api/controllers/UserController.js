@@ -21,7 +21,11 @@ module.exports = {
           var tokenAux = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));
           var token = tokenAux;
           //var token = tokenAux.replace(/\//g, "-");
-          var recoverURL = req.baseUrl + '/change_password?';
+
+          //TODO change it to config env var.
+          var frontendURL = 'http://actual.spaceshiplabs.com';
+
+          var recoverURL =  frontendURL + '/change_password?';
           recoverURL += 'token='+token;
           recoverURL += '&email='+email;
           sendPasswordRecoveryEmail({recoverURL: recoverURL, email: email}, res, req);
