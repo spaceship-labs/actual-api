@@ -8,6 +8,33 @@ var bcrypt = require('bcrypt');
 
 module.exports = {
 
+  create: function(req, res){
+    User
+      .create(_.omit(req.allParams(), 'id'))
+      .exec(function(err,_user){
+        if(err){
+          console.log(err);
+          throw(err);
+          return res.serverError;
+        }else{
+          console.log(_user);
+          return res.ok({user:_user});
+        }
+      })
+  },
+
+  update: function(req, res) {
+    var form = req.params.all();
+    var id = form.id;
+    delete form.password;
+    User.update({id:id},form,function(err,user){
+      if(err) throw(err);
+      return res.ok({
+        user: user
+      })
+    });
+  },
+
   send_password_recovery: function(req, res){
     var form = req.params.all();
     var email = form.email || false;

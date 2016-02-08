@@ -35,6 +35,16 @@ module.exports.routes = {
   '/': {
     controller: 'auth',
     action: 'homeStatus'
+  },
+
+  '/user/create':{
+    controller: 'user',
+    action: 'create'
+  },
+
+  '/user/update/:id':{
+    controller: 'user',
+    action: 'update'
   }
 
   /***************************************************************************

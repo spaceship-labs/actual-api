@@ -33,10 +33,12 @@ module.exports = {
     User
       .create(_.omit(req.allParams(), 'id'))
       .then(function(user){
-        return {
+        /*return {
           token: CipherService.createToken(user),
           user: user
         };
+        */
+        return res.ok({user:user});
       })
       .then(res.created)
       .catch(res.serverError);

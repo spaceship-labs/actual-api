@@ -5,8 +5,8 @@ var JwtStrategy = require('passport-jwt').Strategy;
 var EXPIRES_IN = 60*24*60; //seconds
 var SECRET = process.env.tokenSecret || "4ukI0uIVnB3iI1yxj646fVXSE3ZVk4doZgz6fTbNg7jO41EAtl20J5F7Trtwe7OM";
 var ALGORITHM = "HS256";
-var ISSUER = "aldea.com";
-var AUDIENCE = "aldea.com";
+var ISSUER = "actual.com";
+var AUDIENCE = "actual.com";
 
 var LOCAL_STRATEGY_CONFIG = {
   usernameField: 'email',
@@ -50,7 +50,7 @@ function _onLocalStrategyAuth(email, password, next){
 
 function _onJwtStrategyAuth(payload, next){
   var user = payload.user;
-  console.log(payload);
+  //console.log(payload);
   return next(null, user, {});
 }
 

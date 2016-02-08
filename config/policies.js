@@ -22,7 +22,8 @@ module.exports.policies = {
 
   '*': ['isAuthenticated'],
   AuthController:{
-    '*': true
+    '*': true,
+    signup: 'isAuthenticated'
   },
   UserController:{
     send_password_recovery: true,
