@@ -29,7 +29,15 @@ module.exports = {
             defaultsTo: ''
         },
         lastLogin : 'datetime',
-
+        isAdmin : {
+            type : 'boolean',
+            defaultsTo : false,
+            required : true
+        },
+        userType: {
+            type:'string',
+            defaultsTo: 'seller'
+        },
         toJSON: function () {
             var obj = this.toObject();
             delete obj.password;

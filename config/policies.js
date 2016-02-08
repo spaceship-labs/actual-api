@@ -22,10 +22,11 @@ module.exports.policies = {
 
   '*': ['isAuthenticated'],
   AuthController:{
-    '*': true,
-    signup: 'isAuthenticated'
+    '*': true
   },
   UserController:{
+    create: ['isAdmin'],
+    update: ['isAdmin'],
     send_password_recovery: true,
     update_password: true
   }
