@@ -40,7 +40,7 @@ module.exports = {
   },
 
   homeStatus: function(req, res){
-    res.ok({status:'ok'});
+    res.ok({status:'ok!'});
   }
 
 };
