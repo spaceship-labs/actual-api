@@ -8,6 +8,24 @@ var bcrypt = require('bcrypt');
 
 module.exports = {
 
+  find: function(req, res){
+    User.find({}).exec(function(err, users){
+      res.ok({data:users});
+    });
+  },
+
+  findById: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    User.find({id:id}).exec(function(err, results){
+      if(results.length > 0){
+        res.ok({data:results[0]});
+      }else{
+        res.ok({data:user});
+      }
+    });
+  },
+
   create: function(req, res){
     User
       .create(_.omit(req.allParams(), 'id'))

@@ -42,6 +42,16 @@ module.exports.routes = {
     action: 'create'
   },
 
+  '/user/findbyid/:id':{
+    controller: 'user',
+    action: 'findById'
+  },
+
+  '/user/find':{
+    controller: 'user',
+    action: 'find'
+  },
+
   '/user/update/:id':{
     controller: 'user',
     action: 'update'

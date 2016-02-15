@@ -25,10 +25,11 @@ module.exports.policies = {
     '*': true
   },
   UserController:{
+    '*': ['isAuthenticated'],
     create: ['isAdmin'],
     update: ['isAdmin'],
     send_password_recovery: true,
-    update_password: true
+    update_password: true,
   }
 
   /***************************************************************************
