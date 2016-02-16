@@ -33,7 +33,7 @@ module.exports.policies = {
   },
 
   //Por ahora
-  SyncController:{'*':true}
+  //SyncController:{'*':true}
 
   /***************************************************************************
   *                                                                          *
