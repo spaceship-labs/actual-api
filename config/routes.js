@@ -55,6 +55,11 @@ module.exports.routes = {
   '/user/update/:id':{
     controller: 'user',
     action: 'update'
+  },
+
+  '/sync/gettables':{
+    controller:'sync',
+    action:'show'
   }
 
   /***************************************************************************

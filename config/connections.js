@@ -49,6 +49,28 @@ module.exports.connections = {
     database: process.env.DB_NAME || 'YOUR_MYSQL_DB'
   },
 
+  sqlserver: {
+    adapter: 'sails-sqlserver',
+    user: 'spaceship',
+    password: '#02n4c4y5:az',
+    host: 'actual.database.windows.net', // azure database
+    database: 'actual',
+    options: {
+      encrypt: true   // use this for Azure databases
+    }
+  },
+  /*
+  sqlserver: {
+    adapter: 'sails-sqlserver',
+    user: process.env.SAPDB_USER || '',
+    password: process.env.SAPDB_PASSWORD || '',
+    host: process.env.SAPDB_HOST || '',
+    database: process.env.SAPDB_NAME || '',
+    options: {
+      encrypt: true   // use this for Azure databases
+    }
+  },*/
+
   /***************************************************************************
   *                                                                          *
   * MongoDB is the leading NoSQL database.                                   *

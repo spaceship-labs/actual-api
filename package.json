@@ -16,7 +16,8 @@
     "sails": "~0.11.4",
     "sails-disk": "~0.10.0",
     "sails-hook-email": "^0.12.1",
-    "sails-mysql": "^0.11.3"
+    "sails-mysql": "^0.11.3",
+    "sails-sqlserver": "^0.10.8"
   },
   "scripts": {
     "debug": "node debug app.js",

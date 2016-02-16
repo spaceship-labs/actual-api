@@ -30,7 +30,10 @@ module.exports.policies = {
     update: ['isAdmin'],
     send_password_recovery: true,
     update_password: true,
-  }
+  },
+
+  //Por ahora
+  SyncController:{'*':true}
 
   /***************************************************************************
   *                                                                          *
