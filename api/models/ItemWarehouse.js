@@ -1,0 +1,15 @@
+module.exports = {
+	connection: 'mysql',
+	migrate: 'alter',
+	tableName: 'ItemWarehouse',
+	tableNameSqlServer: 'OITW',
+	attributes: {
+		ItemCode:{type:'string', size:20},
+		WhsCode:{type:'string', size:20},
+		OnHand:{type:'float'},
+		IsCommited:{type:'float'},
+		OnOrder:{type:'float'}
+
+	},
+
+}

@@ -1,3 +1,4 @@
 module.exports = {
-  connection:'sqlserver'
-}
+    connection:'sqlserver',
+    migrate: 'safe'
+};

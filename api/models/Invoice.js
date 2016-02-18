@@ -1,0 +1,32 @@
+module.exports = {
+	connection: 'mysql',
+	migrate: 'alter',
+	tableName: 'Invoice',
+	tableNameSqlServer: 'INV1',
+	attributes: {
+		DocEntry:{type:'integer'},
+		LineNum:{type:'integer'},
+		LineStatus:{type:'integer',size:1},
+		ItemCode:{type:'string',size:20},
+		Dscription:{type:'string',size:100},
+		Quantity:{type:'float'},
+		ShipDate:{type:'datetime'},
+		Price:{type:'float'},
+		Currency:{type:'string',size:3},
+		DiscPrcnt:{type:'float'},
+		LineTotal:{type:'float'},
+		OpenSum:{type:'float'},
+		WhsCode:{type:'string',size:8},
+		SlpCode:{type:'integer'},
+		AcctCode:{type:'string'},
+		DocDate:{type:'datetime'},
+		BaseCard:{type:'string',size:15},
+		CodeBars:{type:'string',size:254},
+		unitMsr:{type:'string',size:100},
+		Text:{type:'text'},
+		StockPrice:{type:'float'},
+		ShipToCode:{type:'string',size:50},
+		ShipToDesc:{type:'string',size:254}
+	},
+
+}
