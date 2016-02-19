@@ -65,6 +65,11 @@ module.exports.routes = {
   '/product/find/:page':{
     controller: 'product',
     action: 'find'
+  },
+
+  '/saleopportunity/find/:page':{
+    controller: 'saleopportunity',
+    action: 'find'
   }
 
   /***************************************************************************
