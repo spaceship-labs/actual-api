@@ -24,10 +24,15 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     User.find({id:id}).exec(function(err, results){
-      if(results.length > 0){
-        res.ok({data:results[0]});
+      if(err){
+        console.log(err);
+        res.notFound();
       }else{
-        res.ok({data:user});
+        if(results.length > 0){
+          res.ok({data:results[0]});
+        }else{
+          res.notFound();
+        }
       }
     });
   },
