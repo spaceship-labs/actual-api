@@ -37,6 +37,11 @@ module.exports.routes = {
     action: 'homeStatus'
   },
 
+  '/auth/signin':{
+    controller: 'auth',
+    action: 'signin'
+  },
+
   '/user/create':{
     controller: 'user',
     action: 'create'
@@ -57,9 +62,9 @@ module.exports.routes = {
     action: 'update'
   },
 
-  '/sync/gettables':{
-    controller:'sync',
-    action:'show'
+  '/product/find/:page':{
+    controller: 'product',
+    action: 'find'
   }
 
   /***************************************************************************
