@@ -9,9 +9,15 @@ var bcrypt = require('bcrypt');
 module.exports = {
 
   find: function(req, res){
-    User.find({}).exec(function(err, users){
-      res.ok({data:users});
-    });
+    var form = req.params.all();
+    var model = 'user';
+    var searchFields = ['firstName','email'];
+    Common.find(model, form, searchFields).then(function(result){
+      res.ok(result);
+    },function(err){
+      console.log(err);
+      res.notFound();
+    })
   },
 
   findById: function(req, res){

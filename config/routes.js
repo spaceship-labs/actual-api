@@ -52,7 +52,7 @@ module.exports.routes = {
     action: 'findById'
   },
 
-  '/user/find':{
+  '/user/find/:page':{
     controller: 'user',
     action: 'find'
   },
