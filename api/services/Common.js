@@ -6,28 +6,39 @@ module.exports = {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
   },
-  find: function(modelName,form,searchFields){
+  find: function(modelName,form,searchFields, populateFields){
     var deferred = q.defer();
     var items = form.items || 10;
     var page = form.page || 1;
     var term = form.term || false;
+    var populateFields = populateFields || false;
     var query = {};
     var querySearchAux = {};
     var model = sails.models[modelName];
+    //console.log(model);
     if(term){
-      query.or = [];
-      for(var i=0;i<searchFields.length;i++){
-        var field = searchFields[i];
-        var obj = {};
-        obj[field] = {contains:term};
-        query.or.push(obj);
+      if(searchFields.length > 0){
+        query.or = [];
+        for(var i=0;i<searchFields.length;i++){
+          var field = searchFields[i];
+          var obj = {};
+          obj[field] = {contains:term};
+          query.or.push(obj);
+        }
       }
       querySearchAux = _.clone(query);
     }
     query.skip = (page-1) * items;
     query.limit = items;
 
-    model.find(query).exec(function(err, results){
+    var read = model.find(query);
+    if(populateFields.length > 0){
+      populateFields.forEach(function(populateF){
+        read = read.populate(populateF);
+      });
+    }
+
+    read.exec(function(err, results){
       model.count(querySearchAux).exec(function(err,count){
         if(err){
           deferred.reject(err);

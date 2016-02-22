@@ -29,13 +29,13 @@ function truncateTable(_model){
 	var sql = "TRUNCATE TABLE " + 	alias + "";
 
 	Mysql_.query(sql,function(err,results){
-		if(err){ 
+		if(err){
 			console.log(err);
 			deferred.reject(err);
 		}
 		console.log('truncate finish' + new Date());
 		deferred.resolve(results);
-	});	
+	});
 
 	return deferred.promise;
 }
@@ -52,7 +52,7 @@ function copyRows(_model, rows){
 	var aux = '';
 
 	var columns = sails.models[_model]._attributes;
-	
+
 	sql += "( ";
 	for(var col in columns){
 		if(col != 'id' && col != 'updatedAt'){
@@ -67,7 +67,7 @@ function copyRows(_model, rows){
 		sql += "(";
 		for(var col in columns){
 			//Inserting values by column
-			if(col != 'id' && col != 'updatedAt'){
+			if(col != 'id' && col != 'updatedAt' && !columns[col].excludeSync){
 
 				if(col === 'createdAt'){
 					date = moment(new Date()).format('YYYY-MM-DD h:mm:ss');
@@ -76,7 +76,7 @@ function copyRows(_model, rows){
 				else if(columns[col].type === 'datetime'){
 					aux = String(rows[i][col]);
 					if(aux == 'null'){
-						date = moment(new Date()).format('YYYY-MM-DD h:mm:ss'); 
+						date = moment(new Date()).format('YYYY-MM-DD h:mm:ss');
 					}
 					else{
 						date = moment(new Date(aux)).format('YYYY-MM-DD h:mm:ss');
@@ -91,28 +91,28 @@ function copyRows(_model, rows){
 						sql += " '" + val +"',";
 					}
 				}
-				
+
 			}
 		}
 		//Deleting last comma
-		sql = sql.substring(0, sql.length - 1);		
+		sql = sql.substring(0, sql.length - 1);
 		sql += ")";
-	
+
 		if(i != rows.length - 1 ){
 			sql += ","
-		}			
+		}
 	}
-	
+
 	Mysql_.query(sql,function(err,results){
-		if(err){ 
+		if(err){
 			console.log(err);
 			deferred.reject(err);
 		}
 		console.log('insert finish' + new Date());
 		deferred.resolve(results);
 	});
-	
-	return deferred.promise;		
+
+	return deferred.promise;
 }
 
 
@@ -126,7 +126,7 @@ function getData(_model){
 	var i = 0;
 
 	for(col in columns){
-		if(col != 'id' && col != 'createdAt' && col != 'updatedAt'){
+		if(col != 'id' && col != 'createdAt' && col != 'updatedAt' && !columns[col].excludeSync){
 			if (i!=0) sql+=" , ";
 			sql += "" + col +" ";
 			i++;
@@ -135,7 +135,7 @@ function getData(_model){
 
 	sql += " FROM [ACTUALKIDS].[dbo].[" + sails.models[_model].tableNameSqlServer + "]";
 	Sqlserver_.query(sql, function(err, results){
-		if(err){ 
+		if(err){
 			deferred.reject(err);
 			console.log(err);
 		}
@@ -143,7 +143,7 @@ function getData(_model){
 			console.log('read finish' + new Date());
 			deferred.resolve(results);
 		}
-	});	
+	});
 
 	return deferred.promise;
 }
@@ -161,19 +161,19 @@ function _getData(_model){
 	var fields = [];
 
 	for(col in columns){
-		if(col != 'id' && col != 'createdAt' && col != 'updatedAt'){
+		if(col != 'id' && col != 'createdAt' && col != 'updatedAt' && !columns[col].excludeSync){
 			fields.push(col);
 		}
 	}
 
 	model.find({},{select: fields}).exec(function(err, results){
-		if(err){ 
+		if(err){
 			console.log(err);
 			deferred.reject(err);
 		}else{
 			console.log(new Date());
 			deferred.resolve(results);
-		}	
+		}
 	});
 
 	return deferred.promise;
@@ -183,7 +183,7 @@ function _copyRows(_model, rows){
 	var deferred = q.defer();
 	var columns = sails.models[_model].schema;
 	Product.create(rows).exec(function(err,created){
-		if(err){ 
+		if(err){
 			console.log(err);
 			deferred.reject(err);
 		}else{

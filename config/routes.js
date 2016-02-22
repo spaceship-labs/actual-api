@@ -67,6 +67,11 @@ module.exports.routes = {
     action: 'find'
   },
 
+  '/product/search':{
+    controller: 'product',
+    action: 'search'
+  },
+
   '/product/findbyid/:id':{
     controller: 'product',
     action: 'findById'
@@ -75,7 +80,19 @@ module.exports.routes = {
   '/saleopportunity/find/:page':{
     controller: 'saleopportunity',
     action: 'find'
-  }
+  },
+
+  '/line/get':{
+    controller: 'line',
+    action: 'get'
+  },
+
+  '/color/get':{
+    controller: 'color',
+    action: 'get'
+  },
+
+
 
   /***************************************************************************
   *                                                                          *

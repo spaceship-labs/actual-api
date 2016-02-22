@@ -4,8 +4,17 @@ module.exports = {
 	tableName: 'Product',
 	tableNameSqlServer: 'OITM',
 	attributes: {
-		ItemCode:{type:'string'},
-		ItemName:{type:'string'},
+		ItemCode:{
+      type:'string',
+      primaryKey:true
+    },
+    /*
+		//id: {
+      columnName: 'ItemCode',
+      type: 'string',
+      primaryKey: true
+    },*/
+    ItemName:{type:'string'},
 		CodeBars:{type:'string'},
 		OnHand:{type:'string'},
 		IsCommited:{type:'float'},
@@ -19,6 +28,11 @@ module.exports = {
 		U_PRODUCTO:{type:'string',size:60},
 		U_COLOR:{type:'string',size:60},
 		U_garantia:{type:'string',size:60},
+    prices: {
+      collection: 'itemprice',
+      via:'Product',
+      //columnName: 'ItemCode'
+    }
 
 	},
 

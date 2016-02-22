@@ -3,6 +3,7 @@ module.exports = {
     var form = req.params.all();
     var model = 'product';
     var searchFields = ['ItemName','ItemCode'];
+    //var populateFields = ['prices'];
     Common.find(model, form, searchFields).then(function(result){
       res.ok(result);
     },function(err){
@@ -13,7 +14,8 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Product.find({id:id}).exec(function(err, results){
+    //Product.find({id:id}).exec(function(err, results){
+    Product.find({ItemCode:id}).exec(function(err, results){
       if(err){
         console.log(err);
         res.notFound();
@@ -26,4 +28,57 @@ module.exports = {
       }
     });
   },
+  search: function(req, res){
+    var form = req.params.all();
+    var items = form.items || 10;
+    var page = form.page || 1;
+    var term = form.term || false;
+    var query = {};
+    var querySearchAux = {};
+    var model = Product
+    var searchFields = ['ItemName','ItemCode'];
+    var color = form.color || false;
+    var line = form.line || false;
+
+    if(term){
+      if(searchFields.length > 0){
+        query.or = [];
+        for(var i=0;i<searchFields.length;i++){
+          var field = searchFields[i];
+          var obj = {};
+          obj[field] = {contains:term};
+          query.or.push(obj);
+        }
+      }
+      querySearchAux = _.clone(query);
+    }
+
+    query.skip = (page-1) * items;
+    query.limit = items;
+
+    if(color){
+      query.U_COLOR = color;
+      querySearchAux = _.clone(query);
+    }
+    if(line){
+      query.U_LINEA = line;
+      querySearchAux = _.clone(query);
+    }
+
+    //console.log(query);
+
+    var read = model.find(query);
+
+    read.exec(function(err, results){
+      model.count(querySearchAux).exec(function(err,count){
+        if(err){
+          console.log(err);
+          return res.notFound();
+        }else{
+          return res.ok({data:results, total:count});
+        }
+      })
+    });
+
+  }
 }
