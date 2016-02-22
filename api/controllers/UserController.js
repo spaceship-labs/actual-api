@@ -9,19 +9,30 @@ var bcrypt = require('bcrypt');
 module.exports = {
 
   find: function(req, res){
-    User.find({}).exec(function(err, users){
-      res.ok({data:users});
-    });
+    var form = req.params.all();
+    var model = 'user';
+    var searchFields = ['firstName','email'];
+    Common.find(model, form, searchFields).then(function(result){
+      res.ok(result);
+    },function(err){
+      console.log(err);
+      res.notFound();
+    })
   },
 
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
     User.find({id:id}).exec(function(err, results){
-      if(results.length > 0){
-        res.ok({data:results[0]});
+      if(err){
+        console.log(err);
+        res.notFound();
       }else{
-        res.ok({data:user});
+        if(results.length > 0){
+          res.ok({data:results[0]});
+        }else{
+          res.notFound();
+        }
       }
     });
   },

@@ -1,6 +1,6 @@
 module.exports = {
 	connection: 'mysql',
-	migrate: 'alter',
+	migrate: 'safe',
 	tableName: 'ProductCategory',
 	tableNameSqlServer: '@PRODUCTO',
 	attributes: {
