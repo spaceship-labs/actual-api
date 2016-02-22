@@ -49,6 +49,7 @@ function copyRows(_model, rows){
 	var sql = "INSERT INTO " + alias + " ";
 	var val = '';
 	var date = '';
+	var aux = '';
 
 	var columns = sails.models[_model]._attributes;
 	
@@ -71,9 +72,24 @@ function copyRows(_model, rows){
 				if(col === 'createdAt'){
 					date = moment(new Date()).format('YYYY-MM-DD h:mm:ss');
 					sql += " '" + date +"',";
-				}else{
+				}
+				else if(columns[col].type === 'datetime'){
+					aux = String(rows[i][col]);
+					if(aux == 'null'){
+						date = moment(new Date()).format('YYYY-MM-DD h:mm:ss'); 
+					}
+					else{
+						date = moment(new Date(aux)).format('YYYY-MM-DD h:mm:ss');
+					}
+					sql += " '" + date +"',";
+				}
+				else{
 					val = String(rows[i][col]).replace(/'/g, "\\'");
-					sql += " '" + val +"',";
+					if(val == 'null'){
+						sql += ' null,';
+					}else{
+						sql += " '" + val +"',";
+					}
 				}
 				
 			}
@@ -86,7 +102,7 @@ function copyRows(_model, rows){
 			sql += ","
 		}			
 	}
-
+	
 	Mysql_.query(sql,function(err,results){
 		if(err){ 
 			console.log(err);
@@ -94,10 +110,9 @@ function copyRows(_model, rows){
 		}
 		console.log('insert finish' + new Date());
 		deferred.resolve(results);
-	});	
-
-	return deferred.promise;		
+	});
 	
+	return deferred.promise;		
 }
 
 
@@ -118,7 +133,7 @@ function getData(_model){
 		}
 	};
 
-	sql += " FROM " + sails.models[_model].tableNameSqlServer;
+	sql += " FROM [ACTUALKIDS].[dbo].[" + sails.models[_model].tableNameSqlServer + "]";
 	Sqlserver_.query(sql, function(err, results){
 		if(err){ 
 			deferred.reject(err);
