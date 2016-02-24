@@ -80,5 +80,18 @@ module.exports = {
       })
     });
 
+  },
+  addFiles : function(req,res){
+    form = req.params.all();
+    Product.findOne({ItemCode:form.id}).exec(function(e,product){
+      if(e) throw(e);
+      product.addFiles(req,{
+        dir : 'products/gallery',
+        profile: 'gallery'
+      },function(e,product){
+        if(e) throw(e);
+        res.json(product);
+      });
+    });
   }
 }
