@@ -77,6 +77,11 @@ module.exports.routes = {
     action: 'addFiles'
   },
 
+  '/product/removefiles':{
+    controller: 'product',
+    action: 'removeFiles'
+  },
+
   '/product/findbyid/:id':{
     controller: 'product',
     action: 'findById'

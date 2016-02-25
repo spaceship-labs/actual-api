@@ -54,21 +54,41 @@ module.exports.models = {
           },function(e,crops){
               if(e) return cb(e,crops);
               /*object.files = objectFiles;
-              console.log(object.files);
-              console.log(typeof object.files);
               */
               object.files.add(objectFiles);
-              //console.log(object);
-
-              //console.log(objectFiles);
-              //console.log('object.files');
-              //console.log(object.files);
               object.save(cb);
               return objectFiles;
           });
       });
+    },
+    removeFiles : function(req,opts,cb){
+      //var async = require('async');
+      var object = this;
+      var files = opts.files ? opts.files : [];
+      var FileModel = opts.fileModel;
+      files = Array.isArray(files) ? files : [files];
+      filesToDelete = [];
+      async.map(files,function(file,callback){
+        opts.file = file;
+        for(var i = 0;i<object.files.length;i++){
+          if(object.files[i].filename == opts.file.filename){
+            object.files.remove(object.files[i].id);
+            FileModel.destroy({id:object.files[i].id}).exec(function(e, _file){
+              if(e) {console.log(e);}
+              else{
+                object.files.splice(i,1);
+                Files.removeFile(opts,callback);
+              }
+            });
+          }
+        }
+      },function(e,files){
+        object.save(cb);
+      });
     }
+
   }
+
 
 };
 

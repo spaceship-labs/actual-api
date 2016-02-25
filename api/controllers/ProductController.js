@@ -93,5 +93,20 @@ module.exports = {
         res.json(product);
       });
     });
-  }
+  },
+
+  removeFiles : function(req,res){
+    var form = req.params.all();
+    Product.findOne({ItemCode:form.ItemCode}).populate('files').exec(function(e,product){
+      product.removeFiles(req,{
+        dir : 'products/gallery',
+        profile : 'gallery',
+        files : form.removeFiles,
+        fileModel: ProductFile
+      },function(e,product){
+        if(e) console.log(e);
+        res.json(product);
+      })
+    });
+  },
 }
