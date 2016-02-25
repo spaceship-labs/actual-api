@@ -53,7 +53,14 @@ module.exports.models = {
                   callback(null,file);
           },function(e,crops){
               if(e) return cb(e,crops);
-              object.files = objectFiles;
+              /*object.files = objectFiles;
+              console.log(object.files);
+              console.log(typeof object.files);
+              */
+              object.files.add(objectFiles);
+              //console.log(object);
+
+              //console.log(objectFiles);
               //console.log('object.files');
               //console.log(object.files);
               object.save(cb);

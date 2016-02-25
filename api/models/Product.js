@@ -31,12 +31,12 @@ module.exports = {
     prices: {
       collection: 'itemprice',
       via:'Product',
-      excludeSync: true
+      //excludeSync: true
       //columnName: 'ItemCode'
     },
     files: {
       collection: 'productfile',
-      via:'product',
+      via:'Product',
       //excludeSync: true
     }
 

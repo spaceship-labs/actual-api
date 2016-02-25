@@ -15,7 +15,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     //Product.find({id:id}).exec(function(err, results){
-    Product.find({ItemCode:id}).exec(function(err, results){
+    Product.find({ItemCode:id}).populate('files').exec(function(err, results){
       if(err){
         console.log(err);
         res.notFound();

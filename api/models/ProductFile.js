@@ -8,8 +8,12 @@ module.exports = {
     type:{type:'string'},
     typebase:{type:'string'},
     size:{type:'integer'},
-    product:{
-      model:'Product'
+    Product:{
+      model:'product',
+      columnName:'ItemCode',
+      type:'string',
+      size:20,
+      //excludeSync: true
     }
   }
 }
