@@ -37,5 +37,9 @@
     "url": "git://github.com/luis/actual-api.git"
   },
   "author": "luis",
-  "license": ""
+  "license": "",
+  "engines": {
+      "node": "5.0.0",
+      "npm": "2.14.16"
+  }
 }
