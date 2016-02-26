@@ -89,7 +89,10 @@ module.exports = {
         dir : 'products/gallery',
         profile: 'gallery'
       },function(e,product){
-        if(e) throw(e);
+        if(e){
+          console.log(e);
+          throw(e);
+        }
         res.json(product);
       });
     });
