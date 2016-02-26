@@ -55,7 +55,10 @@ module.exports.saveFiles = function(req,opts,cb){
     req.file('file').upload(
       uploadOptions,
       function(e,files){
-        if(e) return cb(e,files);
+        if(e){
+          console.log(e);
+          return cb(e,files);
+        }
         files.forEach(function(file){
           var filename = file.fd.split('/');
           filename = filename[filename.length-1];
@@ -172,7 +175,10 @@ module.exports.makeCropsStreams = function(uploadOptions, opts, cb){
         .resize(wh[0], wh[1], '^')
         .crop(wh[0], wh[1], 0, 0)
         .stream(function(err, stdout, stderr){
-            if(err) return next(err);
+            if(err){
+              console.log(err);
+              return next(err);
+            }
             stdout.pipe(adapter.uploadStream({dirSave:opts.dirSave, name: size+opts.filename }, next));
         });
 
