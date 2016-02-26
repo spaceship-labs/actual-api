@@ -82,6 +82,7 @@ module.exports = {
 
   },
   addFiles : function(req,res){
+    res.setTimeout(0);
     form = req.params.all();
     Product.findOne({ItemCode:form.id}).exec(function(e,product){
       if(e) throw(e);
