@@ -39,6 +39,8 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions.region = process.env.CLOUDREGION;
       uploadOptions.container = process.env.CLOUDCONTAINER;
       uploadOptions.dirname = '/uploads/' + opts.dir + '/';
+      console.log('uploadOptions');
+      console.log(uploadOptions);
       if(opts.avatar)
         uploadOptions.after = function(stream, filename, next){
           var lookup = mime.lookup(filename);
