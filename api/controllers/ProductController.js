@@ -82,7 +82,6 @@ module.exports = {
 
   },
   addFiles : function(req,res){
-    res.setTimeout(0);
     form = req.params.all();
     Product.findOne({ItemCode:form.id}).exec(function(e,product){
       if(e) throw(e);
@@ -113,4 +112,17 @@ module.exports = {
       })
     });
   },
+
+  updateIcon: function(req,res){
+    var form = req.params.all();
+    Product.updateAvatar(req,{
+      dir : 'products',
+      profile: 'avatar',
+      id : form.id,
+    },function(e,product){
+      if(e) console.log(e);
+      res.json(product);
+    });
+  },
+
 }

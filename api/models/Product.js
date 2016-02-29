@@ -38,8 +38,13 @@ module.exports = {
       collection: 'productfile',
       via:'Product',
       //excludeSync: true
-    }
+    },
 
+    icon_filename:{type:'string'},
+    icon_name:{type:'string'},
+    icon_type:{type:'string'},
+    icon_typebase:{type:'string'},
+    icon_size:{type:'integer'},
 	},
 
 }

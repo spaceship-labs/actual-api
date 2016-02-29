@@ -39,8 +39,6 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions.region = process.env.CLOUDREGION;
       uploadOptions.container = process.env.CLOUDCONTAINER;
       uploadOptions.dirname = '/uploads/' + opts.dir + '/';
-      console.log('uploadOptions');
-      console.log(uploadOptions);
       if(opts.avatar)
         uploadOptions.after = function(stream, filename, next){
           var lookup = mime.lookup(filename);
@@ -151,7 +149,6 @@ module.exports.removeFile = function(opts,cb){
   var filename = opts.file.filename;
   var async = require('async');
   var routes = [dirSave+filename];
-
 
   if(opts.file.typebase == 'image') sizes.forEach(function(size){routes.push(dirSave+size+filename);});
 
