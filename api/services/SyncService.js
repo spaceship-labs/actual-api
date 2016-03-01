@@ -5,7 +5,8 @@ module.exports = {
 
 	copyTable: function(_model){
 		var deferred = q.defer();
-		if(sails.models[_model]){
+		//console.log(sails.config);
+		if(sails.config.tables[_model]){
 			getData(_model).then(function(rows){
 				truncateTable(_model).then(function(result){
 					copyRows(_model, rows).then(deferred.resolve, deferred.reject);
@@ -25,7 +26,7 @@ module.exports = {
 
 function truncateTable(_model){
 	var deferred = q.defer();
-	var alias = sails.models[_model].tableName;
+	var alias = sails.config.tables[_model].tableName;
 	var sql = "TRUNCATE TABLE " + 	alias + "";
 
 	Mysql_.query(sql,function(err,results){
@@ -45,13 +46,13 @@ function copyRows(_model, rows){
 
 	console.log('insert start' + new Date());
 	var src = sails.config.tables;
-	var alias = sails.models[_model].tableName;
+	var alias = sails.config.tables[_model].tableName;
 	var sql = "INSERT INTO " + alias + " ";
 	var val = '';
 	var date = '';
 	var aux = '';
 
-	var columns = sails.models[_model]._attributes;
+	var columns = sails.config.tables[_model].attributes;
 
 	sql += "( ";
 	for(var col in columns){
@@ -120,7 +121,7 @@ function copyRows(_model, rows){
 function getData(_model){
 	var deferred = q.defer();
 
-	var columns = sails.models[_model]._attributes;
+	var columns = sails.config.tables[_model].attributes;
 	console.log('read start' + new Date());
 	var sql = "SELECT ";
 	var i = 0;
@@ -133,7 +134,8 @@ function getData(_model){
 		}
 	};
 
-	sql += " FROM [ACTUALKIDS].[dbo].[" + sails.models[_model].tableNameSqlServer + "]";
+	sql += " FROM [ACTUALKIDS].[dbo].[" + sails.config.tables[_model].tableNameSqlServer + "]";
+	console.log(sql);
 	Sqlserver_.query(sql, function(err, results){
 		if(err){
 			deferred.reject(err);
@@ -156,8 +158,8 @@ function getData(_model){
 function _getData(_model){
 	var deferred = q.defer();
 	console.log(new Date());
-	var columns = sails.models[_model + '_sqlserver']._attributes;
-	var model = sails.models[_model + '_sqlserver'];
+	var columns = sails.config.tables[_model + '_sqlserver']._attributes;
+	var model = sails.config.tables[_model + '_sqlserver'];
 	var fields = [];
 
 	for(col in columns){
@@ -181,7 +183,7 @@ function _getData(_model){
 
 function _copyRows(_model, rows){
 	var deferred = q.defer();
-	var columns = sails.models[_model].schema;
+	var columns = sails.config.tables[_model].schema;
 	Product.create(rows).exec(function(err,created){
 		if(err){
 			console.log(err);

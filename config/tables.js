@@ -1,27 +1,193 @@
 module.exports.tables = {
-	
-	'OITM': {
-		alias:'Products',
-		columns: [
-			'ItemCode',
-			'ItemName',
-			'CodeBars',
-			'OnHand',
-			'IsCommited',
-			'BuyUnitMsr',
-			'SalUnitMsr',
-			'PicturName',
-			'PurPackMsr',
-			'PurPackUn',
-			'SalPackMsr',
-			'U_LINEA',
-			'U_PRODUCTO',
-			'U_COLOR',
-			'U_GARANTIA'
-		],
+
+	color: {
+		tableName: 'Color',
+		tableNameSqlServer: '@COLOR',
+		attributes: {
+			Code:{type:'string', size:30},
+			Name:{type:'string', size: 30},
+		}
 
 	},
 
+	invoice: {
+		tableName: 'Invoice',
+		tableNameSqlServer: 'INV1',
+		attributes: {
+			DocEntry:{type:'integer'},
+			LineNum:{type:'integer'},
+			LineStatus:{type:'integer',size:1},
+			ItemCode:{type:'string',size:20},
+			Dscription:{type:'string',size:100},
+			Quantity:{type:'float'},
+			ShipDate:{type:'datetime'},
+			Price:{type:'float'},
+			Currency:{type:'string',size:3},
+			DiscPrcnt:{type:'float'},
+			LineTotal:{type:'float'},
+			OpenSum:{type:'float'},
+			WhsCode:{type:'string',size:8},
+			SlpCode:{type:'integer'},
+			AcctCode:{type:'string'},
+			DocDate:{type:'datetime'},
+			BaseCard:{type:'string',size:15},
+			CodeBars:{type:'string',size:254},
+			unitMsr:{type:'string',size:100},
+			Text:{type:'text'},
+			StockPrice:{type:'float'},
+			ShipToCode:{type:'string',size:50},
+			ShipToDesc:{type:'string',size:254}
+		}		
+	},
 
+	itemprice:{
+		tableName: 'ItemPrice',
+		tableNameSqlServer: 'ITM1',
+		attributes: {
+			ItemCode: {type:'string',size:20},
+			PriceList:{type:'integer', size: 4},
+			Price:{type:'float'},
+			Currency:{type:'string',size:3}
+		},
+	},
+
+
+	itemwarehouse:{
+		tableName: 'ItemWarehouse',
+		tableNameSqlServer: 'OITW',
+		attributes: {
+			ItemCode:{type:'string', size:20},
+			WhsCode:{type:'string', size:20},
+			OnHand:{type:'float'},
+			IsCommited:{type:'float'},
+			OnOrder:{type:'float'}
+
+		}		
+	},
+
+
+	line:{
+		tableName: 'Line',
+		tableNameSqlServer: '@LINEA',
+		attributes: {
+			Code:{type:'string', size:30},
+			Name:{type:'string', size: 30},
+		}		
+	},
+
+	payment:{
+		tableName: 'Payments',
+		tableNameSqlServer: 'OVPM',
+		attributes: {
+			DocEntry:{type:'integer'},
+			DocNum:{type:'integer'},
+			DocType:{type:'string',size:1},
+			Canceled:{type:'string',size:1},
+			Handwrtten:{type:'string',size:1},
+			Printed:{type:'string',size:1},
+			DocDate:{type:'datetime'},
+			DocDueDate:{type:'datetime'},
+			CardCode:{type:'string',size:15},
+			CardName:{type:'string',size:100},
+			Address:{type:'string',size:254},
+			DdctPrcnt:{type:'float'},
+			DdctSum:{type:'float'},
+			DocTotal:{type:'float'},
+			DocTotalFC:{type:'float'},
+			Comments:{type:'string',size:254},
+			JrnlMemo:{type:'string',size:50},
+			TransId: {type:'integer'},
+			UpdateDate: {type:'datetime'},
+			CreateDate: {type:'datetime'},
+			TaxDate: {type:'datetime'},
+			Confirmed: {type:'strig',size:1},
+			PayToCode: {type:'strig',size:50},
+			CancelDate: {type:'datetime'},
+			U_UUID:{type:'string',size:50},
+			U_SAT_SERIECFD:{type:'string',size:20},
+			U_SAT_FPAGO:{type:'string',size:30},
+			U_SAT_BENEFICIARIO:{type:'string',size:100},
+			U_SAT_LICTRADNUM:{type:'string',size:13}
+		},		
+	},
+
+	pricelist:{
+		tableName: 'PriceList',
+		tableNameSqlServer: 'OPLN',
+		attributes: {
+			ListNum:{type:'integer', size:30},
+			ListName:{type:'string', size: 32},
+		},
+	},
+
+	product:{
+		tableName: 'Product',
+		tableNameSqlServer: 'OITM',
+		attributes: {
+			ItemCode:{
+	      		type:'string',
+	      		primaryKey:true
+	    	},
+	   		ItemName:{type:'string'},
+			CodeBars:{type:'string'},
+			OnHand:{type:'string'},
+			IsCommited:{type:'float'},
+			BuyUnitMsr:{type:'string'},
+			SalUnitMsr:{type:'string'},
+			PicturName:{type:'string'},
+			PurPackMsr:{type:'string'},
+			PurPackUn:{type:'float'},
+			SalPackMsr:{type:'string'},
+			U_LINEA:{type:'string',size:60},
+			U_PRODUCTO:{type:'string',size:60},
+			U_COLOR:{type:'string',size:60},
+			U_garantia:{type:'string',size:60},
+		},		
+	},	
+
+	productcategory:{
+		tableName: 'ProductCategory',
+		tableNameSqlServer: '@PRODUCTO',
+		attributes: {
+			Code:{type:'string', size:30},
+			Name:{type:'string', size: 30},
+		}
+	},
+
+	quotation: {
+		tableName: 'Quotation',
+		tableNameSqlServer: 'QUT1',
+		attributes: {
+			DocEntry:{type:'integer'},
+			LineNum:{type:'integer'},
+			ItemCode:{type:'string', size:20},
+			Dscription:{type:'string', size: 100},
+			Quantity:{type:'float'},
+			ShipDate:{type:'datetime'},
+			Price:{type:'float'},
+			Currency:{type:'string',size:3},
+			DiscPrcnt:{type:'float'},
+			LineTotal:{type:'float'},
+			OpenSum:{type:'float'},
+			VendorNum:{type:'string',size:17},
+			WhsCode:{type:'string',size:8},
+			DocDate:{type:'datetime'},
+			ShipToCode:{type:'string',size:50},
+			ShipToDesc:{type:'string',size:254}
+		},		
+	},
+
+	saleopportunity:{
+		tableName: 'SaleOpportunity',
+		tableNameSqlServer: 'OOPR',
+		attributes: {
+			OpprId:{type:'integer'},
+			CardCode:{type:'string', size: 15},
+			OpenDate:{type:'datetime'},
+			Memo:{type:'text'},
+			Status:{type:'string',size:1},
+			CardName:{type:'string',size:100}
+		},		
+	}	
 
 };
