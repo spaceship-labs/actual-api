@@ -44,6 +44,7 @@ module.exports.models = {
     });
   },
   attributes : {
+    hash: {type:'string'},
     updateAvatar : function(req,opts,cb){
       var object = this;
       //opts.file = object.icon;

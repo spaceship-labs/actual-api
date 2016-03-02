@@ -4,7 +4,7 @@ module.exports.tables = {
 		tableName: 'Color',
 		tableNameSqlServer: '@COLOR',
 		attributes: {
-			Code:{type:'string', size:30},
+			Code:{type:'string', size:30, primaryKey: true},
 			Name:{type:'string', size: 30},
 		}
 
@@ -14,7 +14,7 @@ module.exports.tables = {
 		tableName: 'Invoice',
 		tableNameSqlServer: 'INV1',
 		attributes: {
-			DocEntry:{type:'integer'},
+			DocEntry:{type:'integer', primaryKey: true},
 			LineNum:{type:'integer'},
 			LineStatus:{type:'integer',size:1},
 			ItemCode:{type:'string',size:20},
@@ -37,12 +37,13 @@ module.exports.tables = {
 			StockPrice:{type:'float'},
 			ShipToCode:{type:'string',size:50},
 			ShipToDesc:{type:'string',size:254}
-		}		
+		}
 	},
 
 	itemprice:{
 		tableName: 'ItemPrice',
 		tableNameSqlServer: 'ITM1',
+    compositeKeys: ['ItemCode','PriceList'],
 		attributes: {
 			ItemCode: {type:'string',size:20},
 			PriceList:{type:'integer', size: 4},
@@ -55,6 +56,7 @@ module.exports.tables = {
 	itemwarehouse:{
 		tableName: 'ItemWarehouse',
 		tableNameSqlServer: 'OITW',
+    compositeKeys: ['ItemCode','WhsCode'],
 		attributes: {
 			ItemCode:{type:'string', size:20},
 			WhsCode:{type:'string', size:20},
@@ -62,7 +64,7 @@ module.exports.tables = {
 			IsCommited:{type:'float'},
 			OnOrder:{type:'float'}
 
-		}		
+		}
 	},
 
 
@@ -70,14 +72,15 @@ module.exports.tables = {
 		tableName: 'Line',
 		tableNameSqlServer: '@LINEA',
 		attributes: {
-			Code:{type:'string', size:30},
+			Code:{type:'string', size:30,primaryKey:true},
 			Name:{type:'string', size: 30},
-		}		
+		}
 	},
 
 	payment:{
 		tableName: 'Payments',
 		tableNameSqlServer: 'OVPM',
+    compositeKeys: ['DocEntry','DocNum'],
 		attributes: {
 			DocEntry:{type:'integer'},
 			DocNum:{type:'integer'},
@@ -108,14 +111,14 @@ module.exports.tables = {
 			U_SAT_FPAGO:{type:'string',size:30},
 			U_SAT_BENEFICIARIO:{type:'string',size:100},
 			U_SAT_LICTRADNUM:{type:'string',size:13}
-		},		
+		},
 	},
 
 	pricelist:{
 		tableName: 'PriceList',
 		tableNameSqlServer: 'OPLN',
 		attributes: {
-			ListNum:{type:'integer', size:30},
+			ListNum:{type:'integer', size:30, primaryKey: true},
 			ListName:{type:'string', size: 32},
 		},
 	},
@@ -124,11 +127,11 @@ module.exports.tables = {
 		tableName: 'Product',
 		tableNameSqlServer: 'OITM',
 		attributes: {
-			ItemCode:{
-	      		type:'string',
-	      		primaryKey:true
-	    	},
-	   		ItemName:{type:'string'},
+		  ItemCode:{
+      		type:'string',
+      		primaryKey:true
+    	},
+   		ItemName:{type:'string'},
 			CodeBars:{type:'string'},
 			OnHand:{type:'string'},
 			IsCommited:{type:'float'},
@@ -142,14 +145,14 @@ module.exports.tables = {
 			U_PRODUCTO:{type:'string',size:60},
 			U_COLOR:{type:'string',size:60},
 			U_garantia:{type:'string',size:60},
-		},		
-	},	
+		},
+	},
 
 	productcategory:{
 		tableName: 'ProductCategory',
 		tableNameSqlServer: '@PRODUCTO',
 		attributes: {
-			Code:{type:'string', size:30},
+			Code:{type:'string', size:30, primaryKey:true},
 			Name:{type:'string', size: 30},
 		}
 	},
@@ -157,6 +160,7 @@ module.exports.tables = {
 	quotation: {
 		tableName: 'Quotation',
 		tableNameSqlServer: 'QUT1',
+    compositeKeys: ['DocEntry','LineNum'],
 		attributes: {
 			DocEntry:{type:'integer'},
 			LineNum:{type:'integer'},
@@ -174,20 +178,20 @@ module.exports.tables = {
 			DocDate:{type:'datetime'},
 			ShipToCode:{type:'string',size:50},
 			ShipToDesc:{type:'string',size:254}
-		},		
+		},
 	},
 
 	saleopportunity:{
 		tableName: 'SaleOpportunity',
 		tableNameSqlServer: 'OOPR',
 		attributes: {
-			OpprId:{type:'integer'},
+			OpprId:{type:'integer',primaryKey:true},
 			CardCode:{type:'string', size: 15},
 			OpenDate:{type:'datetime'},
 			Memo:{type:'text'},
 			Status:{type:'string',size:1},
 			CardName:{type:'string',size:100}
-		},		
-	}	
+		},
+	}
 
 };
