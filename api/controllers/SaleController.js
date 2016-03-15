@@ -1,1 +1,1 @@
-SaleController.js
+module.exports = {}
