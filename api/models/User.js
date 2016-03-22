@@ -1,5 +1,6 @@
 module.exports = {
     schema: true,
+    migrate: 'alter',
     attributes: {
         /*username: {
             type: 'string',
@@ -32,7 +33,7 @@ module.exports = {
         isAdmin : {
             type : 'boolean',
             defaultsTo : false,
-            required : true
+            //required : true
         },
         userType: {
             type:'string',
