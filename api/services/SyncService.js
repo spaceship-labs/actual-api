@@ -2,6 +2,14 @@ var q = require('q');
 var moment = require('moment');
 var async = require('async');
 var hash = require('object-hash');
+var bluebird = require('bluebird');
+
+var insertedCount = 0;
+var updatedCount = 0;
+var notAffectedCount = 0;
+var totalrows = 0;
+var syncDateStart = '';
+var syncDateFinish = '';
 
 module.exports = {
 
@@ -10,7 +18,7 @@ module.exports = {
   * 
   * Flow:
   * getDataFromSap
-  * iterateDataFromSap (loop)
+  * handleDataFromSap (loop)
   *   checkIfExistsInMysql()
   *   handleRow()
   *     if(exists in MySQL):
@@ -24,32 +32,39 @@ module.exports = {
   * 
   */
 
-
   sync: function(modelName){
     var deferred = q.defer();
-    var insertedCount = 0;
-    var updatedCount = 0;
-    var notAffectedCount = 0;
-    var totalrows = 0;
 
     if(sails.config.tables[modelName]){
+      resetCounters();
 
-      getDataFromSap(modelName).then(function(rows){
-        console.log('Iterating data start: ' + new Date());
-        iterateDataFromSap(modelName,rows).then(
-          function(){
-            console.log('Iterating data finished: ' + new Date());
-            deferred.resolve({
-              inserted: insertedCount,
-              updated: updatedCount,
-              notAffected: notAffectedCount
-            });
-          },function(err){
-            if(err){
-              console.log(err);
-            }
-        });
-      }, deferred.reject);
+      var handleDataFromSapSuccess = function(res){
+        console.log('Iterating data finished: ' + new Date());
+        syncDateFinish = new Date();
+        deferred.resolve({
+          syncDateStart: syncDateStart,
+          syncDateFinish: syncDateFinish,
+          total: totalrows,
+          inserted: insertedCount,
+          updated: updatedCount,
+          notAffected: notAffectedCount,
+        });        
+      }
+
+      var handleDataFromSapFail = function(){
+        if(err) console.log(err);
+      }
+      
+      getDataFromSap(modelName)
+        .then(function(results){
+          totalrows = results.length;
+          console.log('Iterating data start: ' + new Date());
+          syncDateStart = new Date();
+          return handleDataFromSap(modelName,results);
+        })
+        .then(handleDataFromSapSuccess)
+        .catch(handleDataFromSapFail);
+    
     }
     else{
       var err = 'Model not found';
@@ -60,17 +75,21 @@ module.exports = {
 
 };
 
+function resetCounters(){
+  insertedCount = 0;
+  updatedCount = 0;
+  notAffectedCount = 0;
+  totalrows = 0;
+}
+
 /**
   * @param string modelName 
   * @return promise, if success returns data, else error message
 */
 function getDataFromSap(modelName){
-  var deferred = q.defer();
   var columns = sails.config.tables[modelName].attributes;
   var sql = "SELECT ";
-  //sql += ' TOP 5 ';
   var i = 0;
-
   for(col in columns){
     if(col != 'id' && col != 'createdAt' && col != 'updatedAt' && !columns[col].excludeSync){
       if (i!=0) sql+=" , ";
@@ -78,21 +97,9 @@ function getDataFromSap(modelName){
       i++;
     }
   };
-
   sql += " FROM [ACTUALKIDS].[dbo].[" + sails.config.tables[modelName].tableNameSqlServer + "]";
-  //console.log(sql);
-  Sqlserver_.query(sql, function(err, results){
-    if(err){
-      deferred.reject(err);
-      console.log(err);
-    }
-    else{
-      console.log('read finish' + new Date());
-      deferred.resolve(results);
-    }
-  });
-
-  return deferred.promise;
+  var queryAsync  = bluebird.promisify(Sqlserver_.query);
+  return queryAsync(sql);
 }
 
 /**
@@ -102,52 +109,28 @@ function getDataFromSap(modelName){
   * goes to the handleRow function. 
   * checkIfExistsInMysql() -> handleRow()
 */
-function iterateDataFromSap(modelName,rows){
-  var deferred = q.defer();
-
-  async.each(rows,function(row,next){
-    async.waterfall([
-      async.apply(checkIfExistsInMysql, modelName, row),
-      handleRow
-    ], function(err, result){
-      if(err){ 
-        console.log(err);
-        next();
-      }else{
-        next();
-      }
-    });
-  }, function(err){
-    if(err) console.log(err);
-    deferred.resolve();
-  });
-
-  return deferred.promise;
+function handleDataFromSap(modelName,rows){
+  var rowsPromises = [];
+  for(row in rows){
+    rowsPromises.push(rowProcess(modelName,rows[row]));
+  }
+  return q.all(rowsPromises);
 }
 
-/**
-  * @param {string} modelName
-  * @param {object} row, data from SAP DB 
-  * @param {object} exists, if exists in MySQL an object with the row data, else false value
-  * @param {function} cb
-  * @return {function} callback with the row data if exists, else false
-*/
-function checkIfExistsInMysql(modelName, row, callback){
-  //console.log('en checkIfExistsInMysql');
-  var table = sails.config.tables[modelName];
-  var whereClause = getWhereClauseMysql(table, modelName, row);
-
-  queryIfExistsInMysql(modelName,whereClause).then(function(results){
-    //This goes to handleRow()
-    if(results.length > 0){
-      callback(null,modelName, row, results[0]);
-    }else{
-      callback(null,modelName,row, false);
-    }    
-  },function(err){
-    console.log(err);
-    callback(null,null, null, null);
-  });
+function checkIfExistsInMysql(modelName, row){
+  var deferred = q.defer();
+  queryIfExistsInMysql(modelName,row)
+    .then(function(results){
+      if(results && results.length > 0){
+        deferred.resolve(results[0]);
+      }else{
+        deferred.resolve(false);
+      }
+    })
+    .catch(function(err){
+      if(err) console.log(err);
+    });
+  return deferred.promise;
 }
 
 /**
@@ -155,9 +138,9 @@ function checkIfExistsInMysql(modelName, row, callback){
 * @param {string} modelName
 * @param {string} whereClause
 */
-function queryIfExistsInMysql(modelName, whereClause){
-  var deferred = q.defer();
-
+function queryIfExistsInMysql(modelName, row){
+  var table = sails.config.tables[modelName];
+  var whereClause = getWhereClauseMysql(table, modelName, row);
   var columns = sails.config.tables[modelName].attributes;
   var sql = "SELECT ";
   //sql += ' TOP 5 ';
@@ -176,18 +159,9 @@ function queryIfExistsInMysql(modelName, whereClause){
   if(whereClause){
     sql += " " + whereClause; 
   }
-
-  Mysql_.query(sql, function(err, results){
-    if(err){
-      deferred.reject(err);
-      console.log(err);
-    }
-    else{
-      deferred.resolve(results);
-    }
-  });
-
-  return deferred.promise;
+  //console.log(sql);
+  var queryAsync = bluebird.promisify(Mysql_.query);
+  return queryAsync(sql)
 }
 
 
@@ -198,36 +172,41 @@ function queryIfExistsInMysql(modelName, whereClause){
   * @param {function} cb
   *
 */
-function handleRow(modelName, row, exists, cb){ 
-  //console.log('row: ' + row.ItemCode); 
-  if(exists){
-    checkIfUpdatedInSap(modelName, row, exists, cb);    
-  }
-  else{
-    insertRowInMysql(modelName, row, cb);
-  }
+function rowProcess(modelName, row){
+  //Default promise
+  var deferred = q.defer();
+
+  checkIfExistsInMysql(modelName, row)
+    .then(function(exists){
+      //El registro de SAP existe en APP DB
+      if(exists){
+        var hashSap = hash(row);
+        var hashMysql = exists.hash;
+
+        if(hashSap == hashMysql){
+          //El registro es igual en ambas DB
+          var innerDeferred = q.defer();
+          notAffectedCount++;
+          innerDeferred.resolve('sin actualizar');
+          deferred.resolve(innerDeferred.promise);
+
+        }
+        else{
+          //Actualizar
+          updatedCount++;
+          deferred.resolve(updateRowInMysql(modelName, row)); //Devuelve un promise
+        }
+      }
+      else{
+        //El registro de SAP no existe en APP DB
+        insertedCount++;
+        deferred.resolve(insertRowInMysql(modelName, row)); //Devuelve un promise
+      }
+    });
+
+  return deferred.promise;
 }
 
-/**
-  * @param {string} modelName
-  * @param {object} valueSap
-  * @param {object} valueMysql
-  * @param {function} cb
-  *
-*/
-function checkIfUpdatedInSap(modelName ,valueSap, valueMysql, cb){
-  var hashSap = hash(valueSap);
-  var hashMysql = valueMysql.hash;
-
-  if(hashSap == hashMysql){
-    //console.log('sin actualizar');
-    //if(notAffectedCount) notAffectedCount++;
-    cb(null,[]);
-  }else{
-    //console.log('registro modificado en SAP ');
-    updateRowInMysql(modelName, valueSap, cb);
-  }
-}
 
 /**
   * @param {string} modelName
@@ -236,6 +215,7 @@ function checkIfUpdatedInSap(modelName ,valueSap, valueMysql, cb){
   *
 */
 function insertRowInMysql(modelName, row, cb){
+  //console.log('inserting row');
   var src = sails.config.tables;
   var alias = sails.config.tables[modelName].tableName;
   var sql = "INSERT INTO " + alias + " ";
@@ -298,16 +278,8 @@ function insertRowInMysql(modelName, row, cb){
 
   sql += ")";
 
-  Mysql_.query(sql,function(err,results){
-    if(err){
-      console.log(err);
-      cb(null,err);
-    }
-    else{
-      //if(insertedCount) insertedCount++;
-      cb(null, results);
-    }
-  });  
+  var queryAsync = bluebird.promisify(Mysql_.query);
+  return queryAsync(sql);
 }
 
 /**
@@ -316,8 +288,8 @@ function insertRowInMysql(modelName, row, cb){
   * @param {function} cb
   *
 */
-function updateRowInMysql(modelName, row, cb){
-  //console.log('en updateRowInMysql');
+function updateRowInMysql(modelName, row){
+  //console.log('updateRowInMysql');
   var src = sails.config.tables;
   var table = sails.config.tables[modelName];
   var alias = sails.config.tables[modelName].tableName;
@@ -366,19 +338,9 @@ function updateRowInMysql(modelName, row, cb){
   sql += " , hash = '" + rowHash + "'";
   sql += " " + whereClause;
 
-  //console.log('updateClause');
-  //console.log(sql);
+  var queryAsync = bluebird.promisify(Mysql_.query);
+  return queryAsync(sql);
 
-  Mysql_.query(sql,function(err,results){
-    if(err){
-      console.log(err);
-      cb(null,err);
-    }
-    else{
-      //if(updatedCount) updatedCount++;
-      cb(null, results);
-    }
-  });
 }
 
 
@@ -395,6 +357,7 @@ function getWhereClauseMysql(table, modelName, row){
   var whereClause = '';
 
   if(table.compositeKeys){
+    whereClause += 'WHERE ';
     for(col in columns){
       for(var i=0;i<table.compositeKeys.length;i++){
         if(col == table.compositeKeys[i]){

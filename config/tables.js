@@ -1,4 +1,15 @@
 module.exports.tables = {
+	usersap:{
+		tableName: 'usersap',
+		tableNameSqlServer: 'OUSR',
+		attributes:{
+			USERID:{type:'integer', primaryKey:true},
+			INTERNAL_K:{type:'integer'},
+			USER_CODE:{type:'string',size:8},
+			U_NAME:{type:'string',size:155},
+			SUPERUSER:{type:'string',size:1}
+		}
+	},
 
 	color: {
 		tableName: 'Color',
@@ -127,11 +138,11 @@ module.exports.tables = {
 		tableName: 'Product',
 		tableNameSqlServer: 'OITM',
 		attributes: {
-		  ItemCode:{
-      		type:'string',
-      		primaryKey:true
-    	},
-   		ItemName:{type:'string'},
+	  		ItemCode:{
+	      		type:'string',
+	      		primaryKey:true
+	    	},
+   			ItemName:{type:'string'},
 			CodeBars:{type:'string'},
 			OnHand:{type:'string'},
 			IsCommited:{type:'float'},
