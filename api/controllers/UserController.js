@@ -43,7 +43,7 @@ module.exports = {
       .exec(function(err,_user){
         if(err){
           console.log(err);
-          throw(err);
+          //throw(err);
           return res.serverError;
         }else{
           console.log(_user);
@@ -57,7 +57,7 @@ module.exports = {
     var id = form.id;
     delete form.password;
     User.update({id:id},form,function(err,user){
-      if(err) throw(err);
+      if(err) console.log(err); //throw(err);
       return res.ok({
         user: user
       })
