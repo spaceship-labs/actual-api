@@ -1,6 +1,6 @@
 module.exports = {
-    schema: true,
-    migrate: 'alter',
+  schema: true,
+  migrate: 'alter',
   tableName: 'usersap',
   connection: 'mysql',
   tableNameSqlServer: 'OUSR',
