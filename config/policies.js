@@ -32,7 +32,9 @@ module.exports.policies = {
     update_password: true,
   },
   ProductController:{
-    find: true
+    find: true,
+    findById: true,
+    search: true
   }
 
   //Por ahora

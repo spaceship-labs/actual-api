@@ -39,6 +39,10 @@ module.exports = {
       via:'Product',
       //excludeSync: true
     },
+    stock:{
+      collection: 'itemwarehouse',
+      via: 'ItemCode'
+    },
 
     icon_filename:{type:'string'},
     icon_name:{type:'string'},
