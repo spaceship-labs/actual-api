@@ -39,7 +39,7 @@ module.exports = {
       resetCounters();
 
       var handleDataFromSapSuccess = function(res){
-        console.log('Iterating data finished: ' + new Date());
+        console.log('Iterating data finished ('+modelName+'): ' + new Date());
         syncDateFinish = new Date();
         deferred.resolve({
           syncDateStart: syncDateStart,
@@ -58,7 +58,7 @@ module.exports = {
       getDataFromSap(modelName)
         .then(function(results){
           totalrows = results.length;
-          console.log('Iterating data start: ' + new Date());
+          console.log('Iterating data start ('+modelName+'): ' + new Date());
           syncDateStart = new Date();
           return handleDataFromSap(modelName,results);
         })
