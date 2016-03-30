@@ -97,6 +97,11 @@ module.exports.routes = {
     action: 'find'
   },
 
+  '/invoice/find/:page':{
+    controller: 'invoice',
+    action: 'find'
+  },
+
   '/line/get':{
     controller: 'line',
     action: 'get'
@@ -106,6 +111,11 @@ module.exports.routes = {
     controller: 'color',
     action: 'get'
   },
+
+  '/usersap/get':{
+    controller:'usersap',
+    action:'get'
+  }
 
 
 

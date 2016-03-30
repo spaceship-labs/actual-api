@@ -31,6 +31,11 @@ module.exports.policies = {
     send_password_recovery: true,
     update_password: true,
   },
+  ProductController:{
+    find: true,
+    findById: true,
+    search: true
+  }
 
   //Por ahora
   //SyncController:{'*':true}

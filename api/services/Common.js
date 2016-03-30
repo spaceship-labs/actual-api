@@ -34,7 +34,14 @@ module.exports = {
     var read = model.find(query);
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
-        read = read.populate(populateF);
+
+        if(modelName == 'product' && populateF == 'prices'){
+          //Choosing the pricelist 1, public price
+          read = read.populate(populateF, {PriceList: 1});
+        }else{
+          read = read.populate(populateF);
+        }
+
       });
     }
 
