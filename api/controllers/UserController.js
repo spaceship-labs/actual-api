@@ -81,7 +81,7 @@ module.exports = {
           //TODO change it to config env var.
           var frontendURL = 'http://actual.spaceshiplabs.com';
 
-          var recoverURL =  frontendURL + '/change_password?';
+          var recoverURL =  frontendURL + '/auth/reset-password?';
           recoverURL += 'token='+token;
           recoverURL += '&email='+email;
           sendPasswordRecoveryEmail({recoverURL: recoverURL, email: email}, res, req);
