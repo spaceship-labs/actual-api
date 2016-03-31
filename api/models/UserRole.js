@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  migrate:'alter',
+  migrate:'safe',
   connection: 'mysql',
   attributes: {
       name : {

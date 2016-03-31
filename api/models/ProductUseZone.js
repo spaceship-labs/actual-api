@@ -3,12 +3,13 @@ module.exports = {
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
-		Parent:{type:'integer'},
 		Description:{type:'text'},
 		Keywords:{type:'string'},
 		Handle:{type:'string'},
-		IsMain:{type:'boolean'},
-		IsSub:{type:'boolean'},
-		CategoryLevel:{type:'integer'}
+
+		Products:{
+			collection:'product',
+			through: 'product_productusezone'
+		}				
 	}
 }

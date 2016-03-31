@@ -1,9 +1,9 @@
 module.exports = {
-  connection: 'mysql',
-  migrate: 'safe',
-  tableName: 'ItemPrice',
-  tableNameSqlServer: 'ITM1',
-  attributes: {
+	connection: 'mysql',
+	migrate: 'safe',
+	tableName: 'ItemPrice',
+	tableNameSqlServer: 'ITM1',
+	attributes: {
     ItemCode: {type:'string',size:20,model:'product'},
     /*
     Product:{
@@ -14,8 +14,8 @@ module.exports = {
     },
     */
     PriceList:{type:'integer', size: 4},
-    Price:{type:'float'},
-    Currency:{type:'string',size:3}
-  },
+		Price:{type:'float'},
+		Currency:{type:'string',size:3}
+	},
 
 }

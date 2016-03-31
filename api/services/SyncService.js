@@ -42,6 +42,7 @@ module.exports = {
         console.log('Iterating data finished ('+modelName+'): ' + new Date());
         syncDateFinish = new Date();
         deferred.resolve({
+          model: modelName,          
           syncDateStart: syncDateStart,
           syncDateFinish: syncDateFinish,
           total: totalrows,

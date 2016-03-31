@@ -8,7 +8,12 @@ module.exports = {
 		Keywords:{type:'string'},
 		Handle:{type:'string'},
 		IsMain:{type:'boolean'},
-		IsSub:{type:'boolean'},
-		CategoryLevel:{type:'integer'}
+		Parent:{type:'integer'},
+
+		Products:{
+			collection:'product',
+			through: 'product_productmaterial'
+		}	
+
 	}
 }

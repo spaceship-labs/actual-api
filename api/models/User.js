@@ -1,7 +1,6 @@
 module.exports = {
     schema: true,
-    migrate: 'alter',
-    connection: 'mysql',
+    migrate: 'safe',
     attributes: {
         /*username: {
             type: 'string',
@@ -19,8 +18,7 @@ module.exports = {
         },
         email: {
             type: 'email',
-            required: true,
-            unique: true
+            required: true
         },
         firstName: {
             type: 'string',
@@ -39,10 +37,6 @@ module.exports = {
         userType: {
             type:'string',
             defaultsTo: 'seller'
-        },
-        userSap:{
-            model:'userSap',
-            unique:true
         },
         toJSON: function () {
             var obj = this.toObject();

@@ -167,6 +167,7 @@ module.exports.tables = {
 	},
 	*/
 	
+	/*
 	productcategory:{
 		tableName: 'ProductCategory',
 		tableNameSqlServer: '@PRODUCTO',
@@ -175,6 +176,7 @@ module.exports.tables = {
 			Name:{type:'string', size: 30},
 		}
 	},
+	*/
 
 	/*
 	quotation: {
