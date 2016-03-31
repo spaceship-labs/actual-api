@@ -11,6 +11,7 @@ module.exports.tables = {
 		}
 	},
 
+	/*
 	color: {
 		tableName: 'Color',
 		tableNameSqlServer: '@COLOR',
@@ -20,6 +21,7 @@ module.exports.tables = {
 		}
 
 	},
+	*/
 
 	invoice: {
 		tableName: 'Invoice',
@@ -51,10 +53,11 @@ module.exports.tables = {
 		}
 	},
 
+	/*
 	itemprice:{
 		tableName: 'ItemPrice',
 		tableNameSqlServer: 'ITM1',
-    compositeKeys: ['ItemCode','PriceList'],
+    	compositeKeys: ['ItemCode','PriceList'],
 		attributes: {
 			ItemCode: {type:'string',size:20},
 			PriceList:{type:'integer', size: 4},
@@ -62,12 +65,13 @@ module.exports.tables = {
 			Currency:{type:'string',size:3}
 		},
 	},
+	*/
 
 
 	itemwarehouse:{
 		tableName: 'ItemWarehouse',
 		tableNameSqlServer: 'OITW',
-    compositeKeys: ['ItemCode','WhsCode'],
+    	compositeKeys: ['ItemCode','WhsCode'],
 		attributes: {
 			ItemCode:{type:'string', size:20},
 			WhsCode:{type:'string', size:20},
@@ -91,7 +95,7 @@ module.exports.tables = {
 	payment:{
 		tableName: 'Payments',
 		tableNameSqlServer: 'OVPM',
-    compositeKeys: ['DocEntry','DocNum'],
+    	compositeKeys: ['DocEntry','DocNum'],
 		attributes: {
 			DocEntry:{type:'integer'},
 			DocNum:{type:'integer'},
@@ -125,6 +129,7 @@ module.exports.tables = {
 		},
 	},
 
+	/*
 	pricelist:{
 		tableName: 'PriceList',
 		tableNameSqlServer: 'OPLN',
@@ -133,7 +138,9 @@ module.exports.tables = {
 			ListName:{type:'string', size: 32},
 		},
 	},
+	*/
 
+	/*
 	product:{
 		tableName: 'Product',
 		tableNameSqlServer: 'OITM',
@@ -158,7 +165,8 @@ module.exports.tables = {
 			U_garantia:{type:'string',size:60},
 		},
 	},
-
+	*/
+	
 	productcategory:{
 		tableName: 'ProductCategory',
 		tableNameSqlServer: '@PRODUCTO',
@@ -168,10 +176,11 @@ module.exports.tables = {
 		}
 	},
 
+	/*
 	quotation: {
 		tableName: 'Quotation',
 		tableNameSqlServer: 'QUT1',
-    compositeKeys: ['DocEntry','LineNum'],
+    	compositeKeys: ['DocEntry','LineNum'],
 		attributes: {
 			DocEntry:{type:'integer'},
 			LineNum:{type:'integer'},
@@ -191,6 +200,7 @@ module.exports.tables = {
 			ShipToDesc:{type:'string',size:254}
 		},
 	},
+	*/
 
 	saleopportunity:{
 		tableName: 'SaleOpportunity',
@@ -203,6 +213,35 @@ module.exports.tables = {
 			Status:{type:'string',size:1},
 			CardName:{type:'string',size:100}
 		},
-	}
+	},
+
+
+	warehouse:{
+		tableName: 'Warehouse',
+		tableNameSqlServer: 'OWHS',
+		attributes: {
+			WhsCode:{type:'string', size:8,primaryKey:true},
+			WhsName:{type:'string', size: 100},
+			IntrnalKey:{type:'integer'},
+			U_Calle:{type:'string',size:150},
+			U_noExterior:{type:'string', size:15},
+			U_noInterior:{type:'string',size:15},
+			U_Colonia:{type:'string',size:150},
+			U_Localidad:{type:'string',size:150},
+			U_Municipio:{type:'string',size:150},
+			U_Estado:{type:'string',size:50},
+			U_Pais:{type:'string',size:50},
+			U_CodigoPostal:{type:'string',size:10},
+			U_Serie_FCP:{type:'string',size:25},
+			U_Serie_ND:{type:'string',size:25},
+			U_Serie_NC:{type:'string',size:25},
+			U_Serie_FR:{type:'string',size:25},
+			U_Serie_FA:{type:'string',size:25},
+			U_EsTransito:{type:'integer'},
+			U_Bodega:{type:'integer'},
+			U_InfoWhs:{type:'integer'},
+			U_Procesado:{type:'integer'}
+		}
+	}	
 
 };

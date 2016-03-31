@@ -3,6 +3,7 @@ var moment = require('moment');
 var async = require('async');
 var hash = require('object-hash');
 var bluebird = require('bluebird');
+var _ = require('underscore');
 
 var insertedCount = 0;
 var updatedCount = 0;
@@ -35,7 +36,7 @@ module.exports = {
   sync: function(modelName){
     var deferred = q.defer();
 
-    if(sails.config.tables[modelName]){
+    if(sails.config.joins[modelName]){
       resetCounters();
 
       var handleDataFromSapSuccess = function(res){
@@ -55,6 +56,9 @@ module.exports = {
         if(err) console.log(err);
       }
       
+      //return getDataFromSap(modelName);
+
+      
       getDataFromSap(modelName)
         .then(function(results){
           totalrows = results.length;
@@ -64,7 +68,7 @@ module.exports = {
         })
         .then(handleDataFromSapSuccess)
         .catch(handleDataFromSapFail);
-    
+
     }
     else{
       var err = 'Model not found';
@@ -87,15 +91,32 @@ function resetCounters(){
   * @return promise, if success returns data, else error message
 */
 function getDataFromSap(modelName){
-  var columns = sails.config.tables[modelName].attributes;
+  var join = sails.config.joins[modelName];
+  var leftTable = sails.config.joins[modelName].left;
+  var rightTable = sails.config.joins[modelName].right;
+  var tables = [leftTable, rightTable];
+
   var sql = "SELECT ";
   var i = 0;
-  for(col in columns){
-    if (i!=0) sql+=" , ";
-    sql += "" + col +" ";
-    i++;
+  tables.forEach(function(table){
+    var columns = table.attributes;
+    var alias = table.tableNameSqlServer;
+    for(col in columns){
+      if (i!=0) sql+=" , ";
+      sql += "" + alias + "." + col +" ";
+      i++;
+    }
+  });  
+  sql += " FROM " + leftTable.tableNameSqlServer;
+  sql += " LEFT JOIN " + rightTable.tableNameSqlServer;
+  sql += " ON " + leftTable.tableNameSqlServer + "." + join.key;
+  sql += " = " + rightTable.tableNameSqlServer + "." + join.key;
+  if(join.where){
+    sql += " WHERE " + join.where;
   }
-  sql += " FROM [ACTUALKIDS].[dbo].[" + sails.config.tables[modelName].tableNameSqlServer + "]";
+  if(join.orderby){
+    sql += " ORDER BY " + join.orderby;
+  }
   var queryAsync  = bluebird.promisify(Sqlserver_.query);
   return queryAsync(sql);
 }
@@ -107,17 +128,64 @@ function getDataFromSap(modelName){
   * goes to the handleRow function. 
   * checkIfExistsInMysql() -> handleRow()
 */
-function handleDataFromSap(modelName,rows){
+function handleDataFromSap(modelName,rowsSap){
   var rowsPromises = [];
-  for(row in rows){
-    rowsPromises.push(rowProcess(modelName,rows[row]));
+  for(row in rowsSap){
+    rowsPromises.push(rowProcess(modelName,rowsSap[row]));
   }
   return q.all(rowsPromises);
 }
 
-function checkIfExistsInMysql(modelName, row){
+
+/**
+  * @param {string} modelName
+  * @param {object} rowSap, data from SAP DB 
+  * @param {object} exists, if exists in MySQL an object with the row data, else false value
+  * @param {function} cb
+  *
+*/
+function rowProcess(modelName, rowSap){
+  //Default promise
   var deferred = q.defer();
-  queryIfExistsInMysql(modelName,row)
+
+  checkIfExistsInMysql(modelName, rowSap)
+    .then(function(exists){ 
+      
+      if(exists){
+        //console.log('exists');
+
+        var hashSap = hash(rowSap);
+        var hashMysql = exists.hash;
+
+        if(hashSap == hashMysql){
+          //El registro es igual en ambas DB
+          var innerDeferred = q.defer();
+          notAffectedCount++;
+          innerDeferred.resolve('sin actualizar');
+          deferred.resolve(innerDeferred.promise);
+
+        }
+        else{
+          //Actualizar
+          updatedCount++;
+          deferred.resolve(updateRowInMysql(modelName, rowSap)); //Devuelve un promise
+        }
+      }
+      else{
+        //El registro de SAP no existe en APP DB
+        insertedCount++;
+        deferred.resolve(insertRowInMysql(modelName, rowSap)); //Devuelve un promise
+      }
+      
+    });
+
+  return deferred.promise;
+}
+
+
+function checkIfExistsInMysql(modelName, rowSap){
+  var deferred = q.defer();
+  queryIfExistsInMysql(modelName,rowSap)
     .then(function(results){
       if(results && results.length > 0){
         deferred.resolve(results[0]);
@@ -136,12 +204,13 @@ function checkIfExistsInMysql(modelName, row){
 * @param {string} modelName
 * @param {string} whereClause
 */
-function queryIfExistsInMysql(modelName, row){
-  var table = sails.config.tables[modelName];
-  var whereClause = getWhereClauseMysql(table, modelName, row);
-  var columns = sails.config.tables[modelName].attributes;
+function queryIfExistsInMysql(modelName, rowSap){
+  var whereClause = getWhereClauseMysql(modelName, rowSap);
+  var join = sails.config.joins[modelName];
+  var alias = join.tableName;
+  var columns = _.extend(join.left.attributes, join.right.attributes);
+
   var sql = "SELECT ";
-  //sql += ' TOP 5 ';
   var i = 0;
 
   for(col in columns){
@@ -150,7 +219,7 @@ function queryIfExistsInMysql(modelName, row){
     i++;
   }
 
-  sql += ",hash FROM " + sails.config.tables[modelName].tableName + "";
+  sql += ",hash FROM " + sails.config.joins[modelName].tableName + "";
   
   if(whereClause){
     sql += " " + whereClause; 
@@ -161,47 +230,6 @@ function queryIfExistsInMysql(modelName, row){
 }
 
 
-/**
-  * @param {string} modelName
-  * @param {object} row, data from SAP DB 
-  * @param {object} exists, if exists in MySQL an object with the row data, else false value
-  * @param {function} cb
-  *
-*/
-function rowProcess(modelName, row){
-  //Default promise
-  var deferred = q.defer();
-
-  checkIfExistsInMysql(modelName, row)
-    .then(function(exists){
-      //El registro de SAP existe en APP DB
-      if(exists){
-        var hashSap = hash(row);
-        var hashMysql = exists.hash;
-
-        if(hashSap == hashMysql){
-          //El registro es igual en ambas DB
-          var innerDeferred = q.defer();
-          notAffectedCount++;
-          innerDeferred.resolve('sin actualizar');
-          deferred.resolve(innerDeferred.promise);
-
-        }
-        else{
-          //Actualizar
-          updatedCount++;
-          deferred.resolve(updateRowInMysql(modelName, row)); //Devuelve un promise
-        }
-      }
-      else{
-        //El registro de SAP no existe en APP DB
-        insertedCount++;
-        deferred.resolve(insertRowInMysql(modelName, row)); //Devuelve un promise
-      }
-    });
-
-  return deferred.promise;
-}
 
 
 /**
@@ -210,15 +238,14 @@ function rowProcess(modelName, row){
   * @param {function} cb
   *
 */
-function insertRowInMysql(modelName, row, cb){
-  //console.log('inserting row');
-  var src = sails.config.tables;
-  var alias = sails.config.tables[modelName].tableName;
+function insertRowInMysql(modelName, rowSap, cb){
+  var join = sails.config.joins[modelName];
+  var alias = join.tableName;
   var sql = "INSERT INTO " + alias + " ";
   var val = '';
   var date = '';
   var aux = '';
-  var columns = sails.config.tables[modelName].attributes;
+  var columns = _.extend(join.left.attributes, join.right.attributes);
 
   sql += "( ";
   for(var col in columns){
@@ -235,9 +262,8 @@ function insertRowInMysql(modelName, row, cb){
   sql += "(";
   for(var col in columns){
     //Inserting values by column
-    
     if(columns[col].type === 'datetime'){
-      aux = String(row[col]);
+      aux = String(rowSap[col]);
       if(aux == 'null'){
         date = moment(new Date()).format('YYYY-MM-DD h:mm:ss');
       }
@@ -247,7 +273,7 @@ function insertRowInMysql(modelName, row, cb){
       sql += " '" + date +"',";
     }
     else{
-      val = String(row[col]).replace(/'/g, "\\'");
+      val = String(rowSap[col]).replace(/'/g, "\\'");
       if(val == 'null'){
         sql += ' null,';
       }else{
@@ -259,7 +285,7 @@ function insertRowInMysql(modelName, row, cb){
   sql = sql.substring(0, sql.length - 1);
 
   //Adding hash field
-  var rowHash = hash(row);
+  var rowHash = hash(rowSap);
   sql += " , '" + rowHash + "'";
 
   sql += ")";
@@ -274,23 +300,20 @@ function insertRowInMysql(modelName, row, cb){
   * @param {function} cb
   *
 */
-function updateRowInMysql(modelName, row){
-  //console.log('updateRowInMysql');
-  var src = sails.config.tables;
-  var table = sails.config.tables[modelName];
-  var alias = sails.config.tables[modelName].tableName;
+function updateRowInMysql(modelName, rowSap){
+  var join = sails.config.joins[modelName];
+  var alias = join.tableName;
   var sql = "UPDATE " + alias + " SET ";
   var val = '';
   var date = '';
   var aux = '';
-  var whereClause = getWhereClauseMysql(table,modelName,row);
-
-  var columns = sails.config.tables[modelName].attributes;
+  var whereClause = getWhereClauseMysql(join,modelName,rowSap);
+  var columns = _.extend(join.left.attributes, join.right.attributes);
 
   for(var col in columns){
     //Inserting values by column
     if(columns[col].type === 'datetime'){
-      aux = String(row[col]);
+      aux = String(rowSap[col]);
       if(aux == 'null'){
         date = moment(new Date()).format('YYYY-MM-DD h:mm:ss');
       }
@@ -300,7 +323,7 @@ function updateRowInMysql(modelName, row){
       sql +=  col + " = '" + date +"',";
     }
     else{
-      val = String(row[col]).replace(/'/g, "\\'");
+      val = String(rowSap[col]).replace(/'/g, "\\'");
       if(val == 'null'){
         sql += col + ' =  null,';
       }else{
@@ -312,8 +335,8 @@ function updateRowInMysql(modelName, row){
   sql = sql.substring(0, sql.length - 1);
 
   //Adding hash field
-  var rowHash = hash(row);
-  sql += " , hash = '" + rowHash + "'";
+  var rowSapHash = hash(rowSap);
+  sql += " , hash = '" + rowSapHash + "'";
   sql += " " + whereClause;
 
   var queryAsync = bluebird.promisify(Mysql_.query);
@@ -326,37 +349,23 @@ function updateRowInMysql(modelName, row){
   HELPER FUNCTIONS
 */
 
-function getWhereClauseMysql(table, modelName, row){
-  var alias = table.tableName;
-  var columns = table.attributes;
-  var compositeKeys = '';
-
+function getWhereClauseMysql(modelName, row){
+  var join = sails.config.joins[modelName];
+  var alias = join.tableName;
+  var columns = _.extend(join.left.attributes, join.right.attributes);
   var whereClause = '';
 
-  if(table.compositeKeys){
-    whereClause += 'WHERE ';
-    for(col in columns){
-      for(var i=0;i<table.compositeKeys.length;i++){
-        if(col == table.compositeKeys[i]){
-          whereClause += " " + col + " = '" + row[col] + "' AND";
-        }
-      }
+  for(col in columns){
+    if(col == join.key){
+      whereClause += "WHERE " +  col + " = '" + row[col] + "' ";
     }
-    whereClause = whereClause.replace(/AND$/, '');
   }
-  else{
-    for(col in columns){
-      if(columns[col].primaryKey){
-        whereClause += "WHERE " +  col + " = '" + row[col] + "' ";
-      }
-    }
-  } 
   return whereClause; 
 }
 
 function truncateTable(_model){
   var deferred = q.defer();
-  var alias = sails.config.tables[_model].tableName;
+  var alias = sails.config.joins[_model].tableName;
   var sql = "TRUNCATE TABLE " +   alias + "";
 
   Mysql_.query(sql,function(err,results){
