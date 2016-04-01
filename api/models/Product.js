@@ -54,6 +54,13 @@ module.exports = {
           //excludeSync: true
         },
 
+        /*
+        stock:{
+          collection: 'itemwarehouse',
+          via: 'ItemCode'
+        },
+        */
+
         Displays:{
             collection:'ProductDisplay',
             through:'product_productdisplay'
@@ -77,22 +84,22 @@ module.exports = {
             collection:'ProductFilter',
             through: 'product_productfilter'
 
-        },         
+        },
 
         Colors:{
             collection:'ProductColor',
             through: 'product_productcolor'
 
-        }, 
+        },
 
         Styles:{
             collection:'ProductStyles',
             through: 'product_productstyle'
-        },    
+        },
 
         Guarantee: {
             model:'ProductGuarantee'
-        },             
+        },
 
 	},
 

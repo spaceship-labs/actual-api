@@ -3,7 +3,7 @@ module.exports = {
     var form = req.params.all();
     var model = 'product';
     var searchFields = ['ItemName','ItemCode'];
-    var populateFields = ['prices','files'];
+    var populateFields = ['files'];
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){
@@ -17,8 +17,7 @@ module.exports = {
     //Product.find({id:id}).exec(function(err, results){
     Product.find({ItemCode:id})
       .populate('files')
-      .populate('prices')
-      .populate('stock')
+      //.populate('stock')
       .exec(function(err, results){
       if(err){
         console.log(err);
@@ -71,7 +70,7 @@ module.exports = {
 
     //console.log(query);
 
-    var read = model.find(query).populate('files').populate('prices');
+    var read = model.find(query).populate('files');
 
     read.exec(function(err, results){
       model.count(querySearchAux).exec(function(err,count){
