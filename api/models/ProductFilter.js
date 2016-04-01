@@ -1,5 +1,5 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
@@ -16,10 +16,16 @@ module.exports = {
 		Shape:{type:'boolean'},
 		Functionality:{type:'boolean'},
 		Firmness: {type:'boolean'},
+    Spacific: {type:'boolean'}
 
 		Products:{
 			collection:'product',
 			through:'product_productfilter'
-		}		
-	}	
+		}
+
+    Categories:{
+      collection:'productcategory',
+      through: 'productcategory_productfilter'
+    }
+	}
 }

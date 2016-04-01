@@ -1,5 +1,5 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
@@ -9,6 +9,11 @@ module.exports = {
 		Handle:{type:'string'},
 		IsMain:{type:'boolean'},
 		IsSub:{type:'boolean'},
-		CategoryLevel:{type:'integer'}
+		CategoryLevel:{type:'integer'},
+
+    Filters:{
+      collection:'productfilter',
+      through: 'productcategory_productfilter'
+    }
 	}
 }

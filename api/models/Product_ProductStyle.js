@@ -1,8 +1,8 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		product:{model:'Product'},
-		usezone:{model:'ProductStyle'}
+		style:{model:'ProductStyle'}
 	}
 }
