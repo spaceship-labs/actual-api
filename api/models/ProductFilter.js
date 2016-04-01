@@ -16,12 +16,12 @@ module.exports = {
 		Shape:{type:'boolean'},
 		Functionality:{type:'boolean'},
 		Firmness: {type:'boolean'},
-    Spacific: {type:'boolean'}
+    Spacific: {type:'boolean'},
 
 		Products:{
 			collection:'product',
 			through:'product_productfilter'
-		}
+		},
 
     Categories:{
       collection:'productcategory',
