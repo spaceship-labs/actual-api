@@ -84,6 +84,16 @@ module.exports = {
     });
 
   },
+
+  update: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Product.update({ItemCode: id}, form, function(e, product){
+      if(e) throw(e);
+      res.json(product);
+    });
+  },
+
   addFiles : function(req,res){
     form = req.params.all();
     Product.findOne({ItemCode:form.id}).exec(function(e,product){

@@ -92,6 +92,11 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  '/product/update/:id':{
+    controller: 'product',
+    action: 'update'
+  },
+
   '/saleopportunity/find/:page':{
     controller: 'saleopportunity',
     action: 'find'

@@ -11,6 +11,7 @@ module.exports = {
     var items = form.items || 10;
     var page = form.page || 1;
     var term = form.term || false;
+    var orderBy = form.orderby || false;
     var populateFields = populateFields || false;
     var query = {};
     var querySearchAux = {};
@@ -43,6 +44,10 @@ module.exports = {
         }
 
       });
+    }
+
+    if(orderBy){
+      read.sort(orderBy);
     }
 
     read.exec(function(err, results){
