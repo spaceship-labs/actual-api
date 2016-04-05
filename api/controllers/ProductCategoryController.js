@@ -59,12 +59,32 @@ module.exports = {
           }
           console.log(category.Parents);
 
+
+          var recursiveSave = function(parents){
+            if (parents[0]) {
+              var params ={
+                Child: result.id,
+                Parent: parents[0]
+              }
+              ProductCategoryTree.create(params).exec(function(err, pc){
+                recursiveSave(parents.slice(1));
+              });
+            }else{
+              res.json(category);
+            }
+          };
+
+          recursiveSave(parents);
+
+          /*
           category.save(function(err3, categoryResult){
             if(err3) throw(err3);
             console.log('final result');
             console.log(categoryResult);
             res.json(categoryResult);
           });
+          */
+
 
         });
       }
