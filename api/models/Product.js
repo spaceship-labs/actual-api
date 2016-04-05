@@ -61,6 +61,11 @@ module.exports = {
         },
         */
 
+        Categories:{
+          collection: 'ProductCategory',
+          through: 'product_productcategory'
+        },
+
         Displays:{
             collection:'ProductDisplay',
             through:'product_productdisplay'
@@ -80,9 +85,9 @@ module.exports = {
             through: 'product_productmaterial'
         },
 
-        Filters:{
-            collection:'ProductFilter',
-            through: 'product_productfilter'
+        FilterValues:{
+            collection:'ProductFilterValue',
+            through: 'product_productfiltervalue'
 
         },
 

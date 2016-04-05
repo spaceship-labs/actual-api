@@ -26,6 +26,13 @@ module.exports = {
     Filters:{
       collection:'productfilter',
       through: 'productcategory_productfilter'
-    }
+    },
+
+    Products:{
+      collection: 'Product',
+      through: 'product_productcategory'
+    },
+
+
 	}
 }

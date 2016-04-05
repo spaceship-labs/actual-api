@@ -148,10 +148,31 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  '/productcategory/destroy/:id':{
+    controller: 'productcategory',
+    action: 'destroy'
+  },
+
   '/productfilter/find/:page':{
     controller: 'productfilter',
     action: 'find'
   },
+
+  '/productfilter/create':{
+    controller: 'productfilter',
+    action: 'create'
+  },
+
+  '/productfilter/findbyid/:id':{
+    controller: 'productfilter',
+    action: 'findById'
+  },
+
+  '/productfilter/destroy/:id':{
+    controller: 'productfilter',
+    action: 'destroy'
+  },
+
 
 
   /***************************************************************************

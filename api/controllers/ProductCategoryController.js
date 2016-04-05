@@ -45,53 +45,41 @@ module.exports = {
     var form = req.params.all();
 
     var parents = form.parents;
+    var relationRecords = [];
 
     ProductCategory.create(form).exec(function(err1, result){
       if(err1) throw(err1);
-
       if(result){
 
-        ProductCategory.findOne({id:result.id}).populate('Parents').exec(function(err2, category){
-          if(err2) throw(err);
-
-          for(parent in parents){
-            category.Parents.add(parent);
-          }
-          console.log(category.Parents);
-
-
-          var recursiveSave = function(parents){
-            if (parents[0]) {
-              var params ={
-                Child: result.id,
-                Parent: parents[0]
-              }
-              ProductCategoryTree.create(params).exec(function(err, pc){
-                recursiveSave(parents.slice(1));
-              });
-            }else{
-              res.json(category);
-            }
-          };
-
-          recursiveSave(parents);
-
-          /*
-          category.save(function(err3, categoryResult){
-            if(err3) throw(err3);
-            console.log('final result');
-            console.log(categoryResult);
-            res.json(categoryResult);
+        for(parent in parents){
+          relationRecords.push({
+            Child: result.id,
+            Parent: parent
           });
-          */
+        }
 
-
+        ProductCategoryTree.create(relationRecords).exec(function createCB(err3, created){
+          if(err) throw(err3);
+          res.json(result);
         });
+
       }
       else{
         res.json(false);
       }
 
+    });
+  },
+
+  destroy: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    ProductCategory.destroy({id:id}).exec(function(err){
+      if(err) throw(err);
+      var query = {or: [{Child:id},{Parent:id}]}
+      ProductCategoryTree.destroy(query).exec(function(err){
+        return res.json({destroyed: true});
+      })
     });
   }
 };

@@ -3,6 +3,6 @@ module.exports = {
 	connection:'mysql',
 	attributes:{
 		product:{model:'Product'},
-		filter:{model:'ProductFilter'}
+		filtervalue:{model:'ProductFilterValue'}
 	}
 }

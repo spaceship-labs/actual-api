@@ -2,7 +2,7 @@ module.exports = {
   migrate:'alter',
   connection:'mysql',
   attributes:{
-    category:{model:'ProductCategory'},
-    filter:{model:'ProductFilter'}
+    product:{model:'Product'},
+    category:{model:'ProductCategory'}
   }
 }
