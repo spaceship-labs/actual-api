@@ -1,5 +1,5 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
@@ -10,7 +10,7 @@ module.exports = {
 
 		Products:{
 			collection:'product',
-			viar:'brand'
-		}	
+			via:'Brand'
+		}
 	}
 }

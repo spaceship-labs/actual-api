@@ -128,6 +128,26 @@ module.exports.routes = {
     action: 'find'
   },
 
+  '/productcategory/create':{
+    controller: 'productcategory',
+    action: 'create'
+  },
+
+  '/productcategory/getallcategories':{
+    controller: 'productcategory',
+    action: 'getAllCategories'
+  },
+
+  '/productcategory/getmaincategories':{
+    controller: 'productcategory',
+    action: 'getMainCategories'
+  },
+
+  '/productcategory/findbyid/:id':{
+    controller: 'productcategory',
+    action: 'findById'
+  },
+
   '/productfilter/find/:page':{
     controller: 'productfilter',
     action: 'find'
