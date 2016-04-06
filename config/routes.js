@@ -138,6 +138,11 @@ module.exports.routes = {
     action: 'getAllCategories'
   },
 
+  '/productcategory/getcategoriesgroups':{
+    controller: 'productcategory',
+    action: 'getCategoriesGroups'
+  },
+
   '/productcategory/getmaincategories':{
     controller: 'productcategory',
     action: 'getMainCategories'

@@ -15,12 +15,33 @@ module.exports = {
 
 
   getAllCategories: function(req, res){
-    ProductCategory.find().populate('Childs').populate('Parents').then(function(result){
+    ProductCategory.find().sort('CategoryLevel ASC').populate('Childs').populate('Parents').then(function(result){
       res.ok(result);
     },function(err){
       console.log(err);
       res.notFound();
     })
+  },
+
+  getCategoriesGroups: function(req, res){
+    var categoriesGroups = [];
+    ProductCategory.find({CategoryLevel:1}).populate('Childs').exec(function(err,mainCategories){
+      if(err) throw(err);
+
+      categoriesGroups.push(mainCategories);
+
+      ProductCategory.find({CategoryLevel:2}).populate('Childs').exec(function(err2,subcategories){
+        if(err2) throw(err2);
+        categoriesGroups.push(subcategories);
+
+        ProductCategory.find({CategoryLevel:3}).populate('Parents').exec(function(err3, subsubcategories){
+          if(err3) throw(err3);
+          categoriesGroups.push(subsubcategories);
+          res.json(categoriesGroups);
+        });
+
+      });
+    });
   },
 
   getMainCategories: function(res, res){
@@ -51,15 +72,15 @@ module.exports = {
       if(err1) throw(err1);
       if(result){
 
-        for(parent in parents){
+        for(index in parents){
           relationRecords.push({
             Child: result.id,
-            Parent: parent
+            Parent: parents[index]
           });
         }
 
         ProductCategoryTree.create(relationRecords).exec(function createCB(err3, created){
-          if(err) throw(err3);
+          if(err3) throw(err3);
           res.json(result);
         });
 
@@ -79,7 +100,7 @@ module.exports = {
       var query = {or: [{Child:id},{Parent:id}]}
       ProductCategoryTree.destroy(query).exec(function(err){
         return res.json({destroyed: true});
-      })
+      });
     });
   }
 };
