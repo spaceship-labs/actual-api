@@ -43,12 +43,8 @@ module.exports = {
       read.sort(orderBy);
     }
 
-    console.log(query);
-    console.log(orderBy);
-
     read.exec(function(err, results){
       if(err) console.log(err);
-      console.log(results);
       model.count(querySearchAux).exec(function(err2,count){
         if(err2){
           throw(err2);
