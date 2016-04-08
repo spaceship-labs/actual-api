@@ -33,13 +33,11 @@ module.exports = {
     query.limit = items;
 
     var read = model.find(query);
-    /*
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
         read = read.populate(populateF);
       });
     }
-    */
 
     if(orderBy){
       read.sort(orderBy);
