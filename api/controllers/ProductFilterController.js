@@ -15,6 +15,13 @@ module.exports = {
     })
   },
 
+  list: function(req, res){
+    ProductFilter.find().populate('Values').exec(function(err, filters){
+      if(err) throw(err);
+      res.json(filters);
+    });
+  },
+
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;

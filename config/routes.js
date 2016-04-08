@@ -168,6 +168,11 @@ module.exports.routes = {
     action: 'find'
   },
 
+  '/productfilter/list':{
+    controller:'productfilter',
+    action: 'list'
+  },
+
   '/productfilter/create':{
     controller: 'productfilter',
     action: 'create'
