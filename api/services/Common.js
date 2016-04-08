@@ -33,11 +33,13 @@ module.exports = {
     query.limit = items;
 
     var read = model.find(query);
+    /*
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
         read = read.populate(populateF);
       });
     }
+    */
 
     if(orderBy){
       read.sort(orderBy);
@@ -47,9 +49,11 @@ module.exports = {
     console.log(orderBy);
 
     read.exec(function(err, results){
+      if(err) console.log(err);
       console.log(results);
-      model.count(querySearchAux).exec(function(err,count){
-        if(err){
+      model.count(querySearchAux).exec(function(err2,count){
+        if(err2){
+          throw(err2);
           deferred.reject(err);
         }else{
           deferred.resolve({data:results, total:count});
