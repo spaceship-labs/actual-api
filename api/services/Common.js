@@ -35,14 +35,7 @@ module.exports = {
     var read = model.find(query);
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
-
-        if(modelName == 'product' && populateF == 'prices'){
-          //Choosing the pricelist 1, public price
-          read = read.populate(populateF, {PriceList: 1});
-        }else{
-          read = read.populate(populateF);
-        }
-
+        read = read.populate(populateF);
       });
     }
 
@@ -50,7 +43,11 @@ module.exports = {
       read.sort(orderBy);
     }
 
+    console.log(query);
+    console.log(orderBy);
+
     read.exec(function(err, results){
+      console.log(results);
       model.count(querySearchAux).exec(function(err,count){
         if(err){
           deferred.reject(err);
