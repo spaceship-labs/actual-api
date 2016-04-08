@@ -34,6 +34,7 @@ module.exports = {
         //CHECAR Model:{type:'string'},
         MainFeatures:{type:'text'},
         Restrictions:{type:'text'},
+        Color: {type:'string'},
         DetailedColor:{type:'string'},
         GuaranteeText:{type:'text'},
         Seats:{type:'string'},
@@ -89,17 +90,6 @@ module.exports = {
             collection:'ProductFilterValue',
             through: 'product_productfiltervalue'
 
-        },
-
-        Colors:{
-            collection:'ProductColor',
-            through: 'product_productcolor'
-
-        },
-
-        Styles:{
-            collection:'ProductStyles',
-            through: 'product_productstyle'
         },
 
         Guarantee: {

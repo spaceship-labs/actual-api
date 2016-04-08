@@ -3,7 +3,7 @@ module.exports = {
     var form = req.params.all();
     var model = 'product';
     var searchFields = ['ItemName','ItemCode'];
-    var populateFields = ['files'];
+    var populateFields = form.noimages ? ['files'] : [];
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){
@@ -17,6 +17,7 @@ module.exports = {
     //Product.find({id:id}).exec(function(err, results){
     Product.find({ItemCode:id})
       .populate('files')
+      .populate('Categories')
       //.populate('stock')
       .exec(function(err, results){
       if(err){
