@@ -102,5 +102,77 @@ module.exports = {
         return res.json({destroyed: true});
       });
     });
-  }
+  },
+
+  update: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    //Array of new parents id's
+    var editParents = _.clone(form.Parents);
+    var toRemoveParents = [];
+    var toAddParents = [];
+
+    //delete form.Parents;
+    delete form.Childs;
+
+    ProductCategory.update({id:id},form).exec(function updateDone(err, updatedCategory){
+      if(err) throw(err);
+
+      ProductCategory.findOne({id:id}).populate('Parents').exec(function(err2, category){
+        if(err2) throw(err2);
+
+        console.log(category);
+
+        //If a category was not a parent category, add it as a parent
+        if(category.Parents.length > 0){
+          editParents.forEach(function(editParent){
+            if( _.where(category.Parents, {id : editParent}).length <= 0 ){
+              console.log('agregando editParent : ' + editParent);
+              toAddParents.push({Parent:editParent, Child: id});
+              //category.Parents.add(editParent);
+            }
+          });
+        }else{
+          console.log('no hay parents');
+          editParents.forEach(function(editParent){
+            console.log('agregando parent : ' + editParent);
+            toAddParents.push({Parent:editParent, Child: id});
+            //category.Parents.add(editParent);
+          });
+        }
+
+        //If the parent(from DB) is not in the new category parents(editParents), assume
+        //that the parent doesn't exist, remove it.
+        category.Parents.forEach(function(dbParent){
+          if( _.where(editParents, {id : dbParent.id}).length <= 0 ){
+            console.log('removiendo editParent : ' + dbParent.id);
+            toRemoveParents.push(dbParent.id);
+            //category.Parents.remove(dbParent.id);
+          }
+        });
+
+        if(toRemoveParents.length > 0){
+          ProductCategoryTree.destroy({id:toRemoveParents}).exec(function(errDestroy){
+            if(errDestroy) throw(errDestroy);
+            ProductCategoryTree.create(toAddParents).exec(function(errCreate, relations){
+              if(errCreate) throw(errCreate);
+              res.json(category);
+            });
+          });
+        }
+        else{
+          ProductCategoryTree.create(toAddParents).exec(function(errCreate, relations){
+            if(errCreate) throw(errCreate);
+            res.json(category);
+          });
+        }
+
+
+      });
+
+    });
+
+  },
+
+
 };

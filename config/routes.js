@@ -158,6 +158,11 @@ module.exports.routes = {
     action: 'destroy'
   },
 
+  '/productcategory/update/:id':{
+    controller: 'productcategory',
+    action: 'update'
+  },
+
   '/productfilter/find/:page':{
     controller: 'productfilter',
     action: 'find'
