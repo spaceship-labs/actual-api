@@ -188,6 +188,16 @@ module.exports.routes = {
     action: 'destroy'
   },
 
+  '/productmaterial/updateall':{
+    controller: 'productmaterial',
+    action:'updateAll'
+  },
+
+  '/productmaterial/getall':{
+    controller: 'productmaterial',
+    action:'getAll'
+  }
+
 
 
   /***************************************************************************

@@ -18,6 +18,8 @@ module.exports = {
     Product.find({ItemCode:id})
       .populate('files')
       .populate('Categories')
+      .populate('Materials')
+      .populate('FilterValues')
       //.populate('stock')
       .exec(function(err, results){
       if(err){
@@ -89,8 +91,11 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Product.update({ItemCode: id}, form, function(e, product){
-      if(e) throw(e);
+    Product.update({ItemCode: id}, form).exec(function updatedProduct(e, product){
+      if(e){
+        console.log(e);
+        throw(e);
+      }
       res.json(product);
     });
   },

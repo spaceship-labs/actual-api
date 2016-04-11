@@ -127,15 +127,12 @@ module.exports = {
         if(category.Parents.length > 0){
           editParents.forEach(function(editParent){
             if( _.where(category.Parents, {id : editParent}).length <= 0 ){
-              console.log('agregando editParent : ' + editParent);
               toAddParents.push({Parent:editParent, Child: id});
               //category.Parents.add(editParent);
             }
           });
         }else{
-          console.log('no hay parents');
           editParents.forEach(function(editParent){
-            console.log('agregando parent : ' + editParent);
             toAddParents.push({Parent:editParent, Child: id});
             //category.Parents.add(editParent);
           });
@@ -145,7 +142,6 @@ module.exports = {
         //that the parent doesn't exist, remove it.
         category.Parents.forEach(function(dbParent){
           if( _.where(editParents, {id : dbParent.id}).length <= 0 ){
-            console.log('removiendo editParent : ' + dbParent.id);
             toRemoveParents.push(dbParent.id);
             //category.Parents.remove(dbParent.id);
           }

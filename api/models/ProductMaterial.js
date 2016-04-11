@@ -1,19 +1,22 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
-		Parent:{type:'integer'},
 		Description:{type:'text'},
 		Keywords:{type:'string'},
 		Handle:{type:'string'},
-		IsMain:{type:'boolean'},
-		Parent:{type:'integer'},
+
+    IsWood:{type:'boolean'},
+    IsMetal:{type:'boolean'},
+    IsSynthetic:{type:'boolean'},
+    IsOrganic:{type:'boolean'},
+    IsGlass:{type:'boolean'},
 
 		Products:{
 			collection:'product',
 			through: 'product_productmaterial'
-		}	
+		}
 
 	}
 }

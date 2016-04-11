@@ -3,6 +3,7 @@ module.exports = {
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
+    Handle: {type:'string'},
 
     Filter:{
       model:'productfilter'

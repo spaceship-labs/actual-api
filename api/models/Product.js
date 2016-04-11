@@ -47,6 +47,11 @@ module.exports = {
         icon_type:{type:'string'},
         icon_typebase:{type:'string'},
         icon_size:{type:'integer'},
+        OnOffline:{type:'boolean'},
+        OnStudio:{type:'boolean'},
+        OnHome:{type:'boolean'},
+        OnKids:{type:'boolean'},
+        OnAmueble:{type:'boolean'},
 
         //RELATIONS
         files: {
@@ -67,18 +72,8 @@ module.exports = {
           through: 'product_productcategory'
         },
 
-        Displays:{
-            collection:'ProductDisplay',
-            through:'product_productdisplay'
-        },
-
         Brand: {
             model:'ProductBrand'
-        },
-
-        UseZones: {
-            collection: 'ProductUseZone',
-            through: 'product_productusezone',
         },
 
         Materials: {
