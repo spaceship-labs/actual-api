@@ -4,6 +4,10 @@ module.exports = {
     tableName: 'Product',
     tableNameSqlServer: 'OITM',
     attributes: {
+        /*----------------/
+            #SAP FIELDS
+        /*---------------*/
+
         ItemCode:{
           type:'string',
           primaryKey:true
@@ -23,9 +27,8 @@ module.exports = {
         U_disenado_en:{type:'string',size:60},
         U_ensamblado_en:{type:'string',size:60},
         U_importador: {type:'string',size:60},
-
         U_pctPuntos:{type:'float'},
-        U_FAMILIA:{type:'string', size:30}
+        U_FAMILIA:{type:'string', size:30},
 
 
         //FIELDS FROM PRICE TABLE
