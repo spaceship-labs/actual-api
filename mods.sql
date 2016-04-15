@@ -11,3 +11,8 @@ ALTER TABLE  `Product` ADD  `OnKids` TINYINT( 1 ) NOT NULL;
 ALTER TABLE  `Product` ADD  `OnAmueble` TINYINT( 1 ) NOT NULL;
 
 
+ALTER TABLE  `productmaterial` ADD  `IsWood` TINYINT( 1 ) NOT NULL ,
+ADD  `IsMetal` TINYINT( 1 ) NOT NULL ,
+ADD  `IsSynthetic` TINYINT( 1 ) NOT NULL ,
+ADD  `IsOrganic` TINYINT( 1 ) NOT NULL ,
+ADD  `IsGlass` TINYINT( 1 ) NOT NULL
