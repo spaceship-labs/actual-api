@@ -1,15 +1,20 @@
 module.exports = {
-	connection: 'mysql',
-	//migrate: 'alter',
-	tableName: 'Product',
-	tableNameSqlServer: 'OITM',
-	attributes: {
-		ItemCode:{
+    connection: 'mysql',
+    //migrate: 'alter',
+    tableName: 'Product',
+    tableNameSqlServer: 'OITM',
+    attributes: {
+        /*----------------/
+            #SAP FIELDS
+        /*---------------*/
+
+        ItemCode:{
           type:'string',
           primaryKey:true
         },
 
         ItemName:{type:'string'},
+        ItmsGrpCod:{type:'integer'},
         CodeBars:{type:'string'},
         OnHand:{type:'string'},
         IsCommited:{type:'float'},
@@ -21,6 +26,9 @@ module.exports = {
         U_garantia:{type:'string',size:60},
         U_disenado_en:{type:'string',size:60},
         U_ensamblado_en:{type:'string',size:60},
+        U_importador: {type:'string',size:60},
+        U_pctPuntos:{type:'float'},
+        U_FAMILIA:{type:'string', size:30},
 
 
         //FIELDS FROM PRICE TABLE
@@ -91,6 +99,6 @@ module.exports = {
             model:'ProductGuarantee'
         },
 
-	},
+    },
 
 }
