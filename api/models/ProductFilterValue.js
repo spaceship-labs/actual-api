@@ -4,6 +4,7 @@ module.exports = {
 	attributes:{
 		Name:{type:'string'},
     Handle: {type:'string'},
+    Keywords:{type:'string'},
 
     Filter:{
       model:'productfilter'

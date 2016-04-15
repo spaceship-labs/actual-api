@@ -1,3 +1,5 @@
+var async = require('async');
+
 module.exports = {
   find: function(req, res){
     var form = req.params.all();
@@ -62,33 +64,28 @@ module.exports = {
     });
   },
 
+  //TODO: Check why .add() doesnt work for ProductCategory.Parents
   create: function(req, res){
     var form = req.params.all();
-
-    var parents = form.parents;
+    var parents = form.Parents;
     var relationRecords = [];
-
     ProductCategory.create(form).exec(function(err1, result){
       if(err1) throw(err1);
       if(result){
-
-        for(index in parents){
+        parents.forEach(function(parent){
           relationRecords.push({
             Child: result.id,
-            Parent: parents[index]
+            Parent: parent
           });
-        }
-
+        });
         ProductCategoryTree.create(relationRecords).exec(function createCB(err3, created){
           if(err3) throw(err3);
           res.json(result);
         });
-
       }
       else{
         res.json(false);
       }
-
     });
   },
 
@@ -104,6 +101,7 @@ module.exports = {
     });
   },
 
+  //TODO: Check better way to add/remove ProductCategory.Parent relation
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -111,16 +109,13 @@ module.exports = {
     var editParents = _.clone(form.Parents);
     var toRemoveParents = [];
     var toAddParents = [];
-
     //delete form.Parents;
-    delete form.Childs;
-
+    //delete form.Childs;
     ProductCategory.update({id:id},form).exec(function updateDone(err, updatedCategory){
       if(err) throw(err);
 
       ProductCategory.findOne({id:id}).populate('Parents').exec(function(err2, category){
         if(err2) throw(err2);
-
         console.log(category);
 
         //If a category was not a parent category, add it as a parent
@@ -128,13 +123,11 @@ module.exports = {
           editParents.forEach(function(editParent){
             if( _.where(category.Parents, {id : editParent}).length <= 0 ){
               toAddParents.push({Parent:editParent, Child: id});
-              //category.Parents.add(editParent);
             }
           });
         }else{
           editParents.forEach(function(editParent){
             toAddParents.push({Parent:editParent, Child: id});
-            //category.Parents.add(editParent);
           });
         }
 
@@ -143,26 +136,36 @@ module.exports = {
         category.Parents.forEach(function(dbParent){
           if( _.where(editParents, {id : dbParent.id}).length <= 0 ){
             toRemoveParents.push(dbParent.id);
-            //category.Parents.remove(dbParent.id);
           }
         });
 
-        if(toRemoveParents.length > 0){
-          ProductCategoryTree.destroy({id:toRemoveParents}).exec(function(errDestroy){
-            if(errDestroy) throw(errDestroy);
+        function destroyRelations(callback){
+          if(toRemoveParents.length > 0){
+            ProductCategoryTree.destroy({id:toRemoveParents}).exec(function(errDestroy){
+              if(errDestroy) throw(errDestroy);
+              callback();
+            });
+          }else{
+            callback();
+          }
+        }
+
+        function createRelations(callback){
+          if(toAddParents.length > 0){
             ProductCategoryTree.create(toAddParents).exec(function(errCreate, relations){
               if(errCreate) throw(errCreate);
               res.json(category);
             });
-          });
-        }
-        else{
-          ProductCategoryTree.create(toAddParents).exec(function(errCreate, relations){
-            if(errCreate) throw(errCreate);
-            res.json(category);
-          });
+          }else{
+            callback();
+          }
         }
 
+        function onCompleteWaterfall(err, results){
+          res.json(category)
+        }
+
+        async.waterfall([destroyRelations, createRelations], onCompleteWaterfall);
 
       });
 
