@@ -46,6 +46,7 @@ module.exports = {
 
     //Creating filter
     ProductFilter.create(form).exec(function(err, created){
+      console.log('created');
       console.log(created);
       if(err){
         console.log(err);
@@ -54,6 +55,7 @@ module.exports = {
 
       filterValues.forEach(function(value){
         value.Filter = created.id;
+        console.log(value);
         valuesToAdd.push(value);
       });
 
@@ -116,31 +118,8 @@ module.exports = {
         if(filter){
 
           /*---------/
-            CREATING AND REMOVING FILTER VALUES
+            CREATING AND REMOVING FILTER CATEGORIES
           /*--------*/
-
-          //If the value is not in the filter, create the value.
-          if(filter.Values.length > 0){
-            editValues.forEach(function(val){
-              if( _.where(filter.Values, {Name : val.Name}).length <= 0 ){
-                //filter.Values.add(val);
-                valuesToAdd.push(val);
-              }
-            });
-          }else{
-            editValues.forEach(function(val){
-              valuesToAdd.push(val);
-            });
-          }
-
-          //If the value(from DB) is not in the filter values(editValues), assume
-          //that the value doesn't exist, delete it.
-          filter.Values.forEach(function(dbValue){
-            if( _.where(editValues, {Name : dbValue.Name}).length <= 0 ){
-              valuesToRemove.push(dbValue.id);
-              //filter.Values.remove(dbValue.id);
-            }
-          });
 
           //If the category is not in the filter, add the category.
           if(filter.Categories.length > 0){
@@ -175,28 +154,6 @@ module.exports = {
               });
             }
           });
-
-          function addValues(callback){
-            if(valuesToAdd.length > 0){
-              ProductFilterValue.create(valuesToAdd).exec(function(errVals){
-                if(errVals) throw(errVals);
-                callback();
-              });
-            }else{
-              callback();
-            }
-          }
-
-          function removeValues(callback){
-            if(valuesToRemove.length > 0){
-              ProductFilterValue.destroy({id: valuesToRemove}).exec(function(err3){
-                if(err3) throw(err3);
-                callback();
-              })
-            }else{
-              callback();
-            }
-          }
 
           function addCategories(callback){
             if(categoriesToAdd.length > 0){
@@ -243,8 +200,6 @@ module.exports = {
           }
 
           async.waterfall([
-            addValues,
-            removeValues,
             addCategories,
             getCategoriesRelation,
             removeCategories

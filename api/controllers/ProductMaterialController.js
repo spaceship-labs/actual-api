@@ -10,6 +10,35 @@ module.exports = {
     });
   },
 
+  create: function(req, res){
+    var form = req.params.all();
+    ProductMaterial.create(form).exec(function createCB(err, created){
+      if(err) throw(err);
+      res.json(created);
+    });
+  },
+
+  update: function(req, res){
+    var form = req.params.all();
+    var id = form.id
+    ProductMaterial.update({id:id},form).exec(function updateCB(err, updated){
+      if(err) throw(err);
+      res.json(updated);
+    });
+  },
+
+
+  destroy: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    ProductMaterial.destroy({id:id}).exec(function destroyCB(err){
+      if(err) throw(err);
+      res.json({destroyed:true});
+    });
+  },
+
+
+
   updateAll: function(req, res){
     var form = req.params.all();
     var editMaterials = form.materials;

@@ -188,6 +188,21 @@ module.exports.routes = {
     action: 'destroy'
   },
 
+  '/productfiltervalue/create':{
+    controller: 'productfiltervalue',
+    action:'create'
+  },
+
+  '/productfiltervalue/update/:id':{
+    controller: 'productfiltervalue',
+    action:'update'
+  },
+
+  '/productfiltervalue/destroy/:id':{
+    controller: 'productfiltervalue',
+    action:'destroy'
+  },
+
   '/productmaterial/updateall':{
     controller: 'productmaterial',
     action:'updateAll'
@@ -196,7 +211,22 @@ module.exports.routes = {
   '/productmaterial/getall':{
     controller: 'productmaterial',
     action:'getAll'
-  }
+  },
+
+  '/productmaterial/create':{
+    controller: 'productmaterial',
+    action:'create'
+  },
+
+  '/productmaterial/update/:id':{
+    controller: 'productmaterial',
+    action:'update'
+  },
+
+  '/productmaterial/destroy/:id':{
+    controller: 'productmaterial',
+    action:'destroy'
+  },
 
 
 
