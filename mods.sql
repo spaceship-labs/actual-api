@@ -16,3 +16,23 @@ ADD  `IsMetal` TINYINT( 1 ) NOT NULL ,
 ADD  `IsSynthetic` TINYINT( 1 ) NOT NULL ,
 ADD  `IsOrganic` TINYINT( 1 ) NOT NULL ,
 ADD  `IsGlass` TINYINT( 1 ) NOT NULL
+
+
+ALTER TABLE  `Product` ADD  `GuaranteeUnit` INT NOT NULL;
+ALTER TABLE  `Product` ADD  `GuaranteeUnitMsr` VARCHAR( 30 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `DesignedInCountry` VARCHAR( 30 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `MadeInCountry` VARCHAR( 30 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `EnsembleTime` VARCHAR( 100 ) NOT NULL;
+
+ALTER TABLE  `Product` ADD  `Length` VARCHAR( 255 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `Width` VARCHAR( 255 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `Height` VARCHAR( 255 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `Volume` VARCHAR( 255 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `Weight` VARCHAR( 255 ) NOT NULL;
+
+ALTER TABLE  `Product` ADD  `icon_description` VARCHAR( 255 ) NOT NULL;
+ALTER TABLE  `Product` ADD  `Video` TEXT NOT NULL;
+ALTER TABLE  `Product` ADD  `Conservation` LONGTEXT NOT NULL;
+
+ALTER TABLE  `Product` ADD  `CommercialPieces` INT NOT NULL;
+ALTER TABLE  `Product` ADD  `DeliveryPieces` INT NOT NULL;
