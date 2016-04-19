@@ -1,6 +1,6 @@
 module.exports = {
     connection: 'mysql',
-    //migrate: 'alter',
+    migrate: 'alter',
     tableName: 'Product',
     tableNameSqlServer: 'OITM',
     attributes: {
@@ -14,7 +14,11 @@ module.exports = {
         },
 
         ItemName:{type:'string'},
-        ItmsGrpCod:{type:'integer'},
+        ItmsGrpCod:{ //Brand
+            type:'integer',
+            model:'productbrand'
+        },
+        SuppCatNum:{type:'string',size:17},
         CodeBars:{type:'string'},
         OnHand:{type:'string'},
         IsCommited:{type:'float'},
@@ -95,10 +99,6 @@ module.exports = {
           through: 'product_productcategory'
         },
 
-        Brand: {
-            model:'ProductBrand'
-        },
-
         Materials: {
             collection: 'ProductMaterial',
             through: 'product_productmaterial'
@@ -108,10 +108,6 @@ module.exports = {
             collection:'ProductFilterValue',
             through: 'product_productfiltervalue'
 
-        },
-
-        Guarantee: {
-            model:'ProductGuarantee'
         },
 
     },

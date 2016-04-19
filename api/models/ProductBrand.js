@@ -1,16 +1,15 @@
 module.exports = {
 	migrate:'alter',
 	connection:'mysql',
+	tableName:'ProductBrand',
+	tableNameSqlServer: 'OITB',
 	attributes:{
-		Name:{type:'string'},
-		Parent:{type:'integer'},
-		Description:{type:'text'},
-		Keywords:{type:'string'},
-		Handle:{type:'string'},
+		ItmsGrpCod:{type:'integer', primaryKey:true},
+		ItmsGrpNam:{type:'string'},
 
 		Products:{
 			collection:'product',
-			via:'Brand'
+			via:'ItmsGrpCod'
 		}
 	}
 }

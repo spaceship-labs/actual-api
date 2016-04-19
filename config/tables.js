@@ -244,6 +244,15 @@ module.exports.tables = {
 			U_InfoWhs:{type:'integer'},
 			U_Procesado:{type:'integer'}
 		}
+	},
+
+	productbrand:{
+		tableName:'ProductBrand',
+		tableNameSqlServer: 'OITB',
+		attributes:{
+			ItmsGrpCod:{type:'integer', primaryKey:true},
+			ItmsGrpNam:{type:'string'},			
+		}
 	}	
 
 };

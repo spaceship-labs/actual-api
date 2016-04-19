@@ -13,6 +13,8 @@ module.exports.joins = {
 		      		primaryKey:true
 		    	},
 		        ItemName:{type:'string'},
+		        ItmsGrpCod:{type:'integer'},
+		        SuppCatNum:{type:'string',size:17},
 		        CodeBars:{type:'string'},
 		        OnHand:{type:'string'},
 		        IsCommited:{type:'float'},
@@ -24,6 +26,9 @@ module.exports.joins = {
 		        U_garantia:{type:'string',size:60},
 		        U_disenado_en:{type:'string',size:60},
 		        U_ensamblado_en:{type:'string',size:60},
+		        U_importador: {type:'string',size:60},
+		        U_pctPuntos:{type:'float'},
+		        U_FAMILIA:{type:'string', size:30},
 			},
 		},
 
