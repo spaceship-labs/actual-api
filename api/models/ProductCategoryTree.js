@@ -1,5 +1,5 @@
 module.exports = {
-  migrate:'alter',
+  //migrate:'alter',
   connection:'mysql',
   attributes:{
     Parent:{type:'integer', model: 'productcategory'},
