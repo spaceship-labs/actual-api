@@ -116,18 +116,18 @@ module.exports = {
 
       ProductCategory.findOne({id:id}).populate('Parents').exec(function(err2, category){
         if(err2) throw(err2);
-        console.log(category);
+        //console.log(category);
 
         //If a category was not a parent category, add it as a parent
         if(category.Parents.length > 0){
           editParents.forEach(function(editParent){
             if( _.where(category.Parents, {id : editParent}).length <= 0 ){
-              toAddParents.push({Parent:editParent, Child: id});
+              toAddParents.push({Parent:editParent, Child: category.id});
             }
           });
         }else{
           editParents.forEach(function(editParent){
-            toAddParents.push({Parent:editParent, Child: id});
+            toAddParents.push({Parent:editParent, Child: category.id});
           });
         }
 
