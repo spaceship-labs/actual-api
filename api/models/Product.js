@@ -1,6 +1,6 @@
 module.exports = {
     connection: 'mysql',
-    //migrate: 'alter',
+    migrate: 'alter',
     tableName: 'Product',
     tableNameSqlServer: 'OITM',
     attributes: {
@@ -46,6 +46,7 @@ module.exports = {
         Name:{type:'string'},
         Description:{type:'text'},
         //CHECAR Model:{type:'string'},
+        SA:{type:'text'},
         MainFeatures:{type:'text'},
         Restrictions:{type:'text'},
         Color: {type:'string'},
@@ -107,6 +108,11 @@ module.exports = {
         FilterValues:{
             collection:'ProductFilterValue',
             through: 'product_productfiltervalue'
+        },
+
+        Colors:{
+            collection:'ProductColor',
+            through: 'product_productcolor'
 
         },
 

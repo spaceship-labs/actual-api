@@ -203,30 +203,11 @@ module.exports.routes = {
     action:'destroy'
   },
 
-  '/productmaterial/updateall':{
-    controller: 'productmaterial',
-    action:'updateAll'
-  },
-
-  '/productmaterial/getall':{
-    controller: 'productmaterial',
+  '/productcolor/getall':{
+    controller: 'productcolor',
     action:'getAll'
   },
 
-  '/productmaterial/create':{
-    controller: 'productmaterial',
-    action:'create'
-  },
-
-  '/productmaterial/update/:id':{
-    controller: 'productmaterial',
-    action:'update'
-  },
-
-  '/productmaterial/destroy/:id':{
-    controller: 'productmaterial',
-    action:'destroy'
-  },
 
 
 
