@@ -116,7 +116,6 @@ module.exports = {
 
       ProductCategory.findOne({id:id}).populate('Parents').exec(function(err2, category){
         if(err2) throw(err2);
-        //console.log(category);
 
         //If a category was not a parent category, add it as a parent
         if(category.Parents.length > 0){
