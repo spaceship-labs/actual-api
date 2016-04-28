@@ -21,6 +21,7 @@ module.exports = {
       .populate('Materials')
       .populate('FilterValues')
       .populate('ItmsGrpCod')
+      .populate('Colors')
       //.populate('stock')
       .exec(function(err, results){
       if(err){
