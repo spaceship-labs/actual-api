@@ -41,8 +41,8 @@ module.exports = {
     var filterCategories = _.clone(form.Categories);
     var categoriesToAdd = [];
     var valuesToAdd = [];
-    //delete form.Values;
-    //delete form.Categories;
+    delete form.Values;
+    delete form.Categories;
 
     //Creating filter
     ProductFilter.create(form).exec(function(err, created){
@@ -53,6 +53,9 @@ module.exports = {
         throw(err);
       }
 
+      res.json(created);
+
+      /*
       filterValues.forEach(function(value){
         value.Filter = created.id;
         console.log(value);
@@ -93,6 +96,7 @@ module.exports = {
       }
 
       async.waterfall([createValues, relateCategories], finalResult);
+      */
 
     });
   },
@@ -196,7 +200,7 @@ module.exports = {
           }
 
           function finalResult(err, results){
-            res.json({destroyed: true});
+            res.json({updated: true});
           }
 
           async.waterfall([
@@ -222,7 +226,7 @@ module.exports = {
 
       function deleteValues(callback){
         //Deleting filter values
-        if(values){
+        if(values || true){
           ProductFilterValue.destroy({Filter:id}).exec(function(err2){
             if(err2) throw(err2);
             callback();
@@ -233,7 +237,7 @@ module.exports = {
       }
 
       function destroyCategoriesRelation(callback){
-        if(categories){
+        if(categories || true){
           //Deleting relations with categories
           ProductCategory_ProductFilter.destroy({filter:id}).exec(function(err3){
             if(err3) throw(err3);
