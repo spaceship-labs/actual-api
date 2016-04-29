@@ -13,7 +13,6 @@ module.exports = {
       columnName:'ItemCode',
       type:'string',
       size:20,
-      //excludeSync: true
     }
   }
 }
