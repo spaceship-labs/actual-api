@@ -1,10 +1,10 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
 		Description:{type:'text'},
-    Handle:{type:'string'},
+    Handle:{type:'string', unique: true},
     IsMultiple: {type:'boolean'},
     ValuesOrder: {type:'string'},
 

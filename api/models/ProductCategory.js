@@ -1,11 +1,11 @@
 module.exports = {
-	//migrate:'alter',
+	migrate:'alter',
 	connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
 		Description:{type:'text'},
 		Keywords:{type:'string'},
-		Handle:{type:'string'},
+		Handle:{type:'string', unique: true},
 		IsMain:{type:'boolean'},
 		IsSub:{type:'boolean'},
 		CategoryLevel:{type:'integer'},

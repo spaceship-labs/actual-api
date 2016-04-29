@@ -38,6 +38,7 @@ ALTER TABLE  `Product` ADD  `CommercialPieces` INT NOT NULL;
 ALTER TABLE  `Product` ADD  `DeliveryPieces` INT NOT NULL;
 ALTER TABLE  `Product` ADD  `SA` VARCHAR( 255 ) NOT NULL;
 
+ALTER TABLE  `Product` ADD  `Handle` VARCHAR( 255 ) NOT NULL;
 ALTER TABLE  `productfilter` ADD  `ValuesOrder` VARCHAR( 255 ) NOT NULL;
 
 #COLORS
