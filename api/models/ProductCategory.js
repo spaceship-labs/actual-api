@@ -5,7 +5,7 @@ module.exports = {
 		Name:{type:'string'},
 		Description:{type:'text'},
 		Keywords:{type:'string'},
-		Handle:{type:'string', unique: true},
+		Handle:{type:'string'},
 		IsMain:{type:'boolean'},
 		IsSub:{type:'boolean'},
 		CategoryLevel:{type:'integer'},

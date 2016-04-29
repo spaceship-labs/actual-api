@@ -44,7 +44,7 @@ module.exports = {
             #EXTRA FIELDS
         /*---------------*/
         Name:{type:'string'},
-        Handle:{type:'string', unique:true},
+        Handle:{type:'string'},
         Description:{type:'text'},
         //CHECAR Model:{type:'string'},
         SA:{type:'text'},
