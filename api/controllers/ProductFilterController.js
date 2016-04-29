@@ -41,8 +41,8 @@ module.exports = {
     var filterCategories = _.clone(form.Categories);
     var categoriesToAdd = [];
     var valuesToAdd = [];
-    //delete form.Values;
-    //delete form.Categories;
+    delete form.Values;
+    delete form.Categories;
 
     //Creating filter
     ProductFilter.create(form).exec(function(err, created){
@@ -53,9 +53,9 @@ module.exports = {
         throw(err);
       }
 
-      res.json(created);
+      //res.json(created);
 
-      /*
+
       filterValues.forEach(function(value){
         value.Filter = created.id;
         console.log(value);
@@ -96,7 +96,7 @@ module.exports = {
       }
 
       async.waterfall([createValues, relateCategories], finalResult);
-      */
+
 
     });
   },
