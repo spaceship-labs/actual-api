@@ -41,8 +41,8 @@ module.exports = {
     var filterCategories = _.clone(form.Categories);
     var categoriesToAdd = [];
     var valuesToAdd = [];
-    delete form.Values;
-    delete form.Categories;
+    //delete form.Values;
+    //delete form.Categories;
 
     //Creating filter
     ProductFilter.create(form).exec(function(err, created){
