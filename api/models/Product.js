@@ -100,11 +100,6 @@ module.exports = {
           through: 'product_productcategory'
         },
 
-        Materials: {
-            collection: 'ProductMaterial',
-            through: 'product_productmaterial'
-        },
-
         FilterValues:{
             collection:'ProductFilterValue',
             through: 'product_productfiltervalue'
