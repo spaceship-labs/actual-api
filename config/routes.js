@@ -208,6 +208,11 @@ module.exports.routes = {
     action:'getAll'
   },
 
+  '/productbrand/getall':{
+    controller: 'productbrand',
+    action:'getAll'
+  },
+
 
 
 
