@@ -38,6 +38,9 @@ module.exports = {
             type:'string',
             defaultsTo: 'seller'
         },
+        company: {
+            type:'string'
+        },
         toJSON: function () {
             var obj = this.toObject();
             delete obj.password;
