@@ -18,7 +18,6 @@ module.exports = {
     Product.find({ItemCode:id})
       .populate('files')
       .populate('Categories')
-      .populate('Materials')
       .populate('FilterValues')
       .populate('ItmsGrpCod')
       .populate('Colors')
