@@ -44,6 +44,8 @@ ALTER TABLE  `productfilter` ADD  `ValuesOrder` VARCHAR( 255 ) NOT NULL;
 
 ALTER TABLE  `user` ADD  `company` VARCHAR( 255 ) NOT NULL;
 
+ALTER TABLE  `Product` ADD  `Brand` INT NOT NULL;
+ALTER TABLE  `Product` ADD  `Grouper` VARCHAR( 17 ) NOT NULL;
 
 #COLORS
 INSERT INTO `actual_test`.`productcolor` (`Name`, `Handle`, `Code`, `hash`, `id`, `createdAt`, `updatedAt`) VALUES ('Rojo', NULL, '#CC0000', NULL, NULL, NULL, NULL), ('Naranja', NULL, '#FB940B', NULL, NULL, NULL, NULL), ('Amarillo', NULL, '#FFFF00', NULL, NULL, NULL, NULL), ('Verde', NULL, '#00CC00', NULL, NULL, NULL, NULL), ('Turquesa', NULL, '#03C0C6', NULL, NULL, NULL, NULL), ('Azul', NULL, '#0000FF', NULL, NULL, NULL, NULL), ('Morado', NULL, '#762CA7', NULL, NULL, NULL, NULL), ('Rosa', NULL, '#FF98BF', NULL, NULL, NULL, NULL), ('Blanco', NULL, '#FFFFFF', NULL, NULL, NULL, NULL), ('Negro', NULL, '#000000', NULL, NULL, NULL, NULL), ('Gris', NULL, '#999999', NULL, NULL, NULL, NULL), ('Cafe', NULL, '#885418', NULL, NULL, NULL, NULL);

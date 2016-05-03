@@ -47,6 +47,11 @@ module.exports = {
         Handle:{type:'string'},
         Description:{type:'text'},
         //CHECAR Model:{type:'string'},
+        Brand:{ //BrandExtra
+            type:'integer',
+            model:'productbrand'
+        },
+        Grouper:{type:'string',size:17},
         SA:{type:'text'},
         MainFeatures:{type:'text'},
         Restrictions:{type:'text'},
