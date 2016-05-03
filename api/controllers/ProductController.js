@@ -21,6 +21,7 @@ module.exports = {
       .populate('FilterValues')
       .populate('ItmsGrpCod')
       .populate('Colors')
+      .populate('Brand')
       //.populate('stock')
       .exec(function(err, results){
       if(err){
