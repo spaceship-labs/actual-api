@@ -7,6 +7,7 @@ module.exports = {
     Handle:{type:'string'},
     IsMultiple: {type:'boolean'},
     ValuesOrder: {type:'string'},
+    IsColor:{type:'boolean'},
 
     Categories:{
       collection:'productcategory',

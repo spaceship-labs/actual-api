@@ -5,6 +5,7 @@ module.exports = {
 		Name:{type:'string'},
     Handle: {type:'string'},
     Keywords:{type:'string'},
+    Code:{type:'string'},
 
     Filter:{
       model:'productfilter'
