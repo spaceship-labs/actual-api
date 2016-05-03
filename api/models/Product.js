@@ -94,6 +94,12 @@ module.exports = {
           //excludeSync: true
         },
 
+        Sizes: {
+          collection: 'productsize',
+          via:'Product',
+          //excludeSync: true
+        },
+
         /*
         stock:{
           collection: 'itemwarehouse',
