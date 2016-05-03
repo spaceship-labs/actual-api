@@ -20,6 +20,7 @@ module.exports = {
       .populate('Categories')
       .populate('FilterValues')
       .populate('Colors')
+      .populate('Sizes')
       //.populate('stock')
       .exec(function(err, results){
       if(err){

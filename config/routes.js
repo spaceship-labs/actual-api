@@ -213,6 +213,21 @@ module.exports.routes = {
     action:'getAll'
   },
 
+  '/productsize/create':{
+    controller: 'productsize',
+    action:'create'
+  },
+
+  '/productsize/update/:id':{
+    controller: 'productsize',
+    action:'update'
+  },
+
+  '/productsize/destroy/:id':{
+    controller: 'productsize',
+    action:'destroy'
+  },
+
 
 
 
