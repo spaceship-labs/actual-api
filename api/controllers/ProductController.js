@@ -19,9 +19,7 @@ module.exports = {
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
-      .populate('ItmsGrpCod')
       .populate('Colors')
-      .populate('Brand')
       //.populate('stock')
       .exec(function(err, results){
       if(err){
