@@ -129,6 +129,11 @@ module.exports = {
 
         },
 
+        Groups: {
+          collection: 'ProductGroup',
+          through: 'product_productgroup'
+        }
+
     },
 
 }

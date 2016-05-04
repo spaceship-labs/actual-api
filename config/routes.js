@@ -228,6 +228,48 @@ module.exports.routes = {
     action:'destroy'
   },
 
+  '/productgroup/find/:page':{
+    controller: 'productgroup',
+    action: 'find'
+  },
+
+  '/productgroup/findbyid/:id':{
+    controller: 'productGroup',
+    action: 'findById'
+  },
+
+  '/productgroup/findbyid/:id':{
+    controller: 'productGroup',
+    action: 'findById'
+  },
+
+  '/productgroup/create':{
+    controller: 'productgroup',
+    action:'create'
+  },
+
+  '/productgroup/update/:id':{
+    controller: 'productgroup',
+    action:'update'
+  },
+
+  '/productgroup/destroy/:id':{
+    controller: 'productgroup',
+    action:'destroy'
+  },
+
+  '/productgroup/addproducttogroup':{
+    controller: 'productgroup',
+    action:'addProductToGroup'
+  },
+
+
+  '/productgroup/removeproductfromgroup':{
+    controller: 'productgroup',
+    action:'removeProductFromGroup'
+  },
+
+
 
 
 

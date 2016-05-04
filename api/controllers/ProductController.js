@@ -40,6 +40,7 @@ module.exports = {
     var items = form.items || 10;
     var page = form.page || 1;
     var term = form.term || false;
+    var autocomplete = form.autocomplete || false;
     var query = {};
     var querySearchAux = {};
     var model = Product
@@ -73,8 +74,12 @@ module.exports = {
     }
 
     //console.log(query);
-
-    var read = model.find(query).populate('files');
+    var read;
+    if(autocomplete){
+      read = model.find(query);
+    }else{
+      read = model.find(query).populate('files');
+    }
 
     read.exec(function(err, results){
       model.count(querySearchAux).exec(function(err,count){
