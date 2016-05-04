@@ -150,7 +150,12 @@ module.exports = {
       id : form.id,
     },function(e,product){
       if(e) console.log(e);
-      res.json(product);
+      //TODO check how to retrieve images instead of doing other query
+      var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
+      Product.findOne({ItemCode:form.id}, {select: selectedFields}).exec(function(e, updatedProduct){
+        return res.json(updatedProduct);
+      });
+      //res.json(product);
     });
   },
 

@@ -2,11 +2,16 @@ module.exports = {
 	migrate:'alter',
 	connection:'mysql',
 	attributes:{
-    Length:{type:'string'},
-    Width:{type:'string'},
-    Height:{type:'string'},
-    Volume:{type:'string'},
-    Weight:{type:'string'},
+    Length:{type:'float'},
+    LengthUnitMsr:{type:'string'},
+    Width:{type:'float'},
+    WidthUnitMsr:{type:'string'},
+    Height:{type:'float'},
+    HeightUnitMsr:{type:'string'},
+    Volume:{type:'float'},
+    VolumeUnitMsr:{type:'string'},
+    Weight:{type:'float'},
+    WeightUnitMsr:{type:'string'},
 
     Product:{
       model:'product',
