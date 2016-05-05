@@ -143,6 +143,7 @@ module.exports.makeCrop = function(size,opts,cb){
 }
 //Deletes a File and Crops if profile is specified;
 module.exports.removeFile = function(opts,cb){
+  console.log(opts);
   var adapter = getAdapterConfig();
   var dirSave = adapter?'/uploads/'+opts.dir+'/' : __dirname+'/../../assets/uploads/'+opts.dir+'/';
   var sizes = opts.profile ? sails.config.images[opts.profile] : [];
@@ -153,6 +154,8 @@ module.exports.removeFile = function(opts,cb){
   if(opts.file.typebase == 'image') sizes.forEach(function(size){routes.push(dirSave+size+filename);});
 
   if(adapter){
+    console.log('entro a adapter');
+    sails.log.debug(routes);
     async.each(routes, adapter.rm, cb);
   }else{
     async.map(routes,fs.unlink,cb);

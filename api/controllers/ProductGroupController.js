@@ -141,4 +141,35 @@ module.exports = {
 
   },
 
-}
+  updateIcon: function(req,res){
+    var form = req.params.all();
+    ProductGroup.updateAvatar(req,{
+      dir : 'groups',
+      profile: 'avatar',
+      id : form.id,
+    },function(e,group){
+      if(e) console.log(e);
+      //TODO check how to retrieve images instead of doing other query
+      var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
+      ProductGroup.findOne({id:form.id}, {select: selectedFields}).exec(function(err2, updatedGroup){
+        if(err2) console.log(err2);
+        return res.json(updatedGroup);
+      });
+      //res.json(product);
+    });
+  },
+
+  removeIcon: function(req,res){
+    var form = req.params.all();
+    ProductGroup.destroyAvatar(req,{
+      dir : 'groups',
+      profile: 'avatar',
+      id : form.id,
+    },function(e,group){
+      if(e) console.log(e);
+      res.json(group);
+    });
+  },
+
+
+};

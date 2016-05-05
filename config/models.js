@@ -32,13 +32,21 @@ module.exports.models = {
   migrate: 'safe',
   connection: 'mysql',
   updateAvatar : function(req,opts,cb){
-    this.findOne({ItemCode:opts.id}).exec(function(e,obj){
+    var query = {id: opts.id};
+    if(opts.dir == 'products'){
+      query = {ItemCode: opts.id};
+    }
+    this.findOne(query).exec(function(e,obj){
       if(e) return cb && cb(e,obj);
       obj.updateAvatar(req,opts,cb);
     });
   },
   destroyAvatar : function(req,opts,cb){
-    this.findOne({ItemCode:opts.id}).exec(function(e,obj){
+    var query = {id:opts.id};
+    if(opts.dir == 'products'){
+      query = {ItemCode: opts.id};
+    }
+    this.findOne(query).exec(function(e,obj){
       if(e) return cb && cb(e,obj);
       obj.destroyAvatar(req,opts,cb);
     });
@@ -96,13 +104,19 @@ module.exports.models = {
     },
     destroyAvatar : function(req,opts,cb){
       object = this;
-      object.icon_filename = null;
-      object.icon_name = null;
-      object.icon_type = null;
-      object.icon_typebase = null;
-      object.icon_size = null;
+      opts.file = mapIconFields(object);
+      Files.removeFile(opts, function(){
+        console.log('llego al callback');
+        object.icon_filename = null;
+        object.icon_name = null;
+        object.icon_type = null;
+        object.icon_typebase = null;
+        object.icon_size = null;
 
-      object.save(cb);
+        object.save(cb);
+
+      })
+
     },
     addFiles : function(req,opts,cb){
       var object = this,

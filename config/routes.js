@@ -272,6 +272,16 @@ module.exports.routes = {
   '/productgroup/search':{
     controller: 'productgroup',
     action: 'search'
+  },
+
+  '/productgroup/updateicon':{
+    controller: 'productgroup',
+    action: 'updateIcon'
+  },
+
+  '/productgroup/removeicon':{
+    controller: 'productgroup',
+    action: 'removeIcon'
   }
 
 
