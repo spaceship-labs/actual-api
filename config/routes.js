@@ -87,6 +87,12 @@ module.exports.routes = {
     action: 'updateIcon'
   },
 
+  '/product/removeicon':{
+    controller: 'product',
+    action: 'removeIcon'
+  },
+
+
   '/product/findbyid/:id':{
     controller: 'product',
     action: 'findById'

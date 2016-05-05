@@ -167,4 +167,17 @@ module.exports = {
     });
   },
 
+  removeIcon: function(req,res){
+    var form = req.params.all();
+    Product.destroyAvatar(req,{
+      dir : 'products',
+      profile: 'avatar',
+      id : form.id,
+    },function(e,product){
+      if(e) console.log(e);
+      res.json(product);
+    });
+  },
+
+
 }
