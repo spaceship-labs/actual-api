@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 module.exports = {
 
   find: function(req, res){
@@ -29,27 +31,32 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     var productsToAdd = [];
+    var products = _.clone(form.Products);
+    delete form.Products;
     ProductGroup.create(form).exec(function(err, created){
-      if(err) console.log(err);
-      /*
-      console.log(created);
-      if(form.Products){
-        form.Products.forEach(function(prod){
-          productsToAdd.push({
-            product: prod.ItemCode,
-            group: created.id
+      if(err){
+        console.log('hay un error');
+        console.log(err);
+        throw(err);
+      }
+      else{
+        if(products){
+          products.forEach(function(prod){
+            productsToAdd.push({
+              product: prod.ItemCode,
+              group: created.id
+            });
           });
-        });
-        console.log(productsToAdd);
-        Product_ProductGroup.create(productsToAdd).exec(function relationsCB(err2, result){
-          if(err2) console.log(err2);
-          res.json(created);
-        });
+          console.log(productsToAdd);
+          Product_ProductGroup.create(productsToAdd).exec(function relationsCB(err2, result){
+            if(err2) console.log(err2);
+            res.json(created);
+          });
 
-      }else{
-      */
-        res.json(created);
-      //}
+        }else{
+          res.json(created);
+        }
+      }
     });
   },
 
@@ -91,8 +98,47 @@ module.exports = {
       res.json({destroyed:true});
     });
 
-  }
+  },
 
+  search: function(req, res){
+    var form = req.params.all();
+    var items = form.items || 10;
+    var page = form.page || 1;
+    var term = form.term || false;
+    var query = {};
+    var querySearchAux = {};
+    var model = ProductGroup;
+    var searchFields = ['Name'];
 
+    if(term){
+      if(searchFields.length > 0){
+        query.or = [];
+        for(var i=0;i<searchFields.length;i++){
+          var field = searchFields[i];
+          var obj = {};
+          obj[field] = {contains:term};
+          query.or.push(obj);
+        }
+      }
+      querySearchAux = _.clone(query);
+    }
+
+    query.skip = (page-1) * items;
+    query.limit = items;
+
+    var read = model.find(query);
+
+    read.exec(function(err, results){
+      model.count(querySearchAux).exec(function(err,count){
+        if(err){
+          console.log(err);
+          return res.notFound();
+        }else{
+          return res.ok({data:results, total:count});
+        }
+      })
+    });
+
+  },
 
 }

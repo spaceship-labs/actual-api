@@ -269,6 +269,11 @@ module.exports.routes = {
     action:'removeProductFromGroup'
   },
 
+  '/productgroup/search':{
+    controller: 'productgroup',
+    action: 'search'
+  }
+
 
 
 

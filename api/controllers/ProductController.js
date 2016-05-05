@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 module.exports = {
   find: function(req, res){
     var form = req.params.all();
@@ -21,6 +23,7 @@ module.exports = {
       .populate('FilterValues')
       .populate('Colors')
       .populate('Sizes')
+      .populate('Groups')
       //.populate('stock')
       .exec(function(err, results){
       if(err){
