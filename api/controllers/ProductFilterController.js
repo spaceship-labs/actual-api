@@ -16,7 +16,14 @@ module.exports = {
   },
 
   list: function(req, res){
-    ProductFilter.find().populate('Values').exec(function(err, filters){
+    var form = req.params.all();
+    var reading;
+    if(form.quickread){
+      reading = ProductFilter.find();
+    }else{
+      reading = ProductFilter.find().populate('Values');
+    }
+    reading.exec(function(err, filters){
       if(err) throw(err);
       res.json(filters);
     });

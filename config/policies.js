@@ -35,6 +35,12 @@ module.exports.policies = {
     find: true,
     findById: true,
     search: true
+  },
+  ProductFilterController:{
+    list: true
+  },
+  ProductGroup:{
+    getGroupVariants: true
   }
 
   //Por ahora

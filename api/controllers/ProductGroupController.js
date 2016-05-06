@@ -27,7 +27,6 @@ module.exports = {
     });
   },
 
-
   create: function(req, res){
     var form = req.params.all();
     var productsToAdd = [];
@@ -170,6 +169,54 @@ module.exports = {
       res.json(group);
     });
   },
+
+  getGroupVariants: function(req, res){
+    //['color','forma','tamano-camas-y-blancos-cama', 'firmeza']
+    var fixedFilters = [
+      {id:16, key:'color', handle:'color', name: 'Color'},
+      {id:17, key:'forma', handle:'forma', name: 'Forma'},
+      {id:5, key:'tamano', handle:'tamano-camas-y-blancos-cama', name: 'Tamaño'},
+      {id:9, key:'firmeza', handle: 'firmeza', name: 'Firmeza'}
+    ];
+    var form = req.params.all();
+    var variants = {};
+    fixedFilters.forEach(function(filter){
+      variants[filter.key] = {filterValues:[]};
+    });
+
+    //Getting all groups in product
+    ProductGroup.findOne({id: form.id}).populate('Products').exec(function(err, group){
+
+      if(err) console.log(err);
+      var productsIds = [];
+      group.Products.forEach(function(prod){
+        productsIds.push(prod.ItemCode);
+      });
+
+      //Getting filterValues/variants from products from the group
+      Product.find({ItemCode: productsIds}).populate('FilterValues').exec(function(err2, products){
+        if(err2) console.log(err2);
+        products.forEach(function(product){
+          product.FilterValues.forEach(function(value){
+            var onFilter = _.findWhere( fixedFilters, {id: value.Filter});
+            if(onFilter){
+              variants[onFilter.key].handle = onFilter.handle;
+              variants[onFilter.key].name = onFilter.name;
+              variants[onFilter.key].filterValues.push({
+                filterId: value.Filter,
+                filterHandle: onFilter.handle,
+                name: onFilter.Name,
+                product: product.ItemCode,
+                value: value,
+              });
+            }
+          });
+        });
+        res.json(variants);
+      });
+    });
+  },
+
 
 
 };

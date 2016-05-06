@@ -288,6 +288,11 @@ module.exports.routes = {
   '/productgroup/removeicon':{
     controller: 'productgroup',
     action: 'removeIcon'
+  },
+
+  '/productgroup/getgroupvariants/:id':{
+    controller: 'productgroup',
+    action: 'getGroupVariants'
   }
 
 
