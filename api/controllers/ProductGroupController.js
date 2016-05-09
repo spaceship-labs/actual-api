@@ -171,7 +171,6 @@ module.exports = {
   },
 
   getGroupVariants: function(req, res){
-    //['color','forma','tamano-camas-y-blancos-cama', 'firmeza']
     var fixedFilters = [
       {id:16, key:'color', handle:'color', name: 'Color'},
       {id:17, key:'forma', handle:'forma', name: 'Forma'},
