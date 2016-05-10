@@ -40,7 +40,8 @@ module.exports.policies = {
     list: true
   },
   ProductGroup:{
-    getGroupVariants: true
+    getGroupVariants: true,
+    getVariantGroupProducts: true
   }
 
   //Por ahora

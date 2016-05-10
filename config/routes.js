@@ -244,6 +244,11 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  '/productgroup/getVariantGroupProducts':{
+    controller: 'productgroup',
+    action: 'getvariantgroupproducts'
+  },
+
   '/productgroup/findbyid/:id':{
     controller: 'productGroup',
     action: 'findById'

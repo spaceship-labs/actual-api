@@ -27,6 +27,30 @@ module.exports = {
     });
   },
 
+  getVariantGroupProducts: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    ProductGroup.findOne({id:id, Type:'variations'}).populate('Products').exec(function(err, group){
+      if(err){
+        console.log(err);
+        throw(err);
+      }
+      if(group.Products.length > 0){
+        var productsIds = [];
+        group.Products.forEach(function(prod){
+          productsIds.push(prod.ItemCode);
+        });
+        Product.find({ItemCode: productsIds}).populate('FilterValues').exec(function(err2, prods){
+          if(err2) console.log(err2);
+          res.json(prods);
+        });
+
+      }else{
+        res.json(false);
+      }
+    });
+  },
+
   create: function(req, res){
     var form = req.params.all();
     var productsToAdd = [];
