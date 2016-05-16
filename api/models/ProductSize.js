@@ -1,5 +1,5 @@
 module.exports = {
-	migrate:'alter',
+	//migrate:'alter',
 	connection:'mysql',
 	attributes:{
     Length:{type:'float'},
