@@ -92,6 +92,7 @@ module.exports = {
         OnKids:{type:'boolean'},
         OnAmueble:{type:'boolean'},
         ImagesOrder:{type:'string'},
+        Conservation: {type:'text'},
 
         //RELATIONS
         files: {
