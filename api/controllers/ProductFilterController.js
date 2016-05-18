@@ -53,8 +53,8 @@ module.exports = {
 
     //Creating filter
     ProductFilter.create(form).exec(function(err, created){
-      console.log('created');
-      console.log(created);
+      //console.log('created');
+      //console.log(created);
       if(err){
         console.log(err);
         throw(err);
@@ -108,6 +108,21 @@ module.exports = {
     });
   },
 
+  /*
+  update: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    sails.log.debug(form);
+    ProductFilter.update({id:id},form).exec(function updateDone(err, updatedFilter){
+      if(err){
+        console.log(err);
+        throw err;
+      }
+      res.json(updatedFilter);
+    });
+  },
+  */
+
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -128,14 +143,11 @@ module.exports = {
         if(err) throw(err);
         if(filter){
 
-          /*---------/
-            CREATING AND REMOVING FILTER CATEGORIES
-          /*--------*/
-
           //If the category is not in the filter, add the category.
           if(filter.Categories.length > 0){
             editCategories.forEach(function(category){
-              if( _.where(filter.Categories, {id : category.id}).length <= 0 ){
+              //if( _.where(filter.Categories, {id : category.id}).length <= 0 ){
+              if( filter.Categories.indexOf(category) <= -1 ){
                 console.log('agregando category : ' + category.id);
                 //filter.Categories.add(category.id);
                 categoriesToAdd.push({
@@ -148,7 +160,7 @@ module.exports = {
             editCategories.forEach(function(category){
               //filter.Categories.add(category.id);
               categoriesToAdd.push({
-                category: category.id,
+                category: category,
                 filter: filter.id
               });
             });
@@ -157,7 +169,8 @@ module.exports = {
           //If the category(from DB) is not in the filter categories(editCategories), assume
           //that the category doesn't exist, remove it.
           filter.Categories.forEach(function(dbCategory){
-            if( _.where(editCategories, {id : dbCategory.id}).length <= 0 ){
+            //if( _.where(editCategories, {id : dbCategory.id}).length <= 0 ){
+            if( editCategories.indexOf(dbCategory) <= -1 ){
               //filter.Categories.remove(dbCategory.id);
               categoriesToRemove.push({
                 category: dbCategory.id,
@@ -221,6 +234,7 @@ module.exports = {
     })
 
   },
+
 
   destroy: function(req, res){
     var form = req.params.all();
