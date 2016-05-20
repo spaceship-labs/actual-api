@@ -103,6 +103,11 @@ module.exports.routes = {
     action: 'update'
   },
 
+  '/product/getproductsbysuppcatnum/:id':{
+    controller: 'product',
+    action: 'getProductsbySuppCatNum'
+  },
+
   '/saleopportunity/find/:page':{
     controller: 'saleopportunity',
     action: 'find'

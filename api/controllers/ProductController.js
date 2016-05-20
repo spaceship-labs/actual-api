@@ -179,5 +179,16 @@ module.exports = {
     });
   },
 
+  getProductsbySuppCatNum: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Product.find( {SuppCatNum: id}, {select: ['ItemCode']} ).exec(function( e, prods ) {
+      if(e){
+        console.log(e);
+        throw(e);
+      }
+      res.json(prods);
+    });
+  }
 
 }
