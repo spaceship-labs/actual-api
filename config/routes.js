@@ -118,16 +118,6 @@ module.exports.routes = {
     action: 'find'
   },
 
-  '/line/get':{
-    controller: 'line',
-    action: 'get'
-  },
-
-  '/color/get':{
-    controller: 'color',
-    action: 'get'
-  },
-
   '/usersap/get':{
     controller:'usersap',
     action:'get'
@@ -214,10 +204,6 @@ module.exports.routes = {
     action:'destroy'
   },
 
-  '/productcolor/getall':{
-    controller: 'productcolor',
-    action:'getAll'
-  },
 
   '/productbrand/getall':{
     controller: 'productbrand',
@@ -247,11 +233,6 @@ module.exports.routes = {
   '/productgroup/findbyid/:id':{
     controller: 'productGroup',
     action: 'findById'
-  },
-
-  '/productgroup/getVariantGroupProducts':{
-    controller: 'productgroup',
-    action: 'getvariantgroupproducts'
   },
 
   '/productgroup/findbyid/:id':{
@@ -299,13 +280,6 @@ module.exports.routes = {
     controller: 'productgroup',
     action: 'removeIcon'
   },
-
-  '/productgroup/getgroupvariants/:id':{
-    controller: 'productgroup',
-    action: 'getGroupVariants'
-  }
-
-
 
 
 

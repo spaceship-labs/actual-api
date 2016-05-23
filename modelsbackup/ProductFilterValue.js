@@ -12,8 +12,8 @@ module.exports = {
     },
 
     Products: {
-      collection:'product',
-      via: 'FilterValues'
+      collection:'productfiltervalue',
+      through: 'product_productfiltervalue'
     }
 	}
 }

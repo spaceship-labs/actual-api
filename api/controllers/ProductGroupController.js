@@ -53,38 +53,20 @@ module.exports = {
 
   create: function(req, res){
     var form = req.params.all();
-    var productsToAdd = [];
-    var products = _.clone(form.Products);
-    delete form.Products;
+    sails.log.debug(form);
     ProductGroup.create(form).exec(function(err, created){
       if(err){
-        console.log('hay un error');
+        //console.log('hay un error');
         console.log(err);
         throw(err);
       }
-      else{
-        if(products){
-          products.forEach(function(prod){
-            productsToAdd.push({
-              product: prod.ItemCode,
-              group: created.id
-            });
-          });
-          console.log(productsToAdd);
-          Product_ProductGroup.create(productsToAdd).exec(function relationsCB(err2, result){
-            if(err2) console.log(err2);
-            res.json(created);
-          });
-
-        }else{
-          res.json(created);
-        }
-      }
+      res.json(created);
     });
   },
 
   update: function(req,res){
     var form = req.params.all();
+    delete form.Products;
     ProductGroup.update({id: form.id}, form).exec(function updateCB(err, updated){
       if(err) console.log(err);
       res.json(updated);
@@ -96,29 +78,47 @@ module.exports = {
     ProductGroup.destroy({id: form.id}).exec(function destroyCB(err){
       if(err) console.log(err);
 
-      Product_ProductGroup.destroy({group: form.id}).exec(function destroyRelationsCB(err2){
-        if(err2) console.log(err);
-        res.json({destroyed: true});
-      });
+      res.json({destroyed: true});
 
     });
   },
 
   addProductToGroup: function(req, res){
     var form = req.params.all();
-    Product_ProductGroup.create(form).exec(function createdCB(err, created){
-      if(err) throw(err);
-      console.log(created);
-      res.json(created);
+    var product = form.product;
+    var group = form.group;
+    ProductGroup.findOne({id: group}).populate('Products').exec(function(err, prod){
+      if(err){
+        console.log(err);
+        throw(err);
+      }
+      prod.Products.add(product);
+      prod.save(function(errSave, result){
+        if(errSave){
+          console.log(errSave);
+          throw(errSave);
+        }
+        res.json(result);
+      });
     });
   },
   removeProductFromGroup: function(req, res){
     var form = req.params.all();
     var product = form.product;
     var group = form.group;
-    Product_ProductGroup.destroy({group:group, product:product}).exec(function destroyedCB(err){
-      if(err) throw(err);
-      res.json({destroyed:true});
+    ProductGroup.findOne({id: group}).populate('Products').exec(function(err, prod){
+      if(err){
+        console.log(err);
+        throw(err);
+      }
+      prod.Products.remove(product);
+      prod.save(function(errSave, result){
+        if(errSave){
+          console.log(errSave);
+          throw(errSave);
+        }
+        res.json(result);
+      });
     });
 
   },
@@ -193,53 +193,5 @@ module.exports = {
       res.json(group);
     });
   },
-
-  getGroupVariants: function(req, res){
-    var fixedFilters = [
-      {id:16, key:'color', handle:'color', name: 'Color'},
-      {id:17, key:'forma', handle:'forma', name: 'Forma'},
-      {id:5, key:'tamano', handle:'tamano-camas-y-blancos-cama', name: 'Tamaño'},
-      {id:9, key:'firmeza', handle: 'firmeza', name: 'Firmeza'}
-    ];
-    var form = req.params.all();
-    var variants = {};
-    fixedFilters.forEach(function(filter){
-      variants[filter.key] = {filterValues:[]};
-    });
-
-    //Getting all groups in product
-    ProductGroup.findOne({id: form.id}).populate('Products').exec(function(err, group){
-
-      if(err) console.log(err);
-      var productsIds = [];
-      group.Products.forEach(function(prod){
-        productsIds.push(prod.ItemCode);
-      });
-
-      //Getting filterValues/variants from products from the group
-      Product.find({ItemCode: productsIds}).populate('FilterValues').exec(function(err2, products){
-        if(err2) console.log(err2);
-        products.forEach(function(product){
-          product.FilterValues.forEach(function(value){
-            var onFilter = _.findWhere( fixedFilters, {id: value.Filter});
-            if(onFilter){
-              variants[onFilter.key].handle = onFilter.handle;
-              variants[onFilter.key].name = onFilter.name;
-              variants[onFilter.key].filterValues.push({
-                filterId: value.Filter,
-                filterHandle: onFilter.handle,
-                name: onFilter.Name,
-                product: product.ItemCode,
-                value: value,
-              });
-            }
-          });
-        });
-        res.json(variants);
-      });
-    });
-  },
-
-
 
 };

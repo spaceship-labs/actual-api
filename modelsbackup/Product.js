@@ -1,7 +1,7 @@
 module.exports = {
     //connection: 'mysql',
     //migrate: 'alter',
-    tableName: 'Product',
+    //tableName: 'Product',
     //tableNameSqlServer: 'OITM',
     attributes: {
         /*----------------/
@@ -14,12 +14,10 @@ module.exports = {
         },
 
         ItemName:{type:'string'},
-
         ItmsGrpCod:{ //Brand
             type:'integer',
             model:'productbrand'
         },
-
         SuppCatNum:{type:'string',size:17},
         CodeBars:{type:'string'},
         OnHand:{type:'string'},
@@ -49,12 +47,10 @@ module.exports = {
         Handle:{type:'string'},
         Description:{type:'text'},
         //CHECAR Model:{type:'string'},
-
         Brand:{ //BrandExtra
             type:'integer',
             model:'productbrand'
         },
-
         Grouper:{type:'string',size:17},
         SA:{type:'text'},
         MainFeatures:{type:'text'},
@@ -120,19 +116,23 @@ module.exports = {
 
         Categories:{
           collection: 'ProductCategory',
-          via: 'Products',
-          dominant: true
+          through: 'product_productcategory'
         },
 
         FilterValues:{
-          collection:'ProductFilterValue',
-          via: 'Products',
-          dominant: true
+            collection:'ProductFilterValue',
+            through: 'product_productfiltervalue'
+        },
+
+        Colors:{
+            collection:'ProductColor',
+            through: 'product_productcolor'
+
         },
 
         Groups: {
           collection: 'ProductGroup',
-          via: 'Products'
+          through: 'product_productgroup'
         }
 
     },

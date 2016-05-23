@@ -1,8 +1,8 @@
 module.exports = {
-	connection: 'mysql',
-	migrate: 'safe',
-	tableName: 'ItemWarehouse',
-	tableNameSqlServer: 'OITW',
+	//connection: 'mysql',
+	//migrate: 'safe',
+	//tableName: 'ItemWarehouse',
+	//tableNameSqlServer: 'OITW',
 	attributes: {
 		ItemCode:{type:'string', size:20},
 		//ItemCode:{type:'string', size:20, model:'product'},

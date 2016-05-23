@@ -19,7 +19,7 @@ module.exports = {
 
     Products: {
       collection: 'Product',
-      via: 'Groups'
+      through: 'product_productgroup'
     }
 
   }

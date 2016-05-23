@@ -72,16 +72,7 @@ module.exports = {
     ProductCategory.create(form).exec(function(err1, result){
       if(err1) throw(err1);
       if(result){
-        parents.forEach(function(parent){
-          relationRecords.push({
-            Child: result.id,
-            Parent: parent
-          });
-        });
-        ProductCategoryTree.create(relationRecords).exec(function createCB(err3, created){
-          if(err3) throw(err3);
-          res.json(result);
-        });
+        res.json(result);
       }
       else{
         res.json(false);
@@ -94,10 +85,7 @@ module.exports = {
     var id = form.id;
     ProductCategory.destroy({id:id}).exec(function(err){
       if(err) throw(err);
-      var query = {or: [{Child:id},{Parent:id}]}
-      ProductCategoryTree.destroy(query).exec(function(err){
-        return res.json({destroyed: true});
-      });
+      return res.json({destroyed: true});
     });
   },
 
@@ -105,69 +93,9 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    //Array of new parents id's
-    var editParents = _.clone(form.Parents);
-    var toRemoveParents = [];
-    var toAddParents = [];
-    //delete form.Parents;
-    //delete form.Childs;
     ProductCategory.update({id:id},form).exec(function updateDone(err, updatedCategory){
       if(err) throw(err);
-
-      ProductCategory.findOne({id:id}).populate('Parents').exec(function(err2, category){
-        if(err2) throw(err2);
-
-        //If a category was not a parent category, add it as a parent
-        if(category.Parents.length > 0){
-          editParents.forEach(function(editParent){
-            if( _.where(category.Parents, {id : editParent}).length <= 0 ){
-              toAddParents.push({Parent:editParent, Child: category.id});
-            }
-          });
-        }else{
-          editParents.forEach(function(editParent){
-            toAddParents.push({Parent:editParent, Child: category.id});
-          });
-        }
-
-        //If the parent(from DB) is not in the new category parents(editParents), assume
-        //that the parent doesn't exist, remove it.
-        category.Parents.forEach(function(dbParent){
-          if( _.where(editParents, {id : dbParent.id}).length <= 0 ){
-            toRemoveParents.push(dbParent.id);
-          }
-        });
-
-        function destroyRelations(callback){
-          if(toRemoveParents.length > 0){
-            ProductCategoryTree.destroy({id:toRemoveParents}).exec(function(errDestroy){
-              if(errDestroy) throw(errDestroy);
-              callback();
-            });
-          }else{
-            callback();
-          }
-        }
-
-        function createRelations(callback){
-          if(toAddParents.length > 0){
-            ProductCategoryTree.create(toAddParents).exec(function(errCreate, relations){
-              if(errCreate) throw(errCreate);
-              res.json(category);
-            });
-          }else{
-            callback();
-          }
-        }
-
-        function onCompleteWaterfall(err, results){
-          res.json(category)
-        }
-
-        async.waterfall([destroyRelations, createRelations], onCompleteWaterfall);
-
-      });
-
+      res.json(updatedCategory);
     });
 
   },

@@ -13,22 +13,24 @@ module.exports = {
 
     Parents:{
       collection: 'productcategory',
-      via:'Childs',
+      via:'Child',
+      through:'productcategorytree'
     },
 
     Childs:{
       collection: 'productcategory',
-      via:'Parents',
+      via:'Parent',
+      through:'productcategorytree'
     },
 
     Filters:{
       collection:'productfilter',
-      via: 'Categories'
+      through: 'productcategory_productfilter'
     },
 
     Products:{
       collection: 'Product',
-      via: 'Categories'
+      through: 'product_productcategory'
     },
 
 

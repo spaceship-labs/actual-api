@@ -21,7 +21,6 @@ module.exports = {
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
-      .populate('Colors')
       .populate('Sizes')
       .populate('Groups')
       //.populate('stock')

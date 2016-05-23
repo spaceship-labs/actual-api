@@ -1,5 +1,5 @@
 module.exports = {
-	connection: 'mysql',
+	//connection: 'mysql',
 	migrate: 'safe',
 	tableName: 'Line',
 	tableNameSqlServer: '@LINEA',

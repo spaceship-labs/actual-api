@@ -30,7 +30,9 @@ module.exports.models = {
   ***************************************************************************/
   // migrate: 'alter'
   migrate: 'safe',
-  connection: 'mysql',
+  connection: 'mongodb',
+  //connection: 'mysql',
+
   updateAvatar : function(req,opts,cb){
     var query = {id: opts.id};
     if(opts.dir == 'products'){

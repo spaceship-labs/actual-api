@@ -11,7 +11,7 @@ module.exports = {
 
     Categories:{
       collection:'productcategory',
-      via: 'Filters'
+      through: 'productcategory_productfilter'
     },
 
     Values: {
