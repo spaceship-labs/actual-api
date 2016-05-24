@@ -9,11 +9,13 @@ module.exports = {
             unique: true,
             alphanumericdashed: true
         },*/
+        /*
         id: {
           type: 'integer',
           unique: true,
           primaryKey: true
         },
+        */
         password: {
             type: 'string'
         },

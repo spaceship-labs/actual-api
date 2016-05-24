@@ -118,11 +118,6 @@ module.exports.routes = {
     action: 'find'
   },
 
-  '/usersap/get':{
-    controller:'usersap',
-    action:'get'
-  },
-
 
   '/productcategory/find/:page':{
     controller: 'productcategory',

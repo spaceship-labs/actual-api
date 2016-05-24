@@ -23,16 +23,12 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    User.find({id:id}).exec(function(err, results){
+    User.findOne({id:id}).exec(function(err, result){
       if(err){
         console.log(err);
         res.notFound();
       }else{
-        if(results.length > 0){
-          res.ok({data:results[0]});
-        }else{
-          res.notFound();
-        }
+        res.ok({data:result});
       }
     });
   },
