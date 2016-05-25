@@ -10,7 +10,7 @@ module.exports = {
 
         ItemCode:{
           type:'string',
-          primaryKey:true
+          //primaryKey:true
         },
 
         ItemName:{type:'string'},

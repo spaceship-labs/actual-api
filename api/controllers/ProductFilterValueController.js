@@ -3,7 +3,7 @@ module.exports = {
     var form = req.params.all();
     ProductFilterValue.create(form).exec(function createdCB(err, created){
       if(err) throw(err);
-      console.log(created);
+      //console.log(created);
       res.json(created);
     });
   },
@@ -12,7 +12,7 @@ module.exports = {
     var id = form.id;
     ProductFilterValue.update({id:id},form).exec(function updatedCB(err, updated){
       if(err) throw(err);
-      console.log(updated);
+      //console.log(updated);
       res.json(updated);
     });
   },

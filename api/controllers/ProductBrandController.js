@@ -5,7 +5,6 @@ module.exports = {
         console.log(err);
         res.notFound();
       }else{
-        console.log(results.length);
         return res.ok(results);
       }
     })
