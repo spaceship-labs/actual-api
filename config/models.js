@@ -193,7 +193,7 @@ module.exports.models = {
       if(process.env.CLOUDUSERNAME){
         opts.avatar = true;
         opts.filename = object.icon_filename?object.icon_filename : null;
-        Files.saveInternalFiles(internalFiles,opts,function(err,files){
+        Files.saveFilesSap(internalFiles,opts,function(err,files){
             if(err) return cb(err);
             //object.icon = files[0];
             object.icon_filename = files[0].filename;
@@ -213,7 +213,7 @@ module.exports.models = {
       async.waterfall([
         function(callback){
             //console.log('save files');
-            Files.saveInternalFiles(internalFiles,opts,callback);
+            Files.saveFilesSap(internalFiles,opts,callback);
         },
         function(files,callback){
           //console.log('crops');

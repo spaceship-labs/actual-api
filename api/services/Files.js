@@ -209,7 +209,7 @@ module.exports.middleware = function(req, res, next){
 };
 
 
-module.exports.saveInternalFiles = function(internalFiles,opts,cb){
+module.exports.saveFilesSap = function(internalFiles,opts,cb){
   var dirSave = __dirname+'/../../assets/uploads/'+opts.dir+'/';
   //var $files = req.file && req.file('file')._files || [],
   maxBytes = 22020096;//max 21mb.
