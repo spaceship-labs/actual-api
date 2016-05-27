@@ -195,7 +195,7 @@ module.exports.models = {
         opts.filename = object.icon_filename?object.icon_filename : null;
         Files.saveInternalFiles(internalFiles,opts,function(err,files){
             if(err) return cb(err);
-            object.icon = files[0];
+            //object.icon = files[0];
             object.icon_filename = files[0].filename;
             object.icon_name = files[0].name;
             object.icon_type = files[0].type;
