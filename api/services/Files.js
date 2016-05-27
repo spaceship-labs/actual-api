@@ -71,26 +71,6 @@ module.exports.saveFiles = function(req,opts,cb){
         });
         cb(e,fFiles);
       });
-    /*},function(err,files){
-      cb(e,fFiles);
-    });*/
-    /*req.file('file').upload({saveAs:makeFileName,dirname:dirSave,onProgress:(req.onProgress && req.onProgress.fileProgress || null),maxBytes:52428800},function(e,files){
-      if(e) return cb(e,files);
-      var fFiles = [];
-      files.forEach(function(file){
-        var filename = file.fd.split('/');
-        filename = filename[filename.length-1];
-        var typebase = file.type.split('/');
-        fFiles.push({
-                filename : filename,
-                name : file.filename,
-                type : file.type,
-                size : file.size,
-                typebase : typebase[0],
-              });
-      });
-      cb(e,fFiles);
-    });*/
   }else{
     return cb(true,false);
   }
@@ -154,8 +134,6 @@ module.exports.removeFile = function(opts,cb){
   if(opts.file.typebase == 'image') sizes.forEach(function(size){routes.push(dirSave+size+filename);});
 
   if(adapter){
-    console.log('entro a adapter');
-    sails.log.debug(routes);
     async.each(routes, adapter.rm, cb);
   }else{
     async.map(routes,fs.unlink,cb);
@@ -229,3 +207,71 @@ module.exports.middleware = function(req, res, next){
         res.redirect(301, module.exports.containerCloudLink + req.url);
     }
 };
+
+
+module.exports.saveInternalFiles = function(internalFiles,opts,cb){
+  var dirSave = __dirname+'/../../assets/uploads/'+opts.dir+'/';
+  //var $files = req.file && req.file('file')._files || [],
+  maxBytes = 22020096;//max 21mb.
+  if(internalFiles){
+    /*
+    if(req._fileparser.form.bytesExpected>=maxBytes){
+      //cb(new Error('exceeds maxBytes')); //throw en controllers
+      cb(false,[]);
+    }
+    */
+    var fFiles = [];
+    var uploadOptions = {
+      saveAs:makeFileName,
+      dirname:dirSave,
+      //onProgress:(req.onProgress && req.onProgress.fileProgress || null),
+      maxBytes:52428800
+    };
+
+    if(process.env.CLOUDUSERNAME && !opts.disableCloud){
+      uploadOptions.adapter = adapterPkgCloud;
+      uploadOptions.username = process.env.CLOUDUSERNAME;
+      uploadOptions.apiKey = process.env.CLOUDAPIKEY;
+      uploadOptions.region = process.env.CLOUDREGION;
+      uploadOptions.container = process.env.CLOUDCONTAINER;
+      uploadOptions.dirname = '/uploads/' + opts.dir + '/';
+      if(opts.avatar)
+        uploadOptions.after = function(stream, filename, next){
+          var lookup = mime.lookup(filename);
+          if(!fileTypes2Crop[lookup])
+            return next();
+
+          opts.srcData = stream;
+          opts.filename = filename;
+          Files.makeCropsStreams(uploadOptions, opts, next);
+        };
+    }
+    internalFiles.upload(
+      uploadOptions,
+      function(e,files){
+        if(e){
+          console.log(e);
+          return cb(e,files);
+        }
+        files.forEach(function(file){
+
+          //TODO dont override
+          file.type = 'image/png';
+
+          var filename = file.fd.split('/');
+          filename = filename[filename.length-1];
+          var typebase = file.type.split('/');
+          fFiles.push({
+                  filename : filename,
+                  name : file.filename,
+                  type : file.type,
+                  size : file.size,
+                  typebase : typebase[0],
+                });
+        });
+        cb(e,fFiles);
+      });
+  }else{
+    return cb(true,false);
+  }
+}

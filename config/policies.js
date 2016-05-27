@@ -39,10 +39,13 @@ module.exports.policies = {
   ProductFilterController:{
     list: true
   },
-  ProductGroup:{
+  ProductGroupController:{
     getGroupVariants: true,
     getVariantGroupProducts: true
-  }
+  },
+  ImportController:{
+    importImagesSap: ['isAdmin']
+  },
 
   //Por ahora
   //SyncController:{'*':true}

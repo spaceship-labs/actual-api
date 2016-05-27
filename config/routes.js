@@ -276,6 +276,11 @@ module.exports.routes = {
     action: 'removeIcon'
   },
 
+  '/import/importimagessap': {
+    controller: 'import',
+    action: 'importImagesSap'
+  }
+
 
 
   /***************************************************************************
