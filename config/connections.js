@@ -59,7 +59,7 @@ module.exports.connections = {
       encrypt: true   // use this for Azure databases
     }
   },
-  /*
+
   mongodb: {
     adapter: 'sails-mongo',
     host: process.env.MONGODB_HOST || 'YOUR_MONGODB_SERVER_HOSTNAME_OR_IP_ADDRESS',
@@ -69,7 +69,7 @@ module.exports.connections = {
     database: process.env.MONGODB_NAME || 'YOUR_MONGODB_DB',
     url:null
   },
-  */
+
   /*
   sqlserver: {
     adapter: 'sails-sqlserver',
