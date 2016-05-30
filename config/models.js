@@ -120,7 +120,6 @@ module.exports.models = {
       object = this;
       opts.file = mapIconFields(object);
       Files.removeFile(opts, function(){
-        console.log('llego al callback');
         object.icon_filename = null;
         object.icon_name = null;
         object.icon_type = null;
@@ -128,8 +127,7 @@ module.exports.models = {
         object.icon_size = null;
 
         object.save(cb);
-
-      })
+      });
 
     },
     addFiles : function(req,opts,cb){

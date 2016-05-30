@@ -46,6 +46,9 @@ module.exports.policies = {
   ImportController:{
     importImagesSap: ['isAdmin']
   },
+  ProductFilterValueController:{
+    getProducts: true
+  },
 
   //Por ahora
   //SyncController:{'*':true}
