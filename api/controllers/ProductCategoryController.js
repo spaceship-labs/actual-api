@@ -94,7 +94,10 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     ProductCategory.update({id:id},form).exec(function updateDone(err, updatedCategory){
-      if(err) throw(err);
+      if(err){
+        console.log(err);
+        throw(err);
+      }
       res.json(updatedCategory);
     });
 

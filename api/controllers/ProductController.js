@@ -61,38 +61,33 @@ module.exports = {
         }
       }
       querySearchAux = _.clone(query);
-    }
 
-    query.skip = (page-1) * items;
-    query.limit = items;
+      query.skip = (page-1) * items;
+      query.limit = items;
 
-    if(color){
-      query.U_COLOR = color;
-      querySearchAux = _.clone(query);
-    }
-    if(line){
-      query.U_LINEA = line;
-      querySearchAux = _.clone(query);
-    }
+      var read;
+      if(autocomplete){
+        read = model.find(query);
+      }else{
+        read = model.find(query).populate('files');
+      }
 
-    //console.log(query);
-    var read;
-    if(autocomplete){
-      read = model.find(query);
+      read.exec(function(err, results){
+        model.count(querySearchAux).exec(function(err,count){
+          if(err){
+            console.log(err);
+            return res.notFound();
+          }else{
+            return res.ok({data:results, total:count});
+          }
+        })
+      });
+
     }else{
-      read = model.find(query).populate('files');
+      return res.ok({data:[], total: 0});
     }
 
-    read.exec(function(err, results){
-      model.count(querySearchAux).exec(function(err,count){
-        if(err){
-          console.log(err);
-          return res.notFound();
-        }else{
-          return res.ok({data:results, total:count});
-        }
-      })
-    });
+
 
   },
 
