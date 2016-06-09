@@ -151,8 +151,8 @@ module.exports.makeCropsStreams = function(uploadOptions, opts, cb){
       var wh = size.split('x');
         gmIm(opts.srcData)
         .resize(wh[0], wh[1], '^')
-        .crop(wh[0], wh[1], 0, 0)
         .gravity('Center')
+        .crop(wh[0], wh[1], 0, 0)
         .stream(function(err, stdout, stderr){
             if(err){
               console.log(err);
