@@ -100,13 +100,13 @@ module.exports.makeCrops = function(req,opts,cb){
 module.exports.makeCrop = function(size,opts,cb){
   //Todo make delete crops function
   //if(opts.lastIcon) fs.unlink(opts.dirSave+size+opts.lastIcon,function(){});
-  console.log('makeCrop');
   var wh = size.split('x')
   , opts2 = {
     srcPath:opts.dirSave+opts.filename
     ,dstPath:opts.dirSave+size+opts.filename
     ,width:wh[0]
     ,height:wh[1]
+    ,gravity: 'Center'
   }
   im.crop(opts2,function(err,stdout,stderr){
     if(err) return cb && cb(err);
@@ -123,7 +123,7 @@ module.exports.makeCrop = function(size,opts,cb){
 }
 //Deletes a File and Crops if profile is specified;
 module.exports.removeFile = function(opts,cb){
-  console.log(opts);
+  //console.log(opts);
   var adapter = getAdapterConfig();
   var dirSave = adapter?'/uploads/'+opts.dir+'/' : __dirname+'/../../assets/uploads/'+opts.dir+'/';
   var sizes = opts.profile ? sails.config.images[opts.profile] : [];
@@ -152,6 +152,7 @@ module.exports.makeCropsStreams = function(uploadOptions, opts, cb){
         gmIm(opts.srcData)
         .resize(wh[0], wh[1], '^')
         .crop(wh[0], wh[1], 0, 0)
+        .gravity('Center')
         .stream(function(err, stdout, stderr){
             if(err){
               console.log(err);
