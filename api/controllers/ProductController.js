@@ -133,7 +133,6 @@ module.exports = {
         fileModel: ProductFile
       },function(e,product){
         if(e) console.log(e);
-        //res.json(product);
         //TODO check how to retrieve images instead of doing other query
         Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
           return res.json(updatedProduct.files);
