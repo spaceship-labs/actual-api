@@ -5,7 +5,7 @@ module.exports = {
     var form = req.params.all();
     var model = 'product';
     var searchFields = ['ItemName','ItemCode'];
-    var populateFields = form.noimages ? ['files'] : [];
+    var populateFields = form.noimages ? [] : ['files'];
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){
