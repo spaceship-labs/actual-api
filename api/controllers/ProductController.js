@@ -115,8 +115,6 @@ module.exports = {
           console.log(e);
           throw(e);
         }
-        //res.json(product);
-
         //TODO check how to retrieve images instead of doing other query
         Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
           return res.json(updatedProduct.files);
