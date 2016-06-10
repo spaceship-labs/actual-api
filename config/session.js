@@ -67,6 +67,9 @@ module.exports.session = {
   *                                                                          *
   ***************************************************************************/
 
+  adapter: 'connect-mongo',
+   url: "mongodb://actualuser:actualpassuser2016@ds013162.mlab.com:13162/actualdbsandbox",
+   stringify: false
   // adapter: 'mongo',
   // host: 'localhost',
   // port: 27017,

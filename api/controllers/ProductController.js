@@ -106,14 +106,17 @@ module.exports = {
   addFiles : function(req,res){
     form = req.params.all();
     Product.findOne({ItemCode:form.id}).exec(function(e,product){
-      if(e) throw(e);
+      if(e){
+        //throw(e);
+        console.log(e);
+      }
       product.addFiles(req,{
         dir : 'products/gallery',
         profile: 'gallery'
       },function(e,product){
         if(e){
           console.log(e);
-          throw(e);
+          //throw(e);
         }
         //TODO check how to retrieve images instead of doing other query
         Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){

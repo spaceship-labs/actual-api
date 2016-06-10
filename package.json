@@ -9,6 +9,7 @@
     "bcrypt": "^0.7.8",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.3.4",
+    "connect-mongo": "0.8.2",
     "connect-timeout": "^1.7.0",
     "fs": "0.0.2",
     "gm": "^1.21.1",
