@@ -104,7 +104,8 @@ module.exports = {
   },
 
   addFiles : function(req,res){
-    form = req.params.all();
+    process.setMaxListeners(0);
+    var form = req.params.all();
     Product.findOne({ItemCode:form.id}).exec(function(e,product){
       if(e){
         //throw(e);
@@ -116,17 +117,21 @@ module.exports = {
       },function(e,product){
         if(e){
           console.log(e);
+          res.json(false);
           //throw(e);
         }
-        //TODO check how to retrieve images instead of doing other query
-        Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
-          return res.json(updatedProduct.files);
-        });
+        else{
+          //TODO check how to retrieve images instead of doing other query
+          Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
+            return res.json(updatedProduct.files);
+          });
+        }
       });
     });
   },
 
   removeFiles : function(req,res){
+    process.setMaxListeners(0);
     var form = req.params.all();
     Product.findOne({ItemCode:form.ItemCode}).populate('files').exec(function(e,product){
       product.removeFiles(req,{
@@ -135,41 +140,59 @@ module.exports = {
         files : form.removeFiles,
         fileModel: ProductFile
       },function(e,product){
-        if(e) console.log(e);
-        //TODO check how to retrieve images instead of doing other query
-        Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
-          return res.json(updatedProduct.files);
-        });
+        if(e){
+          console.log(e);
+          res.json(false);
+        }
+        else{
+          //TODO check how to retrieve images instead of doing other query
+          Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
+            return res.json(updatedProduct.files);
+          });
+        }
       })
     });
   },
 
   updateIcon: function(req,res){
+    process.setMaxListeners(0);
     var form = req.params.all();
     Product.updateAvatar(req,{
       dir : 'products',
       profile: 'avatar',
       id : form.id,
     },function(e,product){
-      if(e) console.log(e);
-      //TODO check how to retrieve images instead of doing other query
-      var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
-      Product.findOne({ItemCode:form.id}, {select: selectedFields}).exec(function(e, updatedProduct){
-        return res.json(updatedProduct);
-      });
+      if(e){
+        console.log(e);
+        sails.log.info('todo mal');
+        return res.json(false);
+      }else{
+        sails.log.info('todo bien');
+        //TODO check how to retrieve images instead of doing other query
+        var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
+        Product.findOne({ItemCode:form.id}, {select: selectedFields}).exec(function(e, updatedProduct){
+          return res.json(updatedProduct);
+        });
+
+      }
       //res.json(product);
     });
   },
 
   removeIcon: function(req,res){
+    process.setMaxListeners(0);
     var form = req.params.all();
     Product.destroyAvatar(req,{
       dir : 'products',
       profile: 'avatar',
       id : form.id,
     },function(e,product){
-      if(e) console.log(e);
-      res.json(product);
+      if(e) {
+        console.log(e);
+        res.json(false);
+      }else{
+        res.json(product);
+      }
     });
   },
 

@@ -16,7 +16,9 @@ module.exports.saveFiles = function(req,opts,cb){
   var dirSave = __dirname+'/../../assets/uploads/'+opts.dir+'/';
   var $files = req.file && req.file('file')._files || [],
   maxBytes = 22020096;//max 21mb.
-  if($files.length){
+
+  if(req.file('file')._files[0] && $files.length > 0){
+    //sails.log.info('entro');
     if(req._fileparser.form.bytesExpected>=maxBytes){
       //cb(new Error('exceeds maxBytes')); //throw en controllers
       cb(false,[]);
@@ -54,6 +56,7 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
+          sails.log.info('entro al upload');
           console.log(e);
           return cb(e,files);
         }
@@ -72,6 +75,7 @@ module.exports.saveFiles = function(req,opts,cb){
         cb(e,fFiles);
       });
   }else{
+    //sails.log.info('no entro');
     return cb(true,false);
   }
 }

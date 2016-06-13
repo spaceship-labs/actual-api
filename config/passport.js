@@ -75,7 +75,7 @@ module.exports = {
       var timeout = require('connect-timeout');
       //app.use(passport.initialize());
       //app.use(passport.session());
-      app.use(timeout('60s'));
+      app.use(timeout('120s'));
       app.use(Files.middleware);
     }
   }
