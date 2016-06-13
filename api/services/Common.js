@@ -42,6 +42,9 @@ module.exports = {
     if(orderBy){
       read.sort(orderBy);
     }
+    else if(modelName == 'product'){
+      read.sort('Available DESC');
+    }
 
     read.exec(function(err, results){
       if(err) console.log(err);

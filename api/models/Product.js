@@ -22,9 +22,11 @@ module.exports = {
 
         SuppCatNum:{type:'string',size:17},
         CodeBars:{type:'string'},
-        OnHand:{type:'string'},
+        OnHand:{type:'float'},
         IsCommited:{type:'float'},
-        OnOrder:{type:'string'},
+        OnOrder:{type:'float'},
+        Available:{type:'float'},
+        PicturName:{type:'string'},
         SalUnitMsr:{type:'string'},
         U_LINEA:{type:'string',size:60},
         U_PRODUCTO:{type:'string',size:60},
