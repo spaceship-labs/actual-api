@@ -1,4 +1,5 @@
 var async = require('async');
+var _ = require('underscore');
 
 module.exports = {
   find: function(req, res){
@@ -23,6 +24,56 @@ module.exports = {
       console.log(err);
       res.notFound();
     })
+  },
+
+  getCategoriesTree: function(req, res){
+    var categoryTree = [];
+    var getLevel1 = function(callback){
+      ProductCategory.find({CategoryLevel:1}).populate('Childs').exec(function(err,categorieslv1){
+        if(err){
+          console.log(err);
+        }
+        callback(null,categorieslv1)
+      });
+    };
+    var getLevel2 = function(level1, callback){
+      ProductCategory.find({CategoryLevel:2}).populate('Childs').exec(function(err,categorieslv2){
+        if(err){
+          console.log(err);
+        }
+        callback(null, level1 ,categorieslv2);
+      });
+    };
+
+    var getLevel3 = function(level1, level2, callback){
+      ProductCategory.find({CategoryLevel:3}).exec(function(err,level3){
+        if(err){
+          console.log(err);
+        }
+        callback(null, [level1, level2, level3]);
+      });
+    };
+
+    async.waterfall([getLevel1, getLevel2, getLevel3], function(err, groups){
+      var categoriesLv1 = groups[0] || [];
+      var categoriesLv2 = groups[1] || [];
+      var categoriesLv3 = groups[2] || [];
+      categoriesLv1.forEach(function(clv1){
+        clv1.Childs.forEach(function(clv2){
+          var lvl2 = _.findWhere( categoriesLv2, {id: clv2.id });
+          if( lvl2 ){
+            clv2.Childs = lvl2.Childs;
+          }else{
+            categoryTree.push(clv1);
+          }
+        });
+        categoryTree.push(clv1);
+      });
+      res.json({categoryTree:categoryTree, groups: groups});
+
+    });
+
+
   },
 
   getCategoriesGroups: function(req, res){

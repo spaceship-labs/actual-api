@@ -36,6 +36,10 @@ module.exports.policies = {
     findById: true,
     search: true
   },
+  ProductCategoryController:{
+    getCategoriesGroups: true,
+    getCategoriesTree: true
+  },
   ProductFilterController:{
     list: true
   },

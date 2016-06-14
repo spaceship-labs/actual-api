@@ -39,14 +39,13 @@ module.exports = {
       selectFields.forEach(function(field){
         selectObj.select.push(field);
       });
+      selectObj.select.push('Name');
 
       read = model.find(query, selectObj);
     }
     else{
       read = model.find(query);
     }
-
-
 
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){

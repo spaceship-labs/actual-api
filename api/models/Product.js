@@ -100,6 +100,12 @@ module.exports = {
         ImagesOrder:{type:'string'},
         Conservation: {type:'text'},
 
+        CheckedPhotos : {type:'boolean'},
+        CheckedStructure : {type:'boolean'},
+        CheckedDescription : {type:'boolean'},
+        CheckedPackage : {type:'boolean'},
+
+
         //RELATIONS
         files: {
           collection: 'productfile',

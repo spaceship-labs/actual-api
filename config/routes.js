@@ -159,6 +159,11 @@ module.exports.routes = {
     action: 'update'
   },
 
+  '/productcategory/getcategoriestree':{
+    controller: 'productcategory',
+    action: 'getCategoriesTree'
+  },
+
   '/productfilter/find/:page':{
     controller: 'productfilter',
     action: 'find'
