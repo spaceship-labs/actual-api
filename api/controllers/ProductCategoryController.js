@@ -28,21 +28,33 @@ module.exports = {
   getCategoriesGroups: function(req, res){
     var categoriesGroups = [];
     ProductCategory.find({CategoryLevel:1}).populate('Childs').exec(function(err,mainCategories){
-      if(err) throw(err);
+      if(err){
+        console.log(err);
+        res.json(false);
+      }else{
+        categoriesGroups.push(mainCategories);
 
-      categoriesGroups.push(mainCategories);
+        ProductCategory.find({CategoryLevel:2}).populate('Childs').exec(function(err2,subcategories){
+          if(err2){
+            console.log(err2);
+            res.json(false);
+          }else{
 
-      ProductCategory.find({CategoryLevel:2}).populate('Childs').exec(function(err2,subcategories){
-        if(err2) throw(err2);
-        categoriesGroups.push(subcategories);
+            categoriesGroups.push(subcategories);
 
-        ProductCategory.find({CategoryLevel:3}).populate('Parents').exec(function(err3, subsubcategories){
-          if(err3) throw(err3);
-          categoriesGroups.push(subsubcategories);
-          res.json(categoriesGroups);
+            ProductCategory.find({CategoryLevel:3}).populate('Parents').exec(function(err3, subsubcategories){
+              if(err3){
+                console.log(err3);
+                res.json(false);
+              }else{
+                categoriesGroups.push(subsubcategories);
+                res.json(categoriesGroups);
+              }
+            });
+          }
+
         });
-
-      });
+      }
     });
   },
 
@@ -59,7 +71,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     ProductCategory.findOne({id:id}).populate('Childs').populate('Parents').exec(function(err, category){
-      if(err) throw(err);
+      if(err) console.log(err);
       res.json(category);
     });
   },
@@ -70,7 +82,7 @@ module.exports = {
     var parents = form.Parents;
     var relationRecords = [];
     ProductCategory.create(form).exec(function(err1, result){
-      if(err1) throw(err1);
+      if(err1) console.log(err1);
       if(result){
         res.json(result);
       }
@@ -84,7 +96,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     ProductCategory.destroy({id:id}).exec(function(err){
-      if(err) throw(err);
+      if(err) console.log(err);
       return res.json({destroyed: true});
     });
   },
@@ -96,7 +108,6 @@ module.exports = {
     ProductCategory.update({id:id},form).exec(function updateDone(err, updatedCategory){
       if(err){
         console.log(err);
-        throw(err);
       }
       res.json(updatedCategory);
     });

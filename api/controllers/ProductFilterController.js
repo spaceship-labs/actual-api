@@ -24,8 +24,11 @@ module.exports = {
       reading = ProductFilter.find().populate('Values');
     }
     reading.exec(function(err, filters){
-      if(err) throw(err);
-      res.json(filters);
+      if(err) {
+        console.log(err);
+      }else{
+        res.json(filters);
+      }
     });
   },
 
@@ -35,9 +38,10 @@ module.exports = {
     ProductFilter.findOne({id:id}).populate('Values').populate('Categories').exec(function(err, filter){
       if(err){
         console.log(err);
-        throw(err);
+        res.json(false);
+      }else{
+        res.json(filter);
       }
-      res.json(filter);
     });
   },
 
@@ -48,9 +52,10 @@ module.exports = {
     ProductFilter.create(form).exec(function(err, created){
       if(err){
         console.log(err);
-        throw(err);
+        res.json(false);
+      }else{
+        res.json(created);
       }
-      res.json(created);
 
     });
   },
@@ -63,9 +68,10 @@ module.exports = {
     ProductFilter.update({id:id},form).exec(function updateDone(err, updatedFilter){
       if(err){
         console.log(err);
-        throw err;
+        res.json(false);
+      }else{
+        res.json(updatedFilter);
       }
-      res.json(updatedFilter);
     });
   },
 
@@ -76,8 +82,12 @@ module.exports = {
     var id = form.id;
 
     ProductFilter.destroy({id:id}).exec(function(err){
-      if(err) throw(err);
-      res.json({destroyed:true})
+      if(err){
+        console.log(err);
+        res.json(false);
+      }else{
+        res.json({destroyed:true})
+      }
     });
   }
 };

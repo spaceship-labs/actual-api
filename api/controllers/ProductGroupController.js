@@ -21,7 +21,7 @@ module.exports = {
     ProductGroup.findOne({id:id}).populate('Products').exec(function(err, group){
       if(err){
         console.log(err);
-        throw(err);
+        console.log(err);
       }
       res.json(group);
     });
@@ -33,7 +33,6 @@ module.exports = {
     ProductGroup.findOne({id:id, Type:'variations'}).populate('Products').exec(function(err, group){
       if(err){
         console.log(err);
-        throw(err);
       }
       if(group.Products.length > 0){
         var productsIds = [];
@@ -56,9 +55,7 @@ module.exports = {
     sails.log.debug(form);
     ProductGroup.create(form).exec(function(err, created){
       if(err){
-        //console.log('hay un error');
         console.log(err);
-        throw(err);
       }
       res.json(created);
     });
@@ -90,15 +87,14 @@ module.exports = {
     ProductGroup.findOne({id: group}).populate('Products').exec(function(err, prod){
       if(err){
         console.log(err);
-        throw(err);
       }
       if(product){
         prod.Products.add(product);
         prod.save(function(errSave, result){
           if(errSave){
             console.log(errSave);
-            //throw(errSave);
           }
+          sails.log.debug('product added to group');
           res.json(result);
         });
       }else{
@@ -113,13 +109,11 @@ module.exports = {
     ProductGroup.findOne({id: group}).populate('Products').exec(function(err, prod){
       if(err){
         console.log(err);
-        throw(err);
       }
       prod.Products.remove(product);
       prod.save(function(errSave, result){
         if(errSave){
           console.log(errSave);
-          throw(errSave);
         }
         res.json(result);
       });

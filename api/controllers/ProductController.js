@@ -203,9 +203,10 @@ module.exports = {
     Product.find( {SuppCatNum: id}, {select: ['ItemCode']} ).exec(function( e, prods ) {
       if(e){
         console.log(e);
-        throw(e);
+        res.json(false);
+      }else{
+        res.json(prods);
       }
-      res.json(prods);
     });
   }
 

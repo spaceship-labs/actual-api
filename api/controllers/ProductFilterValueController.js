@@ -4,7 +4,7 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     ProductFilterValue.create(form).exec(function createdCB(err, created){
-      if(err) throw(err);
+      if(err) console.log(err);
       //console.log(created);
       res.json(created);
     });
@@ -13,7 +13,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     ProductFilterValue.update({id:id},form).exec(function updatedCB(err, updated){
-      if(err) throw(err);
+      if(err) console.log(err);
       //console.log(updated);
       res.json(updated);
     });
@@ -22,7 +22,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     ProductFilterValue.destroy({id:id}).exec(function destroyedCB(err){
-      if(err) throw(err);
+      if(err) console.log(err);
       res.json({destroyed:true});
     });
 

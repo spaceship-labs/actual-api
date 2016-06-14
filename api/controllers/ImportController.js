@@ -8,7 +8,7 @@ module.exports = {
     Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').limit(10).exec(function(err, prods){
       if(err){
         console.log(err);
-        throw(err);
+        //throw(err);
       }
 
       sails.log.debug('prods: ');
