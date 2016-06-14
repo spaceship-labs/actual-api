@@ -6,7 +6,7 @@ module.exports = {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
   },
-  find: function(modelName,form,searchFields, populateFields){
+  find: function(modelName,form,searchFields, populateFields, selectFields){
     var deferred = q.defer();
     var items = form.items || 10;
     var page = form.page || 1;
@@ -16,6 +16,8 @@ module.exports = {
     var query = {};
     var querySearchAux = {};
     var model = sails.models[modelName];
+    var selectObj = false;
+    var read = false;
     //console.log(model);
     if(term){
       if(searchFields.length > 0){
@@ -32,7 +34,20 @@ module.exports = {
     query.skip = (page-1) * items;
     query.limit = items;
 
-    var read = model.find(query);
+    if(selectFields && selectFields.length > 0 && modelName == 'product'){
+      selectObj = {select:[]};
+      selectFields.forEach(function(field){
+        selectObj.select.push(field);
+      });
+
+      read = model.find(query, selectObj);
+    }
+    else{
+      read = model.find(query);
+    }
+
+
+
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
         read = read.populate(populateF);
@@ -60,6 +75,14 @@ module.exports = {
 
     return deferred.promise;
   },
+
+  getImgExtension: function(filename){
+    if(filename){
+      return filename.split('.').pop();
+    }
+    return false;
+  },
+
 
   formatHandle: function(str) {
 

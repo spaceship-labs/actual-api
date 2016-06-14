@@ -261,7 +261,8 @@ module.exports.saveFilesSap = function(internalFiles,opts,cb){
         files.forEach(function(file){
 
           //TODO dont override
-          file.type = 'image/png';
+          var extension = Common.getImgExtension(filename);
+          file.type = 'image/' + extension;
 
           var filename = file.fd.split('/');
           filename = filename[filename.length-1];

@@ -92,14 +92,18 @@ module.exports = {
         console.log(err);
         throw(err);
       }
-      prod.Products.add(product);
-      prod.save(function(errSave, result){
-        if(errSave){
-          console.log(errSave);
-          throw(errSave);
-        }
-        res.json(result);
-      });
+      if(product){
+        prod.Products.add(product);
+        prod.save(function(errSave, result){
+          if(errSave){
+            console.log(errSave);
+            //throw(errSave);
+          }
+          res.json(result);
+        });
+      }else{
+        res.json(prod);
+      }
     });
   },
   removeProductFromGroup: function(req, res){

@@ -184,7 +184,6 @@ module.exports.models = {
       });
     },
     updateAvatarSap : function(internalFiles,opts,cb){
-      sails.log.debug('updateAvatarSap');
       var object = this;
       //opts.file = object.icon;
       opts.file = mapIconFields(object);

@@ -5,17 +5,14 @@ var async = require('async');
 module.exports = {
   importImagesSap: function(req, res){
     var form = req.params.all();
-
-    //sails.log.debug('req');
-    //sails.log.debug(req);
-
-    Product.find({select:['ItemCode']}).limit(5).exec(function(err, prods){
+    Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').limit(10).exec(function(err, prods){
       if(err){
         console.log(err);
         throw(err);
       }
-      sails.log.debug(prods.length);
-      //res.json(prods);
+
+      sails.log.debug('prods: ');
+      sails.log.debug(prods);
 
       updateIcons(prods, function(result){
         console.log(result);
@@ -29,23 +26,37 @@ module.exports = {
 
 function updateIcon(prod, callback){
   var itemCode = prod.ItemCode;
-  var rootDir = process.cwd();
-  var path = rootDir + '/images-sap/' + itemCode + '.png';
-  var rsfile = fs.createReadStream(path);
-  var internalFile = streamToFile( rsfile );
+  var icon = prod.icon_filename;
+  var imgName = prod.PicturName;
 
-  Product.updateAvatarSap(internalFile,{
-    dir : 'products',
-    profile: 'avatar',
-    id : itemCode,
-  },function(e,product){
-    if(e) console.log(e);
-    var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
-    Product.findOne({ItemCode: itemCode}, {select: selectedFields}).exec(function(e, updatedProduct){
-      callback();
-      //return res.json(updatedProduct);
+  //var rootDir = process.cwd();
+  if(typeof imgName!= 'undefined' && imgName && imgName != '' && icon == null){
+  //if(false){
+    var rootDir = '/home/luis/Pictures/ImagenesSAP/';
+    var path = rootDir  + imgName;
+    var rsfile = fs.createReadStream(path);
+    var internalFile = streamToFile( rsfile, imgName );
+
+    Product.updateAvatarSap(internalFile,{
+      dir : 'products',
+      profile: 'avatar',
+      id : itemCode,
+    },function(e,product){
+      if(e){
+        console.log(e);
+        callback();
+      }else{
+        console.log('updatedAvatar ' + itemCode);
+        var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
+        Product.findOne({ItemCode: itemCode}, {select: selectedFields}).exec(function(e, updatedProduct){
+          callback();
+          //return res.json(updatedProduct);
+        });
+      }
     });
-  });
+  }else{
+    callback();
+  }
 
 
 }
@@ -63,10 +74,11 @@ function updateIcons(prods,callback){
   })
 }
 
-function streamToFile(inStream) {
+function streamToFile(inStream, filename) {
 
   var Upstream = require('skipper/standalone/Upstream');
-  var stream = require('stream')
+  var stream = require('stream');
+  var imgName = filename;
 
   /**
    * A transform stream that counts the bytes flowing through it
@@ -76,8 +88,9 @@ function streamToFile(inStream) {
   function ByteCountStream(opts){
     stream.Transform.call(this, opts);
     this.byteCount = 0;
-    this.filename = 'generico.png';
-    this.type = 'image/png';
+    var extension = Common.getImgExtension(imgName);
+    this.filename = 'generico.' + extension;
+    this.type = 'image/' + extension;
     this._transform = function(chunk, encoding, done){
       this.byteCount += chunk.length
       return done(null, chunk)
@@ -108,3 +121,5 @@ function streamToFile(inStream) {
   // The `req.file()` is now fully simulated - continue as if http upload occured
   return file
 }
+
+
