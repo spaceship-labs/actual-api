@@ -36,7 +36,7 @@ module.exports = {
       });
     };
     var getLevel2 = function(level1, callback){
-      ProductCategory.find({CategoryLevel:2}).populate('Childs').exec(function(err,categorieslv2){
+      ProductCategory.find({CategoryLevel:2}).populate('Childs').populate('Parents').exec(function(err,categorieslv2){
         if(err){
           console.log(err);
         }
@@ -45,7 +45,7 @@ module.exports = {
     };
 
     var getLevel3 = function(level1, level2, callback){
-      ProductCategory.find({CategoryLevel:3}).exec(function(err,level3){
+      ProductCategory.find({CategoryLevel:3}).populate('Parents').exec(function(err,level3){
         if(err){
           console.log(err);
         }
@@ -60,27 +60,29 @@ module.exports = {
       var categoryTree = [];
 
       categoriesLv1.forEach(function(clv1){
+        var mainCategory = _.clone(clv1);
+        mainCategory =  mainCategory.toObject();
+        mainCategory.Childs = [];
 
-        sails.log.info('clv1: ' + clv1.Name );
-
-        clv1.Childs = clv1.Childs.map(function(clv2){
-          var lvl2 = _.findWhere( categoriesLv2, {id: clv2.id });
-          if( lvl2 ){
-            //clv2.Childs = lvl2.Childs;
-            if(clv1.Name == 'Muebles'){
-              sails.log.warn(lvl2.Name);
-              sails.log.warn(lvl2.Childs);
-            }
-
-            //return lvl2;
+        clv1.Childs.forEach(function(child){
+          var lvl2 = _.findWhere( categoriesLv2, {id: child.id });
+          if(lvl2){
+            lvl2 = lvl2.toObject();
+            mainCategory.Childs.push(lvl2);
           }
-          return lvl2
         });
-        if(clv1.Name == 'Muebles'){
-          sails.log.debug('Muebles:');
-          sails.log.debug(clv1);
+
+        if(mainCategory.Childs.length <= 0){
+          clv1.Childs.forEach(function(child){
+            var lvl3 = _.findWhere( categoriesLv3, {id: child.id });
+            if(lvl3){
+              lvl3 = lvl3.toObject();
+              mainCategory.Childs.push(lvl3);
+            }
+          });
         }
-        categoryTree.push(clv1);
+
+        categoryTree.push(mainCategory);
       });
       res.json({categoryTree:categoryTree, groups: groups});
 
