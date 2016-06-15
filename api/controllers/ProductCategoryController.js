@@ -27,7 +27,6 @@ module.exports = {
   },
 
   getCategoriesTree: function(req, res){
-    var categoryTree = [];
     var getLevel1 = function(callback){
       ProductCategory.find({CategoryLevel:1}).populate('Childs').exec(function(err,categorieslv1){
         if(err){
@@ -58,15 +57,29 @@ module.exports = {
       var categoriesLv1 = groups[0] || [];
       var categoriesLv2 = groups[1] || [];
       var categoriesLv3 = groups[2] || [];
+      var categoryTree = [];
+
       categoriesLv1.forEach(function(clv1){
-        clv1.Childs.forEach(function(clv2){
+
+        sails.log.info('clv1: ' + clv1.Name );
+
+        clv1.Childs = clv1.Childs.map(function(clv2){
           var lvl2 = _.findWhere( categoriesLv2, {id: clv2.id });
           if( lvl2 ){
-            clv2.Childs = lvl2.Childs;
-          }else{
-            categoryTree.push(clv1);
+            //clv2.Childs = lvl2.Childs;
+            if(clv1.Name == 'Muebles'){
+              sails.log.warn(lvl2.Name);
+              sails.log.warn(lvl2.Childs);
+            }
+
+            //return lvl2;
           }
+          return lvl2
         });
+        if(clv1.Name == 'Muebles'){
+          sails.log.debug('Muebles:');
+          sails.log.debug(clv1);
+        }
         categoryTree.push(clv1);
       });
       res.json({categoryTree:categoryTree, groups: groups});

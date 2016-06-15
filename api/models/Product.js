@@ -104,6 +104,16 @@ module.exports = {
         CheckedStructure : {type:'boolean'},
         CheckedDescription : {type:'boolean'},
         CheckedPackage : {type:'boolean'},
+        CheckedFeatures: {type: 'boolean'},
+
+        ChairBackHeight: {type:'float'},
+        ChairBackHeightUnitMsr: {type:'string'},
+        SeatHeight: {type:'float'},
+        SeatHeightUnitMsr: {type:'string'},
+        ArmRestHeight:{type:'float'},
+        ArmRestHeightUnitMsr:{type:'string'},
+        Depth:{type:'float'},
+        DepthUnitMsr:{type:'string'},
 
 
         //RELATIONS
