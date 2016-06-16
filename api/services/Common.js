@@ -16,6 +16,7 @@ module.exports = {
     var query = {};
     var querySearchAux = {};
     var model = sails.models[modelName];
+    var filters = form.filters;
     var selectObj = false;
     var read = false;
     //console.log(model);
@@ -29,8 +30,16 @@ module.exports = {
           query.or.push(obj);
         }
       }
-      querySearchAux = _.clone(query);
     }
+
+    if(filters){
+      for(key in filters){
+        query[key] = filters[key];
+      }
+    }
+
+    querySearchAux = _.clone(query);
+
     query.skip = (page-1) * items;
     query.limit = items;
 
