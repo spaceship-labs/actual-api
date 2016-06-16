@@ -26,6 +26,7 @@ module.exports = {
     })
   },
 
+
   getCategoriesTree: function(req, res){
     var getLevel1 = function(callback){
       ProductCategory.find({CategoryLevel:1}).populate('Childs').exec(function(err,categorieslv1){
@@ -84,7 +85,7 @@ module.exports = {
 
         categoryTree.push(mainCategory);
       });
-      res.json({categoryTree:categoryTree, groups: groups});
+      res.json(categoryTree);
 
     });
 
@@ -180,5 +181,22 @@ module.exports = {
 
   },
 
+  getCategory: function(req, res){
+    var form = req.params.all();
+    var handle = form.handle;
+    ProductCategory.findOne({Handle:handle}).populate('Products').exec(function(err, category){
+      if(err) console.log(err);
+      res.json(category);
+    });
+  },
+
+  findByHandle: function(req, res){
+    var form = req.params.all();
+    var handle = form.handle;
+    ProductCategory.findOne({Handle:handle}).populate('Products').populate('Childs').exec(function(err, category){
+      if(err) console.log(err);
+      res.json(category);
+    });
+  }
 
 };

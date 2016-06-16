@@ -149,6 +149,11 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  '/productcategory/findbyhandle/:handle':{
+    controller: 'productcategory',
+    action: 'findByHandle'
+  },
+
   '/productcategory/destroy/:id':{
     controller: 'productcategory',
     action: 'destroy'

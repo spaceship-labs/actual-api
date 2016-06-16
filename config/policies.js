@@ -38,7 +38,8 @@ module.exports.policies = {
   },
   ProductCategoryController:{
     getCategoriesGroups: true,
-    getCategoriesTree: true
+    getCategoriesTree: true,
+    findByHandle: true
   },
   ProductFilterController:{
     list: true
