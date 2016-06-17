@@ -19,6 +19,7 @@ module.exports = {
     var filters = form.filters;
     var selectObj = false;
     var read = false;
+    var getAll = form.getAll || false;
     //console.log(model);
     if(term){
       if(searchFields.length > 0){
@@ -40,8 +41,10 @@ module.exports = {
 
     querySearchAux = _.clone(query);
 
-    query.skip = (page-1) * items;
-    query.limit = items;
+    if(!getAll){
+      query.skip = (page-1) * items;
+      query.limit = items;
+    }
 
     if(selectFields && selectFields.length > 0 && modelName == 'product'){
       selectObj = {select:[]};
