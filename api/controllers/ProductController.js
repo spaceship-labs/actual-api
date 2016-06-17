@@ -51,8 +51,8 @@ module.exports = {
     var color = form.color || false;
     var line = form.line || false;
 
-    if(term){
-      if(searchFields.length > 0){
+    if(term || true){
+      if(searchFields.length > 0 && term){
         query.or = [];
         for(var i=0;i<searchFields.length;i++){
           var field = searchFields[i];
@@ -72,6 +72,8 @@ module.exports = {
       }else{
         read = model.find(query).populate('files');
       }
+
+      read.sort('Available DESC');
 
       read.exec(function(err, results){
         model.count(querySearchAux).exec(function(err,count){

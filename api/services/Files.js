@@ -268,12 +268,12 @@ module.exports.saveFilesSap = function(internalFiles,opts,cb){
           filename = filename[filename.length-1];
           var typebase = file.type.split('/');
           fFiles.push({
-                  filename : filename,
-                  name : file.filename,
-                  type : file.type,
-                  size : file.size,
-                  typebase : typebase[0],
-                });
+            filename : filename,
+            name : file.filename,
+            type : file.type,
+            size : file.size,
+            typebase : typebase[0],
+          });
         });
         cb(e,fFiles);
       });

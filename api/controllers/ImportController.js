@@ -1,22 +1,26 @@
 var request = require('request');
 var fs = require('fs');
 var async = require('async');
+var productsList = [];
+var photosUploaded = 0;
+var waitingTime = 0;
 
 module.exports = {
   importImagesSap: function(req, res){
     var form = req.params.all();
-    Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').limit(10).exec(function(err, prods){
+    var limit = form.limit || 10;
+    productsList = [];
+    photosUploaded = 0;
+    waitingTime = 0;
+    sails.log.debug('limit : ' + limit);
+    Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').skip(0).limit(limit).exec(function(err, prods){
       if(err){
         console.log(err);
         //throw(err);
       }
-
-      sails.log.debug('prods: ');
-      sails.log.debug(prods);
-
       updateIcons(prods, function(result){
         console.log(result);
-        res.json(result);
+        res.json(productsList);
       });
 
     });
@@ -29,41 +33,62 @@ function updateIcon(prod, callback){
   var icon = prod.icon_filename;
   var imgName = prod.PicturName;
 
-  //var rootDir = process.cwd();
   if(typeof imgName!= 'undefined' && imgName && imgName != '' && icon == null){
-  //if(false){
     var rootDir = '/home/luis/Pictures/ImagenesSAP/';
     var path = rootDir  + imgName;
     var rsfile = fs.createReadStream(path);
     var internalFile = streamToFile( rsfile, imgName );
+    sails.log.debug('Articulo a subir : ' + itemCode);
+    sails.log.info('Fotos subidas: ' + photosUploaded + ' | Tiempo de espera: ' + waitingTime);
 
-    Product.updateAvatarSap(internalFile,{
-      dir : 'products',
-      profile: 'avatar',
-      id : itemCode,
-    },function(e,product){
-      if(e){
-        console.log(e);
-        callback();
-      }else{
-        console.log('updatedAvatar ' + itemCode);
-        var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
-        Product.findOne({ItemCode: itemCode}, {select: selectedFields}).exec(function(e, updatedProduct){
+    if(photosUploaded%5 == 0 && photosUploaded != 0){
+      waitingTime = 60000;
+    }else{
+      waitingTime = 0;
+    }
+
+    setTimeout(function(){
+
+      Product.updateAvatarSap(internalFile,{
+        dir : 'products',
+        profile: 'avatar',
+        id : itemCode,
+      },function(e,product){
+        if(e){
+          console.log(e);
           callback();
-          //return res.json(updatedProduct);
-        });
-      }
-    });
-  }else{
+        }else{
+          sails.log.info('Articulo Subido: ' + itemCode);
+          productsList.push({ItemCode: itemCode, status: 'con imagen SAP'});
+          photosUploaded++;
+          callback();
+        }
+      });
+
+    }, waitingTime);
+  }
+  else if(icon && icon!='' && imgName && imgName != ''){
+    //sails.log.warn('callback else');
+    productsList.push({ItemCode: itemCode, status: 'con imagen SAP'});
+    callback();
+
+  }
+  else if(icon && icon!='' && !imgName){
+    //sails.log.warn('callback else');
+    productsList.push({ItemCode: itemCode, status: 'con imagen'});
+    callback();
+
+  }
+  else{
+    //sails.log.warn('callback else');
+    productsList.push({ItemCode: itemCode, status: 'faltante'});
     callback();
   }
-
-
 }
 
 
 function updateIcons(prods,callback){
-  async.each(prods ,updateIcon, function(err){
+  async.forEachSeries(prods ,updateIcon, function(err){
     if(err){
       console.log(err);
       callback({done:false});
