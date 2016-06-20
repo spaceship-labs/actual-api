@@ -31,6 +31,39 @@ module.exports = {
   getProducts: function(req, res){
     var form = req.params.all();
     var valuesIds = form.ids;
+    Product_ProductFilterValue.find({productfiltervalue_Products: valuesIds}).exec(function findCB(err, relations){
+      if(err){
+        console.log(err);
+      }
+      var auxProductsIds = [];
+      var productsIds = [];
+      relations.forEach(function(relation){
+        auxProductsIds.push(relation.product_FilterValues);
+      });
+      auxProductsIds = _.uniq(auxProductsIds);
+      auxProductsIds.forEach(function(productId){
+        var matches = _.where(relations, {product_FilterValues: productId});
+        if(matches.length == valuesIds.length){
+          productsIds.push(productId);
+        }
+      });
+
+      Product.find({id: productsIds}).populate('files').populate('FilterValues').exec(function findCB(errProds, products){
+        if(errProds){
+          console.log(errProds);
+        }
+        res.json(products);
+      });
+
+
+      //var matchResults = _.where(relations ,{});
+    });
+  }
+
+  /*
+  getProducts: function(req, res){
+    var form = req.params.all();
+    var valuesIds = form.ids;
     ProductFilterValue.find({id: valuesIds}).populate('Products').exec(function findCB(err, values){
       if(err){
         console.log(err);
@@ -50,11 +83,6 @@ module.exports = {
           console.log(errProds);
         }
 
-        /*
-        valuesIds.forEach(function(val){
-          products
-        });
-        */
         var filteredProducts = [];
 
         products.forEach(function(prod){
@@ -75,4 +103,5 @@ module.exports = {
 
     });
   }
+  */
 };
