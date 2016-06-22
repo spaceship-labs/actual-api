@@ -1,19 +1,22 @@
 var request = require('request');
 var fs = require('fs');
 var async = require('async');
+var pathService = require('path');
 var productsList = [];
 var photosUploaded = 0;
 var waitingTime = 0;
+var prodCount = 0;
 
 module.exports = {
   importImagesSap: function(req, res){
     var form = req.params.all();
     var limit = form.limit || 10;
+    var skip = 2477;
     productsList = [];
     photosUploaded = 0;
     waitingTime = 0;
     sails.log.debug('limit : ' + limit);
-    Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').skip(0).limit(limit).exec(function(err, prods){
+    Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').skip(skip).limit(limit).exec(function(err, prods){
       if(err){
         console.log(err);
         //throw(err);
@@ -32,13 +35,15 @@ function updateIcon(prod, callback){
   var itemCode = prod.ItemCode;
   var icon = prod.icon_filename;
   var imgName = prod.PicturName;
+  prodCount++;
 
   if(typeof imgName!= 'undefined' && imgName && imgName != '' && icon == null){
     var rootDir = '/home/luis/Pictures/ImagenesSAP/';
     var path = rootDir  + imgName;
+    //path = path.replace(/ /g, '\\');
     var rsfile = fs.createReadStream(path);
     var internalFile = streamToFile( rsfile, imgName );
-    sails.log.debug('Articulo a subir : ' + itemCode);
+    sails.log.debug('Articulo a subir : ' + itemCode  + ' , Prod index: ' + prodCount + ' imagen:' + path);
     sails.log.info('Fotos subidas: ' + photosUploaded + ' | Tiempo de espera: ' + waitingTime);
 
     if(photosUploaded%5 == 0 && photosUploaded != 0){
@@ -81,6 +86,7 @@ function updateIcon(prod, callback){
   }
   else{
     //sails.log.warn('callback else');
+    sails.log.warn('Sin imagen');
     productsList.push({ItemCode: itemCode, status: 'faltante'});
     callback();
   }

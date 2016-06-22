@@ -44,6 +44,15 @@ module.exports = {
         company: {
             type:'string'
         },
+
+        SlpCode: {type:'integer'},
+
+        /*
+        Clients :{
+          collection: 'client',
+          via: 'seller'
+        },*/
+
         toJSON: function () {
             var obj = this.toObject();
             delete obj.password;

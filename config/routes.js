@@ -294,7 +294,19 @@ module.exports.routes = {
   '/import/importimagessap': {
     controller: 'import',
     action: 'importImagesSap'
+  },
+
+  '/seller/getall':{
+    controller: 'seller',
+    action:'getAll'
+  },
+
+  '/client/findbyseller/:seller':{
+    controller: 'client',
+    action:'findBySeller'
   }
+
+
 
 
 
