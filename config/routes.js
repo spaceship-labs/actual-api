@@ -304,9 +304,22 @@ module.exports.routes = {
   '/client/findbyseller/:seller':{
     controller: 'client',
     action:'findBySeller'
-  }
+  },
 
+  '/client/findbyid/:id':{
+    controller: 'client',
+    action:'findById'
+  },
 
+  '/quotation/create':{
+    controller: 'quotation',
+    action: 'create'
+  },
+
+  '/quotation/findbyid/:id':{
+    controller: 'quotation',
+    action:'findById'
+  },
 
 
 

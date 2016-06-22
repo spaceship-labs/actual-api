@@ -18,10 +18,16 @@ module.exports = {
   list: function(req, res){
     var form = req.params.all();
     var reading;
+    var query = {};
+
+    if(form.ids){
+      query = {id: form.ids};
+    }
+
     if(form.quickread){
-      reading = ProductFilter.find();
+      reading = ProductFilter.find(query);
     }else{
-      reading = ProductFilter.find().populate('Values');
+      reading = ProductFilter.find(query).populate('Values');
     }
     reading.exec(function(err, filters){
       if(err) {

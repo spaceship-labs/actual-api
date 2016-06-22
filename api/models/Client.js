@@ -18,5 +18,9 @@ module.exports = {
       columnName: 'SlpCode'
     }
     */
+    Quotations: {
+      collection:'Quotation',
+      via: 'Client',
+    }
   }
 }

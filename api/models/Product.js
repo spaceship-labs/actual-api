@@ -151,6 +151,15 @@ module.exports = {
         Groups: {
           collection: 'ProductGroup',
           via: 'Products'
+        },
+
+        Quotations:{
+          collection:'quotation',
+          via: 'Products'
+        },
+
+        Price: {
+          model:'ProductPrice'
         }
 
     },

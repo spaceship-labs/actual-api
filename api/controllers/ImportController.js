@@ -11,9 +11,11 @@ module.exports = {
   importImagesSap: function(req, res){
     var form = req.params.all();
     var limit = form.limit || 10;
-    var skip = 2477;
+    //var skip = 2477;
+    var skip = 0;
     productsList = [];
     photosUploaded = 0;
+    prodCount = 0;
     waitingTime = 0;
     sails.log.debug('limit : ' + limit);
     Product.find({},{select:['ItemCode','PicturName','icon_filename']}).sort('Available DESC').skip(skip).limit(limit).exec(function(err, prods){
@@ -37,13 +39,17 @@ function updateIcon(prod, callback){
   var imgName = prod.PicturName;
   prodCount++;
 
-  if(typeof imgName!= 'undefined' && imgName && imgName != '' && icon == null){
+  var excludes = ['CO32166','CO10438','CO31751','CO32938','CO43242','CO44544','CO44540','CO44849','CO46687','CO46688','CO47735'];
+
+  //sails.log.warn('Articulo: ' + itemCode +' | Icono : ' + icon);
+
+  if(typeof imgName!= 'undefined' && imgName && imgName != '' && icon == null && excludes.indexOf(itemCode) < 0 ){
     var rootDir = '/home/luis/Pictures/ImagenesSAP/';
     var path = rootDir  + imgName;
     //path = path.replace(/ /g, '\\');
     var rsfile = fs.createReadStream(path);
     var internalFile = streamToFile( rsfile, imgName );
-    sails.log.debug('Articulo a subir : ' + itemCode  + ' , Prod index: ' + prodCount + ' imagen:' + path);
+    sails.log.debug('Articulo a subir : ' + itemCode  + ' , Prod index: ' + prodCount + ' imagen:' + imgName + ' | icon: ' + icon);
     sails.log.info('Fotos subidas: ' + photosUploaded + ' | Tiempo de espera: ' + waitingTime);
 
     if(photosUploaded%5 == 0 && photosUploaded != 0){
@@ -72,6 +78,12 @@ function updateIcon(prod, callback){
 
     }, waitingTime);
   }
+  else if( excludes.indexOf(itemCode) > -1 ){
+    sails.log.warn('Producto excluido ' + itemCode);
+    productsList.push({ItemCode: itemCode, status: 'verificar imagen'});
+    callback();
+  }
+
   else if(icon && icon!='' && imgName && imgName != ''){
     //sails.log.warn('callback else');
     productsList.push({ItemCode: itemCode, status: 'con imagen SAP'});

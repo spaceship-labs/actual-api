@@ -193,7 +193,7 @@ module.exports = {
   findByHandle: function(req, res){
     var form = req.params.all();
     var handle = form.handle;
-    ProductCategory.findOne({Handle:handle}).populate('Products').populate('Childs').exec(function(err, category){
+    ProductCategory.findOne({Handle:handle}).populate('Products').populate('Childs').populate('Filters').exec(function(err, category){
       if(err) console.log(err);
       res.json(category);
     });

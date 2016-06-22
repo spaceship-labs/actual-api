@@ -4,7 +4,7 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'product';
-    var searchFields = ['ItemName','ItemCode'];
+    var searchFields = ['ItemName','ItemCode','Name'];
     var selectFields = form.fields;
     var populateFields = form.noimages ? [] : ['files'];
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
@@ -18,23 +18,20 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     //Product.find({id:id}).exec(function(err, results){
-    Product.find({ItemCode:id})
+    Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
       .populate('Sizes')
       .populate('Groups')
+      .populate('Price')
       //.populate('stock')
-      .exec(function(err, results){
+      .exec(function(err, product){
       if(err){
         console.log(err);
         res.notFound();
       }else{
-        if(results.length > 0){
-          res.ok({data:results[0]});
-        }else{
-          res.notFound();
-        }
+        res.ok({data:product});
       }
     });
   },
