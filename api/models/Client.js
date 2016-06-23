@@ -1,8 +1,11 @@
 module.exports = {
-  //migrate:'alter',
+  migrate:'alter',
   tableName:'Contact',
   attributes:{
-    CardCode:{type:'string'},
+    CardCode:{
+      type:'string',
+      primaryKey: true
+    },
     CardName:{type:'string'},
     Phone1:{type:'string'},
     Phone2:{type:'string'},

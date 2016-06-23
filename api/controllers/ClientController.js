@@ -20,6 +20,7 @@ module.exports = {
     var id = form.id;
     //Product.find({id:id}).exec(function(err, results){
     Client.findOne({CardCode:id})
+      .populate('Quotations')
       //.populate('Groups')
       //.populate('stock')
       .exec(function(err, client){

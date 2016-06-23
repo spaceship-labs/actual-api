@@ -321,6 +321,16 @@ module.exports.routes = {
     action:'findById'
   },
 
+  '/quotation/findbyclient/:page':{
+    controller: 'quotation',
+    action:'findByClient'
+  },
+
+  '/sale/findbyclient/:page':{
+    controller: 'sale',
+    action:'findByClient'
+  },
+
 
 
   /***************************************************************************

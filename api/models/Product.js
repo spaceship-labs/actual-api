@@ -153,13 +153,21 @@ module.exports = {
           via: 'Products'
         },
 
+        /*
         Quotations:{
           collection:'quotation',
           via: 'Products'
-        },
+        },*/
 
         Price: {
-          model:'ProductPrice'
+          //model: 'ProductPrice',
+          //via: 'Product'
+          collection:'ProductPrice',
+          via:'ItemCode'
+          //collection: 'ProductPrice',
+          //via:'Product'
+          //model:'ProductPrice',
+          //unique: true
         }
 
     },

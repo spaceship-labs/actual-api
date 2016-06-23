@@ -72,6 +72,8 @@ module.exports = {
       read.sort('Available DESC');
     }
 
+    sails.log.info(query);
+
     read.exec(function(err, results){
       if(err) console.log(err);
       model.count(querySearchAux).exec(function(err2,count){

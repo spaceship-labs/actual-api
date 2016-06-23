@@ -1,10 +1,13 @@
 module.exports = {
+  migrate: 'alter',
   tableName: 'ItemPrice',
   attributes: {
-    Product:{
+    ItemCode: {type:'string'}
+    /*Product:{
       model: 'Product',
-      via: 'ProductPrice',
-      columnName: 'ItemCode'
+      columnName: 'ItemCode',
+      foreignKey: true
     },
+    */
   }
 };

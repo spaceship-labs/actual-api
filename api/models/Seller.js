@@ -3,6 +3,9 @@ module.exports = {
   tableName:'Seller',
   attributes:{
     SlpName: {type:'string'},
-    SlpCode : {type:'integer'}
+    SlpCode : {
+      type:'integer',
+      primaryKey: true
+    }
   }
 }
