@@ -1,5 +1,5 @@
 module.exports = {
-  migrate: 'alter',
+  //migrate: 'alter',
   tableName: 'Quotation',
   attributes: {
     DocEntry:{

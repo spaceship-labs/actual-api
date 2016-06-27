@@ -1,6 +1,8 @@
 module.exports = {
   //migrate: 'alter',
-  tableName: 'QuotationDetail',
   attributes: {
+    Client:{
+      model:'Client'
+    }
   }
 };

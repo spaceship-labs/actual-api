@@ -159,17 +159,6 @@ module.exports = {
           via: 'Products'
         },*/
 
-        Price: {
-          //model: 'ProductPrice',
-          //via: 'Product'
-          collection:'ProductPrice',
-          via:'ItemCode'
-          //collection: 'ProductPrice',
-          //via:'Product'
-          //model:'ProductPrice',
-          //unique: true
-        }
-
     },
 
 }

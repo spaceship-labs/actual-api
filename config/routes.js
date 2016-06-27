@@ -301,6 +301,11 @@ module.exports.routes = {
     action:'getAll'
   },
 
+  '/client/find':{
+    controller: 'client',
+    action:'find'
+  },
+
   '/client/findbyseller/:seller':{
     controller: 'client',
     action:'findBySeller'
@@ -326,9 +331,14 @@ module.exports.routes = {
     action:'findByClient'
   },
 
-  '/sale/findbyclient/:page':{
+  '/quotation/find/:page':{
+    controller: 'quotation',
+    action:'find'
+  },
+
+  '/sale/find/:page':{
     controller: 'sale',
-    action:'findByClient'
+    action:'find'
   },
 
 

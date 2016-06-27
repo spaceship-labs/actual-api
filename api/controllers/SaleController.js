@@ -1,6 +1,6 @@
 module.exports = {
 
-  findByClient: function(req, res){
+  find: function(req, res){
     var form = req.params.all();
     var client = form.client;
     var model = 'sale';

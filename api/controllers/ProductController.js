@@ -7,6 +7,9 @@ module.exports = {
     var searchFields = ['ItemName','ItemCode','Name'];
     var selectFields = form.fields;
     var populateFields = form.noimages ? [] : ['files'];
+    if(form.populate_fields){
+      populateFields = form.populate_fields;
+    }
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
       res.ok(result);
     },function(err){
@@ -24,7 +27,6 @@ module.exports = {
       .populate('FilterValues')
       .populate('Sizes')
       .populate('Groups')
-      .populate('Price')
       //.populate('stock')
       .exec(function(err, product){
       if(err){

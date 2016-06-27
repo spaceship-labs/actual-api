@@ -59,6 +59,9 @@ module.exports = {
       read = model.find(query);
     }
 
+    sails.log.info('Query common: ');
+    sails.log.info(query);
+
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
         read = read.populate(populateF);
@@ -72,7 +75,7 @@ module.exports = {
       read.sort('Available DESC');
     }
 
-    sails.log.info(query);
+    //sails.log.info(query);
 
     read.exec(function(err, results){
       if(err) console.log(err);

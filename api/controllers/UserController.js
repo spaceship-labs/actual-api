@@ -33,6 +33,19 @@ module.exports = {
     });
   },
 
+  findBySlpCode: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    User.findOne({SlpCode:id}).exec(function(err, result){
+      if(err){
+        console.log(err);
+        res.notFound();
+      }else{
+        res.ok({data:result});
+      }
+    });
+  },
+
   create: function(req, res){
     User
       .create(_.omit(req.allParams(), 'id'))

@@ -24,6 +24,10 @@ module.exports = {
     Quotations: {
       collection:'Quotation',
       via: 'Client',
+    },
+
+    ClientInfo: {
+      model:'ClientInfo'
     }
   }
 }
