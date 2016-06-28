@@ -27,6 +27,13 @@ module.exports = {
     Records: {
       collection:'QuotationRecord',
       via:'Quotation'
-    }
+    },
+
+    Info:{
+      //model: 'QuotationInfo'
+      collection:'QuotationInfo',
+      via:'Quotation'
+    },
+
   }
 };

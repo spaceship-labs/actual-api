@@ -39,7 +39,7 @@ function updateIcon(prod, callback){
   var imgName = prod.PicturName;
   prodCount++;
 
-  var excludes = ['CO32166','CO10438','CO31751','CO32938','CO43242','CO44544','CO44540','CO44849','CO46687','CO46688','CO47735','CO03412','CO24328','ST01203','ST01312'];
+  var excludes = ['CO32166','CO10438','CO31751','CO32938','CO43242','CO44544','CO44540','CO44849','CO46687','CO46688','CO47735','CO03412','CO24328','ST01203','ST01312','ST02342'];
 
   //sails.log.warn('Articulo: ' + itemCode +' | Icono : ' + icon);
 

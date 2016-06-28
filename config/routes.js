@@ -346,6 +346,11 @@ module.exports.routes = {
     action:'addRecord'
   },
 
+  '/quotation/updateinfo/:docentry':{
+    controller:'quotation',
+    action: 'updateInfo'
+  },
+
 
 
   /***************************************************************************

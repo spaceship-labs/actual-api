@@ -11,16 +11,19 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({id: id}).populate('Details').populate('Records').exec(function findCB(err, quotation){
+    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('Info').exec(function findCB(err, quotation){
       if(err) console.log(err);
+
+        //sails.log.debug(quotation)
 
         var recordsIds = [];
         quotation.Records.forEach(function(record){
           recordsIds.push(record.id);
         });
 
-        QuotationRecord.find({id: recordsIds}).populate('files').populate('User').exec(function findRecordsCB(errFiles, records){
+        QuotationRecord.find({id: recordsIds}).populate('files').exec(function findRecordsCB(errFiles, records){
 
+          quotation = quotation.toObject();
           quotation.Records = records;
 
           Client.findOne({CardCode: quotation.CardCode}).exec(function findClientCB(err2, client ){
@@ -60,13 +63,56 @@ module.exports = {
     form.Quotation = id;
     QuotationRecord.create(form).exec( function createCB(err, createdRecord){
       if(err) console.log(err);
-      QuotationRecord.findOne({id:createdRecord.id}).populate('User').populate('files').exec(function findCB(err2, record){
-        if(err2) console.log(err2);
-        res.json(record);
+
+      QuotationRecord.findOne({id:createdRecord.id}).exec(function cb(errFind, record){
+        if(errFind) console.log(errFind);
+
+        if(req.file('file')._files[0]){
+          record.addFiles(req,{
+            dir : 'records/gallery',
+            profile: 'gallery'
+          },function(e,record){
+            if(e){
+              console.log(e);
+              res.json(false);
+            }else{
+              //TODO check how to retrieve images instead of doing other query
+              QuotationRecord.findOne({id:createdRecord.id}).populate('User').populate('files').exec(function findCB(err2, recordUpdated){
+                if(err2) console.log(err2);
+                res.json(recordUpdated);
+              });
+            }
+          });
+        }else{
+          res.json(record);
+        }
       });
       //res.json(record);
     });
   },
+
+  updateInfo: function(req, res){
+    var form = req.params.all();
+    var DocEntry = form.docentry;
+    if( !isNaN(DocEntry) ){
+      form.Quotation = parseInt(DocEntry);
+    }
+    var query = {Quotation: DocEntry};
+    delete form.docentry;
+    QuotationInfo.findOrCreate(query, form).exec(function cb(err, quotationInfo){
+      if(err) console.log(err);
+      //If not created
+      if(quotationInfo.id == form.id){
+        QuotationInfo.update(query, form).exec(function cbUpdate(err2, quotationInfoUpdated){
+          if(err2) console.log(err2);
+          res.json(quotationInfoUpdated);
+        });
+      }else{
+        res.json(quotationInfo);
+      }
+    });
+  },
+
 
   findByClient: function(req, res){
     var form = req.params.all();
