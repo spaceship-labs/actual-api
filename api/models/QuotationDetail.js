@@ -1,6 +1,10 @@
 module.exports = {
-  //migrate: 'alter',
+  migrate: 'alter',
   tableName: 'QuotationDetail',
   attributes: {
+    Quotation:{
+      model:'Quotation',
+      columnName: 'DocEntry'
+    }
   }
 };

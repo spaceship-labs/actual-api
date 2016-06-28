@@ -47,6 +47,10 @@ module.exports = {
 
         SlpCode: {type:'integer'},
 
+        Records: {
+          collection:'QuotationRecord',
+          via:'User'
+        },
         /*
         Clients :{
           collection: 'client',

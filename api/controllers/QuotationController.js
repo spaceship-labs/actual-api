@@ -3,17 +3,6 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     res.json(true);
-    /*
-    Quotation.create(form).exec(function(err1, result){
-      if(err1) console.log(err1);
-      if(result){
-        res.json(result);
-      }
-      else{
-        res.json(false);
-      }
-    });
-    */
   },
 
   findById: function(req, res){
@@ -22,40 +11,60 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({DocEntry: id}).populate('Client').exec(function findCB(err, quotation){
+    Quotation.findOne({id: id}).populate('Details').populate('Records').exec(function findCB(err, quotation){
       if(err) console.log(err);
-      Client.findOne({CardCode: quotation.CardCode}).exec(function findClientCB(err2, client ){
-        if(err2) console.log(err2);
-        quotation.Client = client;
 
-        var query = {DocEntry: id};
-        //sails.log.info('query');
-        //sails.log.info(query);
-        QuotationDetail.find(query).exec(function findDetailsCB(errD, details){
-          if(errD) console.log(errD);
-          //sails.log.info('details');
-          //sails.log.info(details);
-          quotation.Details = details;
-
-          User.findOne({SlpCode: quotation.SlpCode}).exec( function findUserCB(err3, user){
-            if(err3) console.log(err3);
-
-            if(!user){
-
-              Seller.findOne({SlpCode: quotation.SlpCode}).exec( function findSellerCB(err4, seller){
-                quotation.Seller = seller;
-                res.json(quotation);
-              });
-
-            }else{
-              quotation.Seller = user;
-              res.json(quotation);
-            }
-          });
-
+        var recordsIds = [];
+        quotation.Records.forEach(function(record){
+          recordsIds.push(record.id);
         });
 
+        QuotationRecord.find({id: recordsIds}).populate('files').populate('User').exec(function findRecordsCB(errFiles, records){
+
+          quotation.Records = records;
+
+          Client.findOne({CardCode: quotation.CardCode}).exec(function findClientCB(err2, client ){
+            if(err2) console.log(err2);
+            quotation.Client = client;
+
+            User.findOne({SlpCode: quotation.SlpCode}).exec( function findUserCB(err3, user){
+              if(err3) console.log(err3);
+
+              if(!user){
+
+                Seller.findOne({SlpCode: quotation.SlpCode}).exec( function findSellerCB(err4, seller){
+                  quotation.Seller = seller;
+                  res.json(quotation);
+                });
+
+              }else{
+                quotation.Seller = user;
+                res.json(quotation);
+              }
+            });
+
+          });
+
       });
+
+    });
+  },
+
+  addRecord: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    if( !isNaN(id) ){
+      id = parseInt(id);
+    }
+    delete form.id;
+    form.Quotation = id;
+    QuotationRecord.create(form).exec( function createCB(err, createdRecord){
+      if(err) console.log(err);
+      QuotationRecord.findOne({id:createdRecord.id}).populate('User').populate('files').exec(function findCB(err2, record){
+        if(err2) console.log(err2);
+        res.json(record);
+      });
+      //res.json(record);
     });
   },
 

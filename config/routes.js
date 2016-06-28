@@ -341,6 +341,11 @@ module.exports.routes = {
     action:'find'
   },
 
+  '/quotation/addrecord/:id':{
+    controller:'quotation',
+    action:'addRecord'
+  },
+
 
 
   /***************************************************************************
