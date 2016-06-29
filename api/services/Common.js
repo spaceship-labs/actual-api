@@ -75,6 +75,7 @@ module.exports = {
       read.sort('Available DESC');
     }
 
+    //sails.log.info(modelName);
     //sails.log.info(query);
 
     read.exec(function(err, results){
