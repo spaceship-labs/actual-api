@@ -6,7 +6,6 @@ module.exports = {
     var form = req.params.all();
     var model = 'productcategory';
     var searchFields = ['Name'];
-    var populateFields = ['Childs'];
 
     Common.find(model, form, searchFields).then(function(result){
       res.ok(result);

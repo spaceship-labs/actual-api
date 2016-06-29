@@ -220,6 +220,37 @@ module.exports.routes = {
     action:'getAll'
   },
 
+  '/custombrand/find/:page':{
+    controller: 'custombrand',
+    action:'find'
+  },
+
+  '/custombrand/getall':{
+    controller: 'custombrand',
+    action:'getAll'
+  },
+
+  '/custombrand/create':{
+    controller: 'custombrand',
+    action:'create'
+  },
+
+  '/custombrand/update/:id':{
+    controller: 'custombrand',
+    action:'update'
+  },
+
+  '/custombrand/findbyid/:id':{
+    controller: 'custombrand',
+    action:'findById'
+  },
+
+  '/custombrand/destroy/:id':{
+    controller: 'custombrand',
+    action:'destroy'
+  },
+
+
   '/productsize/create':{
     controller: 'productsize',
     action:'create'

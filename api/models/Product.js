@@ -153,6 +153,10 @@ module.exports = {
           via: 'Products'
         },
 
+        CustomBrand: {
+          model: 'CustomBrand'
+        },
+
         /*
         Quotations:{
           collection:'quotation',
