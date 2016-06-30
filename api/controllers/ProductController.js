@@ -11,7 +11,11 @@ module.exports = {
       populateFields = form.populate_fields;
     }
     populateFields.push('CustomBrand');
+    if(form.getAll){
+      sails.log.info('Exportando productos');
+    }
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+      sails.log.info('Termino exportacion de productos');
       res.ok(result);
     },function(err){
       console.log(err);
