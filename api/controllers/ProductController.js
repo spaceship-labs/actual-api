@@ -15,7 +15,9 @@ module.exports = {
       sails.log.info('Exportando productos');
     }
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
-      sails.log.info('Termino exportacion de productos');
+      if(form.getAll){
+        sails.log.info('Termino exportacion de productos');
+      }
       res.ok(result);
     },function(err){
       console.log(err);

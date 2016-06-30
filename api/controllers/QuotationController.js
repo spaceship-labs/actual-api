@@ -15,6 +15,7 @@ module.exports = {
       if(err) console.log(err);
 
         //sails.log.debug(quotation)
+      if(quotation){
 
         var recordsIds = [];
         quotation.Records.forEach(function(record){
@@ -48,8 +49,11 @@ module.exports = {
 
           });
 
-      });
-
+        });
+      }
+      else{
+        res.json(false);
+      }
     });
   },
 
