@@ -10,6 +10,7 @@ module.exports = {
     if(form.populate_fields){
       populateFields = form.populate_fields;
     }
+    populateFields.push('CustomBrand');
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
       res.ok(result);
     },function(err){
