@@ -39,8 +39,9 @@ function updateIcon(prod, callback){
   var imgName = prod.PicturName;
   prodCount++;
 
-  var excludes = ['CO32166','CO10438','CO31751','CO32938','CO43242','CO44544','CO44540','CO44849','CO46687','CO46688','CO47735','CO03412','CO24328','ST01203','ST01312','ST02342','ST07239','ST09227'];
-
+  //var excludes = ['CO32166','CO10438','CO31751','CO32938','CO43242','CO44544','CO44540','CO44849','CO46687','CO46688','CO47735','CO03412','CO24328','ST01203','ST01312','ST02342','ST07239','ST09227','ST09473'];
+  var excludes = [];
+  sails.log.info('intentando levantar');
   //sails.log.warn('Articulo: ' + itemCode +' | Icono : ' + icon);
 
   if(typeof imgName!= 'undefined' && imgName && imgName != '' && icon == null && excludes.indexOf(itemCode) < 0 ){
@@ -79,7 +80,8 @@ function updateIcon(prod, callback){
     }, waitingTime);
   }
   else if( excludes.indexOf(itemCode) > -1 ){
-    sails.log.warn('Producto excluido ' + itemCode);
+    //sails.log.warn('Producto excluido ' + itemCode);
+    //sails.log.warn(imgName);
     productsList.push({ItemCode: itemCode, status: 'verificar imagen'});
     callback();
   }
@@ -98,7 +100,7 @@ function updateIcon(prod, callback){
   }
   else{
     //sails.log.warn('callback else');
-    sails.log.warn('Sin imagen');
+    //sails.log.warn('Sin imagen');
     productsList.push({ItemCode: itemCode, status: 'faltante'});
     callback();
   }
