@@ -26,7 +26,7 @@ module.exports = {
       via: 'Client',
     },
 
-    ClientInfo: {
+    Info: {
       model:'ClientInfo'
     }
   }

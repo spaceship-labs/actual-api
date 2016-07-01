@@ -337,10 +337,6 @@ module.exports.routes = {
     action:'find'
   },
 
-  '/client/findbyseller/:seller':{
-    controller: 'client',
-    action:'findBySeller'
-  },
 
   '/client/findbyid/:id':{
     controller: 'client',
@@ -382,6 +378,10 @@ module.exports.routes = {
     action: 'updateInfo'
   },
 
+  '/client/update/:id':{
+    controller: 'client',
+    action: 'update'
+  }
 
 
   /***************************************************************************

@@ -1,11 +1,15 @@
 module.exports = {
-  //migrate:'alter',
+  migrate:'alter',
   tableName:'Seller',
   attributes:{
     SlpName: {type:'string'},
-    SlpCode : {
+    id : {
       type:'integer',
-      primaryKey: true
+      primaryKey: true,
+      columnName: 'SlpCode'
+    },
+    User: {
+      model:'User'
     }
   }
 }

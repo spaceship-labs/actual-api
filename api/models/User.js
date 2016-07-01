@@ -45,7 +45,11 @@ module.exports = {
             type:'string'
         },
 
-        SlpCode: {type:'integer'},
+        SlpCode: {
+          type:'integer',
+          columnName:'SlpCode',
+          model:'Seller'
+        },
 
         Records: {
           collection:'QuotationRecord',

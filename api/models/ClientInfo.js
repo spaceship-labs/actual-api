@@ -1,6 +1,9 @@
 module.exports = {
-  //migrate: 'alter',
+  migrate: 'alter',
   attributes: {
+
+    title: {type:'string'},
+    gender: {type:'string'},
     Client:{
       model:'Client'
     }
