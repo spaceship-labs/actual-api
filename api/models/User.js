@@ -55,6 +55,9 @@ module.exports = {
           collection:'QuotationRecord',
           via:'User'
         },
+        accessList:{
+          type:'array'
+        },
         /*
         Clients :{
           collection: 'client',

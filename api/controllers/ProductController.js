@@ -53,7 +53,7 @@ module.exports = {
     var query = {};
     var querySearchAux = {};
     var model = Product
-    var searchFields = ['ItemName','ItemCode'];
+    var searchFields = ['ItemName', 'Name','ItemCode'];
     var color = form.color || false;
     var line = form.line || false;
 
