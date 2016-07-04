@@ -20,6 +20,7 @@ module.exports = {
     var selectObj = false;
     var read = false;
     var getAll = form.getAll || false;
+    var dateRange = form.dateRange || false;
     //console.log(model);
     if(term){
       if(searchFields.length > 0){
@@ -37,6 +38,10 @@ module.exports = {
       for(key in filters){
         query[key] = filters[key];
       }
+    }
+
+    if(dateRange){
+      query[dateRange.field] = { '>=': new Date(dateRange.start), '<=': new Date(dateRange.end) };
     }
 
     querySearchAux = _.clone(query);
