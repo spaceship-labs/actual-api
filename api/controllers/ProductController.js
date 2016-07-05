@@ -52,10 +52,9 @@ module.exports = {
     var autocomplete = form.autocomplete || false;
     var query = {};
     var querySearchAux = {};
-    var model = Product
+    var model = Product;
+    var keywords = form.keywords || false;
     var searchFields = ['ItemName', 'Name','ItemCode'];
-    var color = form.color || false;
-    var line = form.line || false;
 
     if(term || true){
       if(searchFields.length > 0 && term){
@@ -67,6 +66,18 @@ module.exports = {
           query.or.push(obj);
         }
       }
+
+      if(keywords && searchFields.length > 0){
+        query.or = [];
+        searchFields.forEach(function(field){
+          keywords.forEach(function(keyword){
+            var obj = {};
+            obj[field] = {contains:keyword};
+            query.or.push(obj);
+          });
+        });
+      }
+
       querySearchAux = _.clone(query);
 
       query.skip = (page-1) * items;

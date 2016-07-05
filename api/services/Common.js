@@ -21,6 +21,8 @@ module.exports = {
     var read = false;
     var getAll = form.getAll || false;
     var dateRange = form.dateRange || false;
+    var keywords = form.keywords || false;
+
     //console.log(model);
     if(term){
       if(searchFields.length > 0){
@@ -31,6 +33,19 @@ module.exports = {
           obj[field] = {contains:term};
           query.or.push(obj);
         }
+      }
+    }
+
+    if(keywords){
+      if(searchFields.length > 0){
+        query.or = [];
+        searchFields.forEach(function(field){
+          keywords.forEach(function(keyword){
+            var obj = {};
+            obj[field] = {contains:keyword};
+            query.or.push(obj);
+          });
+        });
       }
     }
 
