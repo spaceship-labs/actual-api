@@ -31,6 +31,10 @@ module.exports = {
   getProducts: function(req, res){
     var form = req.params.all();
     var valuesIds = form.ids;
+    var keywords = form.keywords || false;
+    var query = {};
+    var searchFields = ['ItemName', 'Name','ItemCode'];
+
     Product_ProductFilterValue.find({productfiltervalue_Products: valuesIds}).exec(function findCB(err, relations){
       if(err){
         console.log(err);
@@ -48,7 +52,20 @@ module.exports = {
         }
       });
 
-      Product.find({id: productsIds}).populate('files').populate('FilterValues').exec(function findCB(errProds, products){
+      if(keywords && searchFields.length > 0){
+        query.or = [];
+        searchFields.forEach(function(field){
+          keywords.forEach(function(keyword){
+            var obj = {};
+            obj[field] = {contains:keyword};
+            query.or.push(obj);
+          });
+        });
+      }
+
+      query.id = productsIds;
+
+      Product.find(query).populate('files').populate('FilterValues').exec(function findCB(errProds, products){
         if(errProds){
           console.log(errProds);
         }
