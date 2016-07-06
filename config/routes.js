@@ -381,8 +381,17 @@ module.exports.routes = {
   '/client/update/:id':{
     controller: 'client',
     action: 'update'
-  }
+  },
 
+  '/product/advancedsearch':{
+    controller: 'productsearch',
+    action:'advancedSearch'
+  },
+
+  '/product/searchbyfilters':{
+    controller: 'productsearch',
+    action:'searchByfilters'
+  }
 
   /***************************************************************************
   *                                                                          *
