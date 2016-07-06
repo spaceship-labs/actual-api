@@ -32,7 +32,7 @@ module.exports.policies = {
   ProductController:{
     find: true,
     findById: true,
-    search: true
+    search: true,
   },
   ProductCategoryController:{
     getCategoriesGroups: true,
@@ -52,6 +52,10 @@ module.exports.policies = {
   ProductFilterValueController:{
     getProducts: true
   },
+  ProductSearchController:{
+    advancedSearch: true,
+    searchByFilters: true
+  }
 
   //Por ahora
   //SyncController:{'*':true}
