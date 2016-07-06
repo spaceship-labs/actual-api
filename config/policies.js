@@ -54,7 +54,8 @@ module.exports.policies = {
   },
   ProductSearchController:{
     advancedSearch: true,
-    searchByFilters: true
+    searchByFilters: true,
+    searchByCategory: true
   }
 
   //Por ahora

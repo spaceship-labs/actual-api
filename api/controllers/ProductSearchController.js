@@ -98,17 +98,12 @@ module.exports = {
         });
 
       }
-
       productsIds = productsIds.map(function(id){
         return ObjectId(id);
       });
-
       query._id = {$in: productsIds};
-
-
       //sails.log.info('query:');
       //sails.log.info(util.inspect(query, false, null));
-
       Product.native(function(err, collection){
         if(err) console.log(err);
         collection.find(query).toArray(function(errProds, products){
@@ -118,7 +113,30 @@ module.exports = {
       });
 
     });
-
+  },
+  searchByCategory: function(req, res) {
+    var form       = req.params.all();
+    var handle     = form.handle;
+    var productIds = [];
+    var paginate   = {
+      page:  form.page  || 1,
+      limit: form.limit || 10
+    };
+    ProductCategory.findOne({Handle: handle}).exec(function(err, category){
+      if (err) {return res.negotiate(err);}
+      Product_ProductCategory.find({productcategory_Products: category.id}).exec(function(err, relations) {
+        if (err) {return res.negotiate(err);}
+        productIds = relations.map(function(relation){
+          return relation.product_Categories;
+        });
+        Product.find(productIds).paginate(paginate).populate('files').exec(function(err, products){
+          if (err) {return res.negotiate(err);}
+          return res.json({
+            products: products,
+            total: productIds.length
+          });
+        });
+      });
+    });
   }
-
 }
