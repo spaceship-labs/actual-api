@@ -114,29 +114,88 @@ module.exports = {
 
     });
   },
+
   searchByCategory: function(req, res) {
     var form       = req.params.all();
     var handle     = form.handle;
-    var productIds = [];
+    var total      = 0;
     var paginate   = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
-    ProductCategory.findOne({Handle: handle}).exec(function(err, category){
-      if (err) {return res.negotiate(err);}
-      Product_ProductCategory.find({productcategory_Products: category.id}).exec(function(err, relations) {
-        if (err) {return res.negotiate(err);}
-        productIds = relations.map(function(relation){
-          return relation.product_Categories;
+    getProductsByCategory(handle)
+      .then(function(idProducts) {
+        total = idProducts.length;
+        return Product.find(idProducts).paginate(paginate).populate('files');
+      })
+      .then(function(products) {
+        return res.json({
+          products: products,
+          total: total
         });
-        Product.find(productIds).paginate(paginate).populate('files').exec(function(err, products){
-          if (err) {return res.negotiate(err);}
-          return res.json({
-            products: products,
-            total: productIds.length
-          });
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  },
+  searchByFilterValues: function(req, res) {
+    var form         = req.params.all();
+    var filtervalues = [].concat(form.filtervalues);
+    var total        = 0;
+    var paginate     = {
+      page:  form.page  || 1,
+      limit: form.limit || 10
+    };
+    getProductsByFilterValue(filtervalues)
+      .then(function(idProducts) {
+        total = idProducts.length;
+        return Product.find(idProducts).paginate(paginate).populate('files');
+      })
+      .then(function(products) {
+        return res.json({
+          products: products,
+          total: total
         });
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  }
+}
+
+
+function getProductsByCategory(handle) {
+  return ProductCategory.findOne({Handle: handle})
+    .then(function(category) {
+      return Product_ProductCategory.find({productcategory_Products: category.id});
+    })
+    .then(function(relations) {
+      return relations.map(function(relation){
+        return relation.product_Categories;
       });
     });
-  }
+}
+
+function getProductsByFilterValue(filtervalues){
+  return Product_ProductFilterValue.find({productfiltervalue_Products: filtervalues})
+    .then(function(relations) {
+      relations = relations.reduce(function(prodMap, current){
+        prodMap[current.product_FilterValues] = (prodMap[current.product_FilterValues] || []).concat(current.productfiltervalue_Products);
+        return prodMap;
+      }, {});
+      relations = hashToArray(relations);
+      relations = relations.filter(function(relation) {
+        return _.isEqual(filtervalues, relation[1]);
+      });
+      return relations.map(function(relation) {
+        return relation[0];
+      });
+    });
+}
+
+function hashToArray(hash) {
+  var entries = Object.keys(hash);
+  return entries.map(function(entry){
+    return [entry, hash[entry]]
+  });
 }
