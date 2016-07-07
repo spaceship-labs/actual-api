@@ -123,7 +123,7 @@ module.exports = {
       limit: form.limit || 10
     };
     ProductCategory.findOne({Handle: handle}).exec(function(err, category){
-      if (err) {return res.negotiate(err);}
+      if (err || !category) {return res.negotiate(err);}
       Product_ProductCategory.find({productcategory_Products: category.id}).exec(function(err, relations) {
         if (err) {return res.negotiate(err);}
         productIds = relations.map(function(relation){
