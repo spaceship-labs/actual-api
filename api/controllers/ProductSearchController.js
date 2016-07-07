@@ -2,7 +2,6 @@ var util = require('util');
 var ObjectId = require('mongodb').ObjectID;
 
 module.exports = {
-
   advancedSearch: function(req, res){
     var form = req.params.all();
     var items = form.items || 10;
@@ -116,37 +115,27 @@ module.exports = {
   },
 
   searchByCategory: function(req, res) {
-    var form       = req.params.all();
-    var handle     = form.handle;
-    var total      = 0;
-    var paginate   = {
-      page:  form.page  || 1,
-      limit: form.limit || 10
-    };
-    getProductsByCategory(handle)
-      .then(function(idProducts) {
-        total = idProducts.length;
-        return Product.find(idProducts).paginate(paginate).populate('files');
-      })
-      .then(function(products) {
-        return res.json({
-          products: products,
-          total: total
-        });
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  },
-  searchByFilterValues: function(req, res) {
     var form         = req.params.all();
+    var handle       = form.handle;
     var filtervalues = [].concat(form.filtervalues);
     var total        = 0;
     var paginate     = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
-    getProductsByFilterValue(filtervalues)
+    getProductsByCategory(handle)
+      .then(function(catprods) {
+        return [catprods, getProductsByFilterValue(filtervalues)];
+      })
+      .spread(function(catprods, filterprods) {
+        if (!handle || handle.length == 0) {
+          return filterprods;
+        } else if(!filtervalues || filter.values.length == 0) {
+          return catprods;
+        } else {
+          return intersection(catprods, filterprods);
+        }
+      })
       .then(function(idProducts) {
         total = idProducts.length;
         return Product.find(idProducts).paginate(paginate).populate('files');
@@ -165,9 +154,10 @@ module.exports = {
 
 
 function getProductsByCategory(handle) {
-  return ProductCategory.findOne({Handle: handle})
+  return ProductCategory.find({Handle: handle})
     .then(function(category) {
-      return Product_ProductCategory.find({productcategory_Products: category.id});
+      category = category.map(function(cat){return cat.id;});
+      return Product_ProductCategory.find({productcategory_Products: category});
     })
     .then(function(relations) {
       return relations.map(function(relation){
@@ -197,5 +187,11 @@ function hashToArray(hash) {
   var entries = Object.keys(hash);
   return entries.map(function(entry){
     return [entry, hash[entry]]
+  });
+}
+
+function intersection(set1, set2) {
+  return set1.filter(function(si) {
+    return set2.indexOf(si) != -1;
   });
 }
