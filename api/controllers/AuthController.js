@@ -20,7 +20,7 @@ function _onPassportAuth(req, res, error, user, info){
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
 
   /*Logging stuff*/
-  var message    = 'El usuario ' + user.firstName + ' ' + user.lastName + ' se ha loggeado';
+  var message    = user.firstName + ' ingresó al sistema';
   var action     = 'login';
   Logger.log(user.id, message, action).then(function(log) {
     return res.ok({
