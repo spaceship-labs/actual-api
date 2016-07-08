@@ -59,7 +59,8 @@ module.exports.policies = {
     searchByFilterValues: true
   },
   LoggingController: {
-    'find': true
+    'find': true,
+    'create': true
   }
 
   //Por ahora

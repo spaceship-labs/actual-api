@@ -13,7 +13,7 @@ module.exports = {
     },
     action: {
       type: 'string',
-      enum: ['login'],
+      enum: ['login', 'pointer'],
       required: true
     },
     references: {
