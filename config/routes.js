@@ -348,6 +348,11 @@ module.exports.routes = {
     action: 'create'
   },
 
+  '/quotation/update/:id':{
+    controller: 'quotation',
+    action: 'update'
+  },
+
   '/quotation/findbyid/:id':{
     controller: 'quotation',
     action:'findById'
@@ -373,10 +378,16 @@ module.exports.routes = {
     action:'addRecord'
   },
 
-  '/quotation/updateinfo/:docentry':{
+  '/quotation/adddetail/:id':{
     controller:'quotation',
-    action: 'updateInfo'
+    action:'addDetail'
   },
+
+  '/quotation/removedetail/:id':{
+    controller:'quotation',
+    action:'removeDetail'
+  },
+
 
   '/client/update/:id':{
     controller: 'client',

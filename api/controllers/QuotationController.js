@@ -2,7 +2,19 @@ module.exports = {
 
   create: function(req, res){
     var form = req.params.all();
-    res.json(true);
+    Quotation.create(form).exec(function createCB(err, created){
+      if(err) console.log(err);
+      res.json(created);
+    });
+  },
+
+  update: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Quotation.update({id:id}, form).exec(function updateCB(err, updated){
+      if(err) console.log(err);
+      res.json(updated);
+    });
   },
 
   findById: function(req, res){
@@ -11,11 +23,11 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('Info').exec(function findCB(err, quotation){
+    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('User').exec(function findCB(err, quotation){
       if(err) console.log(err);
 
-        //sails.log.debug(quotation)
       if(quotation){
+        quotation = quotation.toObject();
 
         var recordsIds = [];
         quotation.Records.forEach(function(record){
@@ -23,32 +35,9 @@ module.exports = {
         });
 
         QuotationRecord.find({id: recordsIds}).populate('files').exec(function findRecordsCB(errFiles, records){
-
-          quotation = quotation.toObject();
+          if(errFiles) console.log(errFiles);
           quotation.Records = records;
-
-          Client.findOne({CardCode: quotation.CardCode}).exec(function findClientCB(err2, client ){
-            if(err2) console.log(err2);
-            quotation.Client = client;
-
-            User.findOne({SlpCode: quotation.SlpCode}).exec( function findUserCB(err3, user){
-              if(err3) console.log(err3);
-
-              if(!user){
-
-                Seller.findOne({SlpCode: quotation.SlpCode}).exec( function findSellerCB(err4, seller){
-                  quotation.Seller = seller;
-                  res.json(quotation);
-                });
-
-              }else{
-                quotation.Seller = user;
-                res.json(quotation);
-              }
-            });
-
-          });
-
+          res.json(quotation);
         });
       }
       else{
@@ -95,28 +84,26 @@ module.exports = {
     });
   },
 
-  updateInfo: function(req, res){
+
+  addDetail: function(req, res){
     var form = req.params.all();
-    var DocEntry = form.docentry;
-    if( !isNaN(DocEntry) ){
-      form.Quotation = parseInt(DocEntry);
-    }
-    var query = {Quotation: DocEntry};
-    delete form.docentry;
-    QuotationInfo.findOrCreate(query, form).exec(function cb(err, quotationInfo){
+    var id = form.id;
+    form.Quotation = id;
+    delete form.id;
+    QuotationDetail.create(form).exec(function addCB(err, created){
       if(err) console.log(err);
-      //If not created
-      if(quotationInfo.id == form.id){
-        QuotationInfo.update(query, form).exec(function cbUpdate(err2, quotationInfoUpdated){
-          if(err2) console.log(err2);
-          res.json(quotationInfoUpdated);
-        });
-      }else{
-        res.json(quotationInfo);
-      }
+      res.json(created);
     });
   },
 
+  removeDetail: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    QuotationDetail.destroy({id: id}).exec(function removeCB(err){
+      if(err) console.log(err);
+      res.json({destroyed:true});
+    });
+  },
 
   findByClient: function(req, res){
     var form = req.params.all();
@@ -139,7 +126,9 @@ module.exports = {
     var model = 'quotation';
     var searchFields = ['DocEntry','CardCode','CardName'];
     var selectFields = form.fields;
-    var populateFields = [];
+    var populateFields = ['Client'];
+    sails.log.info('populateFields');
+    sails.log.info(populateFields);
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
       res.ok(result);
     },function(err){

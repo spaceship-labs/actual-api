@@ -2,24 +2,12 @@ module.exports = {
   migrate: 'alter',
   tableName: 'Quotation',
   attributes: {
-    id:{
-      type:'integer',
-      primaryKey: true,
-      autoIncrement: true,
-      columnName: 'DocEntry'
-    },
     Client:{
-      model:'client'
+      model:'Client'
     },
-    Seller:{
+    User:{
       model: 'User',
     },
-    /*
-    Client:{
-      model: 'Client',
-      columnName: 'SlpCode'
-    },
-    */
     Details: {
       collection:'QuotationDetail',
       via:'Quotation'
@@ -28,12 +16,18 @@ module.exports = {
       collection:'QuotationRecord',
       via:'Quotation'
     },
-
-    Info:{
-      //model: 'QuotationInfo'
-      collection:'QuotationInfo',
-      via:'Quotation'
+    Address:{
+      model:'QuotationAddress',
     },
 
+    clientName: {type:'string'},
+    folio:{type:'integer'}
+  },
+
+  beforeCreate: function(val,cb){
+    Common.orderCustomAI(val, 'quotationFolio',function(val){
+      cb();
+    });
   }
+
 };

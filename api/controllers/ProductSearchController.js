@@ -11,7 +11,7 @@ module.exports = {
     var query = {};
     var querySearchAux = {};
     var keywords = form.keywords || false;
-    var searchFields = ['ItemName', 'Name','ItemCode'];
+    var searchFields = ['Name', 'ItemName','ItemCode'];
 
     if(keywords && searchFields.length > 0){
       query.$and = [];
@@ -38,6 +38,7 @@ module.exports = {
         var find = collection.find(query);
         find.skip((page-1) * items);
         find.limit(items);
+        find.sort( { Available: -1 } );
         find.toArray(function(errProds, products){
           if(errProds) console.log(errProds);
           res.json({data:products, total: total});
@@ -54,7 +55,7 @@ module.exports = {
     var keywords = form.keywords || false;
     var term = form.term || false;
     var query = {};
-    var searchFields = ['ItemName', 'Name','ItemCode','Description','DetailedColor'];
+    var searchFields = ['Name','ItemName','ItemCode','Description','DetailedColor'];
 
     Product_ProductFilterValue.find({productfiltervalue_Products: valuesIds}).exec(function findCB(err, relations){
       if(err){
@@ -138,7 +139,7 @@ module.exports = {
       })
       .then(function(idProducts) {
         total = idProducts.length;
-        return Product.find(idProducts).paginate(paginate).populate('files');
+        return Product.find(idProducts).paginate(paginate).sort('Available DESC').populate('files');
       })
       .then(function(products) {
         return res.json({

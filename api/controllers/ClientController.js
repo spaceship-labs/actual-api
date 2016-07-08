@@ -44,7 +44,6 @@ module.exports = {
         console.log(err);
         res.notFound();
       }else{
-        sails.log.info(client);
         res.json(client);
       }
     });
