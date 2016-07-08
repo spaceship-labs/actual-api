@@ -1,6 +1,6 @@
 module.exports = {
-  log: function(message, action, references) {
+  log: function(user, message, action, references) {
     sails.log(action + ': ' + message, references);
-    return Logging.create({message: message, action: action, references: references});
+    return Logging.create({user: user, message: message, action: action, references: references});
   }
 };
