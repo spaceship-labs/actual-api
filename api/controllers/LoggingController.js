@@ -21,12 +21,15 @@ module.exports = {
 
   find: function(req, res) {
     var form         = req.params.all();
-    var user         = form.user;
+    var query        = {};
     var paginate     = {
       page:  form.page  || 1,
       limit: form.limit || 5
     };
-    Logging.find({user: user})
+    if (form.user) {
+      query.user = form.user;
+    }
+    Logging.find(query)
       .sort('createdAt DESC')
       .paginate(paginate)
       .populate('user').exec(function(err, log) {
