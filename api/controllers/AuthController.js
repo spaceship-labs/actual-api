@@ -19,9 +19,19 @@ function _onPassportAuth(req, res, error, user, info){
   if(error) return res.serverError(error);
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
 
-  return res.ok({
-    token: CipherService.createToken(user),
-    user: user
+  /*Logging stuff*/
+  var message    = 'El usuario ' + user.firstName + ' ' + user.lastName + ' se ha loggeado';
+  var action     = 'login';
+  var references = {
+    user: user.id
+  };
+  Logger.log(message, action, references).then(function(log) {
+    return res.ok({
+      token: CipherService.createToken(user),
+      user: user
+    });
+  }).catch(function(err) {
+    return res.negotiate(err);
   });
 }
 
