@@ -7,6 +7,10 @@
 
 module.exports = {
   attributes: {
+    user: {
+      model: 'user',
+      required: true
+    },
     message: {
       type: 'string',
       required: true

@@ -22,10 +22,7 @@ function _onPassportAuth(req, res, error, user, info){
   /*Logging stuff*/
   var message    = 'El usuario ' + user.firstName + ' ' + user.lastName + ' se ha loggeado';
   var action     = 'login';
-  var references = {
-    user: user.id
-  };
-  Logger.log(message, action, references).then(function(log) {
+  Logger.log(user.id, message, action).then(function(log) {
     return res.ok({
       token: CipherService.createToken(user),
       user: user
