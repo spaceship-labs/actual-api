@@ -3,7 +3,7 @@ module.exports = {
 	//migrate: 'safe',
 	//tableName: 'Warehouse',
 	//tableNameSqlServer: 'OWHS',
-	migrate: 'alter',
+	migrate: 'safe',
   attributes: {
 		WhsCode:{type:'string', size:8},
 		WhsName:{type:'string', size: 100},
