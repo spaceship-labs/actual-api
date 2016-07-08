@@ -50,7 +50,10 @@ module.exports = {
           columnName:'SlpCode',
           model:'Seller'
         },
-
+        Quotations:{
+          collection: 'Quotation',
+          via:'User'
+        },
         Records: {
           collection:'QuotationRecord',
           via:'User'

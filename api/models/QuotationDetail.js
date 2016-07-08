@@ -4,7 +4,11 @@ module.exports = {
   attributes: {
     Quotation:{
       model:'Quotation',
-      columnName: 'DocEntry'
-    }
+    },
+    Product: {
+      model:'Product'
+    },
+    Quantity: 'integer',
+    Discount: 'float',
   }
 };

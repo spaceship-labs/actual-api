@@ -120,6 +120,22 @@ module.exports = {
     return false;
   },
 
+  orderCustomAI: function(val, folioName, cb){
+    Counter.native(function(err, counter){
+        counter.findAndModify(
+            { name: folioName }
+            ,[]
+            ,{ $inc: { seq : 1} }
+            ,{}
+            ,function (err, object) {
+               if(err) console.log(err);
+               val.folio = object.value.seq;
+               cb(val);
+            }
+        );
+    })
+  },
+
 
   formatHandle: function(str) {
 
