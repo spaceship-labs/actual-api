@@ -20,10 +20,22 @@ module.exports = {
   },
 
   find: function(req, res) {
-    Logging.find().populate('user').exec(function(err, log) {
-      if (err) {return res.negotiate(err);}
-      return res.json(log);
-    });
+    var form         = req.params.all();
+    var user         = form.user;
+    var paginate     = {
+      page:  form.page  || 1,
+      limit: form.limit || 5
+    };
+    Logging.find({user: user})
+      .sort('createdAt DESC')
+      .paginate(paginate)
+      .populate('user').exec(function(err, log) {
+        if (err) {return res.negotiate(err);}
+        return res.json(log);
+      });
   },
+
+
+
 };
 
