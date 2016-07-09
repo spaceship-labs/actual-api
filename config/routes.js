@@ -383,7 +383,7 @@ module.exports.routes = {
     action:'addDetail'
   },
 
-  '/quotation/removedetail/:id':{
+  '/quotation/removedetail/:id/:quotation':{
     controller:'quotation',
     action:'removeDetail'
   },

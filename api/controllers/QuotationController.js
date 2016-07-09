@@ -4,20 +4,64 @@ module.exports = {
     var form = req.params.all();
     Quotation.create(form).exec(function createCB(err, created){
       if(err) console.log(err);
-      res.json(created);
-    });
+
+      Quotation.findOne({id:created.id}).populate('Details').exec(function(err, quotation){
+        if(err) console.log(err);
+        if(!quotation.Details || quotation.Details.length == 0){
+          cb();
+        }else{
+          var detailsIds = [];
+          quotation.Details.forEach(function(detail){
+            detailsIds.push(detail.id);
+          });
+          QuotationDetail.find({id:detailsIds}).populate('Product').exec(function(err2, details){
+            if(err2) console.log(err2);
+            var total = calculateTotal(details);
+
+            Quotation.update({id: created.id}, {total:total}).exec(function(err, updated){
+              if(err) console.log(err);
+              if(Array.isArray(updated)){
+                updated = updated[0];
+              }
+              res.json(updated);
+
+            }); //End update price
+
+          }); //End find details
+        }
+
+      }); //End find one
+
+    }); //End create
   },
 
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    sails.log.info('updating');
     Quotation.update({id:id}, form).exec(function updateCB(err, updated){
       if(err) console.log(err);
-      sails.log.info('updated');
-      sails.log.info(updated);
-      res.json(updated);
+      Quotation.findOne({id:id}).populate('Details').exec(function findOneCb(err, quotation){
+
+        var detailsIds = [];
+        quotation.Details.forEach(function(detail){
+          detailsIds.push(detail.id);
+        });
+        QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
+          if(err) console.log(err);
+          var total = 0;
+          total = calculateTotal(details);
+          Quotation.update({id:id}, {total:total}).exec(function updateCB(err, updated){
+            if(err) console.log(err);
+            if(Array.isArray(updated)){
+              updated = updated[0];
+            }
+            res.json(updated);
+          });
+        });
+
+      });
     });
+    //Updating quotation total, with details
   },
 
   findById: function(req, res){
@@ -93,19 +137,57 @@ module.exports = {
     var id = form.id;
     form.Quotation = id;
     delete form.id;
-    QuotationDetail.create(form).exec(function addCB(err, created){
+
+    QuotationDetail.create(form).exec(function createCB(err, createdDetail){
       if(err) console.log(err);
-      res.json(created);
-    });
+
+      Quotation.findOne({id:form.Quotation}).populate('Details').exec(function findCB(err, quotation){
+        var detailsIds = [];
+        quotation.Details.forEach(function(detail){
+          detailsIds.push(detail.id);
+        });
+        QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
+          if(err) console.log(err);
+          var total = 0;
+          total = calculateTotal(details);
+          Quotation.update({id:id}, {total:total}).exec(function updateCB(err, updated){
+            if(err) console.log(err);
+            res.json(updated);
+          }); //End update quotation total
+        });//End get details
+
+      });//End find quotation
+
+    }); //End create detail
+
   },
 
   removeDetail: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    QuotationDetail.destroy({id: id}).exec(function removeCB(err){
+    var quotationId = form.quotation;
+    QuotationDetail.destroy({id:id}).exec(function destroyCB(err){
       if(err) console.log(err);
-      res.json({destroyed:true});
-    });
+
+      Quotation.findOne({id:quotationId}).populate('Details').exec(function findCB(err, quotation){
+        var detailsIds = [];
+        quotation.Details.forEach(function(detail){
+          detailsIds.push(detail.id);
+        });
+        QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
+          if(err) console.log(err);
+          var total = 0;
+          total = calculateTotal(details);
+          Quotation.update({id:quotationId}, {total:total}).exec(function updateCB(err, updated){
+            if(err) console.log(err);
+            res.json(updated);
+          }); //End update quotation total
+
+        });//End get details
+
+      });//End find quotation
+
+    }); //End create detail
   },
 
   findByClient: function(req, res){
@@ -130,8 +212,6 @@ module.exports = {
     var searchFields = ['DocEntry','CardCode','CardName'];
     var selectFields = form.fields;
     var populateFields = ['Client'];
-    sails.log.info('populateFields');
-    sails.log.info(populateFields);
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
       res.ok(result);
     },function(err){
@@ -141,3 +221,13 @@ module.exports = {
   }
 
 };
+
+function calculateTotal(details){
+  var total = 0;
+  details.forEach(function(detail){
+    if(detail.Product && detail.Product.Price){
+      total+= detail.Product.Price * detail.Quantity;
+    }
+  });
+  return total;
+}
