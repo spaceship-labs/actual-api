@@ -1,3 +1,4 @@
+//APP COLLECTION
 module.exports = {
   migrate: 'alter',
   tableName: 'QuotationRecord',
@@ -12,11 +13,9 @@ module.exports = {
     notes: {type:'text'},
     eventType: {type:'string'},
     dateTime: {type:'datetime'},
-
     files: {
       collection: 'QuotationRecordFile',
       via:'QuotationRecord',
-      //excludeSync: true
     },
   }
 };

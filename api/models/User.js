@@ -1,21 +1,7 @@
+//APP COLLECTION
 module.exports = {
     schema: true,
-    //migrate: 'safe',
-    migrate: 'alter',
     attributes: {
-        /*username: {
-            type: 'string',
-            required: true,
-            unique: true,
-            alphanumericdashed: true
-        },*/
-        /*
-        id: {
-          type: 'integer',
-          unique: true,
-          primaryKey: true
-        },
-        */
         password: {
             type: 'string'
         },

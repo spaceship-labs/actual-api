@@ -1,3 +1,4 @@
+// APP/SAP COLLECTION
 module.exports = {
   migrate:'alter',
   tableName:'Contact',

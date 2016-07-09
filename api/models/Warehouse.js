@@ -1,8 +1,6 @@
+//SAP COLLECTION
+//TODO: Check if remove
 module.exports = {
-	//connection: 'mysql',
-	//migrate: 'safe',
-	//tableName: 'Warehouse',
-	//tableNameSqlServer: 'OWHS',
 	migrate: 'safe',
   attributes: {
 		WhsCode:{type:'string', size:8},

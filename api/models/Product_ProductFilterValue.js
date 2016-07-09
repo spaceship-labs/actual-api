@@ -1,3 +1,4 @@
+//APP COLLECTION
 module.exports = {
   tableName: 'product_filtervalues__productfiltervalue_products',
   attributes:{

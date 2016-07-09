@@ -1,3 +1,4 @@
+//APP COLLECTION
 module.exports = {
   attributes:{
     Quotation:{

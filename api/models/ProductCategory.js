@@ -1,6 +1,6 @@
+//APP COLLECTION
 module.exports = {
 	migrate:'alter',
-	//connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
 		Description:{type:'text'},
@@ -8,7 +8,6 @@ module.exports = {
 		Handle:{type:'string'},
 		IsMain:{type:'boolean'},
 		CategoryLevel:{type:'integer'},
-
 
     Parents:{
       collection: 'productcategory',

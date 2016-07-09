@@ -1,6 +1,5 @@
+//APP COLLECTION
 module.exports = {
-	migrate:'alter',
-	//connection:'mysql',
 	attributes:{
 		Name:{type:'string'},
 		Description:{type:'text'},
@@ -8,12 +7,10 @@ module.exports = {
     IsMultiple: {type:'boolean'},
     ValuesOrder: {type:'string'},
     IsColor:{type:'boolean'},
-
     Categories:{
       collection:'productcategory',
       via: 'Filters'
     },
-
     Values: {
       collection:'productfiltervalue',
       via: 'Filter'

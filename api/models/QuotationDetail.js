@@ -1,5 +1,5 @@
+//APP COLLECTION
 module.exports = {
-  migrate: 'alter',
   tableName: 'QuotationDetail',
   attributes: {
     Quotation:{

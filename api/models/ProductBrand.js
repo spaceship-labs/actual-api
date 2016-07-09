@@ -1,3 +1,4 @@
+//SAP COLLECTION
 module.exports = {
 	//migrate:'alter',
 	tableName:'ProductBrand',

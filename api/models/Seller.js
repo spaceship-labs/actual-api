@@ -1,5 +1,5 @@
+//SAP COLLECTION
 module.exports = {
-  migrate:'alter',
   tableName:'Seller',
   attributes:{
     SlpName: {type:'string'},

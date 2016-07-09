@@ -243,8 +243,8 @@ module.exports = {
           Quotation.native(function(errNative, collection){
             if(errNative) console.log(errNative);
             collection.aggregate([
+                { $match: { createdAt: {$gte: startDate, $lte: endDate } } },
                 { $group: {_id:null, total: {$sum: '$total'} } },
-                { $match: { createdAt: {$gte: startDate, $lte: endDate } } }
               ]
             , function(err, resultRangeDate){
                 if(err) console.log(err);

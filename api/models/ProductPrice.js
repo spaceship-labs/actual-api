@@ -1,5 +1,6 @@
+//SAP COLLECTION
+//TODO: Check if remove
 module.exports = {
-  migrate: 'alter',
   tableName: 'ItemPrice',
   attributes: {
     ItemCode: {type:'string'}

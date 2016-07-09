@@ -1,6 +1,5 @@
+//APP COLLECTION
 module.exports = {
-  migrate:'alter',
-  //connection:'mysql',
   attributes:{
     Name:{type:'string'},
     Type:{type:'string'},

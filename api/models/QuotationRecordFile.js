@@ -1,8 +1,5 @@
+//APP COLLECTION
 module.exports = {
-  //connection: 'mysql',
-  //migrate: 'safe',
-  //tableName: 'Product_File',
-  migrate: 'alter',
   attributes: {
     filename:{type:'string'},
     name:{type:'string'},
