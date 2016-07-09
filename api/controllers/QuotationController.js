@@ -8,7 +8,7 @@ module.exports = {
       Quotation.findOne({id:created.id}).populate('Details').exec(function(err, quotation){
         if(err) console.log(err);
         if(!quotation.Details || quotation.Details.length == 0){
-          cb();
+          res.json(created);
         }else{
           var detailsIds = [];
           quotation.Details.forEach(function(detail){
@@ -217,6 +217,68 @@ module.exports = {
     },function(err){
       console.log(err);
       res.notFound();
+    });
+  },
+
+
+  getTotalsByUser: function(req, res){
+    var form = req.params.all();
+    var userId = form.userid;
+    //Find all totals
+    Quotation.native(function(errNative, collection){
+      if(errNative) console.log(errNative);
+      collection.aggregate({
+          $group: {_id:null, total: {$sum: '$total'} }
+        },
+        function(err, resultAll){
+          if(err) console.log(err);
+
+          //Today range
+          var startDate = new Date();
+          startDate.setHours(0,0,0,0);
+          var endDate = new Date();
+          endDate.setHours(23,59,59,999);
+
+          //Finding by date range
+          Quotation.native(function(errNative, collection){
+            if(errNative) console.log(errNative);
+            collection.aggregate([
+                { $group: {_id:null, total: {$sum: '$total'} } },
+                { $match: { createdAt: {$gte: startDate, $lte: endDate } } }
+              ]
+            , function(err, resultRangeDate){
+                if(err) console.log(err);
+                res.json({
+                  all: resultAll || false,
+                  dateRange: resultRangeDate || false
+                });
+            });
+          });
+      });
+    });
+  },
+
+  getCountByUser: function(req, res){
+    var form = req.params.all();
+    var userId = form.userid;
+    //Today range
+    var startDate = new Date();
+    startDate.setHours(0,0,0,0);
+    var endDate = new Date();
+    endDate.setHours(23,59,59,999);
+    Quotation.count({User: userId}).exec(function(err, foundAll){
+      if(err) console.log(err);
+      var query = {
+        User: userId,
+        createdAt: { '>=': startDate, '<=': endDate }
+      };
+      Quotation.count(query).exec(function(err, foundToday){
+        if(err) console.log(err);
+        res.json({
+          all: foundAll,
+          dateRange: foundToday
+        });
+      });
     });
   }
 

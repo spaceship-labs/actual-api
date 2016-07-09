@@ -368,6 +368,16 @@ module.exports.routes = {
     action:'find'
   },
 
+  '/quotation/gettotalsbyuser/:userid':{
+    controller: 'quotation',
+    action:'getTotalsByuser'
+  },
+
+  '/quotation/getcountbyuser/:userid':{
+    controller: 'quotation',
+    action:'getCountByUser'
+  },
+
   '/sale/find/:page':{
     controller: 'sale',
     action:'find'
