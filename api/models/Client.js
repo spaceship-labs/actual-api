@@ -4,7 +4,6 @@ module.exports = {
   attributes:{
     CardCode:{
       type:'string',
-      primaryKey: true
     },
     CardName:{type:'string'},
     Phone1:{type:'string'},

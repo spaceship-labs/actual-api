@@ -11,8 +11,11 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    sails.log.info('updating');
     Quotation.update({id:id}, form).exec(function updateCB(err, updated){
       if(err) console.log(err);
+      sails.log.info('updated');
+      sails.log.info(updated);
       res.json(updated);
     });
   },
@@ -23,7 +26,7 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('User').exec(function findCB(err, quotation){
+    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('User').populate('Client').populate('Address').exec(function findCB(err, quotation){
       if(err) console.log(err);
 
       if(quotation){
