@@ -28,6 +28,11 @@ module.exports = {
 
     Info: {
       model:'ClientInfo'
-    }
+    },
+    Orders: {
+      collection:'Order',
+      via: 'Client',
+    },
+
   }
 }

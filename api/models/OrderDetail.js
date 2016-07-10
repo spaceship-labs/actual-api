@@ -1,9 +1,8 @@
 //APP COLLECTION
 module.exports = {
-  tableName: 'QuotationDetail',
   attributes: {
-    Quotation:{
-      model:'Quotation',
+    Order:{
+      model:'Order',
     },
     Product: {
       model:'Product'

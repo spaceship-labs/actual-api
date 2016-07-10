@@ -412,6 +412,21 @@ module.exports.routes = {
   '/product/searchbyfilters':{
     controller: 'productsearch',
     action:'searchByfilters'
+  },
+
+  '/order/create':{
+    controller: 'order',
+    action:'create'
+  },
+
+  '/order/addpayment/:orderid':{
+    controller: 'order',
+    action:'addPayment'
+  },
+
+  '/order/find/:page':{
+    controller:'order',
+    action:'find'
   }
 
   /***************************************************************************

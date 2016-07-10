@@ -70,7 +70,7 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('User').populate('Client').populate('Address').exec(function findCB(err, quotation){
+    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('User').populate('Client').populate('Address').populate('Order').exec(function findCB(err, quotation){
       if(err) console.log(err);
 
       if(quotation){

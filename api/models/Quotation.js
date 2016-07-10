@@ -20,6 +20,9 @@ module.exports = {
     Address:{
       model:'QuotationAddress',
     },
+    Order:{
+      model:'Order'
+    },
 
     clientName: {type:'string'},
     folio:{type:'integer'},
