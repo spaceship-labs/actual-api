@@ -9,7 +9,10 @@ module.exports = {
     currency:{type:'string'},
     verificationCode: {type:'string'},
     terminal:{type:'string'},
-    status:{type:'string'},
+    status:{
+      type:'string',
+      enum: ['paid','pending','cancelled']
+    },
     Order:{
       model:'Order'
     }

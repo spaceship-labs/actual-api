@@ -56,7 +56,11 @@ module.exports = {
     }
 
     if(dateRange){
-      query[dateRange.field] = { '>=': new Date(dateRange.start), '<=': new Date(dateRange.end) };
+      var startDate = new Date(dateRange.start);
+      startDate.setHours(0,0,0,0);
+      var endDate = new Date(dateRange.end);
+      endDate.setHours(23,59,59,999);
+      query[dateRange.field] = { '>=': new Date(startDate), '<=': new Date(endDate) };
     }
 
     querySearchAux = _.clone(query);

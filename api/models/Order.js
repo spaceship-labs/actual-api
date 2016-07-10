@@ -5,11 +5,15 @@ module.exports = {
     DocEntry:{type:'integer'},
     SlpCode: {type:'string'},
     CardCode: {type:'string'},
+    ammountPaid: {type:'float'},
     total:{type:'float'},
     subtotal:{type:'float'},
     discount:{type:'float'},
     currency:{type:'string'},
-    status:{type:'string'},
+    status:{
+      type:'string',
+      enum:['lost','pending','on-delivery','minimum-paid','paid']
+    },
     name:{type:'string'},
     lastName:{type:'string'},
     dialCode: {type:'string'},

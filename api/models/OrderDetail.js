@@ -1,5 +1,6 @@
 //APP COLLECTION
 module.exports = {
+  migrate: 'alter',
   attributes: {
     Order:{
       model:'Order',

@@ -429,6 +429,12 @@ module.exports.routes = {
     action:'find'
   }
 
+  '/order/getpaymentsbyorder/:orderid':{
+    controller: 'order',
+    action:'getPaymentsByOrder'
+  },
+
+
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
