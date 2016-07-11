@@ -15,6 +15,9 @@ module.exports = {
     },
     Order:{
       model:'Order'
+    },
+    Quotation:{
+      model:'Quotation'
     }
   }
 }

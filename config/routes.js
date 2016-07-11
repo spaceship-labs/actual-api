@@ -399,6 +399,11 @@ module.exports.routes = {
   },
 
 
+  '/quotation/addpayment/:quotationid':{
+    controller: 'quotation',
+    action:'addPayment'
+  },
+
   '/client/update/:id':{
     controller: 'client',
     action: 'update'
