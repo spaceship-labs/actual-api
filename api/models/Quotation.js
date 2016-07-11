@@ -23,7 +23,7 @@ module.exports = {
     Order:{
       model:'Order'
     },
-    Payments{
+    Payments:{
       collection: 'Payment',
       via:'Quotation'
     },
