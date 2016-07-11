@@ -117,7 +117,7 @@ module.exports = {
 
   searchByCategory: function(req, res) {
     var form         = req.params.all();
-    var handle       = form.handle;
+    var handle       = [].concat(form.category);
     var filtervalues = [].concat(form.filtervalues);
     var total        = 0;
     var paginate     = {
@@ -131,7 +131,7 @@ module.exports = {
       .spread(function(catprods, filterprods) {
         if (!handle || handle.length == 0) {
           return filterprods;
-        } else if(!filtervalues || filter.values.length == 0) {
+        } else if(!filtervalues || filtervalues.length == 0) {
           return catprods;
         } else {
           return intersection(catprods, filterprods);
