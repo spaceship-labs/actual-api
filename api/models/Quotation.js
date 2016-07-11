@@ -23,10 +23,15 @@ module.exports = {
     Order:{
       model:'Order'
     },
+    Payments{
+      collection: 'Payment',
+      via:'Quotation'
+    },
 
     clientName: {type:'string'},
     folio:{type:'integer'},
-    total:{type:'float'}
+    total:{type:'float'},
+    ammountPaid: {type:'float'}
   },
 
   beforeCreate: function(val,cb){

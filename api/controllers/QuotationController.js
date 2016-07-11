@@ -280,7 +280,31 @@ module.exports = {
         });
       });
     });
-  }
+  },
+
+  addPayment: function(req, res){
+    var form = req.params.all();
+    var quotationId = form.quotationid;
+    form.Quotation = quotationId;
+    Payment.create(form).exec(function(err, payment){
+      Quotation.findOne({id: quotationId}).populate('Payments').exec(function(err, quotation){
+        if(err) console.log(err);
+        var ammountPaid = quotation.Payments.reduce(function(paymentA, paymentB){
+          return paymentA.ammount + paymentB.ammount;
+        });
+        var params = {
+          ammountPaid: ammountPaid
+        };
+        sails.log.info('cantidad pagada cotizacion:' + ammountPaid);
+        params.status = (ammountPaid / quotation.total >= 0.6) ? 'minimum-paid' : 'pending';
+        Quotation.update({id:quotation}, params).exec(function(err, quotationUpdated){
+          if(err) console.log(err);
+          res.json(quotationUpdated);
+        });
+      });
+    });
+  },
+
 
 };
 
