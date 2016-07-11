@@ -427,7 +427,7 @@ module.exports.routes = {
   '/order/find/:page':{
     controller:'order',
     action:'find'
-  }
+  },
 
   '/order/getpaymentsbyorder/:orderid':{
     controller: 'order',
