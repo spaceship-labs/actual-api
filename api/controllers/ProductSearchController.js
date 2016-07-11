@@ -119,11 +119,15 @@ module.exports = {
     var form         = req.params.all();
     var handle       = [].concat(form.category);
     var filtervalues = [].concat(form.filtervalues);
-    var total        = 0;
+    var price        = {
+      '>=': form.minPrice || 0,
+      '<=': form.maxPrice || Infinity
+    };
     var paginate     = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
+
     getProductsByCategory(handle)
       .then(function(catprods) {
         return [catprods, getProductsByFilterValue(filtervalues)];
@@ -138,10 +142,19 @@ module.exports = {
         }
       })
       .then(function(idProducts) {
-        total = idProducts.length;
-        return Product.find(idProducts).paginate(paginate).sort('Available DESC').populate('files');
+        var q = {
+          id: idProducts,
+          Price: price
+        };
+        return [
+          Product.count(q),
+          Product.find(q)
+            .paginate(paginate)
+            .sort('Available DESC')
+            .populate('files')
+        ];
       })
-      .then(function(products) {
+      .spread(function(total, products) {
         return res.json({
           products: products,
           total: total
