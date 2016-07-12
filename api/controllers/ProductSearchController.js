@@ -1,118 +1,58 @@
-var util = require('util');
+var util     = require('util');
 var ObjectId = require('mongodb').ObjectID;
+var assign   = require('object-assign');
 
 module.exports = {
   advancedSearch: function(req, res){
-    var form = req.params.all();
-    var items = form.items || 10;
-    var page = form.page || 1;
-    var term = form.term || false;
-    var autocomplete = form.autocomplete || false;
-    var query = {};
-    var querySearchAux = {};
-    var keywords = form.keywords || false;
-    var searchFields = ['Name', 'ItemName','ItemCode'];
-
-    if(keywords && searchFields.length > 0){
-      query.$and = [];
-      keywords.forEach(function(keyword){
-        var orValues = [];
-        searchFields.forEach(function(field){
-          var obj = {};
-          obj[field] = {$regex:keyword, $options : 'i'};
-          orValues.push(obj);
-        });
-        query.$and.push( {$or: orValues } );
+    var form         = req.params.all();
+    var terms        = [].concat(form.keywords || []);
+    var minPrice     = form.minPrice;
+    var maxPrice     = form.maxPrice;
+    var paginate     = {
+      page:  form.page  || 1,
+      limit: form.items || 10
+    };
+    var query        = {};
+    query            = queryTerms(query, terms);
+    query            = queryPrice(query, minPrice, maxPrice);
+    Product.count(query)
+      .then(function(total) {
+        return [total, Product.find(query).paginate(paginate)];
+      })
+      .spread(function(total, products) {
+        return res.json({total: total, data: products});
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
       });
-
-    }
-
-    //sails.log.info('query:');
-    //sails.log.info(util.inspect(query, false, null));
-
-    Product.native(function(errNative, collection){
-      if(errNative) console.log(errNative);
-
-      collection.count(query, function(errCount, total){
-        if(errCount) console.log(errCount);
-        var find = collection.find(query);
-        find.skip((page-1) * items);
-        find.limit(items);
-        find.sort( { Available: -1 } );
-        find.toArray(function(errProds, products){
-          if(errProds) console.log(errProds);
-          res.json({data:products, total: total});
-        })
-
-      });
-    });
-
   },
 
   searchByFilters: function(req, res){
-    var form = req.params.all();
-    var valuesIds = form.ids;
-    var keywords = form.keywords || false;
-    var term = form.term || false;
-    var query = {};
-    var searchFields = ['Name','ItemName','ItemCode','Description','DetailedColor'];
-
-    Product_ProductFilterValue.find({productfiltervalue_Products: valuesIds}).exec(function findCB(err, relations){
-      if(err){
-        console.log(err);
-      }
-      var auxProductsIds = [];
-      var productsIds = [];
-      relations.forEach(function(relation){
-        auxProductsIds.push(relation.product_FilterValues);
-      });
-      auxProductsIds = _.uniq(auxProductsIds);
-      auxProductsIds.forEach(function(productId){
-        var matches = _.where(relations, {product_FilterValues: productId});
-        if(matches.length == valuesIds.length){
-          productsIds.push(productId);
+    var form         = req.params.all();
+    var terms        = [].concat(form.keywords || []);
+    var filtervalues = [].concat(form.ids || []);
+    var minPrice     = form.minPrice;
+    var maxPrice     = form.maxPrice;
+    var paginate     = {
+      page:  form.page  || 1,
+      limit: form.items || 10
+    };
+    var query        = {};
+    query            = queryTerms(query, terms);
+    query            = queryPrice(query, minPrice, maxPrice);
+    getProductsByFilterValue(filtervalues)
+      .then(function(idProducts) {
+        if (filtervalues.length != 0) {
+          query = queryIdsProducts(query, idProducts);
         }
+        return [Product.count(query), Product.find(query).paginate(paginate)];
+      })
+      .spread(function(total, products) {
+        return res.json({total: total, products: products});
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
       });
-
-      if(searchFields.length > 0 && term){
-        query.or = [];
-        for(var i=0;i<searchFields.length;i++){
-          var field = searchFields[i];
-          var obj = {};
-          obj[field] = {contains:term};
-          query.or.push(obj);
-        }
-      }
-
-      if(keywords && searchFields.length > 0){
-        query.$and = [];
-        keywords.forEach(function(keyword){
-          var orValues = [];
-          searchFields.forEach(function(field){
-            var obj = {};
-            //obj[field] = {contains:keyword};
-            obj[field] = {$regex:keyword, $options : 'i'};
-            orValues.push(obj);
-          });
-          query.$and.push( {$or: orValues } );
-        });
-
-      }
-      productsIds = productsIds.map(function(id){
-        return ObjectId(id);
-      });
-      query._id = {$in: productsIds};
-      //sails.log.info('query:');
-      //sails.log.info(util.inspect(query, false, null));
-      Product.native(function(err, collection){
-        if(err) console.log(err);
-        collection.find(query).toArray(function(errProds, products){
-          if(errProds) console.log(errProds);
-          res.json(products);
-        })
-      });
-
-    });
   },
 
   searchByCategory: function(req, res) {
@@ -164,8 +104,41 @@ module.exports = {
         return res.negotiate(err);
       });
   }
+};
+
+function queryIdsProducts(query, idProducts) {
+  return assign(query, {id: idProducts});
 }
 
+function queryPrice(query, minPrice, maxPrice) {
+  var price = {
+    '>=': minPrice || 0,
+    '<=': maxPrice || Infinity
+  };
+  return assign(query, {Price: price});
+}
+
+function queryTerms(query, terms) {
+  if (!terms || terms.length == 0) {
+    return query;
+  }
+  var searchFields = [
+    'Name',
+    'ItemName',
+    'ItemCode',
+    'Description',
+    'DetailedColor'
+  ];
+  var filter       = searchFields.reduce(function(acum, sf){
+    var and = terms.reduce(function(acum, term){
+      var fname = {};
+      fname[sf] = {contains: term};
+      return acum.concat(fname);
+    }, []);
+    return acum.concat({$and: and})
+  }, []);
+  return assign(query, {$or: filter});
+}
 
 function getProductsByCategory(handle) {
   return ProductCategory.find({Handle: handle})
