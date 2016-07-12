@@ -3,9 +3,11 @@ module.exports = {
   migrate:'alter',
   tableName:'Contact',
   attributes:{
-    CardCode:{
-      type:'string',
-    },
+
+    /*-----/
+    FIELDS SAP
+    /*-----*/
+    CardCode:{type:'string'},
     CardName:{type:'string'},
     Phone1:{type:'string'},
     Phone2:{type:'string'},
@@ -21,6 +23,11 @@ module.exports = {
       columnName: 'SlpCode'
     }
     */
+
+    /*-----/
+    FIELDS APP
+    /*-----*/
+
     Quotations: {
       collection:'Quotation',
       via: 'Client',
@@ -33,6 +40,64 @@ module.exports = {
       collection:'Order',
       via: 'Client',
     },
+
+    firstName:{type:'string'},
+    lastName:{type:'string'},
+    secondLastName:{type:'string'},
+    title:{type:'string'},
+    gender:{type:'string'},
+    birthDate:{type:'date'},
+
+    dialCode: {type:'string'},
+    phone:{type:'string'},
+    email:{type:'string'},
+    mobileDialCode:{type:'string'},
+    mobilePhone: {type:'string'},
+    externalNumber:{type:'string'},
+    internalNumber:{type:'string'},
+    neighborhood: {type:'string'},
+    municipality: {type:'string'},
+    city:{type:'string'},
+    entity:{type:'string'},
+    zipCode: {type:'string'},
+    street: {type:'string'},
+    street2: {type:'string'},
+    references:{type:'text'},
+
+    bussinessLegalName: {type:'string'},
+    bussinessName: {type:'string'},
+    rfc:{type:'string'},
+
+    invoiceEmail: {type:'string'},
+    invoiceDialCode: {type:'string'},
+    invoicePhone: {type:'string'},
+    invoiceStreet: {type:'string'},
+    invoiceExternalNumber:{type:'string'},
+    invoiceInternalNumber:{type:'string'},
+    invoiceNeighborhood: {type:'string'},
+    invoiceMunicipality: {type:'string'},
+    invoiceCity:{type:'string'},
+    invoiceEntity:{type:'string'},
+    invoiceZipCode: {type:'string'},
+
+    deliveryName: {type:'string'},
+    deliveryLastName: {type:'string'},
+    deliveryDialCode: {type:'string'},
+    deliveryPhone:{type:'string'},
+    deliveryEmail:{type:'string'},
+    deliveryMobileDialCode:{type:'string'},
+    deliveryMobilePhone: {type:'string'},
+    deliveryExternalNumber:{type:'string'},
+    deliveryInternalNumber:{type:'string'},
+    deliveryNeighborhood: {type:'string'},
+    deliveryMunicipality: {type:'string'},
+    deliveryCity:{type:'string'},
+    deliveryEntity:{type:'string'},
+    deliveryZipCode: {type:'string'},
+    deliveryStreet: {type:'string'},
+    deliveryStreet2: {type:'string'},
+    deliveryReferences:{type:'text'},
+
 
   }
 }

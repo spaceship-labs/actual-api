@@ -196,7 +196,7 @@ module.exports = {
     var model = 'quotation';
     var searchFields = [];
     var selectFields = form.fields;
-    var populateFields = [];
+    var populateFields = ['Client'];
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
       res.ok(result);
     },function(err){
