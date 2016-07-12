@@ -305,6 +305,15 @@ module.exports = {
     });
   },
 
+  getPaymentsByQuotation: function(req, res){
+    var form = req.params.all();
+    var quotationId = form.quotationid;
+    Payment.find({Quotation: quotationId}).exec(function(err, payments){
+      if(err) console.log(err);
+      res.json(payments);
+    });
+  },
+
 
 };
 

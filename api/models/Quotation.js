@@ -27,7 +27,9 @@ module.exports = {
       collection: 'Payment',
       via:'Quotation'
     },
-
+    isClosed:{type:'boolean'},
+    isClosedReason:{type:'string'},
+    isClosedNotes:{type:'text'},
     clientName: {type:'string'},
     folio:{type:'integer'},
     total:{type:'float'},
