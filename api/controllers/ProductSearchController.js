@@ -15,6 +15,7 @@ module.exports = {
     var query        = {};
     query            = queryTerms(query, terms);
     query            = queryPrice(query, minPrice, maxPrice);
+    query.Active     = 'Y';
     Product.count(query)
       .then(function(total) {
         return [total, Product.find(query).paginate(paginate)];
@@ -40,6 +41,7 @@ module.exports = {
     var query        = {};
     query            = queryTerms(query, terms);
     query            = queryPrice(query, minPrice, maxPrice);
+    query.Active     = 'Y';
     getProductsByFilterValue(filtervalues)
       .then(function(idProducts) {
         if (filtervalues.length != 0) {
@@ -84,7 +86,8 @@ module.exports = {
       .then(function(idProducts) {
         var q = {
           id: idProducts,
-          Price: price
+          Price: price,
+          Active: 'Y'
         };
         return [
           Product.count(q),
