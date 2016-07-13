@@ -114,6 +114,8 @@ module.exports = {
       Depth:{type:'float'},
       DepthUnitMsr:{type:'string'},
 
+      freeSale: {type:'boolean'},
+
 
       //RELATIONS
       files: {

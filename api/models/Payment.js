@@ -9,6 +9,9 @@ module.exports = {
     currency:{type:'string'},
     verificationCode: {type:'string'},
     terminal:{type:'string'},
+    isRecurring: {type:'boolean'},
+    paymentType: {type:'string'},
+    terminal: {type:'string'},
     status:{
       type:'string',
       enum: ['paid','pending','cancelled']
