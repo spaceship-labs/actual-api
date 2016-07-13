@@ -29,6 +29,9 @@ module.exports.policies = {
     send_password_recovery: true,
     update_password: true,
   },
+  MeController: {
+    '*': ['isAuthenticated'],
+  },
   ProductController:{
     find: true,
     findById: true,
