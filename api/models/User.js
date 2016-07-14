@@ -92,7 +92,7 @@ module.exports = {
         permissions: {
           collecion: 'permission',
           via: 'owners'
-        }
+        },
 
         /*
         Clients :{
