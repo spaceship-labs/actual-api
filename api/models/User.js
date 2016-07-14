@@ -96,6 +96,10 @@ module.exports = {
           via: 'owners'
         },
 
+        Commission:{
+          model:'Commission'
+        },
+
         /*
         Clients :{
           collection: 'client',
