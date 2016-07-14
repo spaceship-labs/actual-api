@@ -39,7 +39,7 @@ module.exports = {
     User.findOne({SlpCode:id}).exec(function(err, result){
       if(err){
         console.log(err);
-        res.notFound();
+        res.negotiate(err);
       }else{
         res.ok({data:result});
       }
@@ -47,15 +47,13 @@ module.exports = {
   },
 
   create: function(req, res){
-    User
-      .create(_.omit(req.allParams(), 'id'))
+    var form = req.params.all();
+    User.create(_.omit(req.allParams(), 'id'))
       .exec(function(err,_user){
         if(err){
           console.log(err);
-          //throw(err);
-          return res.serverError;
+          res.negotiate(err);
         }else{
-          console.log(_user);
           return res.ok({user:_user});
         }
       })
@@ -66,7 +64,10 @@ module.exports = {
     var id = form.id;
     delete form.password;
     User.update({id:id},form,function(err,user){
-      if(err) console.log(err); //throw(err);
+      if(err) {
+        console.log(err);
+        res.negotiate(err);
+      }
       return res.ok({
         user: user
       })

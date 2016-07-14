@@ -1,5 +1,6 @@
 //APP COLLECTION
 module.exports = {
+    migrate:'alter',
     schema: true,
     attributes: {
         password: {
@@ -7,7 +8,8 @@ module.exports = {
         },
         email: {
             type: 'email',
-            required: true
+            required: true,
+            unique:true
         },
         firstName: {
             type: 'string',
