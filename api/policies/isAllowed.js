@@ -1,3 +1,6 @@
+var _ = require('underscore');
+Array.prototype.find = _.find;
+
 module.exports = function (req, res, next) {
   var user       = req.user.id;
   var controller = req.options.controller;
