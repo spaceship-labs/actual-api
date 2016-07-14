@@ -44,7 +44,7 @@ module.exports = {
           collection:'QuotationRecord',
           via:'User'
         },
-        accessList:{
+        accessList: {
           type:'array'
         },
 
@@ -87,6 +87,12 @@ module.exports = {
         bank:{type:'string'},
         bankAccount:{type:'string'},
         interbankClabe: {type:'string'},
+
+        //relations - permissions
+        permissions: {
+          collecion: 'permission',
+          via: 'owners'
+        }
 
         /*
         Clients :{
