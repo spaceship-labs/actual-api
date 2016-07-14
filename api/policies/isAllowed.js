@@ -1,5 +1,4 @@
 var _ = require('underscore');
-Array.prototype.find = _.find;
 
 module.exports = function (req, res, next) {
   var user       = req.user.id;
@@ -11,8 +10,11 @@ module.exports = function (req, res, next) {
   })
     .populate('owners')
     .exec(function(err, permissions) {
-      var allowed = (permissions || []).find(function(permission){
-        return (permission.owners || []).indexOf(user) !== -1;
+      var allowed = _.find(permissions || [], function(permission){
+        var owners = permission.owners.map(function(owner){
+          return owner.id;
+        });
+        return owners.indexOf(user) !== -1;
       });
       if (!allowed) {
         return res.unauthorized('user is not authorized');

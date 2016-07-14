@@ -92,7 +92,7 @@ module.exports = {
 
         //relations - permissions
         permissions: {
-          collecion: 'permission',
+          collection: 'permission',
           via: 'owners'
         },
 

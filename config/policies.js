@@ -26,6 +26,7 @@ module.exports.policies = {
   },
   UserController:{
     '*': ['isAuthenticated'],
+    find: ['isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
   },
@@ -64,7 +65,11 @@ module.exports.policies = {
   LoggingController: {
     'find': true,
     'create': true
+  },
+  PermissionController: {
+    'find': true
   }
+
 
   //Por ahora
   //SyncController:{'*':true}

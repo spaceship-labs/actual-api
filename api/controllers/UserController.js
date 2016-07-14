@@ -23,14 +23,16 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    User.findOne({id:id}).exec(function(err, result){
-      if(err){
-        console.log(err);
-        res.notFound();
-      }else{
-        res.ok({data:result});
-      }
-    });
+    User.findOne({id: id})
+      .populate('permissions')
+      .exec(function(err, result){
+        if(err){
+          console.log(err);
+          res.notFound();
+        }else{
+          res.ok({data:result});
+        }
+      });
   },
 
   findBySlpCode: function(req, res){
@@ -111,7 +113,10 @@ module.exports = {
     if(token && email && password && confirmPass){
       if(password == confirmPass){
         validateToken(token, email, function(err, result){
-          User.update({email:email},{password: password}).exec(function(err, user){
+          User.update(
+            {email: email},
+            {password: password}
+          ).exec(function(err, user){
             if(err || typeof user == 'undefined'){
               console.log(err);
               return res.ok({success:false});
@@ -154,7 +159,10 @@ function sendPasswordRecoveryEmail(params, res, req){
 }
 
 function validateToken(token, email, cb){
-  User.findOne( {email:email}, {select: ['id', 'email', 'password']} ).exec(function(err,user){
+  User.findOne(
+    {email:email},
+    {select: ['id', 'email', 'password']}
+  ).exec(function(err,user){
     if(err){
       console.log(err);
     }
