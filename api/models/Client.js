@@ -33,9 +33,6 @@ module.exports = {
       via: 'Client',
     },
 
-    Info: {
-      model:'ClientInfo'
-    },
     Orders: {
       collection:'Order',
       via: 'Client',

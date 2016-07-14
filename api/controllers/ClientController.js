@@ -4,7 +4,7 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'client';
-    var searchFields = ['id','CardName'];
+    var searchFields = ['id','CardName','CardCode','firstName','lastName','E_Mail','phone'];
     var selectFields =[];
     var populateFields = [];
     Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
