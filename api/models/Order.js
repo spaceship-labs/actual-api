@@ -49,7 +49,12 @@ module.exports = {
       collection:'Payment',
       via:'Order'
     },
-
+    User:{
+      model: 'User',
+    },
+    Broker:{
+      model: 'User',
+    },
 
   }
 }

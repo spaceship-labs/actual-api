@@ -9,6 +9,9 @@ module.exports = {
     User:{
       model: 'User',
     },
+    Broker:{
+      model: 'User',
+    },
     Details: {
       collection:'QuotationDetail',
       via:'Quotation'

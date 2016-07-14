@@ -435,6 +435,10 @@ module.exports.routes = {
     action:'find'
   },
 
+  '/me/update':{
+    controller:'me',
+    action:'update'
+  }
 
 
   /***************************************************************************

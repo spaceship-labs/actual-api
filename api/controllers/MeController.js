@@ -10,7 +10,8 @@ module.exports = {
     var form = req.params.all();
     var user = req.user;
     delete form.password;
-    User.update({id: user.id}, form, function(err,user){
+    delete form.email;
+    User.update({id: user.id}, form).exec(function updateCB(err,user){
       if(err) {return res.negotiate(err)};
       return res.json(user[0]);
     });
