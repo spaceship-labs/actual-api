@@ -5,6 +5,7 @@ module.exports = function (req, res, next) {
   var user       = req.user.id;
   var controller = req.options.controller;
   var action     = req.options.action;
+  sails.log.info('Doing isAllowed policy');
   Permission.find({
     action: action,
     controller: controller

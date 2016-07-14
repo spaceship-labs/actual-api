@@ -112,6 +112,8 @@ module.exports = {
       if(password == confirmPass){
         validateToken(token, email, function(err, result){
           User.update({email:email},{password: password}).exec(function(err, user){
+            sails.log.info('user update_password');
+            sails.log.info(user);
             if(err || typeof user == 'undefined'){
               console.log(err);
               return res.ok({success:false});
