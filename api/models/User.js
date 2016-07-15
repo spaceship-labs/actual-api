@@ -32,7 +32,10 @@ module.exports = {
         company: {
             type:'string'
         },
-
+        companies: {
+          collection: 'company',
+          via: 'users'
+        },
         SlpCode: {
           type:'integer',
           columnName:'SlpCode',
