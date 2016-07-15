@@ -11,7 +11,7 @@ module.exports = {
     },
     Promotions:{
       collection:'promotion',
-      via:'CustomBrand'
+      via:'CustomBrands'
     }
   }
 }

@@ -21,7 +21,7 @@ module.exports = {
       via:'Promotions'
     },
     FilterValues:{
-      collection:'FilterValue',
+      collection:'ProductFilterValue',
       via:'Promotions'
     },
     CustomBrands:{

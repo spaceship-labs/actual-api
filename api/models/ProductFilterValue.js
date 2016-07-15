@@ -21,7 +21,7 @@ module.exports = {
       via: 'FilterValues'
     },
     Promotions:{
-      collection:'promotions',
+      collection:'promotion',
       via:'FilterValues'
     }
 	}
