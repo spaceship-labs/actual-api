@@ -3,6 +3,8 @@
  * Similar to 403 Forbidden.
  * Specifically for authentication failed or not yet provided.
  */
+var _ = require('underscore');
+
 module.exports = function (data, code, message, root) {
   var response = _.assign({
     code: code || 'E_UNAUTHORIZED',

@@ -27,6 +27,8 @@ module.exports.policies = {
   UserController:{
     '*': ['isAuthenticated'],
     find: ['isAuthenticated', 'isAllowed'],
+    create: ['isAuthenticated', 'isAllowed'],
+    update: ['isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
   },
@@ -34,7 +36,8 @@ module.exports.policies = {
     '*': ['isAuthenticated'],
   },
   ProductController:{
-    find: true,
+    find: ['isAuthenticated', 'isAllowed'],
+    update: ['isAuthenticated', 'isAllowed'],
     findById: true,
     search: true,
   },

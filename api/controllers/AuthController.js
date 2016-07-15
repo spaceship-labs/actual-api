@@ -16,13 +16,8 @@ var passport = require('passport');
  * @private
  */
 function _onPassportAuth(req, res, error, user, info){
-  sails.log.info('_onPassportAuth');
-  sails.log.info(error);
-  sails.log.info(user);
-  sails.log.info(info);
   if(error) return res.serverError(error);
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
-
   /*Logging stuff*/
   var message    = user.firstName + ' ingresó al sistema';
   var action     = 'login';
@@ -46,7 +41,6 @@ module.exports = {
    * @param {Object} res Response object
    */
   signin: function (req, res) {
-    sails.log.info('signin');
     passport.authenticate('local',
       _onPassportAuth.bind(this, req, res))(req, res);
   },
