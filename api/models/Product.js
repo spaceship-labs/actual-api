@@ -115,6 +115,7 @@ module.exports = {
       DepthUnitMsr:{type:'string'},
 
       freeSale: {type:'boolean'},
+      slowMovement:{type:'boolean'},
 
 
       //RELATIONS

@@ -19,6 +19,11 @@ module.exports = {
     Products: {
       collection: 'Product',
       via: 'Groups'
+    },
+
+    Promotions:{
+      collection: 'Promotion',
+      via:'Groups'
     }
 
   }
