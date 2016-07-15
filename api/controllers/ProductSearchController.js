@@ -3,31 +3,6 @@ var ObjectId = require('mongodb').ObjectID;
 var assign   = require('object-assign');
 
 module.exports = {
-  advancedSearch: function(req, res){
-    var form         = req.params.all();
-    var terms        = [].concat(form.keywords || []);
-    var minPrice     = form.minPrice;
-    var maxPrice     = form.maxPrice;
-    var paginate     = {
-      page:  form.page  || 1,
-      limit: form.items || 10
-    };
-    var query        = {};
-    query            = queryTerms(query, terms);
-    query            = queryPrice(query, minPrice, maxPrice);
-    query.Active     = 'Y';
-    Product.count(query)
-      .then(function(total) {
-        return [total, Product.find(query).paginate(paginate)];
-      })
-      .spread(function(total, products) {
-        return res.json({total: total, data: products});
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  },
-
   searchByFilters: function(req, res){
     var form         = req.params.all();
     var terms        = [].concat(form.keywords || []);
@@ -70,7 +45,7 @@ module.exports = {
       limit: form.limit || 10
     };
 
-    getProductsByCategory(handle)
+    getProductsByCategories({Handle:handle})
       .then(function(catprods) {
         return [catprods, getProductsByFilterValue(filtervalues)];
       })
@@ -106,7 +81,60 @@ module.exports = {
       .catch(function(err) {
         return res.negotiate(err);
       });
+  },
+
+  advancedSearch: function(req, res) {
+    var form         = req.params.all();
+    var handle       = [].concat(form.category);
+    var categories   = [].concat(form.categories);
+    var filtervalues = [].concat(form.filtervalues);
+    var price        = {
+      '>=': form.minPrice || 0,
+      '<=': form.maxPrice || Infinity
+    };
+    var paginate     = {
+      page:  form.page  || 1,
+      limit: form.limit || 10
+    };
+
+    getProductsByCategories({id:categories})
+      .then(function(catprods) {
+        return [catprods, getProductsByFilterValue(filtervalues)];
+      })
+      .spread(function(catprods, filterprods) {
+        if (!catprods || catprods.length == 0) {
+          return filterprods;
+        } else if(!filterprods || filterprods.length == 0) {
+          return catprods;
+        } else {
+          return intersection(catprods, filterprods);
+        }
+      })
+      .then(function(idProducts) {
+        var q = {
+          id: idProducts,
+          Price: price,
+          Active: 'Y'
+        };
+        return [
+          Product.count(q),
+          Product.find(q)
+            .paginate(paginate)
+            .sort('Available DESC')
+            .populate('files')
+        ];
+      })
+      .spread(function(total, products) {
+        return res.json({
+          products: products,
+          total: total
+        });
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
   }
+
 };
 
 function queryIdsProducts(query, idProducts) {
@@ -143,8 +171,8 @@ function queryTerms(query, terms) {
   return assign(query, {$or: filter});
 }
 
-function getProductsByCategory(handle) {
-  return ProductCategory.find({Handle: handle})
+function getProductsByCategories(categoryQuery) {
+  return ProductCategory.find(categoryQuery)
     .then(function(category) {
       category = category.map(function(cat){return cat.id;});
       return Product_ProductCategory.find({productcategory_Products: category});
@@ -185,3 +213,29 @@ function intersection(set1, set2) {
     return set2.indexOf(si) != -1;
   });
 }
+
+  /*
+  advancedSearch: function(req, res){
+    var form         = req.params.all();
+    var terms        = [].concat(form.keywords || []);
+    var minPrice     = form.minPrice;
+    var maxPrice     = form.maxPrice;
+    var paginate     = {
+      page:  form.page  || 1,
+      limit: form.items || 10
+    };
+    var query        = {};
+    query            = queryTerms(query, terms);
+    query            = queryPrice(query, minPrice, maxPrice);
+    query.Active     = 'Y';
+    Product.count(query)
+      .then(function(total) {
+        return [total, Product.find(query).paginate(paginate)];
+      })
+      .spread(function(total, products) {
+        return res.json({total: total, data: products});
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  },*/
