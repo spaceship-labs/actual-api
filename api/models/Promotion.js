@@ -37,5 +37,10 @@ module.exports = {
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
 
+    Products:{
+      collection:'Product',
+      via:'Promotions'
+    }
+
   }
 };

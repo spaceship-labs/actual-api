@@ -154,6 +154,11 @@ module.exports = {
       QuotationDetails:{
         collection:'QuotationDetail',
         via:'Product'
+      },
+
+      Promotions:{
+        collection: 'Promotion',
+        via:'Products'
       }
 
     },
