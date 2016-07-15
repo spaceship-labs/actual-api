@@ -15,15 +15,6 @@ module.exports = {
   },
 
   /**
-  * Hash the password field of the passed user.
-  */
-  hashPasswordUser: function(user){
-    if(user.password){
-      user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
-    }
-  },
-
-  /**
    * Compare user password hash with unhashed password
    * @returns boolean indicating a match
    */

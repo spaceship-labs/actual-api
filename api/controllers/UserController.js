@@ -65,10 +65,9 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     delete form.password;
-    User.update({id:id},form,function(err,user){
+    User.update({id: id}, form, function(err, user){
       if(err) {
-        console.log(err);
-        res.negotiate(err);
+        return res.negotiate(err);
       }
       return res.ok({
         user: user
@@ -115,7 +114,7 @@ module.exports = {
         validateToken(token, email, function(err, result){
           User.update(
             {email: email},
-            {password: password}
+            {new_password: password}
           ).exec(function(err, user){
             if(err || typeof user == 'undefined'){
               console.log(err);

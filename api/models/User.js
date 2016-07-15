@@ -114,11 +114,15 @@ module.exports = {
         }
     },
     beforeUpdate: function (values, next) {
-        CipherService.hashPasswordUser(values);
+        if (values.new_password) {
+          values.password = CipherService.hashPassword(values.new_password);
+        }
         next();
     },
     beforeCreate: function (values, next) {
-        CipherService.hashPasswordUser(values);
+        if (values.password) {
+          values.password = CipherService.hashPassword(values.password);
+        }
         next();
     }
 };
