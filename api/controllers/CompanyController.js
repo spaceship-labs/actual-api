@@ -6,6 +6,11 @@
  */
 
 module.exports = {
-	
+  find: function(req, res) {
+    Company.find().exec(function(err, companies){
+      if (err) {return res.negotiate(err);}
+      return res.json(companies);
+    });
+  }
 };
 

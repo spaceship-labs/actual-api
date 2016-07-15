@@ -25,6 +25,7 @@ module.exports = {
     var id = form.id;
     User.findOne({id: id})
       .populate('permissions')
+      .populate('companies')
       .exec(function(err, result){
         if(err){
           console.log(err);
