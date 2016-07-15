@@ -19,6 +19,10 @@ module.exports = {
     Products: {
       collection:'product',
       via: 'FilterValues'
+    },
+    Promotions:{
+      collection:'promotion',
+      via:'FilterValues'
     }
 	}
 }

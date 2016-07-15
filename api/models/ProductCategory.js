@@ -29,6 +29,11 @@ module.exports = {
       via: 'Categories'
     },
 
+    Promotions:{
+      collection:'Promotion',
+      via:'Categories'
+    }
+
 
 	}
 }

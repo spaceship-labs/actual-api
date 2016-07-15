@@ -115,6 +115,7 @@ module.exports = {
       DepthUnitMsr:{type:'string'},
 
       freeSale: {type:'boolean'},
+      slowMovement:{type:'boolean'},
 
 
       //RELATIONS
@@ -153,6 +154,11 @@ module.exports = {
       QuotationDetails:{
         collection:'QuotationDetail',
         via:'Product'
+      },
+
+      Promotions:{
+        collection: 'Promotion',
+        via:'Products'
       }
 
     },

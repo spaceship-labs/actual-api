@@ -8,6 +8,10 @@ module.exports = {
     Products:{
       collection:'product',
       via:'CustomBrand'
+    },
+    Promotions:{
+      collection:'promotion',
+      via:'CustomBrands'
     }
   }
 }
