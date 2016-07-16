@@ -47,7 +47,10 @@ module.exports = {
 
     dialCode: {type:'string'},
     phone:{type:'string'},
-    email:{type:'string'},
+    email: {
+      type:'string',
+      unique: true
+    },
     mobileDialCode:{type:'string'},
     mobilePhone: {type:'string'},
     externalNumber:{type:'string'},
