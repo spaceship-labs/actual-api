@@ -3,10 +3,12 @@ module.exports = {
   tableName: 'product_filtervalues__productfiltervalue_products',
   attributes:{
     value : 'integer',
-    productfiltervalue_Products : { //product filter value
+    productfiltervalue : { //product filter value
+      columnName:'productfiltervalue_Products',
       model : 'productfiltervalue'
     },
-    product_FilterValues : { //product
+    product : { //product
+      columnName:'product_FilterValues',
       model : 'product'
     }
   }

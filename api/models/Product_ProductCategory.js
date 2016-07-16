@@ -2,10 +2,12 @@
 module.exports = {
   tableName: 'product_categories__productcategory_products',
   attributes:{
-    productcategory_Products: {
+    productCategory: {
+      columnName:'productcategory_Products',
       model: 'productCategory'
     },
-    product_Categories: {
+    product: {
+      columnName:'product_Categories',
       model: 'product'
     }
   }

@@ -85,9 +85,9 @@ module.exports = {
 
   advancedSearch: function(req, res) {
     var form         = req.params.all();
-    var handle       = [].concat(form.category);
     var categories   = [].concat(form.categories);
     var filtervalues = [].concat(form.filtervalues);
+    var groups       = [].concat(form.groups);
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -97,25 +97,29 @@ module.exports = {
       limit: form.limit || 10
     };
 
+    var filters = [
+      {key:'Price', value: price},
+      {key:'Active', value: 'Y'},
+      {key:'CustomBrand', value: form.CustomBrand},
+      {key:'OnStudio', value: form.OnStudio},
+      {key:'OnHome', value: form.OnHome},
+      {key:'OnKids', value: form.OnKids},
+      {key:'OnAmueble', value: form.OnAmueble},
+    ];
+
+
     getProductsByCategories({id:categories})
       .then(function(catprods) {
-        return [catprods, getProductsByFilterValue(filtervalues)];
+        return [catprods, getProductsByFilterValue(filtervalues), getProductsByGroup(groups)];
       })
-      .spread(function(catprods, filterprods) {
-        if (!catprods || catprods.length == 0) {
-          return filterprods;
-        } else if(!filterprods || filterprods.length == 0) {
-          return catprods;
-        } else {
-          return intersection(catprods, filterprods);
-        }
+      .spread(function(catprods, filterprods, groupsprods) {
+        return getMultiIntersection([catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
-        var q = {
-          id: idProducts,
-          Price: price,
-          Active: 'Y'
-        };
+        if( (categories && categories.length > 0) || (filtervalues && filtervalues.length > 0) || (groups && groups.length > 0) ){
+          filters.id = idProducts;
+        }
+        var q = applyFilters({},filters);
         return [
           Product.count(q),
           Product.find(q)
@@ -149,6 +153,15 @@ function queryPrice(query, minPrice, maxPrice) {
   return assign(query, {Price: price});
 }
 
+function applyFilters(query, filters){
+  filters.forEach(function(filter){
+    if(filter.value && !_.isUndefined(filter.value) ){
+      query[filter.key] = filter.value;
+    }
+  });
+  return query;
+}
+
 function queryTerms(query, terms) {
   if (!terms || terms.length == 0) {
     return query;
@@ -175,20 +188,20 @@ function getProductsByCategories(categoryQuery) {
   return ProductCategory.find(categoryQuery)
     .then(function(category) {
       category = category.map(function(cat){return cat.id;});
-      return Product_ProductCategory.find({productcategory_Products: category});
+      return Product_ProductCategory.find({productCategory: category});
     })
     .then(function(relations) {
       return relations.map(function(relation){
-        return relation.product_Categories;
+        return relation.product;
       });
     });
 }
 
 function getProductsByFilterValue(filtervalues){
-  return Product_ProductFilterValue.find({productfiltervalue_Products: filtervalues})
+  return Product_ProductFilterValue.find({productfiltervalue: filtervalues})
     .then(function(relations) {
       relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product_FilterValues] = (prodMap[current.product_FilterValues] || []).concat(current.productfiltervalue_Products);
+        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productfiltervalue);
         return prodMap;
       }, {});
       relations = hashToArray(relations);
@@ -201,6 +214,20 @@ function getProductsByFilterValue(filtervalues){
     });
 }
 
+function getProductsByGroup(groups) {
+  return ProductGroup.find({id:groups})
+    .then(function(group) {
+      group = group.map(function(grp){return grp.id;});
+      return Product_ProductGroup.find({productgroup: group});
+    })
+    .then(function(relations) {
+      return relations.map(function(relation){
+        return relation.product;
+      });
+    });
+}
+
+
 function hashToArray(hash) {
   var entries = Object.keys(hash);
   return entries.map(function(entry){
@@ -212,6 +239,23 @@ function intersection(set1, set2) {
   return set1.filter(function(si) {
     return set2.indexOf(si) != -1;
   });
+}
+
+function getMultiIntersection(arrays){
+  arrays = arrays.filter(function(arr){return arr.length > 0});
+  var finalIntersection = [];
+  if(arrays.length > 0){
+    finalIntersection = arrays.shift().reduce(function(intersection, value) {
+        var valueIsInArrays = arrays.every(function(arr) {
+          return arr.indexOf(value) !== -1;
+        });
+        if (intersection.indexOf(value) === -1 && valueIsInArrays){
+          intersection.push(value);
+        }
+        return intersection;
+    }, []);
+  }
+  return finalIntersection;
 }
 
   /*
