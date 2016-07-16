@@ -1,6 +1,16 @@
 
 module.exports = {
-
+  create: function(req, res) {
+    var form       = req.params.all();
+    var email      = form.email;
+    var actualMail =  /@actualgroup.com$/
+    if (email && email.match(actualMail)) {
+      return res.badRequest({
+        error: 'user could not be created with an employee\'s mail'
+      });
+    }
+    return res.badRequest({error: 'this endpoint is not finished'});
+  },
   find: function(req, res){
     var form = req.params.all();
     var model = 'client';
