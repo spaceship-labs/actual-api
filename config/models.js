@@ -65,18 +65,24 @@ module.exports.models = {
     });
   },
 
+  /*
+  beforeCreate: function(values, next){
+  }*/
+
   attributes : {
     hash: {type:'string'},
+    /*createdBy: {
+      model:'User'
+    },
+    */
     updateAvatar : function(req,opts,cb){
       var object = this;
-      //opts.file = object.icon;
       opts.file = mapIconFields(object);
       if(process.env.CLOUDUSERNAME){
         opts.avatar = true;
         opts.filename = object.icon_filename?object.icon_filename : null;
         Files.saveFiles(req,opts,function(err,files){
             if(err) return cb(err);
-            //object.icon = files[0];
             object.icon_filename = files[0].filename;
             object.icon_name = files[0].name;
             object.icon_type = files[0].type;
@@ -93,11 +99,9 @@ module.exports.models = {
 
       async.waterfall([
         function(callback){
-            //console.log('save files');
             Files.saveFiles(req,opts,callback);
         },
         function(files,callback){
-          //console.log('crops');
           object.icon_filename = files[0].filename;
           object.icon_name = files[0].name;
           object.icon_type = files[0].type;
@@ -150,8 +154,6 @@ module.exports.models = {
                   callback(null,file);
           },function(e,crops){
               if(e) return cb(e,crops);
-              /*object.files = objectFiles;
-              */
               object.files.add(objectFiles);
               object.save(cb);
               return objectFiles;
@@ -159,7 +161,6 @@ module.exports.models = {
       });
     },
     removeFiles : function(req,opts,cb){
-      //var async = require('async');
       var object = this;
       var files = opts.files ? opts.files : [];
       var FileModel = opts.fileModel;
@@ -185,14 +186,12 @@ module.exports.models = {
     },
     updateAvatarSap : function(internalFiles,opts,cb){
       var object = this;
-      //opts.file = object.icon;
       opts.file = mapIconFields(object);
       if(process.env.CLOUDUSERNAME){
         opts.avatar = true;
         opts.filename = object.icon_filename?object.icon_filename : null;
         Files.saveFilesSap(internalFiles,opts,function(err,files){
             if(err) return cb(err);
-            //object.icon = files[0];
             object.icon_filename = files[0].filename;
             object.icon_name = files[0].name;
             object.icon_type = files[0].type;
@@ -209,11 +208,9 @@ module.exports.models = {
 
       async.waterfall([
         function(callback){
-            //console.log('save files');
-            Files.saveFilesSap(internalFiles,opts,callback);
+          Files.saveFilesSap(internalFiles,opts,callback);
         },
         function(files,callback){
-          //console.log('crops');
           object.icon_filename = files[0].filename;
           object.icon_name = files[0].name;
           object.icon_type = files[0].type;

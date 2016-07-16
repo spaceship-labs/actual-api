@@ -32,6 +32,10 @@ module.exports = {
     users: {
       collection: 'user',
       via: 'companies'
+    },
+    Promotions:{
+      collection: 'promotion',
+      via: 'Companies'
     }
   }
 };

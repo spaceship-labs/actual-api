@@ -443,6 +443,16 @@ module.exports.routes = {
   '/me/update':{
     controller:'me',
     action:'update'
+  },
+
+  '/promotion/create':{
+    controller: 'promotion',
+    action:'create'
+  },
+
+  '/promotion/find/:page':{
+    controller: 'promotion',
+    action:'find'
   }
 
 

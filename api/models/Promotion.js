@@ -16,6 +16,10 @@ module.exports = {
     //tiendas aplicables
     //productos aplicables, verificar si aplicar sobre producto o sobre filtros/categorias
     productSearchTerm: {type:'string'},
+    OnStudio:{type:'boolean'},
+    OnHome:{type:'boolean'},
+    OnKids:{type:'boolean'},
+    OnAmueble:{type:'boolean'},
     Categories:{
       collection:'ProductCategory',
       via:'Promotions'
@@ -32,13 +36,12 @@ module.exports = {
       collection:'ProductGroup',
       via:'Promotions'
     },
-    OnStudio:{type:'boolean'},
-    OnHome:{type:'boolean'},
-    OnKids:{type:'boolean'},
-    OnAmueble:{type:'boolean'},
-
     Products:{
       collection:'Product',
+      via:'Promotions'
+    },
+    Companies:{
+      collection:'company',
       via:'Promotions'
     }
 

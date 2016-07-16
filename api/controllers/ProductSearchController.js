@@ -45,7 +45,7 @@ module.exports = {
       limit: form.limit || 10
     };
 
-    getProductsByCategories({Handle:handle})
+    getProductsByCategory({Handle:handle})
       .then(function(catprods) {
         return [catprods, getProductsByFilterValue(filtervalues)];
       })
@@ -88,6 +88,7 @@ module.exports = {
     var categories   = [].concat(form.categories);
     var filtervalues = [].concat(form.filtervalues);
     var groups       = [].concat(form.groups);
+    var noIcons      = form.noIcons || false;
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -100,7 +101,7 @@ module.exports = {
     var filters = [
       {key:'Price', value: price},
       {key:'Active', value: 'Y'},
-      {key:'CustomBrand', value: form.CustomBrand},
+      {key:'CustomBrand', value: form.customBrands },
       {key:'OnStudio', value: form.OnStudio},
       {key:'OnHome', value: form.OnHome},
       {key:'OnKids', value: form.OnKids},
@@ -108,25 +109,30 @@ module.exports = {
     ];
 
 
-    getProductsByCategories({id:categories})
+    getProductsByCategories(categories)
       .then(function(catprods) {
         return [catprods, getProductsByFilterValue(filtervalues), getProductsByGroup(groups)];
       })
       .spread(function(catprods, filterprods, groupsprods) {
+        //sails.log.info('catprods: ' + catprods.length);
+        //sails.log.info('filterprods: ' + filterprods.length);
+        //sails.log.info('groupsprods: ' + groupsprods.length);
         return getMultiIntersection([catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
-        if( (categories && categories.length > 0) || (filtervalues && filtervalues.length > 0) || (groups && groups.length > 0) ){
-          filters.id = idProducts;
+        if(categories.length > 0 || filtervalues.length > 0 || groups.length > 0){
+          filters.push({key:'id', value: idProducts});
         }
+
         var q = applyFilters({},filters);
-        return [
-          Product.count(q),
-          Product.find(q)
-            .paginate(paginate)
-            .sort('Available DESC')
-            .populate('files')
-        ];
+        var find = Product.find(q)
+          .paginate(paginate)
+          .sort('Available DESC')
+
+        if(!noIcons){
+          find.populate('files')
+        }
+        return [Product.count(q), find];
       })
       .spread(function(total, products) {
         return res.json({
@@ -155,7 +161,10 @@ function queryPrice(query, minPrice, maxPrice) {
 
 function applyFilters(query, filters){
   filters.forEach(function(filter){
-    if(filter.value && !_.isUndefined(filter.value) ){
+    if(filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0 ){
+      query[filter.key] = filter.value;
+    }
+    else if(filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)  ){
       query[filter.key] = filter.value;
     }
   });
@@ -184,7 +193,7 @@ function queryTerms(query, terms) {
   return assign(query, {$or: filter});
 }
 
-function getProductsByCategories(categoryQuery) {
+function getProductsByCategory(categoryQuery) {
   return ProductCategory.find(categoryQuery)
     .then(function(category) {
       category = category.map(function(cat){return cat.id;});
@@ -193,6 +202,23 @@ function getProductsByCategories(categoryQuery) {
     .then(function(relations) {
       return relations.map(function(relation){
         return relation.product;
+      });
+    });
+}
+
+function getProductsByCategories(categoriesIds) {
+  return Product_ProductCategory.find({productCategory: categoriesIds})
+    .then(function(relations) {
+      relations = relations.reduce(function(prodMap, current){
+        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
+        return prodMap;
+      }, {});
+      relations = hashToArray(relations);
+      relations = relations.filter(function(relation) {
+        return _.isEqual(categoriesIds, relation[1]);
+      });
+      return relations.map(function(relation) {
+        return relation[0];
       });
     });
 }
