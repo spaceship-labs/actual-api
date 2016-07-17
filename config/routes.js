@@ -453,6 +453,11 @@ module.exports.routes = {
   '/promotion/find/:page':{
     controller: 'promotion',
     action:'find'
+  },
+
+  '/promotion/findbyid/:id':{
+    controller: 'promotion',
+    action:'findById'
   }
 
 

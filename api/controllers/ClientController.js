@@ -43,12 +43,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    //Product.find({id:id}).exec(function(err, results){
     Client.findOne({id:id})
-      .populate('Info')
-      //.populate('Quotations')
-      //.populate('Groups')
-      //.populate('stock')
       .exec(function(err, client){
       if(err){
         console.log(err);
@@ -68,30 +63,5 @@ module.exports = {
     });
   }
 
-  /*
-  updateInfo: function(req, res){
-    var form = req.params.all();
-    var client = form.client;
-    sails.log.debug('client : ' + client);
-    form.Client = client || false;
-    delete form.id;
-    delete form.client;
-    ClientInfo.findOne({Client: client}).exec(function findCB(err, found){
-      if(err) console.log(err);
-      if(found){
-        delete form.client;
-        ClientInfo.update({id: found.id}, form).exec(function updateCB(err2, updated){
-          if(err2) console.log(err2);
-          res.json(updated);
-        });
-      }else{
-        ClientInfo.create(form).exec(function createCB(err3, created){
-          res.json(created);
-          if(err3) console.log(err3);
-        });
-      }
-
-    });
-  }*/
 
 };

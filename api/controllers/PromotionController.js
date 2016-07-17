@@ -25,5 +25,20 @@ module.exports = {
         res.negotiate(err);
       });
   },
+  findById: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Promotion.findOne({id:id})
+      .populate('FilterValues')
+      .populate('CustomBrands')
+      .populate('Groups')
+      .populate('Companies')
+      .then(function(promo){
+        res.json(promo);
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      });
+  }
 
 }
