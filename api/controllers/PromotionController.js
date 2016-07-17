@@ -33,6 +33,19 @@ module.exports = {
       .populate('CustomBrands')
       .populate('Groups')
       .populate('Companies')
+      .populate('Categories')
+      .populate('Products')
+      .then(function(promo){
+        res.json(promo);
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      });
+  },
+  update: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Promotion.update({id:id}, form)
       .then(function(promo){
         res.json(promo);
       })

@@ -8,11 +8,11 @@ module.exports = {
     type:{type:'string'},
     startDate:{type:'datetime'},
     endDate:{type:'datetime'},
-    discountPaymentGroup1:{type:'float'},
-    discountPaymentGroup2:{type:'float'},
-    discountPaymentGroup3:{type:'float'},
-    discountPaymentGroup4:{type:'float'},
-    discountPaymentGroup5:{type:'float'},
+    discountPg1:{type:'float'},
+    discountPg2:{type:'float'},
+    discountPg3:{type:'float'},
+    discountPg4:{type:'float'},
+    discountPg5:{type:'float'},
     //tiendas aplicables
     //productos aplicables, verificar si aplicar sobre producto o sobre filtros/categorias
     productSearchTerm: {type:'string'},
@@ -20,6 +20,7 @@ module.exports = {
     OnHome:{type:'boolean'},
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
+    excludedProducts: {type:'array'},
     Categories:{
       collection:'ProductCategory',
       via:'Promotions'
