@@ -114,14 +114,13 @@ module.exports = {
         return [catprods, getProductsByFilterValue(filtervalues), getProductsByGroup(groups)];
       })
       .spread(function(catprods, filterprods, groupsprods) {
-        //sails.log.info('catprods: ' + catprods.length);
-        //sails.log.info('filterprods: ' + filterprods.length);
-        //sails.log.info('groupsprods: ' + groupsprods.length);
         return getMultiIntersection([catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
-        if(categories.length > 0 || filtervalues.length > 0 || groups.length > 0){
+        if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
           filters.push({key:'id', value: idProducts});
+        }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
+          return [Promise.resolve(0),Promise.resolve(0)];
         }
 
         var q = applyFilters({},filters);
