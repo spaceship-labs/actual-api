@@ -22,7 +22,20 @@ module.exports = {
         if (filtervalues.length != 0) {
           query = queryIdsProducts(query, idProducts);
         }
-        return [Product.count(query), Product.find(query).paginate(paginate)];
+
+        var currentDate = new Date();
+        var queryPromo = {
+          select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+          startDate: {'<=': currentDate},
+          endDate: {'>=': currentDate},
+        };
+
+        return [
+          Product.count(query),
+          Product.find(query)
+            .populate('Promotions', queryPromo)
+            .paginate(paginate)
+        ];
       })
       .spread(function(total, products) {
         return res.json({total: total, products: products});
@@ -64,12 +77,19 @@ module.exports = {
           Price: price,
           Active: 'Y'
         };
+        var currentDate = new Date();
+        var queryPromo = {
+          select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+          startDate: {'<=': currentDate},
+          endDate: {'>=': currentDate},
+        };
         return [
           Product.count(q),
           Product.find(q)
             .paginate(paginate)
             .sort('Available DESC')
             .populate('files')
+            .populate('Promotions',queryPromo)
         ];
       })
       .spread(function(total, products) {
@@ -124,7 +144,14 @@ module.exports = {
         }
 
         var q = applyFilters({},filters);
+        var currentDate = new Date();
+        var queryPromo = {
+          select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+          startDate: {'<=': currentDate},
+          endDate: {'>=': currentDate},
+        };
         var find = Product.find(q)
+          .populate('Promotions',queryPromo)
           .paginate(paginate)
           .sort('Available DESC')
 

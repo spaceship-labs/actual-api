@@ -28,12 +28,19 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     //Product.find({id:id}).exec(function(err, results){
+    var currentDate = new Date();
+    var queryPromo = {
+      select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+      startDate: {'<=': currentDate},
+      endDate: {'>=': currentDate},
+    };
     Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
       .populate('Sizes')
       .populate('Groups')
+      .populate('Promotions')
       //.populate('stock')
       .exec(function(err, product){
       if(err){

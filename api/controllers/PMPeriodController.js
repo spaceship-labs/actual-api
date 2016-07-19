@@ -75,8 +75,8 @@ module.exports = {
     //Today range
     var currentDate = new Date();
     var query = {
-      startDate: {'>=': currentDate},
-      endDate: {'<=': current},
+      startDate: {'<=': currentDate},
+      endDate: {'>=': current},
     };
     PMPeriod.findOne(query).then(function(active){
       res.json(active);
