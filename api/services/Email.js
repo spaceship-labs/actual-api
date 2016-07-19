@@ -30,9 +30,9 @@ module.exports = {
     request.path = '/v3/mail/send'
     request.body = requestBody
     sendgrid.API(request, function (response) {
+      sails.log.info('Email: ');
+      sails.log.info(response);
       if (response.statusCode >= 200 && response.statusCode <=299) {
-        sails.log.info('Email: ');
-        saisl.log.info(response);
         cb();
       } else {
         cb(response);
