@@ -81,10 +81,10 @@ module.exports = {
     var email = form.email || false;
     if(email && Common.validateEmail(email) ){
       User.findOne( {email:email}, {select: ['id', 'password', 'email']} ).exec(function(err,user){
-        if(err || typeof user == 'undefined'){
+        if(err || typeof user == 'undefined') {
           console.log(err);
           return res.notFound();
-        }else{
+        } else {
           var values = user.id + user.email + user.password;
           var tokenAux = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));
           var token = tokenAux;
@@ -96,7 +96,17 @@ module.exports = {
           var recoverURL =  frontendURL + '/auth/reset-password?';
           recoverURL += 'token='+token;
           recoverURL += '&email='+email;
-          sendPasswordRecoveryEmail({recoverURL: recoverURL, email: email}, res, req);
+          Email.sendPasswordRecovery(
+            user.firstName,
+            user.email,
+            recoverURL,
+            function(err) {
+              if (err){return res.negotiate(err)};
+              return res.ok({
+                success:true,
+              });
+            }
+          );
         }
       });
     }else{
@@ -135,28 +145,6 @@ module.exports = {
 
 
 };
-
-function sendPasswordRecoveryEmail(params, res, req){
-  var data = {
-    recoverURL: params.recoverURL,
-  };
-  var head = {
-    to: params.email,
-    subject: 'Solicitud de cambio de contraseña en Actual System'
-  };
-
-  sails.hooks.email.send(
-    "passwordRecovery", data, head, function(err){
-      if(err){
-        console.log(err);
-        return res.ok({success:false});
-      }
-      return res.ok({
-        success:true,
-        recoverURL: data.recoverURL//REMOVE IN PRODUCTION
-      });
-  });
-}
 
 function validateToken(token, email, cb){
   User.findOne(
