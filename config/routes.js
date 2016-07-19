@@ -463,7 +463,33 @@ module.exports.routes = {
   '/promotion/update/:id':{
     controller: 'promotion',
     action:'update'
-  }
+  },
+
+  '/pmperiod/create':{
+    controller: 'pmperiod',
+    action:'create'
+  },
+
+  '/pmperiod/update/:id':{
+    controller: 'pmperiod',
+    action:'update'
+  },
+
+  '/pmperiod/find/:page':{
+    controller: 'pmperiod',
+    action:'find'
+  },
+
+  '/pmperiod/findbyid/:id':{
+    controller: 'pmperiod',
+    action:'findById'
+  },
+
+  '/pmperiod/getactive':{
+    controller: 'pmperiod',
+    action:'getActive'
+  },
+
 
   /***************************************************************************
   *                                                                          *
