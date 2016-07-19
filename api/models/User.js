@@ -32,10 +32,6 @@ module.exports = {
         company: {
             type:'string'
         },
-        companies: {
-          collection: 'company',
-          via: 'users'
-        },
         SlpCode: {
           type:'integer',
           columnName:'SlpCode',
@@ -94,6 +90,10 @@ module.exports = {
         interbankClabe: {type:'string'},
 
         //relations - permissions
+        companies: {
+          collection: 'company',
+          via: 'users'
+        },
         permissions: {
           collection: 'permission',
           via: 'owners'
