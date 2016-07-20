@@ -160,6 +160,7 @@ function promotionCronJobSearch(opts) {
     '>=': opts.minPrice || 0,
     '<=': opts.maxPrice || Infinity
   };
+  var excludes     = [].concat(opts.excludes);
   var paginate = {
     page:  opts.page  || 1,
     limit: opts.limit || 99999999999
@@ -182,13 +183,31 @@ function promotionCronJobSearch(opts) {
       return getMultiIntersection([catprods, filterprods, groupsprods]);
     })
     .then(function(idProducts) {
+      var auxQuery = {};
+
       if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
-        filters.push({key:'id', value: idProducts});
+        if(excludes.length > 0){
+          var ids = _.difference(idProducts, excludes);
+          filters.push({
+            key:'id',
+            value:ids
+          });
+        }else{
+          filters.push({key:'id', value: idProducts});
+        }
+
       }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
         return [Promise.resolve(0),Promise.resolve(0)];
       }
 
-      var q = applyFilters({},filters);
+      if(excludes.length > 0 && idProducts.length == 0){
+        filters.push({
+          key:'id',
+          value:{'!':excludes}
+        });
+      }
+
+      var q = applyFilters(auxQuery,filters);
       var find = Product.find(q)
         .paginate(paginate)
         .sort('Available DESC')
