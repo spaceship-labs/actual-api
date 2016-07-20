@@ -14,13 +14,13 @@ module.exports = {
       limit: form.items || 10
     };
     var query        = {};
-    query            = queryTerms(query, terms);
+    query            = Search.queryTerms(query, terms);
     query            = queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
-    getProductsByFilterValue(filtervalues)
+    Search.getProductsByFilterValue(filtervalues)
       .then(function(idProducts) {
         if (filtervalues.length != 0) {
-          query = queryIdsProducts(query, idProducts);
+          query = Search.queryIdsProducts(query, idProducts);
         }
 
         var currentDate = new Date();
@@ -58,9 +58,9 @@ module.exports = {
       limit: form.limit || 10
     };
 
-    getProductsByCategory({Handle:handle})
+    Search.getProductsByCategory({Handle:handle})
       .then(function(catprods) {
-        return [catprods, getProductsByFilterValue(filtervalues)];
+        return [catprods, Search.getProductsByFilterValue(filtervalues)];
       })
       .spread(function(catprods, filterprods) {
         if (!handle || handle.length == 0) {
@@ -68,7 +68,7 @@ module.exports = {
         } else if(!filtervalues || filtervalues.length == 0) {
           return catprods;
         } else {
-          return intersection(catprods, filterprods);
+          return Search.intersection(catprods, filterprods);
         }
       })
       .then(function(idProducts) {
@@ -129,12 +129,12 @@ module.exports = {
     ];
 
 
-    getProductsByCategories(categories)
+    Search.getProductsByCategories(categories)
       .then(function(catprods) {
-        return [catprods, getProductsByFilterValue(filtervalues), getProductsByGroup(groups)];
+        return [catprods, Search.getProductsByFilterValue(filtervalues), Search.getProductsByGroup(groups)];
       })
       .spread(function(catprods, filterprods, groupsprods) {
-        return getMultiIntersection([catprods, filterprods, groupsprods]);
+        return Search.getMultiIntersection([catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
         if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
@@ -143,7 +143,7 @@ module.exports = {
           return [Promise.resolve(0),Promise.resolve(0)];
         }
 
-        var q = applyFilters({},filters);
+        var q = Search.applyFilters({},filters);
         var currentDate = new Date();
         var queryPromo = {
           select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
@@ -173,142 +173,7 @@ module.exports = {
 
 };
 
-function queryIdsProducts(query, idProducts) {
-  return assign(query, {id: idProducts});
-}
 
-function queryPrice(query, minPrice, maxPrice) {
-  var price = {
-    '>=': minPrice || 0,
-    '<=': maxPrice || Infinity
-  };
-  return assign(query, {Price: price});
-}
-
-function applyFilters(query, filters){
-  filters.forEach(function(filter){
-    if(filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0 ){
-      query[filter.key] = filter.value;
-    }
-    else if(filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)  ){
-      query[filter.key] = filter.value;
-    }
-  });
-  return query;
-}
-
-function queryTerms(query, terms) {
-  if (!terms || terms.length == 0) {
-    return query;
-  }
-  var searchFields = [
-    'Name',
-    'ItemName',
-    'ItemCode',
-    'Description',
-    'DetailedColor'
-  ];
-  var filter       = searchFields.reduce(function(acum, sf){
-    var and = terms.reduce(function(acum, term){
-      var fname = {};
-      fname[sf] = {contains: term};
-      return acum.concat(fname);
-    }, []);
-    return acum.concat({$and: and})
-  }, []);
-  return assign(query, {$or: filter});
-}
-
-function getProductsByCategory(categoryQuery) {
-  return ProductCategory.find(categoryQuery)
-    .then(function(category) {
-      category = category.map(function(cat){return cat.id;});
-      return Product_ProductCategory.find({productCategory: category});
-    })
-    .then(function(relations) {
-      return relations.map(function(relation){
-        return relation.product;
-      });
-    });
-}
-
-function getProductsByCategories(categoriesIds) {
-  return Product_ProductCategory.find({productCategory: categoriesIds})
-    .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
-      relations = relations.filter(function(relation) {
-        return _.isEqual(categoriesIds, relation[1]);
-      });
-      return relations.map(function(relation) {
-        return relation[0];
-      });
-    });
-}
-
-function getProductsByFilterValue(filtervalues){
-  return Product_ProductFilterValue.find({productfiltervalue: filtervalues})
-    .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productfiltervalue);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
-      relations = relations.filter(function(relation) {
-        return _.isEqual(filtervalues, relation[1]);
-      });
-      return relations.map(function(relation) {
-        return relation[0];
-      });
-    });
-}
-
-function getProductsByGroup(groups) {
-  return ProductGroup.find({id:groups})
-    .then(function(group) {
-      group = group.map(function(grp){return grp.id;});
-      return Product_ProductGroup.find({productgroup: group});
-    })
-    .then(function(relations) {
-      return relations.map(function(relation){
-        return relation.product;
-      });
-    });
-}
-
-
-function hashToArray(hash) {
-  var entries = Object.keys(hash);
-  return entries.map(function(entry){
-    return [entry, hash[entry]]
-  });
-}
-
-function intersection(set1, set2) {
-  return set1.filter(function(si) {
-    return set2.indexOf(si) != -1;
-  });
-}
-
-function getMultiIntersection(arrays){
-  arrays = arrays.filter(function(arr){return arr.length > 0});
-  var finalIntersection = [];
-  if(arrays.length > 0){
-    finalIntersection = arrays.shift().reduce(function(intersection, value) {
-        var valueIsInArrays = arrays.every(function(arr) {
-          return arr.indexOf(value) !== -1;
-        });
-        if (intersection.indexOf(value) === -1 && valueIsInArrays){
-          intersection.push(value);
-        }
-        return intersection;
-    }, []);
-  }
-  return finalIntersection;
-}
 
   /*
   advancedSearch: function(req, res){
@@ -321,7 +186,7 @@ function getMultiIntersection(arrays){
       limit: form.items || 10
     };
     var query        = {};
-    query            = queryTerms(query, terms);
+    query            = Search.queryTerms(query, terms);
     query            = queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
     Product.count(query)

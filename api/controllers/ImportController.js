@@ -112,10 +112,8 @@ function updateIcons(prods,callback){
       console.log(err);
       callback({done:false});
     }
-
     callback({done:true});
-
-  })
+  });
 }
 
 function streamToFile(inStream, filename) {
