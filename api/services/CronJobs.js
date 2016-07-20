@@ -2,14 +2,12 @@ var cron = require('cron').CronJob;
 var async = require('async');
 
 module.exports.init = function(){
-  console.log('starting');
-  sails.log.info('starting cronJobs');
   var cronJobs = [
     {
       fn: function(d){
         getPromos();
       }
-      , time:'0 0 */1 * * *'
+      , time:'0 */2 * * * *'
       //s,m,h,d del mes,m,d de la semana
     }
   ].forEach(function(v){
@@ -49,6 +47,10 @@ function updatePromo(promo, callback){
   var categories = promo.Categories.map(function(c){return c.id});
   var filtervalues = promo.FilterValues.map(function(fv){return fv.id});
   var groups = promo.Groups.map(function(g){return g.id});
+  var excluded = [];
+  if(promo.excludedProducts && promo.excludedProducts.length > 0){
+    excluded = promo.excludedProducts.map(function(p){return p.id});
+  }
   var opts = {
     OnStudio: promo.OnStudio || false,
     OnHome: promo.OnHome || false,
@@ -56,7 +58,8 @@ function updatePromo(promo, callback){
     OnAmueble: promo.OnAmueble || false,
     categories: categories,
     filtervalues: filtervalues,
-    groups: groups
+    groups: groups,
+    excluded: excluded
   };
   sails.log.info('Searching:');
   Search.promotionCronJobSearch(opts).then(function(res){
@@ -66,13 +69,16 @@ function updatePromo(promo, callback){
       Promotion.update({id: promo.id}, {Products: products})
         .then(function(updated){
           callback();
+          return null;
         })
         .catch(function(err){
           console.log(err);
           callback();
+          return null;
         });
     }else{
       callback();
+      return null;
     }
     //return res;
   }).catch(function(err){

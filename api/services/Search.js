@@ -160,7 +160,7 @@ function promotionCronJobSearch(opts) {
     '>=': opts.minPrice || 0,
     '<=': opts.maxPrice || Infinity
   };
-  var excludes     = [].concat(opts.excludes);
+  var excluded     = opts.excluded ? [].concat(opts.excluded): [];
   var paginate = {
     page:  opts.page  || 1,
     limit: opts.limit || 99999999999
@@ -186,8 +186,8 @@ function promotionCronJobSearch(opts) {
       var auxQuery = {};
 
       if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
-        if(excludes.length > 0){
-          var ids = _.difference(idProducts, excludes);
+        if(excluded.length > 0){
+          var ids = _.difference(idProducts, excluded);
           filters.push({
             key:'id',
             value:ids
@@ -200,10 +200,10 @@ function promotionCronJobSearch(opts) {
         return [Promise.resolve(0),Promise.resolve(0)];
       }
 
-      if(excludes.length > 0 && idProducts.length == 0){
+      if(excluded.length > 0 && idProducts.length == 0){
         filters.push({
           key:'id',
-          value:{'!':excludes}
+          value:{'!':excluded}
         });
       }
 
