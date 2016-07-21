@@ -16,8 +16,8 @@ module.exports = {
       required: true
     },
     ammount: {
-      type: 'float'
-      required: true,
+      type: 'float',
+      required: true
     }
   }
 };
