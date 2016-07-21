@@ -20,15 +20,6 @@ module.exports = {
             defaultsTo: ''
         },
         lastLogin : 'datetime',
-        isAdmin : {
-            type : 'boolean',
-            defaultsTo : false,
-            //required : true
-        },
-        userType: {
-            type:'string',
-            defaultsTo: 'seller'
-        },
         company: {
             type:'string'
         },
@@ -105,17 +96,11 @@ module.exports = {
           collection: 'role',
           via: 'owner'
         },
-        /*
-        Clients :{
-          collection: 'client',
-          via: 'seller'
-        },*/
-
         toJSON: function () {
-            var obj = this.toObject();
-            delete obj.password;
-            delete obj.socialProfiles;
-            return obj;
+          var obj = this.toObject();
+          delete obj.password;
+          delete obj.socialProfiles;
+          return obj;
         }
     },
     beforeUpdate: function (values, next) {
