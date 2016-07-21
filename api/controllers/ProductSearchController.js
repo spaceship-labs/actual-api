@@ -15,7 +15,7 @@ module.exports = {
     };
     var query        = {};
     query            = Search.queryTerms(query, terms);
-    query            = queryPrice(query, minPrice, maxPrice);
+    query            = Search.queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
     Search.getProductsByFilterValue(filtervalues)
       .then(function(idProducts) {
@@ -187,7 +187,7 @@ module.exports = {
     };
     var query        = {};
     query            = Search.queryTerms(query, terms);
-    query            = queryPrice(query, minPrice, maxPrice);
+    query            = Search.queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
     Product.count(query)
       .then(function(total) {
