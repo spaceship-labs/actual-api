@@ -98,11 +98,13 @@ module.exports = {
           collection: 'permission',
           via: 'owners'
         },
-
         Commission:{
           model:'Commission'
         },
-
+        role: {
+          collection: 'role',
+          via: 'owner'
+        },
         /*
         Clients :{
           collection: 'client',
