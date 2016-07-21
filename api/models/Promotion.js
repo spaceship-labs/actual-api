@@ -26,7 +26,7 @@ module.exports = {
     pushMoneyUnitType:{
       type:'string',
       enum:['ammount','percent']
-    }
+    },
     Categories:{
       collection:'ProductCategory',
       via:'Promotions'
