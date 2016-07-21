@@ -21,6 +21,12 @@ module.exports = {
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
     excludedProducts: {type:'array'},
+    hasLM:{type:'boolean'},
+    pushMoneyUnit:{type:'float'},
+    pushMoneyUnitType:{
+      type:'string',
+      enum:['ammount','percent']
+    }
     Categories:{
       collection:'ProductCategory',
       via:'Promotions'
