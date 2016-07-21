@@ -6,6 +6,11 @@
  */
 
 module.exports = {
-	
+  find: function(req, res) {
+    Role.find().exec(function(err, roles) {
+      if (err) {return res.negotiate(err);}
+      return res.json(roles);
+    });
+  }
 };
 
