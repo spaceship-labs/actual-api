@@ -1,3 +1,5 @@
+var assign   = require('object-assign');
+
 module.exports = {
   applyFilters: applyFilters,
   getMultiIntersection: getMultiIntersection,
@@ -48,7 +50,7 @@ function queryTerms(query, terms) {
     'Description',
     'DetailedColor'
   ];
-  var filter       = searchFields.reduce(function(acum, sf){
+  var filter = searchFields.reduce(function(acum, sf){
     var and = terms.reduce(function(acum, term){
       var fname = {};
       fname[sf] = {contains: term};
