@@ -4,13 +4,24 @@
  * @description :: Server-side logic for managing goals
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var Promise = require('q');
 
 module.exports = {
   find: function(req, res) {
-    Goal.find().exec(function(err, goals) {
-      if (err) {return res.negotiate(err);}
-      return res.json(goals);
-    });
+    Promise
+      .all([
+        Goal.count(),
+        Goal.find().populate('role')
+      ])
+      .spread(function(total, goals){
+        return res.json({
+          total: total,
+          data: goals
+        });
+      })
+      .catch(function(err){
+        return res.negotiate(err);
+      });
   },
 
   create: function(req, res) {
