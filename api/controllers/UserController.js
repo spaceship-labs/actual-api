@@ -11,8 +11,9 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'user';
-    var searchFields = ['firstName','email'];
-    Common.find(model, form, searchFields).then(function(result){
+    var searchFields   = ['firstName','email'];
+    var populateFields = ['role'];
+    Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){
       console.log(err);
@@ -26,6 +27,7 @@ module.exports = {
     User.findOne({id: id})
       .populate('permissions')
       .populate('companies')
+      .populate('role')
       .exec(function(err, result){
         if(err){
           console.log(err);
