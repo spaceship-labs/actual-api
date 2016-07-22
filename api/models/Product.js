@@ -37,7 +37,7 @@ module.exports = {
       U_pctPuntos:{type:'float'},
       U_FAMILIA:{type:'string', size:30},
       U_Empresa:{type:'string'},
-
+      nameSA: {type:'string',columnName:'EmpresaName'},
 
       //FIELDS FROM PRICE TABLE
       PriceList:{type:'integer', size: 4},
