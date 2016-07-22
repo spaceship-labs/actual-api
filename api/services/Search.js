@@ -175,7 +175,7 @@ function promotionCronJobSearch(opts) {
     {key:'OnHome', value: opts.OnHome},
     {key:'OnKids', value: opts.OnKids},
     {key:'OnAmueble', value: opts.OnAmueble},
-    {key:'SA', value: opts.SA}
+    {key:'U_Empresa', value: opts.U_Empresa}
   ];
 
   return getProductsByCategories(categories)
