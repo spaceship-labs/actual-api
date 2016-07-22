@@ -13,6 +13,11 @@ module.exports = {
     discountPg3:{type:'float'},
     discountPg4:{type:'float'},
     discountPg5:{type:'float'},
+    discountTextPg1:{type:'string'},
+    discountTextPg2:{type:'string'},
+    discountTextPg3:{type:'string'},
+    discountTextPg4:{type:'string'},
+    discountTextPg5:{type:'string'},
     //tiendas aplicables
     //productos aplicables, verificar si aplicar sobre producto o sobre filtros/categorias
     productSearchTerm: {type:'string'},
