@@ -20,6 +20,7 @@ module.exports = {
     OnHome:{type:'boolean'},
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
+    U_Empresa: {type:'string'},
     excludedProducts: {type:'array'},
     hasLM:{type:'boolean'},
     pushMoneyUnit:{type:'float'},
