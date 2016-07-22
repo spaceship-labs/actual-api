@@ -8,8 +8,9 @@ module.exports.init = function(){
     {
       fn: function(d){
         getPromos();
-      }
-      , time:'0 0 */1 * * *'
+      },
+      time:'0 0 */1 * * *'
+      //time: '0 */4 * * * *'
       //s,m,h,d del mes,m,d de la semana
     }
   ].forEach(function(v){
@@ -53,16 +54,19 @@ function updatePromo(promo){
     OnHome: promo.OnHome || false,
     OnKids: promo.OnKids || false,
     OnAmueble: promo.OnAmueble || false,
+    name: promo.name,
+    U_Empresa: promo.U_Empresa || false,
     categories: categories,
     filtervalues: filtervalues,
     groups: groups,
-    excluded: excluded
+    excluded: excluded,
   };
   sails.log.info('Searching:');
   return Search.promotionCronJobSearch(opts).then(function(res){
     if(res && _.isArray(res)){
       var products = res.map(function(p){return p.id});
-      sails.log.info('Actualizando con ' + products.length + ' products' );
+      sails.log.info('Actualizando (' +opts.name+ ') con ' + products.length + ' products' );
+      sails.log.info('U_Empresa : ' + opts.U_Empresa);
       return Promotion.update({id: promo.id}, {Products: products})
         .then(function(updated){
           return null;
