@@ -7,21 +7,17 @@
 var Promise = require('q');
 
 module.exports = {
-  find: function(req, res) {
-    Promise
-      .all([
-        Goal.count(),
-        Goal.find().populate('role')
-      ])
-      .spread(function(total, goals){
-        return res.json({
-          total: total,
-          data: goals
-        });
-      })
-      .catch(function(err){
-        return res.negotiate(err);
-      });
+  find: function(req, res){
+    var form = req.params.all();
+    var model = 'goal';
+    var searchFields   = ['name', 'role.name', 'ammount'];
+    var selectFields   = form.fields;
+    var populateFields = ['role'];
+    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+      return res.ok(result);
+    },function(err){
+      return res.notFound();
+    });
   },
 
   create: function(req, res) {
