@@ -20,10 +20,28 @@ module.exports = {
     });
   },
 
+  findById: function(req, res) {
+    var id = req.param('id');
+    Goal.findOne(id).exec(function(err, goal) {
+      if (err) {return res.negotiate(err);}
+      return res.json(goal);
+    });
+  },
+
   create: function(req, res) {
     var form = req.params.all();
     var goal = form.goal;
     Goal.create(goal).exec(function(err, goal) {
+      if (err) {return res.negotiate(err);}
+      return res.json(goal);
+    });
+  },
+
+  update: function(req, res) {
+    var form = req.allParams();
+    var id   = form.id;
+    delete form.id;
+    Goal.update(form.id, form).exec(function(err, goal) {
       if (err) {return res.negotiate(err);}
       return res.json(goal);
     });
