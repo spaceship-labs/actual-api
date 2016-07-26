@@ -7,16 +7,10 @@
 var Promise = require('q');
 
 module.exports = {
-  find: function(req, res){
-    var form = req.params.all();
-    var model = 'goal';
-    var searchFields   = ['name', 'role.name', 'ammount'];
-    var selectFields   = form.fields;
-    var populateFields = ['role'];
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
-      return res.ok(result);
-    },function(err){
-      return res.notFound();
+  find: function(req, res) {
+    Goal.find().populate('role').exec(function(err, goals) {
+      if (err) {return res.negotiate(err);}
+      return res.json(goals);
     });
   },
 
@@ -45,6 +39,21 @@ module.exports = {
       if (err) {return res.negotiate(err);}
       return res.json(goal);
     });
-  }
+  },
+
+  search: function(req, res){
+    var form = req.params.all();
+    var model = 'goal';
+    var searchFields   = ['name', 'role.name', 'ammount'];
+    var selectFields   = form.fields;
+    var populateFields = ['role'];
+    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+      return res.ok(result);
+    },function(err){
+      return res.notFound();
+    });
+  },
+
+
 };
 
