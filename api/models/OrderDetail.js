@@ -8,7 +8,7 @@ module.exports = {
     Product: {
       model:'Product'
     },
-    Quantity: 'integer',
+    quantity: 'integer',
     discount: 'float',
     total: 'float'
   }

@@ -1,5 +1,4 @@
 var cron = require('cron').CronJob;
-var async = require('async');
 var Promise = require('bluebird')
 
 module.exports.init = function(){
@@ -9,7 +8,7 @@ module.exports.init = function(){
       fn: function(d){
         getPromos();
       },
-      time:'0 0 */1 * * *'
+      time:'0 0 */6 * * *'
       //time: '0 */4 * * * *'
       //s,m,h,d del mes,m,d de la semana
     }

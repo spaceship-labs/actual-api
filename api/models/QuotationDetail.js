@@ -1,5 +1,6 @@
 //APP COLLECTION
 module.exports = {
+  schema:true,
   tableName: 'QuotationDetail',
   attributes: {
     Quotation:{
@@ -8,8 +9,9 @@ module.exports = {
     Product: {
       model:'Product'
     },
-    Quantity: 'integer',
+    quantity: 'integer',
     discount: 'float',
+    subtotal: 'float',
     total: 'float'
   }
 };

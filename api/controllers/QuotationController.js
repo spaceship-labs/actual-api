@@ -2,6 +2,7 @@ module.exports = {
 
   create: function(req, res){
     var form = req.params.all();
+    form.Details = formatProductsIds(form.Details);
     Quotation.create(form).exec(function createCB(err, created){
       if(err) console.log(err);
 
@@ -16,9 +17,9 @@ module.exports = {
           });
           QuotationDetail.find({id:detailsIds}).populate('Product').exec(function(err2, details){
             if(err2) console.log(err2);
-            var total = calculateTotal(details);
+            var subtotal = calculateTotal(details);
 
-            Quotation.update({id: created.id}, {total:total}).exec(function(err, updated){
+            Quotation.update({id: created.id}, {subtotal:subtotal}).exec(function(err, updated){
               if(err) console.log(err);
               if(Array.isArray(updated)){
                 updated = updated[0];
@@ -38,6 +39,7 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    form.Details = formatProductsIds(form.Details);
     Quotation.update({id:id}, form).exec(function updateCB(err, updated){
       if(err) console.log(err);
       Quotation.findOne({id:id}).populate('Details').exec(function findOneCb(err, quotation){
@@ -48,9 +50,9 @@ module.exports = {
         });
         QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
           if(err) console.log(err);
-          var total = 0;
-          total = calculateTotal(details);
-          Quotation.update({id:id}, {total:total}).exec(function updateCB(err, updated){
+          var subtotal = 0;
+          subtotal = calculateTotal(details);
+          Quotation.update({id:id}, {subtotal:subtotal}).exec(function updateCB(err, updated){
             if(err) console.log(err);
             if(Array.isArray(updated)){
               updated = updated[0];
@@ -70,7 +72,15 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({id: id}).populate('Details').populate('Records').populate('User').populate('Client').populate('Address').populate('Order').exec(function findCB(err, quotation){
+    Quotation.findOne({id: id})
+      .populate('Details')
+      .populate('Records')
+      .populate('User')
+      .populate('Client')
+      .populate('Address')
+      .populate('Order')
+      .populate('Payments')
+      .exec(function findCB(err, quotation){
       if(err) console.log(err);
 
       if(quotation){
@@ -136,6 +146,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     form.Quotation = id;
+    form.Details = formatProductsIds(form.Details);
     delete form.id;
 
     QuotationDetail.create(form).exec(function createCB(err, createdDetail){
@@ -148,9 +159,9 @@ module.exports = {
         });
         QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
           if(err) console.log(err);
-          var total = 0;
-          total = calculateTotal(details);
-          Quotation.update({id:id}, {total:total}).exec(function updateCB(err, updated){
+          var subtotal = 0;
+          subtotal = calculateTotal(details);
+          Quotation.update({id:id}, {subtotal:subtotal}).exec(function updateCB(err, updated){
             if(err) console.log(err);
             res.json(updated);
           }); //End update quotation total
@@ -166,6 +177,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var quotationId = form.quotation;
+    form.Details = formatProductsIds(form.Details);
     QuotationDetail.destroy({id:id}).exec(function destroyCB(err){
       if(err) console.log(err);
 
@@ -176,9 +188,9 @@ module.exports = {
         });
         QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
           if(err) console.log(err);
-          var total = 0;
-          total = calculateTotal(details);
-          Quotation.update({id:quotationId}, {total:total}).exec(function updateCB(err, updated){
+          var subtotal = 0;
+          subtotal = calculateTotal(details);
+          Quotation.update({id:quotationId}, {subtotal:subtotal}).exec(function updateCB(err, updated){
             if(err) console.log(err);
             res.json(updated);
           }); //End update quotation total
@@ -228,7 +240,7 @@ module.exports = {
     Quotation.native(function(errNative, collection){
       if(errNative) console.log(errNative);
       collection.aggregate({
-          $group: {_id:null, total: {$sum: '$total'} }
+          $group: {_id:null, subtotal: {$sum: '$subtotal'} }
         },
         function(err, resultAll){
           if(err) console.log(err);
@@ -244,7 +256,7 @@ module.exports = {
             if(errNative) console.log(errNative);
             collection.aggregate([
                 { $match: { createdAt: {$gte: startDate, $lte: endDate } } },
-                { $group: {_id:null, total: {$sum: '$total'} } },
+                { $group: {_id:null, subtotal: {$sum: '$subtotal'} } },
               ]
             , function(err, resultRangeDate){
                 if(err) console.log(err);
@@ -285,32 +297,32 @@ module.exports = {
   addPayment: function(req, res){
     var form = req.params.all();
     var quotationId = form.quotationid;
+    var totalDiscount = form.totalDiscount || 0;
     form.Quotation = quotationId;
+    form.Details = formatProductsIds(form.Details);
+    delete form.quotationid;
+    delete form.cards;
+    delete form.terminals;
+    delete form.totalDiscount;
     Payment.create(form).exec(function(err, payment){
       Quotation.findOne({id: quotationId}).populate('Payments').exec(function(err, quotation){
         if(err) console.log(err);
-        var ammountPaid = quotation.Payments.reduce(function(paymentA, paymentB){
-          return paymentA.ammount + paymentB.ammount;
+        var payments = quotation.Payments.map(function(p){return p.ammount});
+        var ammountPaid = payments.reduce(function(paymentA, paymentB){
+          return paymentA + paymentB;
         });
+        var total = quotation.subtotal - totalDiscount;
         var params = {
-          ammountPaid: ammountPaid
+          ammountPaid: ammountPaid,
+          totalDiscount: totalDiscount,
+          total: total,
         };
-        sails.log.info('cantidad pagada cotizacion:' + ammountPaid);
-        params.status = (ammountPaid / quotation.total >= 0.6) ? 'minimum-paid' : 'pending';
-        Quotation.update({id:quotation}, params).exec(function(err, quotationUpdated){
+        params.status = (ammountPaid / total >= 0.6) ? 'minimum-paid' : 'pending';
+        Quotation.update({id:quotation.id}, params).exec(function(err, quotationUpdated){
           if(err) console.log(err);
           res.json(quotationUpdated);
         });
       });
-    });
-  },
-
-  getPaymentsByQuotation: function(req, res){
-    var form = req.params.all();
-    var quotationId = form.quotationid;
-    Payment.find({Quotation: quotationId}).exec(function(err, payments){
-      if(err) console.log(err);
-      res.json(payments);
     });
   },
 
@@ -321,8 +333,21 @@ function calculateTotal(details){
   var total = 0;
   details.forEach(function(detail){
     if(detail.Product && detail.Product.Price){
-      total+= detail.Product.Price * detail.Quantity;
+      total+= detail.Product.Price * detail.quantity;
     }
   });
   return total;
+}
+
+function formatProductsIds(details){
+  var result = [];
+  if(details && details.length > 0){
+    result = details.map(function(d){
+      if(d.Product){
+        d.Product = (typeof d.Product == 'string') ? d.Product :  d.Product.id;
+      }
+      return d;
+    });
+  }
+  return result;
 }

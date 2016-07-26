@@ -1,6 +1,7 @@
 //APP COLLECTION
 module.exports = {
   migrate: 'alter',
+  schema:true,
   tableName: 'Quotation',
   attributes: {
     Client:{
@@ -36,6 +37,8 @@ module.exports = {
     clientName: {type:'string'},
     folio:{type:'integer'},
     total:{type:'float'},
+    subtotal: {type:'float'},
+    discount: {type:'float'},
     ammountPaid: {type:'float'}
   },
 
@@ -51,7 +54,7 @@ function calculateTotal(details){
   var total = 0;
   details.forEach(function(detail){
     if(detail.Product && detail.Product.Price){
-      total+= detail.Product.Price * detail.Quantity;
+      total+= detail.Product.Price * detail.quantity;
     }
   });
   return total;

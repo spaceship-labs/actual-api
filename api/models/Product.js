@@ -1,5 +1,6 @@
 //APP/SAP COLLECTION
 module.exports = {
+    schema: true,
     //migrate: 'alter',
     tableName: 'Product',
     attributes: {

@@ -404,11 +404,6 @@ module.exports.routes = {
     action:'addPayment'
   },
 
-  '/quotation/getpaymentsbyquotation/:quotationid':{
-    controller: 'quotation',
-    action:'getPaymentsByQuotation'
-  },
-
   '/client/update/:id':{
     controller: 'client',
     action: 'update'
@@ -428,12 +423,6 @@ module.exports.routes = {
     controller: 'productsearch',
     action:'searchByCategory'
   },
-
-  '/order/create':{
-    controller: 'order',
-    action:'create'
-  },
-
 
   '/order/find/:page':{
     controller:'order',
