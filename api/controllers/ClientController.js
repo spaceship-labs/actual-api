@@ -43,15 +43,25 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Client.findOne({id:id})
-      .exec(function(err, client){
-      if(err){
-        console.log(err);
-        res.notFound();
+    Client.findOne({id:id}).then(function(client){
+      //res.json(client);
+      if(client){
+        return ClientContact.find({CardCode: client.CardCode}).then(function(contacts){
+          client = client.toObject();
+          client.Contacts = contacts;
+          return res.json(client);
+        }).catch(function(err){
+          console.log(err);
+          return res.negotiate(err);
+        });
+
       }else{
         res.json(client);
       }
-    });
+    }).catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    })
   },
 
   update: function(req, res){

@@ -27,7 +27,7 @@ module.exports = {
     var id = form.id;
     var startDate = new Date(form.startDate);
     var endDate = new Date(form.endDate);
-    overlapsRange(startDate, endDate).then(function(overlaps){
+    overlapsRange(startDate, endDate, id).then(function(overlaps){
       if(!overlaps){
         PMPeriod.update({id:id},form).then(function(created){
           res.json(created);
@@ -89,13 +89,16 @@ module.exports = {
 }
 
 //Params must be Date objects
-function overlapsRange(newStart, newEnd){
+function overlapsRange(newStart, newEnd, currentPeriodId){
   console.log('newStart: ' + newStart);
   console.log('newEnd: ' + newEnd);
   var query = {
     endDate: {'>': newStart},
     startDate: {'<': newEnd},
   };
+  if(currentPeriodId){
+    query.id = {'!':currentPeriodId};
+  }
   return PMPeriod.findOne(query).then(function(result){
     return result;
   }).catch(function(err){

@@ -490,7 +490,15 @@ module.exports.routes = {
     action:'getActive'
   },
 
+  '/site/update/:handle':{
+    controller:'site',
+    action:'update'
+  },
 
+  '/site/findbyhandle/:handle':{
+    controller:'site',
+    action:'findByHandle'
+  }
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
