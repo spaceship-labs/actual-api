@@ -9,12 +9,30 @@ module.exports = {
   },
 
   find: function(req, res) {
-
+    Commission.find().exec(function(err, commissions) {
+      if (err) {return res.negotiate(err);}
+      return res.json(commissions);
+    });
   },
 
   findById: function(req, res) {
-
+    var id = req.param('id');
+    Commission.findOne(id).exec(function(err, commission) {
+      if (err) {return res.negotiate(err);}
+      return res.json(commission);
+    });
   },
+
+  update: function(req, res) {
+    var form = req.allParams();
+    var id   = form.id;
+    delete form.id;
+    Commission.update(form.id, form).exec(function(err, commission) {
+      if (err) {return res.negotiate(err);}
+      return res.json(commission);
+    });
+  },
+
 
   search: function(req, res){
     var form = req.params.all();
