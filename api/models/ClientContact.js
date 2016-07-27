@@ -39,7 +39,7 @@ module.exports = {
       columnName:'Tel2',
       type:'string'
     },
-    mobilePhone:{
+    mobileSAP:{
       columnName:'Cellolar',
       type:'string'
     },

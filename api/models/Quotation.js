@@ -22,7 +22,7 @@ module.exports = {
       via:'Quotation'
     },
     Address:{
-      model:'QuotationAddress',
+      model:'ClientContact',
     },
     Order:{
       model:'Order'

@@ -343,7 +343,7 @@ module.exports.routes = {
     action:'findById'
   },
 
-  '/client/:SlpCode/contacts':{
+  '/client/:CardCode/contacts':{
     controller:'client',
     action:'getContactsByClient'
   },
@@ -403,10 +403,14 @@ module.exports.routes = {
     action:'removeDetail'
   },
 
-
   '/quotation/addpayment/:quotationid':{
     controller: 'quotation',
     action:'addPayment'
+  },
+
+  '/quotation/totals/:id':{
+    controller: 'quotation',
+    action: 'getQuotationTotals'
   },
 
   '/client/update/:id':{
