@@ -53,8 +53,8 @@ module.exports = {
     })
     .then(function(contacts){
       clientFound = clientFound.toObject();
-      client.Contacts = contacts;
-      res.json(client);
+      clientFound.Contacts = contacts;
+      res.json(clientFound);
     })
     .catch(function(err){
       console.log(err);

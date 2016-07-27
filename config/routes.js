@@ -343,7 +343,7 @@ module.exports.routes = {
     action:'findById'
   },
 
-  '/client/:SlpCode/contacts':{
+  '/client/:CardCode/contacts':{
     controller:'client',
     action:'getContactsByClient'
   },

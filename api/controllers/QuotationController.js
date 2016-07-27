@@ -53,7 +53,7 @@ module.exports = {
       .populate('Records')
       .populate('User')
       .populate('Client')
-      .populate('Address')
+      //.populate('Address')
       .populate('Order')
       .populate('Payments')
       .exec(function findCB(err, quotation){
