@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 module.exports = {
 
   create: function(req, res){
@@ -36,32 +37,35 @@ module.exports = {
     }); //End create
   },
 
+
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var finalQuotation;
     form.Details = formatProductsIds(form.Details);
-    Quotation.update({id:id}, form).exec(function updateCB(err, updated){
-      if(err) console.log(err);
-      Quotation.findOne({id:id}).populate('Details').exec(function findOneCb(err, quotation){
-
-        var detailsIds = [];
-        quotation.Details.forEach(function(detail){
-          detailsIds.push(detail.id);
-        });
-        QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
-          if(err) console.log(err);
-          var subtotal = 0;
-          subtotal = calculateTotal(details);
-          Quotation.update({id:id}, {subtotal:subtotal}).exec(function updateCB(err, updated){
-            if(err) console.log(err);
-            if(Array.isArray(updated)){
-              updated = updated[0];
-            }
-            res.json(updated);
-          });
-        });
-
-      });
+    Quotation.update({id:id}, form).then(function updateCB(updated){
+      finalQuotation = updated;
+      return Quotation.findOne({id:id}).populate('Details');
+    })
+    .then(function(quotation){
+      var detailsIds = [];
+      if(quotation.Details){
+        detailsIds = quotation.Details.map(function(d){return d.id});
+        return QuotationDetail.find({id:detailsIds}).populate('Product');
+      }else{
+        return [];
+      }
+    })
+    .then(function(details){
+      return Prices.processDetails(details)
+    })
+    .then(function(processedDetails){
+      sails.log.warn('Llego del processedDetails');
+      sails.log.info(processedDetails);
+      res.json(finalQuotation);
+    })
+    .catch(function(err){
+      console.log(err);
     });
     //Updating quotation total, with details
   },

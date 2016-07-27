@@ -20,7 +20,7 @@ module.exports = {
       console.log(err);
       res.notFound();
     });
-  }
+  },
 
   createFromQuotation: function(req, res){
     var form = req.params.all();

@@ -49,13 +49,3 @@ module.exports = {
   },
 
 };
-
-function calculateTotal(details){
-  var total = 0;
-  details.forEach(function(detail){
-    if(detail.Product && detail.Product.Price){
-      total+= detail.Product.Price * detail.quantity;
-    }
-  });
-  return total;
-}
