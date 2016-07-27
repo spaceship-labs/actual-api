@@ -43,25 +43,24 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var clientFound = false;
     Client.findOne({id:id}).then(function(client){
-      //res.json(client);
       if(client){
-        return ClientContact.find({CardCode: client.CardCode}).then(function(contacts){
-          client = client.toObject();
-          client.Contacts = contacts;
-          return res.json(client);
-        }).catch(function(err){
-          console.log(err);
-          return res.negotiate(err);
-        });
-
-      }else{
-        res.json(client);
+        clientFound = client;
+        return ClientContact.find({CardCode: client.CardCode});
       }
-    }).catch(function(err){
-      console.log(err);
-      res.negotiate(err);
+      return [];
     })
+    .then(function(contacts){
+      clientFound = clientFound.toObject();
+      client.Contacts = contacts;
+      res.json(client);
+    })
+    .catch(function(err){
+      console.log(err);
+      return res.negotiate(err);
+    });
+
   },
 
   update: function(req, res){
@@ -71,7 +70,17 @@ module.exports = {
       if(err) console.log(err);
       res.json(updated);
     });
-  }
+  },
 
+  getContactsByClient: function(req, res){
+    var form = req.params.all();
+    var CardCode = form.CardCode;
+    ClientContact.find({CardCode:CardCode}).then(function(contacts){
+      res.json(contacts);
+    }).catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    })
+  }
 
 };

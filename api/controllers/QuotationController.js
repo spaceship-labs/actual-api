@@ -4,90 +4,42 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     form.Details = formatProductsIds(form.Details);
-    Quotation.create(form).then(function(created){
-
-      Quotation.findOne({id:created.id}).populate('Details')
-      .then(function(quotation){
-        var detailsIds = [];
-        if(quotation.Details){
-          detailsIds = quotation.Details.map(function(d){return d.id});
-          return QuotationDetail.find({id:detailsIds}).populate('Product');
-        }else{
-          return [];
-        }
-      })
-      .then(function(details){
-        return Prices.processDetails(details)
-      })
-      .then(function(processedDetails){
-        var totals = {
-          subtotal:0,
-          total:0,
-          discount:0
-        };
-        processedDetails.forEach(function(pd){
-          totals.total+= pd.total;
-          totals.subtotal += pd.subtotal;
-          totals.discount += (pd.subtotal - pd.total);
-        });
-        return Quotation.update({id:id}, totals);
+    Quotation.create(form)
+      .then(function(created){
+        return Prices.updateQuotationTotals(created.id);
       })
       .then(function(updatedQuotation){
-        res.json(updatedQuotation);
+        if(updatedQuotation && updatedQuotation.length > 0){
+          res.json(updatedQuotation[0]);
+        }
+        res.json(null);
       })
       .catch(function(err){
         console.log(err);
+        res.negotiate(err);
       });
-
-
-    }).catch(function(err){
-      console.log(err);
-    });
-
   },
 
 
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var finalQuotation;
     form.Details = formatProductsIds(form.Details);
-    Quotation.update({id:id}, form).then(function updateCB(updated){
-      finalQuotation = updated;
-      return Quotation.findOne({id:id}).populate('Details');
-    })
-    .then(function(quotation){
-      var detailsIds = [];
-      if(quotation.Details){
-        detailsIds = quotation.Details.map(function(d){return d.id});
-        return QuotationDetail.find({id:detailsIds}).populate('Product');
-      }else{
-        return [];
-      }
-    })
-    .then(function(details){
-      return Prices.processDetails(details)
-    })
-    .then(function(processedDetails){
-      var totals = {
-        subtotal:0,
-        total:0,
-        discount:0
-      };
-      processedDetails.forEach(function(pd){
-        totals.total+= pd.total;
-        totals.subtotal += pd.subtotal;
-        totals.discount += (pd.subtotal - pd.total);
+    Quotation.update({id:id}, form)
+      .then(function(){
+        return Prices.updateQuotationTotals(id);
+      })
+      .then(function(updatedQuotation){
+        if(updatedQuotation && updatedQuotation.length > 0){
+          res.json(updatedQuotation[0]);
+        }else{
+          res.json(null);
+        }
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
       });
-      return Quotation.update({id:id}, totals);
-    })
-    .then(function(updatedQuotation){
-      res.json(updatedQuotation);
-    })
-    .catch(function(err){
-      console.log(err);
-    });
-    //Updating quotation total, with details
   },
 
   findById: function(req, res){
@@ -173,48 +125,21 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     delete form.id;
 
-    QuotationDetail.create(form).then(function(created){
-
-      Quotation.findOne({id:form.Quotation}).populate('Details')
-      .then(function(quotation){
-        var detailsIds = [];
-        if(quotation.Details){
-          detailsIds = quotation.Details.map(function(d){return d.id});
-          return QuotationDetail.find({id:detailsIds}).populate('Product');
-        }else{
-          return [];
-        }
-      })
-      .then(function(details){
-        return Prices.processDetails(details)
-      })
-      .then(function(processedDetails){
-        var totals = {
-          subtotal:0,
-          total:0,
-          discount:0
-        };
-        processedDetails.forEach(function(pd){
-          totals.total+= pd.total;
-          totals.subtotal += pd.subtotal;
-          totals.discount += (pd.subtotal - pd.total);
-        });
-        return Quotation.update({id:id}, totals);
+    QuotationDetail.create(form)
+      .then(function(created){
+        return Prices.updateQuotationTotals(id);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
           res.json(updatedQuotation[0]);
+        }else{
+          res.json(null);
         }
-        res.json(null);
       })
       .catch(function(err){
         console.log(err);
+        res.negotiate(err);
       });
-
-    }).catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    })
 
   },
 
@@ -223,46 +148,21 @@ module.exports = {
     var id = form.id;
     var quotationId = form.quotation;
     form.Details = formatProductsIds(form.Details);
-    QuotationDetail.destroy({id:id}).then(function(){
-
-      Quotation.findOne({id:quotationId}).populate('Details')
-      .then(function(quotation){
-        var detailsIds = [];
-        if(quotation.Details){
-          detailsIds = quotation.Details.map(function(d){return d.id});
-          return QuotationDetail.find({id:detailsIds}).populate('Product');
-        }else{
-          return [];
-        }
-      })
-      .then(function(details){
-        return Prices.processDetails(details)
-      })
-      .then(function(processedDetails){
-        var totals = {
-          subtotal:0,
-          total:0,
-          discount:0
-        };
-        processedDetails.forEach(function(pd){
-          totals.total+= pd.total;
-          totals.subtotal += pd.subtotal;
-          totals.discount += (pd.subtotal - pd.total);
-        });
-        return Quotation.update({id:quotationId}, totals);
+    QuotationDetail.destroy({id:id})
+      .then(function(){
+        return Prices.updateQuotationTotals(quotationId);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
           res.json(updatedQuotation[0]);
+        }else{
+          res.json(null);
         }
-        res.json(null);
       })
       .catch(function(err){
         console.log(err);
+        res.negotiate(err);
       });
-
-
-    }); //End create detail
   },
 
   findByClient: function(req, res){

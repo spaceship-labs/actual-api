@@ -343,6 +343,11 @@ module.exports.routes = {
     action:'findById'
   },
 
+  '/client/:SlpCode/contacts':{
+    controller:'client',
+    action:'getContactsByClient'
+  },
+
   '/quotation/create':{
     controller: 'quotation',
     action: 'create'

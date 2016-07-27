@@ -1,7 +1,8 @@
 var Promise = require('bluebird')
 
 module.exports = {
-  processDetails: processDetails
+  processDetails: processDetails,
+  updateQuotationTotals: updateQuotationTotals
 };
 
 //@params details: Array of objects from model Detail
@@ -83,4 +84,37 @@ function getMainPromo(product){
 function getDiscountKey(group){
   var keys = ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'];
   return keys[group-1];
+}
+
+function updateQuotationTotals(quotationId){
+
+  return Quotation.findOne({id:quotationId}).populate('Details')
+    .then(function(quotation){
+      var detailsIds = [];
+      if(quotation.Details){
+        detailsIds = quotation.Details.map(function(d){return d.id});
+        return QuotationDetail.find({id:detailsIds}).populate('Product');
+      }else{
+        return [];
+      }
+    })
+    .then(function(details){
+      return processDetails(details)
+    })
+    .then(function(processedDetails){
+      var totals = {
+        subtotal:0,
+        total:0,
+        discount:0,
+        totalProducts: 0
+      };
+      processedDetails.forEach(function(pd){
+        totals.total+= pd.total;
+        totals.subtotal += pd.subtotal;
+        totals.discount += (pd.subtotal - pd.total);
+        totals.totalProducts += pd.quantity;
+      });
+      return Quotation.update({id:quotationId}, totals);
+    })
+
 }

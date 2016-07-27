@@ -39,7 +39,8 @@ module.exports = {
     total:{type:'float'},
     subtotal: {type:'float'},
     discount: {type:'float'},
-    ammountPaid: {type:'float'}
+    ammountPaid: {type:'float'},
+    totalProducts: {type:'integer'}
   },
 
   beforeCreate: function(val,cb){
