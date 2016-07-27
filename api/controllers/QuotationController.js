@@ -4,37 +4,46 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     form.Details = formatProductsIds(form.Details);
-    Quotation.create(form).exec(function createCB(err, created){
-      if(err) console.log(err);
+    Quotation.create(form).then(function(created){
 
-      Quotation.findOne({id:created.id}).populate('Details').exec(function(err, quotation){
-        if(err) console.log(err);
-        if(!quotation.Details || quotation.Details.length == 0){
-          res.json(created);
+      Quotation.findOne({id:created.id}).populate('Details')
+      .then(function(quotation){
+        var detailsIds = [];
+        if(quotation.Details){
+          detailsIds = quotation.Details.map(function(d){return d.id});
+          return QuotationDetail.find({id:detailsIds}).populate('Product');
         }else{
-          var detailsIds = [];
-          quotation.Details.forEach(function(detail){
-            detailsIds.push(detail.id);
-          });
-          QuotationDetail.find({id:detailsIds}).populate('Product').exec(function(err2, details){
-            if(err2) console.log(err2);
-            var subtotal = calculateTotal(details);
-
-            Quotation.update({id: created.id}, {subtotal:subtotal}).exec(function(err, updated){
-              if(err) console.log(err);
-              if(Array.isArray(updated)){
-                updated = updated[0];
-              }
-              res.json(updated);
-
-            }); //End update price
-
-          }); //End find details
+          return [];
         }
+      })
+      .then(function(details){
+        return Prices.processDetails(details)
+      })
+      .then(function(processedDetails){
+        var totals = {
+          subtotal:0,
+          total:0,
+          discount:0
+        };
+        processedDetails.forEach(function(pd){
+          totals.total+= pd.total;
+          totals.subtotal += pd.subtotal;
+          totals.discount += (pd.subtotal - pd.total);
+        });
+        return Quotation.update({id:id}, totals);
+      })
+      .then(function(updatedQuotation){
+        res.json(updatedQuotation);
+      })
+      .catch(function(err){
+        console.log(err);
+      });
 
-      }); //End find one
 
-    }); //End create
+    }).catch(function(err){
+      console.log(err);
+    });
+
   },
 
 
@@ -60,9 +69,20 @@ module.exports = {
       return Prices.processDetails(details)
     })
     .then(function(processedDetails){
-      sails.log.warn('Llego del processedDetails');
-      sails.log.info(processedDetails);
-      res.json(finalQuotation);
+      var totals = {
+        subtotal:0,
+        total:0,
+        discount:0
+      };
+      processedDetails.forEach(function(pd){
+        totals.total+= pd.total;
+        totals.subtotal += pd.subtotal;
+        totals.discount += (pd.subtotal - pd.total);
+      });
+      return Quotation.update({id:id}, totals);
+    })
+    .then(function(updatedQuotation){
+      res.json(updatedQuotation);
     })
     .catch(function(err){
       console.log(err);
@@ -153,27 +173,45 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     delete form.id;
 
-    QuotationDetail.create(form).exec(function createCB(err, createdDetail){
-      if(err) console.log(err);
+    QuotationDetail.create(form).then(function(created){
 
-      Quotation.findOne({id:form.Quotation}).populate('Details').exec(function findCB(err, quotation){
+      Quotation.findOne({id:form.Quotation}).populate('Details')
+      .then(function(quotation){
         var detailsIds = [];
-        quotation.Details.forEach(function(detail){
-          detailsIds.push(detail.id);
+        if(quotation.Details){
+          detailsIds = quotation.Details.map(function(d){return d.id});
+          return QuotationDetail.find({id:detailsIds}).populate('Product');
+        }else{
+          return [];
+        }
+      })
+      .then(function(details){
+        return Prices.processDetails(details)
+      })
+      .then(function(processedDetails){
+        var totals = {
+          subtotal:0,
+          total:0,
+          discount:0
+        };
+        processedDetails.forEach(function(pd){
+          totals.total+= pd.total;
+          totals.subtotal += pd.subtotal;
+          totals.discount += (pd.subtotal - pd.total);
         });
-        QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
-          if(err) console.log(err);
-          var subtotal = 0;
-          subtotal = calculateTotal(details);
-          Quotation.update({id:id}, {subtotal:subtotal}).exec(function updateCB(err, updated){
-            if(err) console.log(err);
-            res.json(updated);
-          }); //End update quotation total
-        });//End get details
+        return Quotation.update({id:id}, totals);
+      })
+      .then(function(updatedQuotation){
+        res.json(updatedQuotation);
+      })
+      .catch(function(err){
+        console.log(err);
+      });
 
-      });//End find quotation
-
-    }); //End create detail
+    }).catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    })
 
   },
 
@@ -182,26 +220,41 @@ module.exports = {
     var id = form.id;
     var quotationId = form.quotation;
     form.Details = formatProductsIds(form.Details);
-    QuotationDetail.destroy({id:id}).exec(function destroyCB(err){
-      if(err) console.log(err);
+    QuotationDetail.destroy({id:id}).then(function(){
 
-      Quotation.findOne({id:quotationId}).populate('Details').exec(function findCB(err, quotation){
+      Quotation.findOne({id:quotationId}).populate('Details')
+      .then(function(quotation){
         var detailsIds = [];
-        quotation.Details.forEach(function(detail){
-          detailsIds.push(detail.id);
+        if(quotation.Details){
+          detailsIds = quotation.Details.map(function(d){return d.id});
+          return QuotationDetail.find({id:detailsIds}).populate('Product');
+        }else{
+          return [];
+        }
+      })
+      .then(function(details){
+        return Prices.processDetails(details)
+      })
+      .then(function(processedDetails){
+        var totals = {
+          subtotal:0,
+          total:0,
+          discount:0
+        };
+        processedDetails.forEach(function(pd){
+          totals.total+= pd.total;
+          totals.subtotal += pd.subtotal;
+          totals.discount += (pd.subtotal - pd.total);
         });
-        QuotationDetail.find({id:detailsIds}).populate('Product').exec(function findCB(err, details){
-          if(err) console.log(err);
-          var subtotal = 0;
-          subtotal = calculateTotal(details);
-          Quotation.update({id:quotationId}, {subtotal:subtotal}).exec(function updateCB(err, updated){
-            if(err) console.log(err);
-            res.json(updated);
-          }); //End update quotation total
+        return Quotation.update({id:id}, totals);
+      })
+      .then(function(updatedQuotation){
+        res.json(updatedQuotation);
+      })
+      .catch(function(err){
+        console.log(err);
+      });
 
-        });//End get details
-
-      });//End find quotation
 
     }); //End create detail
   },

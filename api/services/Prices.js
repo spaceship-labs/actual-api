@@ -17,7 +17,12 @@ function processDetails(details){
 
 function updateDetails(details){
   var updatedDetails = details.map(function(d){
-    return updateDetail(d);
+    return updateDetail(d).then(function(updated){
+      if(updated && updated.length > 0){
+        return updated[0];
+      }
+      return null;
+    });
   });
   return Promise.all(updatedDetails);
 }
