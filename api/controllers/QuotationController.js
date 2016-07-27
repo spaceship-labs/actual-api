@@ -202,7 +202,10 @@ module.exports = {
         return Quotation.update({id:id}, totals);
       })
       .then(function(updatedQuotation){
-        res.json(updatedQuotation);
+        if(updatedQuotation && updatedQuotation.length > 0){
+          res.json(updatedQuotation[0]);
+        }
+        res.json(null);
       })
       .catch(function(err){
         console.log(err);
@@ -246,10 +249,13 @@ module.exports = {
           totals.subtotal += pd.subtotal;
           totals.discount += (pd.subtotal - pd.total);
         });
-        return Quotation.update({id:id}, totals);
+        return Quotation.update({id:quotationId}, totals);
       })
       .then(function(updatedQuotation){
-        res.json(updatedQuotation);
+        if(updatedQuotation && updatedQuotation.length > 0){
+          res.json(updatedQuotation[0]);
+        }
+        res.json(null);
       })
       .catch(function(err){
         console.log(err);
