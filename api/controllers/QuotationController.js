@@ -289,6 +289,23 @@ module.exports = {
     });
   },
 
+  getQuotationTotals: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var paymentGroup = form.paymentGroup || 1;
+    var params = {
+      update: false,
+      paymentGroup: paymentGroup
+    };
+    Prices.getQuotationTotals(id, params).then(function(totals){
+      res.json(totals);
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });
+  }
+
 
 };
 

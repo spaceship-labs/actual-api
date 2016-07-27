@@ -2,17 +2,24 @@ var Promise = require('bluebird')
 
 module.exports = {
   processDetails: processDetails,
+  getQuotationTotals, getQuotationTotals,
   updateQuotationTotals: updateQuotationTotals
 };
 
 //@params details: Array of objects from model Detail
 //Every detail must contain a Product object populated
-function processDetails(details){
+function processDetails(details, opts){
+  opts = opts || {};
   var processedDetails = details.map(function(d){
-    return getDetailTotals(d);
+    return getDetailTotals(d, opts.paymentGroup);
   });
+
   return Promise.all(processedDetails).then(function(pDetails){
-    return updateDetails(pDetails);
+    if(opts.updateDetails){
+      return updateDetails(pDetails);
+    }else{
+      return pDetails;
+    }
   });
 }
 
@@ -50,7 +57,7 @@ function getDetailTotals(detail, paymentGroup){
       var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
       var subtotal = qty * unitPrice;
       var total = qty * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
-      return {
+      var detailTotals = {
         id: detail.id,
         unitPrice: unitPrice,
         Promotion: promo, //Promotion id
@@ -59,7 +66,7 @@ function getDetailTotals(detail, paymentGroup){
         total:total,
         paymentGroup: paymentGroup
       }
-      //return mainPromo;
+      return detailTotals;
     });
 }
 
@@ -87,7 +94,13 @@ function getDiscountKey(group){
 }
 
 function updateQuotationTotals(quotationId){
+  return getQuotationTotals(quotationId).then(function(totals){
+    return Quotation.update({id:quotationId}, totals);
+  });
+}
 
+function getQuotationTotals(quotationId, opts){
+  opts = opts || {paymentGroup:1 , updateDetails: true};
   return Quotation.findOne({id:quotationId}).populate('Details')
     .then(function(quotation){
       var detailsIds = [];
@@ -99,7 +112,7 @@ function updateQuotationTotals(quotationId){
       }
     })
     .then(function(details){
-      return processDetails(details)
+      return processDetails(details,opts)
     })
     .then(function(processedDetails){
       var totals = {
@@ -114,7 +127,7 @@ function updateQuotationTotals(quotationId){
         totals.discount += (pd.subtotal - pd.total);
         totals.totalProducts += pd.quantity;
       });
-      return Quotation.update({id:quotationId}, totals);
-    })
+      return totals;
+    });
 
 }

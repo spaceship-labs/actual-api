@@ -1,5 +1,6 @@
 //APP COLLECTION
 module.exports = {
+  schema:true,
   migrate:'alter',
   attributes:{
     type: {
