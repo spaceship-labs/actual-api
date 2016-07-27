@@ -12,7 +12,27 @@ module.exports = {
 
   },
 
-  search: function(req, res) {
+  findById: function(req, res) {
 
-  }
+  },
+
+  search: function(req, res){
+    var form = req.params.all();
+    var model = 'commission';
+    var searchFields   = ['name', 'type.name'];
+    var selectFields   = form.fields;
+    var populateFields = ['type'];
+    Common.find(
+      model,
+      form,
+      searchFields,
+      populateFields,
+      selectFields
+    ).then(function(result){
+      return res.ok(result);
+    },function(err){
+      return res.notFound();
+    });
+  },
+
 }
