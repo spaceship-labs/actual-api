@@ -438,6 +438,16 @@ module.exports.routes = {
     action:'find'
   },
 
+  '/order/createfromquotation/:quotationId':{
+    controller:'order',
+    action:'createFromQuotation'
+  },
+
+  '/order/findbyid/:id':{
+    controller:'order',
+    action:'findById'
+  },
+
   '/me/update':{
     controller:'me',
     action:'update'
