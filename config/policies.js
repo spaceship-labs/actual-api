@@ -66,11 +66,14 @@ module.exports.policies = {
     searchByFilterValues: true
   },
   LoggingController: {
-    'find': true,
-    'create': true
+    find: true,
+    create: true
   },
   PermissionController: {
-    'find': true
+    find: true
+  },
+  CompanyController: {
+    find: true
   }
 
 
