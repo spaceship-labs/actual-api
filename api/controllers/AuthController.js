@@ -19,14 +19,16 @@ function _onPassportAuth(req, res, error, user, info){
   if(error) return res.serverError(error);
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
   /*Selecting a store*/
-  var company = req.param('companyActive');
-  var valid = user.companies.filter(function(comp){
-    return comp.id == company;
-  });
-  if (valid.length == 0) {
-    return res.negotiate({err: 'No autorizado para vender en esta tienda'});
+  if (user.role.name == 'seller') {
+    var company = req.param('companyActive');
+    var valid = user.companies.filter(function(comp){
+      return comp.id == company;
+    });
+    if (valid.length == 0) {
+      return res.negotiate({err: 'No autorizado para vender en esta tienda'});
+    }
+    user.companyActive = company;
   }
-  user.companyActive = company;
   user.save(function(err) {
     if (err) {
       return res.negotiate(err);
