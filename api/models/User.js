@@ -88,7 +88,7 @@ module.exports = {
         companyMain: {
           model: 'company'
         },
-        companyCurrent: {
+        companyActive: {
           model: 'company'
         },
         permissions: {
