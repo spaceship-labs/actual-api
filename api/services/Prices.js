@@ -2,7 +2,7 @@ var Promise = require('bluebird')
 
 module.exports = {
   processDetails: processDetails,
-  getQuotationTotals, getQuotationTotals,
+  getQuotationTotals: getQuotationTotals,
   updateQuotationTotals: updateQuotationTotals
 };
 
