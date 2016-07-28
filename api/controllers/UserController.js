@@ -27,6 +27,7 @@ module.exports = {
     User.findOne({id: id})
       .populate('permissions')
       .populate('companies')
+      .populate('companyMain')
       .populate('role')
       .exec(function(err, result){
         if(err){
@@ -68,13 +69,14 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     delete form.password;
+    console.log(form);
     User.update({id: id}, form, function(err, user){
       if(err) {
         return res.negotiate(err);
       }
       return res.ok({
         user: user
-      })
+      });
     });
   },
 
