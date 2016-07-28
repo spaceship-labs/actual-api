@@ -22,7 +22,7 @@ var JWT_STRATEGY_CONFIG = {
 };
 
 function _onLocalStrategyAuth(email, password, next){
-  User.findOne({email: email}).populate('role').exec(function(error, user){
+  User.findOne({email: email}).populate('role').populate('companies').exec(function(error, user){
     if (error) return next(error, false, {});
 
     if (!user) return next(null, false,{
