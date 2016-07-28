@@ -85,6 +85,12 @@ module.exports = {
           collection: 'company',
           via: 'users'
         },
+        companyMain: {
+          model: 'company'
+        },
+        companyCurrent: {
+          model: 'company'
+        },
         permissions: {
           collection: 'permission',
           via: 'owners'
