@@ -233,6 +233,56 @@ module.exports = {
     });
   },
 
+  addPayment: function(req, res){
+    var form = req.params.all();
+    var quotationId = form.quotationid;
+    var totalDiscount = form.totalDiscount || 0;
+    var paymentGroup = form.group || 1;
+    form.Quotation = quotationId;
+    form.Details = formatProductsIds(form.Details);
+
+    Payment.create(form)
+      .then(function(paymentCreated){
+        return Quotation.findOne({id: quotationId}).populate('Payments');
+      })
+      .then(function(quotation){
+        var payments = quotation.Payments.map(function(p){return p.ammount});
+        var ammountPaid = payments.reduce(function(paymentA, paymentB){
+          return paymentA + paymentB;
+        });
+        var params = {ammountPaid: ammountPaid};
+        return Quotation.update({id:quotation.id}, params);
+      })
+      .then(function(updatedQuotation){
+        if(updatedQuotation && updatedQuotation.length > 0){
+          res.json(updatedQuotation[0]);
+        }else{
+          res.json(null);
+        }
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
+  getQuotationTotals: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var paymentGroup = form.paymentGroup || 1;
+    var params = {
+      update: false,
+      paymentGroup: paymentGroup
+    };
+    Prices.getQuotationTotals(id, params).then(function(totals){
+      res.json(totals);
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });
+  },
+
   getCountByUser: function(req, res){
     var form = req.params.all();
     var userId = form.userid;
@@ -257,67 +307,8 @@ module.exports = {
     });
   },
 
-  addPayment: function(req, res){
-    var form = req.params.all();
-    var quotationId = form.quotationid;
-    var totalDiscount = form.totalDiscount || 0;
-    form.Quotation = quotationId;
-    form.Details = formatProductsIds(form.Details);
-    delete form.quotationid;
-    delete form.cards;
-    delete form.terminals;
-    delete form.totalDiscount;
-    Payment.create(form).exec(function(err, payment){
-      Quotation.findOne({id: quotationId}).populate('Payments').exec(function(err, quotation){
-        if(err) console.log(err);
-        var payments = quotation.Payments.map(function(p){return p.ammount});
-        var ammountPaid = payments.reduce(function(paymentA, paymentB){
-          return paymentA + paymentB;
-        });
-        var total = quotation.subtotal - totalDiscount;
-        var params = {
-          ammountPaid: ammountPaid,
-          totalDiscount: totalDiscount,
-          total: total,
-        };
-        params.status = (ammountPaid / total >= 0.6) ? 'minimum-paid' : 'pending';
-        Quotation.update({id:quotation.id}, params).exec(function(err, quotationUpdated){
-          if(err) console.log(err);
-          res.json(quotationUpdated);
-        });
-      });
-    });
-  },
-
-  getQuotationTotals: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var paymentGroup = form.paymentGroup || 1;
-    var params = {
-      update: false,
-      paymentGroup: paymentGroup
-    };
-    Prices.getQuotationTotals(id, params).then(function(totals){
-      res.json(totals);
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });
-  }
-
-
 };
 
-function calculateTotal(details){
-  var total = 0;
-  details.forEach(function(detail){
-    if(detail.Product && detail.Product.Price){
-      total+= detail.Product.Price * detail.quantity;
-    }
-  });
-  return total;
-}
 
 function formatProductsIds(details){
   var result = [];

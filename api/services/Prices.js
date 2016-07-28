@@ -1,4 +1,5 @@
-var Promise = require('bluebird')
+var Promise = require('bluebird');
+var _ = require('underscore');
 
 module.exports = {
   processDetails: processDetails,
@@ -64,7 +65,8 @@ function getDetailTotals(detail, paymentGroup){
         discountPercent: discountPercent,
         subtotal: subtotal,
         total:total,
-        paymentGroup: paymentGroup
+        paymentGroup: paymentGroup,
+        quantity: qty,
       }
       return detailTotals;
     });
@@ -93,8 +95,12 @@ function getDiscountKey(group){
   return keys[group-1];
 }
 
-function updateQuotationTotals(quotationId){
-  return getQuotationTotals(quotationId).then(function(totals){
+function updateQuotationTotals(quotationId, opts){
+  opts = opts || {paymentGroup:1 , updateDetails: true};
+  return getQuotationTotals(quotationId, opts).then(function(totals){
+    if(opts && opts.updateParams){
+      totals = _.extend(totals, opts.updateParams);
+    }
     return Quotation.update({id:quotationId}, totals);
   });
 }

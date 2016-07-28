@@ -1,8 +1,10 @@
 //APP COLLECTION
 module.exports = {
   migrate:'alter',
+  schema: true,
   attributes:{
     DocEntry:{type:'integer'},
+    folio:{type:'integer'},
     SlpCode: {type:'string'},
     CardCode: {type:'string'},
     ammountPaid: {type:'float'},
@@ -10,28 +12,11 @@ module.exports = {
     subtotal:{type:'float'},
     discount:{type:'float'},
     currency:{type:'string'},
+    paymentGroup:{type:'integer'},
     status:{
       type:'string',
-      enum:['lost','pending','on-delivery','minimum-paid','paid']
+      //enum:['lost','pending','on-delivery','minimum-paid','paid']
     },
-    name:{type:'string'},
-    lastName:{type:'string'},
-    dialCode: {type:'string'},
-    phone:{type:'string'},
-    email:{type:'string'},
-    mobileDialCode:{type:'string'},
-    mobilePhone: {type:'string'},
-    street:{type:'string'},
-    externalNumber:{type:'string'},
-    internalNumber:{type:'string'},
-    neighborhood: {type:'string'},
-    municipality: {type:'string'},
-    city:{type:'string'},
-    entity:{type:'string'},
-    zipCode: {type:'string'},
-    street: {type:'string'},
-    street2: {type:'string'},
-    references:{type:'text'},
     Quotation:{
       model:'Quotation'
     },
@@ -55,6 +40,66 @@ module.exports = {
     Broker:{
       model: 'User',
     },
+    Address:{
+      model:'ClientContact',
+    },
 
-  }
+
+
+    //CONTACT ADDRESS FIELDS SNAPSHOT
+    //APP/SAP FIELDS
+    email:{
+      type:'string'
+    },
+    firstName:{
+      type:'string'
+    },
+    middleName:{
+      type:'string'
+    },
+    lastName:{
+      type:'string'
+    },
+
+    //SAP FIELDS
+    CntCtCode:{type:'integer'},
+    name:{
+      type:'string'
+    },
+    address: {
+      type:'string'
+    },
+    phone1:{
+      type:'string'
+    },
+    phone2:{
+      type:'string'
+    },
+    mobileSAP:{
+      type:'string'
+    },
+
+    //APP FIELDS
+    dialCode: {type:'string'},
+    phone:{type:'string'},
+    email:{type:'string'},
+    mobileDialCode:{type:'string'},
+    mobilePhone: {type:'string'},
+    externalNumber:{type:'string'},
+    internalNumber:{type:'string'},
+    neighborhood: {type:'string'},
+    municipality: {type:'string'},
+    city:{type:'string'},
+    entity:{type:'string'},
+    zipCode: {type:'string'},
+    street: {type:'string'},
+    street2: {type:'string'},
+    references:{type:'text'},
+  },
+
+  beforeCreate: function(val,cb){
+    Common.orderCustomAI(val, 'orderFolio',function(val){
+      cb();
+    });
+  },
 }
