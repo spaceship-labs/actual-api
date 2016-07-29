@@ -18,32 +18,16 @@ var passport = require('passport');
 function _onPassportAuth(req, res, error, user, info){
   if(error) return res.serverError(error);
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
-  /*Selecting a store*/
-  if (user.role.name == 'seller') {
-    var company = req.param('companyActive');
-    var valid = user.companies.filter(function(comp){
-      return comp.id == company;
+  /*Logging stuff*/
+  var message    = user.firstName + ' ingresó al sistema';
+  var action     = 'login';
+  Logger.log(user.id, message, action).then(function(log) {
+    return res.ok({
+      token: CipherService.createToken(user),
+      user: user
     });
-    if (valid.length == 0) {
-      return res.negotiate({err: 'No autorizado para vender en esta tienda'});
-    }
-    user.companyActive = company;
-  }
-  user.save(function(err) {
-    if (err) {
-      return res.negotiate(err);
-    }
-    /*Logging stuff*/
-    var message    = user.firstName + ' ingresó al sistema';
-    var action     = 'login';
-    Logger.log(user.id, message, action).then(function(log) {
-      return res.ok({
-        token: CipherService.createToken(user),
-        user: user
-      });
-    }).catch(function(err) {
-      return res.negotiate(err);
-    });
+  }).catch(function(err) {
+    return res.negotiate(err);
   });
 }
 

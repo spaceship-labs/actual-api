@@ -24,7 +24,6 @@ var JWT_STRATEGY_CONFIG = {
 function _onLocalStrategyAuth(email, password, next){
   User.findOne({email: email}).populate('role').populate('companies').exec(function(error, user){
     if (error) return next(error, false, {});
-
     if (!user) return next(null, false,{
       code: 'E_USER_NOT_FOUND',
       message: email + 'is not found'
