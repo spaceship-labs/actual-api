@@ -6,16 +6,16 @@ module.exports = {
 };
 
 function syncProducts(){
-  var deferred = new Promise();
-  request.get(baseUrl + 'Product', function(err, response, body){
-    if(err){
-      deferred.reject(err);
-    }else{
-      sails.log.info(response);
-      sails.log.info(body);
-      deferred.resolve(body);
-    }
+  return new Promise(function(resolve, reject){
+    request.get(baseUrl + 'Product', function(err, response, body){
+      if(err){
+        reject(err);
+      }else{
+        sails.log.info(response);
+        sails.log.info(body);
+        resolve(response);
+      }
+    });
   });
-  return deferred.promise;
 }
 

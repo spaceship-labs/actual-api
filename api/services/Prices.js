@@ -4,7 +4,8 @@ var _ = require('underscore');
 module.exports = {
   processDetails: processDetails,
   getQuotationTotals: getQuotationTotals,
-  updateQuotationTotals: updateQuotationTotals
+  updateQuotationTotals: updateQuotationTotals,
+  getExchangeRate: getExchangeRate
 };
 
 //@params details: Array of objects from model Detail
@@ -136,4 +137,10 @@ function getQuotationTotals(quotationId, opts){
       return totals;
     });
 
+}
+
+function getExchangeRate(){
+  return Site.findOne({handle:'actual-group'}).then(function(site){
+    return site.exchangeRate || 18.78;
+  });
 }

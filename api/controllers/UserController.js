@@ -69,7 +69,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     delete form.password;
-    console.log(form);
+    //console.log(form);
     User.update({id: id}, form, function(err, user){
       if(err) {
         return res.negotiate(err);

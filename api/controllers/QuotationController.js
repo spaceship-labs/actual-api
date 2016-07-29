@@ -240,20 +240,31 @@ module.exports = {
     var quotationId = form.quotationid;
     var totalDiscount = form.totalDiscount || 0;
     var paymentGroup = form.group || 1;
+    var payments = [];
     form.Quotation = quotationId;
-    form.Details = formatProductsIds(form.Details);
-
+    if(form.Details){
+      form.Details = formatProductsIds(form.Details);
+    }
     Payment.create(form)
       .then(function(paymentCreated){
         return Quotation.findOne({id: quotationId}).populate('Payments');
       })
       .then(function(quotation){
-        var payments = quotation.Payments.map(function(p){return p.ammount});
-        var ammountPaid = payments.reduce(function(paymentA, paymentB){
+        payments = quotation.Payments;
+        return Prices.getExchangeRate();
+      })
+      .then(function(exchangeRate){
+        var ammounts = payments.map(function(p){
+          if(p.type == 'cash-usd'){
+           return p.ammount * exchangeRate;
+          }
+          return p.ammount;
+        });
+        var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
           return paymentA + paymentB;
         });
         var params = {ammountPaid: ammountPaid};
-        return Quotation.update({id:quotation.id}, params);
+        return Quotation.update({id:quotationId}, params);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
