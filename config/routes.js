@@ -506,7 +506,14 @@ module.exports.routes = {
   '/site/findbyhandle/:handle':{
     controller:'site',
     action:'findByHandle'
+  },
+
+  '/sync/products':{
+    controller:'sync',
+    action:'syncProducts'
   }
+
+
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
