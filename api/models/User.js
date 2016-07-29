@@ -26,7 +26,8 @@ module.exports = {
         SlpCode: {
           type:'integer',
           columnName:'SlpCode',
-          model:'Seller'
+          model:'Seller',
+          unique: true
         },
         Quotations:{
           collection: 'Quotation',
