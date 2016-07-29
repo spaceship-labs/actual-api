@@ -5,7 +5,7 @@ module.exports = {
   attributes:{
     DocEntry:{type:'integer'},
     folio:{type:'integer'},
-    SlpCode: {type:'string'},
+    SlpCode: {type:'integer'},
     CardCode: {type:'string'},
     ammountPaid: {type:'float'},
     total:{type:'float'},

@@ -24,7 +24,9 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    form.Details = formatProductsIds(form.Details);
+    if(form.Details){
+      form.Details = formatProductsIds(form.Details);
+    }
     Quotation.update({id:id}, form)
       .then(function(){
         return Prices.updateQuotationTotals(id);

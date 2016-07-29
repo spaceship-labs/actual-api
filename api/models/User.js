@@ -32,6 +32,10 @@ module.exports = {
           collection: 'Quotation',
           via:'User'
         },
+        Orders:{
+          collection:'Order',
+          via:'User'
+        },
         Records: {
           collection:'QuotationRecord',
           via:'User'

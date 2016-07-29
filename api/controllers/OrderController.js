@@ -58,6 +58,7 @@ module.exports = {
           .populate('Payments')
           .populate('Details')
           .populate('Address')
+          .populate('User')
       })
       .then(function(quotation){
         quotationBase = quotation;
@@ -77,7 +78,7 @@ module.exports = {
           Broker: quotationBase.Broker,
           Address: _.clone(quotationBase.Address.id) || false,
           CardCode: quotationBase.Address.CardCode,
-          SlpCode: req.user.SlpCode,
+          SlpCode: quotationBase.User.SlpCode,
         };
         delete quotationBase.Address.id;
         orderParams = _.extend(orderParams, quotationBase.Address);
