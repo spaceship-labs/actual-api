@@ -234,6 +234,10 @@ module.exports = {
         res.json(prods);
       }
     });
+  },
+
+  getDeliveryDates: function(req, res){
+    var form = req.params.all();
   }
 
 }

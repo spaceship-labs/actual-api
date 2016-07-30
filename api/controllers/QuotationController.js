@@ -11,8 +11,9 @@ module.exports = {
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
           res.json(updatedQuotation[0]);
+        }else{
+          res.json(null);
         }
-        res.json(null);
       })
       .catch(function(err){
         console.log(err);

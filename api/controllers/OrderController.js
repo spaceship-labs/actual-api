@@ -35,6 +35,7 @@ module.exports = {
       .populate('Client')
       .populate('Address')
       .populate('Payments')
+      .populate('Store')
       .then(function(order){
         res.json(order);
       }).catch(function(err){
@@ -79,6 +80,7 @@ module.exports = {
           Address: _.clone(quotationBase.Address.id) || false,
           CardCode: quotationBase.Address.CardCode,
           SlpCode: quotationBase.User.SlpCode,
+          Store: quotationBase.User.companyActive
         };
         delete quotationBase.Address.id;
         orderParams = _.extend(orderParams, quotationBase.Address);

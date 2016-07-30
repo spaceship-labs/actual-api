@@ -4,10 +4,30 @@ module.exports = {
   migrate:'alter',
   attributes:{
     type: {
-      type:'string'
+      type:'string',
+      enum:[
+        'cash',
+        'cash-usd',
+        'cheque',
+        'deposit',
+        'transfer',
+        'monedero',
+        'credit-card',
+        '3-msi',
+        '6-msi',
+        '9-msi',
+        '18-msi'
+      ]
     },
     ammount:{type:'float'},
-    currency:{type:'string'},
+    currency:{
+      type:'string',
+      enum:[
+        'mxn',
+        'usd'
+      ]
+    },
+    exchangeRate:{type:'float'},
     verificationCode: {type:'string'},
     terminal:{type:'string'},
     isRecurring: {type:'boolean'},

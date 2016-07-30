@@ -43,6 +43,9 @@ module.exports = {
     Address:{
       model:'ClientContact',
     },
+    Store:{
+      model:'company'
+    },
 
 
 
