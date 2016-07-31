@@ -44,9 +44,9 @@ module.exports = {
       model:'ClientContact',
     },
     Store:{
-      model:'company'
+      model:'company',
+      required: 'true'
     },
-
 
 
     //CONTACT ADDRESS FIELDS SNAPSHOT

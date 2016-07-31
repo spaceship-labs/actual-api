@@ -19,10 +19,14 @@ module.exports = {
     },
     individualRate: {
       type: 'float',
+      min: 0,
+      max: 1,
       required: true
     },
     storeRate: {
       type: 'float',
+      min: 0,
+      max: 1,
       required: true
     },
     type: {
