@@ -1,4 +1,4 @@
-var _      = require('underscore');
+var _ = require('underscore');
 
 module.exports = {
   user: userCommissions,
@@ -26,24 +26,12 @@ function userCommissions(idUser, dateFrom, dateTo) {
 
 function userSales(idUser, dateFrom, dateTo) {
   var query = queryDate({User: idUser}, dateFrom, dateTo);
-  return Order
-    .find(query)
-    .then(function(orders) {
-      return orders.reduce(function(acum, current) {
-        return acum + current.total;
-      }, 0);
-    });
+  return Order.find(query).then(sumTotalOrders);
 }
 
 function companySales(idCompany, dateFrom, dateTo) {
   var query = queryDate({Store: idCompany}, dateFrom, dateTo);
-  return Order
-    .find(query)
-    .then(function(orders){
-      return orders.reduce(function(acum, current) {
-        return acum + current.total;
-      }, 0);
-    });
+  return Order.find(query).then(sumTotalOrders);
 }
 
 function queryDate(query, dateFrom, dateTo) {
@@ -55,6 +43,12 @@ function queryDate(query, dateFrom, dateTo) {
       '<': addOneDay(dateTo)
     }
   });
+}
+
+function sumTotalOrders(orders) {
+  return orders.reduce(function(acum, current) {
+    return acum + current.total;
+  }, 0);
 }
 
 function sameDay(date1, date2) {
