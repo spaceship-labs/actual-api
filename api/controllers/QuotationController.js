@@ -6,7 +6,12 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     Quotation.create(form)
       .then(function(created){
-        return Prices.updateQuotationTotals(created.id);
+        var opts = {
+          paymentGroup:1,
+          updateDetails: true,
+          currentStore: req.user.companyActive
+        };
+        return Prices.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -30,7 +35,12 @@ module.exports = {
     }
     Quotation.update({id:id}, form)
       .then(function(){
-        return Prices.updateQuotationTotals(id);
+        var opts = {
+          paymentGroup:1,
+          updateDetails: true,
+          currentStore: req.user.companyActive
+        };
+        return Prices.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -130,7 +140,12 @@ module.exports = {
 
     QuotationDetail.create(form)
       .then(function(created){
-        return Prices.updateQuotationTotals(id);
+        var opts = {
+          paymentGroup:1,
+          updateDetails: true,
+          currentStore: req.user.companyActive
+        };
+        return Prices.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -153,7 +168,12 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     QuotationDetail.destroy({id:id})
       .then(function(){
-        return Prices.updateQuotationTotals(quotationId);
+        var opts = {
+          paymentGroup:1,
+          updateDetails: true,
+          currentStore: req.user.companyActive
+        };
+        return Prices.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -286,7 +306,8 @@ module.exports = {
     var paymentGroup = form.paymentGroup || 1;
     var params = {
       update: false,
-      paymentGroup: paymentGroup
+      paymentGroup: paymentGroup,
+      currentStore: req.user.companyActive
     };
     Prices.getQuotationTotals(id, params).then(function(totals){
       res.json(totals);

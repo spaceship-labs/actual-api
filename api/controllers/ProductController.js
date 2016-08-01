@@ -30,7 +30,7 @@ module.exports = {
     //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
     var queryPromo = {
-      select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+      //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
       startDate: {'<=': currentDate},
       endDate: {'>=': currentDate},
     };
@@ -40,7 +40,7 @@ module.exports = {
       .populate('FilterValues')
       .populate('Sizes')
       .populate('Groups')
-      .populate('Promotions')
+      .populate('Promotions', queryPromo)
       //.populate('stock')
       .exec(function(err, product){
       if(err){

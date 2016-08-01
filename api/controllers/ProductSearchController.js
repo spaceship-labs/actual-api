@@ -25,7 +25,7 @@ module.exports = {
 
         var currentDate = new Date();
         var queryPromo = {
-          select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
           startDate: {'<=': currentDate},
           endDate: {'>=': currentDate},
         };
@@ -79,7 +79,7 @@ module.exports = {
         };
         var currentDate = new Date();
         var queryPromo = {
-          select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
           startDate: {'<=': currentDate},
           endDate: {'>=': currentDate},
         };
@@ -147,7 +147,7 @@ module.exports = {
         var q = Search.applyFilters({},filters);
         var currentDate = new Date();
         var queryPromo = {
-          select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
           startDate: {'<=': currentDate},
           endDate: {'>=': currentDate},
         };
