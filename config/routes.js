@@ -511,6 +511,11 @@ module.exports.routes = {
   '/sync/products':{
     controller:'sync',
     action:'syncProducts'
+  },
+
+  '/store/:id/promotions':{
+    controller:'company',
+    action:'getPromosByStore'
   }
 
 

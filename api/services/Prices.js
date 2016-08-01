@@ -49,8 +49,13 @@ function getDetailTotals(detail, paymentGroup){
   var total = 0;
   var product = detail.Product;
   var qty = detail.quantity;
+  var currentDate = new Date();
+  var queryPromo = {
+    startDate: {'<=': currentDate},
+    endDate: {'>=': currentDate},
+  };
   return Product.findOne({id:product.id})
-    .populate('Promotions')
+    .populate('Promotions', queryPromo)
     .then(function(p){
       var mainPromo = getMainPromo(p);
       var unitPrice = p.Price;
