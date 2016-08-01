@@ -2,14 +2,17 @@
 module.exports = {
   tableName:'Seller',
   attributes:{
-    SlpName: {type:'string'},
     id : {
       type:'integer',
       primaryKey: true,
       columnName: 'SlpCode'
     },
+    SlpName: {
+      type:'string'
+    },
     User: {
-      model:'User'
+      model:'User',
+      unique: true
     }
   }
 }

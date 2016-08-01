@@ -1,12 +1,21 @@
 module.exports = {
   getAll: function(req, res){
-    Seller.find({}).populate('User').limit(1000).exec(function(err, results){
+    Seller.find({}).populate('User').exec(function(err, results) {
       if(err){
-        console.log(err);
-        res.notFound();
+        return res.notFound();
       }else{
         return res.ok(results);
       }
-    })
+    });
+  },
+
+  getAllUnselected: function(req, res) {
+    Seller.find({User: null}).exec(function(err, results) {
+      if(err){
+        return res.notFound();
+      }else{
+        return res.ok(results);
+      }
+    });
   }
 }

@@ -12,7 +12,7 @@ module.exports = {
     var form = req.params.all();
     var model = 'user';
     var searchFields   = ['firstName','email'];
-    var populateFields = ['role'];
+    var populateFields = ['role', 'SlpCode'];
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){
@@ -29,6 +29,7 @@ module.exports = {
       .populate('companies')
       .populate('companyMain')
       .populate('role')
+      .populate('SlpCode')
       .exec(function(err, result){
         if(err){
           console.log(err);
@@ -42,14 +43,16 @@ module.exports = {
   findBySlpCode: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    User.findOne({SlpCode:id}).exec(function(err, result){
-      if(err){
-        console.log(err);
-        res.negotiate(err);
-      }else{
-        res.ok({data:result});
-      }
-    });
+    User
+      .findOne({SlpCode:id})
+      .populate('SlpCode')
+      .exec(function(err, result){
+        if(err){
+          res.negotiate(err);
+        }else{
+          res.ok({data:result});
+        }
+      });
   },
 
   create: function(req, res){
