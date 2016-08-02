@@ -52,7 +52,8 @@ module.exports = {
     var quotationId = form.quotationId;
     var opts = {
       paymentGroup: form.paymentGroup || 1,
-      updateDetails: true
+      updateDetails: true,
+      currentStore: req.user.companyActive
     };
     var quotationBase = false;
     var orderCreated = false;

@@ -12,6 +12,7 @@
     "connect-mongo": "0.8.2",
     "connect-timeout": "^1.7.0",
     "cron": "^1.1.0",
+    "ejs": "^2.5.1",
     "fs": "0.0.2",
     "gm": "^1.21.1",
     "imagemagick": "^0.1.3",

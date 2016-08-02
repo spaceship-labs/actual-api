@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
+var storePromotions = [];
 
 module.exports = {
   processDetails: processDetails,
@@ -11,9 +12,9 @@ module.exports = {
 //@params details: Array of objects from model Detail
 //Every detail must contain a Product object populated
 function processDetails(details, opts){
-  opts = opts || {};
+  opts = opts || {paymentGroup:1};
   var processedDetails = details.map(function(d){
-    return getDetailTotals(d, opts.paymentGroup);
+    return getDetailTotals(d, opts);
   });
 
   return Promise.all(processedDetails).then(function(pDetails){
@@ -43,19 +44,27 @@ function updateDetail(detail){
 
 //@params: detail Object from model Detail
 //Must contain a Product object populated
-function getDetailTotals(detail, paymentGroup){
-  paymentGroup = paymentGroup || 1;
+function getDetailTotals(detail, opts){
+  opts = opts || {};
+  paymentGroup = opts.paymentGroup || 1;
   var subTotal = 0;
   var total = 0;
   var product = detail.Product;
   var qty = detail.quantity;
+  var currentDate = new Date();
+  var queryPromo = {};
+  queryPromo = {
+    startDate: {'<=': currentDate},
+    endDate: {'>=': currentDate},
+  };
+  //return new Promise(function(resolve, reject){
   return Product.findOne({id:product.id})
-    .populate('Promotions')
+    .populate('Promotions', queryPromo)
     .then(function(p){
       var mainPromo = getMainPromo(p);
       var unitPrice = p.Price;
       var promo = mainPromo ? mainPromo.id : false;
-      var discountKey = getDiscountKey(paymentGroup);
+      var discountKey = getDiscountKey(opts.paymentGroup);
       var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
       var subtotal = qty * unitPrice;
       var total = qty * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
@@ -64,13 +73,36 @@ function getDetailTotals(detail, paymentGroup){
         unitPrice: unitPrice,
         Promotion: promo, //Promotion id
         discountPercent: discountPercent,
+        discountKey: discountKey,
         subtotal: subtotal,
         total:total,
-        paymentGroup: paymentGroup,
+        paymentGroup: opts.paymentGroup,
         quantity: qty,
       }
       return detailTotals;
+      //resolve(detailTotals);
+    })
+    .catch(function(err){
+      console.log(err);
+      reject(err);
     });
+
+    //});
+}
+
+function getPromosByStore(storeId){
+  var currentDate = new Date();
+  var queryPromo = {
+    startDate: {'<=': currentDate},
+    endDate: {'>=': currentDate},
+  };
+  return Company.findOne({id:storeId}).populate('Promotions', queryPromo)
+    .then(function(store){
+      return store.Promotions;
+    })
+    .catch(function(err){
+      console.log(err);
+    })
 }
 
 //@params product Object from model Product
@@ -79,6 +111,10 @@ function getMainPromo(product){
   if(product.Promotions && product.Promotions.length > 0){
     var indexMaxPromo = 0;
     var maxPromo = 0;
+    //Filter product promotions with store promotions
+    product.Promotions = product.Promotions.filter(function(promotion){
+      return _.findWhere(storePromotions, {id:promotion.id});
+    });
     product.Promotions.forEach(function(promo, index){
       if(promo.discountPg1 >= maxPromo){
         maxPromo = promo.discountPg1;
@@ -108,7 +144,12 @@ function updateQuotationTotals(quotationId, opts){
 
 function getQuotationTotals(quotationId, opts){
   opts = opts || {paymentGroup:1 , updateDetails: true};
-  return Quotation.findOne({id:quotationId}).populate('Details')
+
+  return getPromosByStore(opts.currentStore)
+    .then(function(promos){
+      storePromotions = promos;
+      return Quotation.findOne({id:quotationId}).populate('Details')
+    })
     .then(function(quotation){
       var detailsIds = [];
       if(quotation.Details){
