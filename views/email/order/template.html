@@ -63,7 +63,6 @@
       padding-left: 0 !important;
       padding-right: 0 !important;
     }
-    // 2 columns
     #templateColumns{
         width:100% !important;
     }
@@ -116,7 +115,7 @@
 </tr>
 </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div><span style="font-size:16px;"><strong>Estimado %user%:</strong></span></div>  <div>&nbsp;</div>  <div>su orden con id <strong>%order_id%&nbsp;</strong>está siendo procesada.</div>  <div>&nbsp;</div>  <div>&nbsp;</div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div><span style="font-size:16px;"><strong>Estimado <%=customer%>:</strong></span></div>  <div>&nbsp;</div>  <div>su orden con id <strong><%=order_id%>&nbsp;</strong>est&aacute; siendo procesada.</div>  <div>&nbsp;</div>  <div>&nbsp;</div> </td>
 </tr>
 </table>
 <table class="module" role="module" data-type="divider" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%2C%22linecolor%22%3A%22%23000000%22%2C%22height%22%3A5%7D'>
@@ -127,7 +126,7 @@
 </td></tr></table>
 <table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>&nbsp;</div>  <div><strong><span style="font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; color: rgb(102, 102, 102);">Su fec</span></strong><span style="font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; color: rgb(102, 102, 102);">ha estimada de entrega es:</span><strong><span style="color: rgb(51, 51, 51); font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; background-color: rgb(239, 239, 239);">&nbsp;</span></strong></div>  <div><strong style="color: rgb(51, 51, 51); font-size: 14px; font-style: normal; font-variant: normal; line-height: normal;">%shipping_date%</strong></div>  <div>&nbsp;</div>  <div><span style="font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; color: rgb(102, 102, 102);">Su dirección de entrega es:&nbsp;</span></div>  <div><font color="#333333" face="ProximaNova-Semibold"><span style="line-height: normal;"><b>%shipping_address%</b></span></font></div>  <div>&nbsp;</div>  <div><strong>Detalles del Pedido</strong></div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>&nbsp;</div>  <div><strong><span style="font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; color: rgb(102, 102, 102);">Su fec</span></strong><span style="font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; color: rgb(102, 102, 102);">ha estimada de entrega es:</span><strong><span style="color: rgb(51, 51, 51); font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; background-color: rgb(239, 239, 239);">&nbsp;</span></strong></div>  <div><strong style="color: rgb(51, 51, 51); font-size: 14px; font-style: normal; font-variant: normal; line-height: normal;"><%=shipping_date%></strong></div>  <div>&nbsp;</div>  <div><span style="font-family: Arial, san-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; color: rgb(102, 102, 102);">Su direcci&oacute;n de entrega es:&nbsp;</span></div>  <div><font color="#333333" face="ProximaNova-Semibold"><span style="line-height: normal;"><b><%=shipping_address%></b></span></font></div>  <div>&nbsp;</div>  <div><strong>Detalles del Pedido</strong></div> </td>
 </tr>
 </table>
 <table class="module" role="module" data-type="divider" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%2C%22linecolor%22%3A%22%23000000%22%2C%22height%22%3A1%7D'>
@@ -135,11 +134,8 @@
   <table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" height="1"  style="font-size: 1px; line-height: 1px;">
     <tr><td bgcolor="#000000">&nbsp;</td></tr>
   </table>
-</td></tr>
-</table>
-
-%product-items%
-
+</td></tr></table>
+<%-products %>
 <table class="module" role="module" data-type="divider" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%2C%22linecolor%22%3A%22%23000000%22%2C%22height%22%3A1%7D'>
 <tr><td role="module-content" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff">
   <table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" height="1"  style="font-size: 1px; line-height: 1px;">
@@ -179,22 +175,22 @@
 </td><td style="padding: 0px 0px 0px 0px" role="column-3" align="center" valign="top" width="25%" height="100%" class="templateColumnContainer column-drop-area ">
   <table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>%products_size%</div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div><%=products_size%></div> </td>
 </tr>
 </table>
 <table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>$ %products_subtotal%</div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>$ <%=products_subtotal%></div> </td>
 </tr>
 </table>
 <table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>$ %products_iva%</div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>$ <%=products_iva%></div> </td>
 </tr>
 </table>
 <table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>$ %products_total%</div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div>$ <%=products_total%></div> </td>
 </tr>
 </table>
 
@@ -212,7 +208,7 @@
             <tr>
               <td class="leftColumnContent" role="column-one" height="100%" style="height:100%;"><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0"  width="100%" style="table-layout: fixed;" data-attributes='%7B%22dropped%22%3Atrue%2C%22child%22%3Afalse%2C%22padding%22%3A%220%2C0%2C0%2C0%22%2C%22containerbackground%22%3A%22%23ffffff%22%7D'>
 <tr>
-  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div style="font-size:12px;line-height:150%;margin:0;text-align:center;">This email was sent by: [Sender_Name] [Sender_Address], [Sender_City] [Sender_State] [Sender_Zip]</div>  <div style="font-size:12px;line-height:150%;margin:0;text-align:center;">To unsubscribe click: <a href="[Unsubscribe]">here</a></div> </td>
+  <td role="module-content"  valign="top" height="100%" style="padding: 0px 0px 0px 0px;" bgcolor="#ffffff"><div style="font-size:12px;line-height:150%;margin:0;text-align:center;"> <div style="font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: 18px; font-family: arial, sans-serif; color: rgb(0, 0, 0); text-align: center; background-color: rgb(255, 255, 255);">Este correo fue enviado por&nbsp;<%=sender_name%>&nbsp;<%=sender_address%>, <%=sender_city%> <%=sender_state%>&nbsp;<%=sender_ip%></div>  <div style="font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: 18px; font-family: arial, sans-serif; color: rgb(0, 0, 0); text-align: center; background-color: rgb(255, 255, 255);">Para cancelar la subscripci&oacute;n de un&nbsp;click &nbsp;<a href="<%=unsubscribe%>">aqu&iacute;</a></div> </div> </td>
 </tr>
 </table>
 </td>
@@ -240,3 +236,11 @@
           <!--[if (gte mso 9)|(IE)]>
           </td>
         </tr>
+      </table>
+      <![endif]-->
+      </tr></td>
+      </table>
+    </div>
+  </center>
+</body>
+</html>

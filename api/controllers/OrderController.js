@@ -2,10 +2,20 @@ var _ = require('underscore');
 module.exports = {
   create: function(req, res){
     var form = req.params.all();
-    Order.create(form).exec(function(err, created){
-      if(err) console.log(err);
-      res.json(created);
-    });
+    Order.create(form)
+      .then(function(order) {
+        return Order.findOne(order.id).populate('User').populate('Client');
+      })
+      .then(function(order) {
+        var user     = order.User;
+        var customer = order.Client;
+      })
+      .then(function(store, user, customer, order, products){
+
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
   },
 
   find: function(req, res){
