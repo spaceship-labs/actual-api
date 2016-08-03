@@ -16,6 +16,7 @@ module.exports = {
         '3-msi',
         '6-msi',
         '9-msi',
+        '12-msi',
         '18-msi'
       ]
     },

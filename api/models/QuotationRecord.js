@@ -1,6 +1,7 @@
 //APP COLLECTION
 module.exports = {
   migrate: 'alter',
+  schema:true,
   tableName: 'QuotationRecord',
   attributes: {
     Quotation:{
