@@ -107,6 +107,9 @@ module.exports = {
         },
         toJSON: function () {
           var obj = this.toObject();
+          if (obj.SlpCode && isArray(obj.SlpCode) && obj.SlpCode.length > 0) {
+            obj.SlpCode = obj.SlpCode[0];
+          }
           delete obj.password;
           delete obj.socialProfiles;
           return obj;
@@ -125,3 +128,7 @@ module.exports = {
         next();
     }
 };
+
+function isArray(o) {
+  return o.constructor === Array;
+}
