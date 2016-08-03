@@ -53,15 +53,15 @@ module.exports = {
     });
   },
 
-  sendOrderConfirmation: function(userName, userEmail, order, products,  cb) {
-    var request         = sendgrid.emptyRequest();
-    var requestBody     = undefined;
-    var mail            = new helper.Mail();
-    var personalization = new helper.Personalization();
-    var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
-    var to              = new helper.Email(userEmail, userName);
-    var subject         = 'confirmación de compra';
-    var user             = order.name;
+  sendOrderConfirmation: function(store, user, customer, order, products,  cb) {
+    var request          = sendgrid.emptyRequest();
+    var requestBody      = undefined;
+    var mail             = new helper.Mail();
+    var personalization  = new helper.Personalization();
+    var from             = new helper.Email("noreply@actualgroup.com", "actualgroup");
+    var to               = new helper.Email(customer.email, customer.firstName);
+    var subject          = 'confirmación de compra';
+    var customer         = customer.firstName;
     var shipping_address = order.address;
     var shipping_date    = new Date().toLocaleDateString();
     var order_id         = order.id;
@@ -80,7 +80,7 @@ module.exports = {
       });
     }, '');
     var res              = orderTemplate({
-      user: user,
+      customer: customer,
       shipping_address: shipping_address,
       shipping_date: shipping_date,
       order_id: order_id,

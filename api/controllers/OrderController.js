@@ -3,9 +3,16 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     Order.create(form)
-      .then(function(created){
-        return res.json(created);
-      }).then(function(){})
+      .then(function(order) {
+        return Order.findOne(order.id).populate('User').populate('Client');
+      })
+      .then(function(order) {
+        var user     = order.User;
+        var customer = order.Client;
+      })
+      .then(function(store, user, customer, order, products){
+
+      })
       .catch(function(err) {
         return res.negotiate(err);
       });
