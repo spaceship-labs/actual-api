@@ -148,6 +148,20 @@ module.exports = {
     }else{
       return res.ok({success:false});
     }
+  },
+
+  brokers: function(req, res) {
+    var form  = req.params.all();
+    var page  = form.page  || 1;
+    var limit = form.limit || 10;
+    Role
+      .findOne({name: 'broker'})
+      .populate('owner')
+      .paginate({page: page, limit: limit})
+      .exec(function(err, role){
+        if (err) {return res.negotiate(err);}
+        return res.json(role.owner);
+      });
   }
 
 
