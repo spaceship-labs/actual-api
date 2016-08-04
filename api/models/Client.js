@@ -97,7 +97,10 @@ module.exports = {
     deliveryStreet: {type:'string'},
     deliveryStreet2: {type:'string'},
     deliveryReferences:{type:'text'},
-
-
+    ewallet: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
+    }
   }
 }
