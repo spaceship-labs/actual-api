@@ -3,6 +3,11 @@ module.exports = {
     migrate:'alter',
     schema: true,
     attributes: {
+        ewallet:{
+          type: 'float',
+          required: true,
+          defaultsTo: 0
+        },
         password: {
             type: 'string'
         },
@@ -19,7 +24,9 @@ module.exports = {
             type: 'string',
             defaultsTo: ''
         },
-        lastLogin : 'datetime',
+        lastLogin : {
+          type: 'datetime'
+        },
         company: {
             type:'string'
         },
