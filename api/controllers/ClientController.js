@@ -61,9 +61,11 @@ module.exports = {
         error: 'user could not be created with an employee\'s mail'
       });
     }
-    //return res.badRequest({error: 'this endpoint is not finished'});
+    form = mapClientFields(form);
+
     SapService.createClient(form)
       .then(function(result){
+        sails.log.info(result);
         return Client.create(form);
       })
       .then(function(created){
@@ -78,7 +80,9 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
-    SapService.updateClient(CardCode)
+    form = mapClientFields(form);
+
+    SapService.updateClient(CardCode, form)
       .then(function(result){
         return Client.update({CardCode: CardCode}, form);
       })
@@ -89,12 +93,6 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-    /*
-      Client.update({id: id}, form).exec(function updateCB(err, updated) {
-        if(err) console.log(err);
-        res.json(updated);
-      });
-    */
   },
 
   getContactsByClient: function(req, res){
@@ -109,3 +107,24 @@ module.exports = {
   }
 
 };
+
+function mapClientFields(fields){
+  sails.log.info(fields);
+  //Name
+  fields.CardName = fields.firstName || fields.CardName;
+  if(fields.firstName && fields.lastName){
+    fields.CardName = fields.firstName + ' ' + fields.lastName;
+  }
+  //Phone
+  fields.Phone1 = fields.phone || fields.Phone1;
+  if(fields.phone && fields.dialCode){
+    fields.Phone1 = fields.dialCode + fields.phone;
+  }
+  //Mobilephone
+  fields.Cellular = fields.mobilePhone || fields.Cellular;
+  if(fields.mobilePhone && fields.mobileDialCode){
+    fields.Cellular = fields.mobileDialCode + fields.mobilePhone;
+  }
+  fields.E_Mail = fields.email || fields.E_Mail;
+  return fields;
+}
