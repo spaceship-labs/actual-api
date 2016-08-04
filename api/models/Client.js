@@ -1,5 +1,6 @@
 // APP/SAP COLLECTION
 module.exports = {
+  schema: true,
   migrate:'alter',
   tableName:'Contact',
   attributes:{
@@ -40,7 +41,6 @@ module.exports = {
 
     firstName:{type:'string'},
     lastName:{type:'string'},
-    secondLastName:{type:'string'},
     title:{type:'string'},
     gender:{type:'string'},
     birthDate:{type:'date'},
