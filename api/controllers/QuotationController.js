@@ -107,6 +107,7 @@ module.exports = {
         if(errFind) console.log(errFind);
 
         if(req.file('file')._files[0]){
+          sails.log.info('adding file');
           record.addFiles(req,{
             dir : 'records/gallery',
             profile: 'gallery'
@@ -123,6 +124,7 @@ module.exports = {
             }
           });
         }else{
+          sails.log.info('not adding file');
           res.json(record);
         }
       });
@@ -341,6 +343,21 @@ module.exports = {
       });
     });
   },
+
+  getRecords: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    QuotationRecord.find({Quotation:id})
+      .populate('User')
+      .populate('files')
+      .then(function(records){
+        res.json(records);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  }
 
 };
 

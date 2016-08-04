@@ -383,6 +383,11 @@ module.exports.routes = {
     action:'getCountByUser'
   },
 
+  '/quotation/:id/records':{
+    controller:'quotation',
+    action:'getRecords'
+  },
+
   '/sale/find/:page':{
     controller: 'sale',
     action:'find'
@@ -413,7 +418,7 @@ module.exports.routes = {
     action: 'getQuotationTotals'
   },
 
-  '/client/update/:id':{
+  '/client/update/:CardCode':{
     controller: 'client',
     action: 'update'
   },

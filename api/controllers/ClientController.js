@@ -1,16 +1,5 @@
 
 module.exports = {
-  create: function(req, res) {
-    var form       = req.params.all();
-    var email      = form.email;
-    var actualMail =  /@actualgroup.com$/
-    if (email && email.match(actualMail)) {
-      return res.badRequest({
-        error: 'user could not be created with an employee\'s mail'
-      });
-    }
-    return res.badRequest({error: 'this endpoint is not finished'});
-  },
   find: function(req, res){
     var form = req.params.all();
     var model = 'client';
@@ -63,13 +52,49 @@ module.exports = {
 
   },
 
+  create: function(req, res) {
+    var form       = req.params.all();
+    var email      = form.email;
+    var actualMail =  /@actualgroup.com$/
+    if (email && email.match(actualMail)) {
+      return res.badRequest({
+        error: 'user could not be created with an employee\'s mail'
+      });
+    }
+    //return res.badRequest({error: 'this endpoint is not finished'});
+    SapService.createClient(form)
+      .then(function(result){
+        return Client.create(form);
+      })
+      .then(function(created){
+        res.json(created);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
   update: function(req, res){
     var form = req.params.all();
-    var id = form.id;
-    Client.update({id: id}, form).exec(function updateCB(err, updated) {
-      if(err) console.log(err);
-      res.json(updated);
-    });
+    var CardCode = form.CardCode;
+    SapService.updateClient(CardCode)
+      .then(function(result){
+        return Client.update({CardCode: CardCode}, form);
+      })
+      .then(function(updated){
+        res.json(updated);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+    /*
+      Client.update({id: id}, form).exec(function updateCB(err, updated) {
+        if(err) console.log(err);
+        res.json(updated);
+      });
+    */
   },
 
   getContactsByClient: function(req, res){

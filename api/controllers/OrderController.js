@@ -84,7 +84,6 @@ module.exports = {
           status: 'paid',
           Client: quotationBase.Client,
           Quotation: quotationId,
-          Details: quotationBase.Details, //Need to be added later
           Payments: quotationBase.Payments,
           User: quotationBase.User,
           Broker: quotationBase.Broker,
@@ -109,6 +108,9 @@ module.exports = {
         return orderFound.save();
       })
       .then(function(){
+        return Quotation.update({id:quotationBase.id} , {Order: orderCreated.id});
+      })
+      .then(function(quotationUpdated){
         res.json(orderCreated);
       })
       .catch(function(err){

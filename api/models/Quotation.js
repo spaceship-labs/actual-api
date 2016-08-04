@@ -41,7 +41,11 @@ module.exports = {
     discount: {type:'float'},
     ammountPaid: {type:'float'},
     totalProducts: {type:'integer'},
-    status:{type:'string'}
+    //TODO: Check status types
+    status:{
+      type:'string',
+      enum:['closed','pending-payment','to-order']
+    }
   },
 
   beforeCreate: function(val,cb){

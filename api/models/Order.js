@@ -18,7 +18,8 @@ module.exports = {
       //enum:['lost','pending','on-delivery','minimum-paid','paid']
     },
     Quotation:{
-      model:'Quotation'
+      model:'Quotation',
+      unique:true
     },
     Sale: {
       model:'Sale'
