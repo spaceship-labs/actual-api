@@ -259,16 +259,29 @@ module.exports = {
   },
 
   addPayment: function(req, res){
-    var form = req.params.all();
-    var quotationId = form.quotationid;
+    var form          = req.params.all();
+    var quotationId   = form.quotationid;
     var totalDiscount = form.totalDiscount || 0;
-    var paymentGroup = form.group || 1;
-    var payments = [];
-    form.Quotation = quotationId;
-    if(form.Details){
+    var paymentGroup  = form.group || 1;
+    var payments      = [];
+    form.Quotation    = quotationId;
+    if (form.Details) {
       form.Details = formatProductsIds(form.Details);
     }
-    Payment.create(form)
+    Quotation.findOne(form.Quotation)
+      .populate('Client')
+      .then(function(quotation){
+        var client = quotation.Client;
+        if (form.type != 'monedero') { return; }
+        if (client.ewallet < form.ammount) {
+          console.log(client.ewallet, form.ammount);
+          return Promise.reject(new Error('fondos insuficientes'));
+        }
+        return Client.update(client.id, {ewallet: client.ewallet - form.ammount});
+      })
+      .then(function(client) {
+        return Payment.create(form);
+      })
       .then(function(paymentCreated){
         return Quotation.findOne({id: quotationId}).populate('Payments');
       })
