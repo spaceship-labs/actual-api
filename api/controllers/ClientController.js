@@ -62,10 +62,14 @@ module.exports = {
       });
     }
     form = mapClientFields(form);
-
+    form.currentStore = req.user.companyActive;
+    form.SlpCode = req.user.SlpCode.id || -1;
     SapService.createClient(form)
       .then(function(result){
-        sails.log.info(result);
+        result = JSON.parse(result);
+        //sails.log.info(typeof result);
+        //sails.log.info(result);
+        form.CardCode = result.value;
         return Client.create(form);
       })
       .then(function(created){
@@ -109,7 +113,7 @@ module.exports = {
 };
 
 function mapClientFields(fields){
-  sails.log.info(fields);
+  //sails.log.info(fields);
   //Name
   fields.CardName = fields.firstName || fields.CardName;
   if(fields.firstName && fields.lastName){

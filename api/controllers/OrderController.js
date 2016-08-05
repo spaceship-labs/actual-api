@@ -64,6 +64,7 @@ module.exports = {
     };
     var quotationBase = false;
     var orderCreated = false;
+    var user = false;
     Prices.updateQuotationTotals(quotationId, opts)
       .then(function(updatedQuotation){
         return Quotation.findOne({id: quotationId})
@@ -74,6 +75,13 @@ module.exports = {
       })
       .then(function(quotation){
         quotationBase = quotation;
+        return User.findOne({id:quotationBase.User.id}).populate('SlpCode');
+      })
+      .then(function(user){
+        var SlpCode = -1;
+        if(user.SlpCode && user.SlpCode.length > 0){
+          SlpCode = user.SlpCode[0].id;
+        }
         var payments = quotationBase.Payments.map(function(p){return p.id});
         var orderParams = {
           ammountPaid: quotationBase.ammountPaid,
@@ -85,12 +93,15 @@ module.exports = {
           Client: quotationBase.Client,
           Quotation: quotationId,
           Payments: quotationBase.Payments,
-          User: quotationBase.User,
+          User: user.id,
           Broker: quotationBase.Broker,
           Address: _.clone(quotationBase.Address.id) || false,
           CardCode: quotationBase.Address.CardCode,
-          SlpCode: quotationBase.User.SlpCode,
-          Store: quotationBase.User.companyActive
+          SlpCode: SlpCode,
+          Store: user.companyActive
+          //User: quotationBase.User,
+          //SlpCode: quotationBase.User.SlpCode,
+          //Store: quotationBase.User.companyActive
         };
         delete quotationBase.Address.id;
         orderParams = _.extend(orderParams, quotationBase.Address);
