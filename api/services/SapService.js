@@ -25,14 +25,65 @@ function updateClient(cardcode, form){
 function createClient(form){
   return new Promise(function(resolve, reject){
     var url = baseUrl + 'Contact';
-    var endPoint = appendQuery(url, form);
-    sails.log.info(endPoint);
-    request.post( endPoint, function(err, response, body){
-      if(err){
-        reject(err);
-      }else{
-        resolve(body);
-      }
-    });
+    form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
+    form.LicTradNum = 'XXAX010101000';
+    getSeriesNum(form.currentStore)
+      .then(function(series){
+        form.Series = series;
+        var endPoint = appendQuery(url, form);
+        request.post( endPoint, function(err, response, body){
+          if(err){
+            reject(err);
+          }else{
+            resolve(body);
+          }
+        });
+      });
   });
+}
+
+function getSeriesNum(companyId){
+  return Company.findOne({id:companyId})
+    .then(function(company){
+      return mapWhsSeries(company.WhsName);
+    })
+    .catch(function(err){
+      console.log(err);
+      return err;
+    })
+}
+
+function mapWhsSeries(whsName){
+  var series = 209;
+  switch (whsName){
+    case 'STUDIO MALECON':
+      series = 182;
+      break;
+    case 'STUDIO PLAYA':
+      series = 183;
+      break;
+    case 'STUDIO CUMBRES':
+      series = 185;
+      break;
+    case 'STUDIO CARMEN':
+      series = 181;
+      break;
+    case 'STUDIO MERIDA':
+      series = 184;
+      break;
+    case 'STUDIO CHETUMAL':
+      series = 186;
+      break;
+    case 'HOME XCARET':
+      series = 209;
+      break;
+    case 'HOME MERIDA':
+      series = 210;
+      break;
+    default:
+      series = 209;
+      break;
+  }
+
+  return series;
 }
