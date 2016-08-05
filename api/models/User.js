@@ -19,7 +19,9 @@ module.exports = {
             type: 'string',
             defaultsTo: ''
         },
-        lastLogin : 'datetime',
+        lastLogin : {
+          type: 'datetime'
+        },
         company: {
             type:'string'
         },
