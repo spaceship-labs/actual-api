@@ -67,13 +67,17 @@ module.exports = {
     SapService.createClient(form)
       .then(function(result){
         result = JSON.parse(result);
-        //sails.log.info(typeof result);
-        //sails.log.info(result);
+        if(!result.value){
+          return {err: result};
+        }
         form.CardCode = result.value;
         return Client.create(form);
       })
       .then(function(created){
-        res.json(created);
+        if(created.err){
+          return res.negotiate(created.err);
+        }
+        return res.json(created);
       })
       .catch(function(err){
         console.log(err);

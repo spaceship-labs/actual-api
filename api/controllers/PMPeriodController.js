@@ -90,8 +90,6 @@ module.exports = {
 
 //Params must be Date objects
 function overlapsRange(newStart, newEnd, currentPeriodId){
-  console.log('newStart: ' + newStart);
-  console.log('newEnd: ' + newEnd);
   var query = {
     endDate: {'>': newStart},
     startDate: {'<': newEnd},

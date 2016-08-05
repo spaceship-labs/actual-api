@@ -31,7 +31,6 @@ function createClient(form){
       .then(function(series){
         form.Series = series;
         var endPoint = appendQuery(url, form);
-        //sails.log.info(endPoint);
         request.post( endPoint, function(err, response, body){
           if(err){
             reject(err);
