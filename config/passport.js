@@ -53,7 +53,6 @@ function _onLocalStrategyAuth(email, password, next){
 
 function _onJwtStrategyAuth(payload, next){
   var user = payload.user;
-  //console.log(payload);
   return next(null, user, {});
 }
 

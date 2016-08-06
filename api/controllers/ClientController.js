@@ -62,8 +62,7 @@ module.exports = {
       });
     }
     form = mapClientFields(form);
-    form.currentStore = req.user.companyActive;
-    form.SlpCode = req.user.SlpCode.id || -1;
+    form.User = req.user.id;
     SapService.createClient(form)
       .then(function(result){
         result = JSON.parse(result);

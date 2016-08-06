@@ -4,13 +4,16 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     form.Details = formatProductsIds(form.Details);
-    Quotation.create(form)
+    var opts = {
+      paymentGroup:1,
+      updateDetails: true,
+    };
+    User.findOne({select:['companyActive'], id: req.user.id})
+      .then(function(user){
+        opts.currentStore = user.companyActive;
+        return Quotation.create(form);
+      })
       .then(function(created){
-        var opts = {
-          paymentGroup:1,
-          updateDetails: true,
-          currentStore: req.user.companyActive
-        };
         return Prices.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
@@ -30,16 +33,19 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var opts = {
+      paymentGroup:1,
+      updateDetails: true,
+    };
     if(form.Details){
       form.Details = formatProductsIds(form.Details);
     }
-    Quotation.update({id:id}, form)
+    User.findOne({select:['companyActive'], id: req.user.id})
+      .then(function(user){
+        opts.currentStore = user.companyActive;
+        return Quotation.update({id:id}, form)
+      })
       .then(function(){
-        var opts = {
-          paymentGroup:1,
-          updateDetails: true,
-          currentStore: req.user.companyActive
-        };
         return Prices.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
@@ -139,14 +145,16 @@ module.exports = {
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
     delete form.id;
-
-    QuotationDetail.create(form)
+    var opts = {
+      paymentGroup:1,
+      updateDetails: true,
+    };
+    User.findOne({select:['companyActive'], id: req.user.id})
+      .then(function(user){
+        opts.currentStore = user.companyActive;
+        return QuotationDetail.create(form);
+      })
       .then(function(created){
-        var opts = {
-          paymentGroup:1,
-          updateDetails: true,
-          currentStore: req.user.companyActive
-        };
         return Prices.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
@@ -168,13 +176,16 @@ module.exports = {
     var id = form.id;
     var quotationId = form.quotation;
     form.Details = formatProductsIds(form.Details);
-    QuotationDetail.destroy({id:id})
+    var opts = {
+      paymentGroup:1,
+      updateDetails: true,
+    };
+    User.findOne({select:['companyActive'], id: req.user.id})
+      .then(function(user){
+        opts.currentStore = user.companyActive;
+        return QuotationDetail.destroy({id:id});
+      })
       .then(function(){
-        var opts = {
-          paymentGroup:1,
-          updateDetails: true,
-          currentStore: req.user.companyActive
-        };
         return Prices.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
@@ -309,11 +320,15 @@ module.exports = {
     var params = {
       update: false,
       paymentGroup: paymentGroup,
-      currentStore: req.user.companyActive
     };
-    Prices.getQuotationTotals(id, params).then(function(totals){
-      res.json(totals);
-    })
+    User.findOne({select:['companyActive'], id: req.user.id})
+      .then(function(user){
+        params.currentStore = user.companyActive;
+        return Prices.getQuotationTotals(id, params);
+      })
+      .then(function(totals){
+        res.json(totals);
+      })
     .catch(function(err){
       console.log(err);
       res.negotiate(err);

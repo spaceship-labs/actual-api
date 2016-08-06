@@ -60,12 +60,15 @@ module.exports = {
     var opts = {
       paymentGroup: form.paymentGroup || 1,
       updateDetails: true,
-      currentStore: req.user.companyActive
     };
     var quotationBase = false;
     var orderCreated = false;
     var user = false;
-    Prices.updateQuotationTotals(quotationId, opts)
+      User.findOne({id:req.user.id}).populate('SlpCode')
+      .then(function(u){
+        opts.currentStore = u.companyActive;
+        return Prices.updateQuotationTotals(quotationId, opts);
+      })
       .then(function(updatedQuotation){
         return Quotation.findOne({id: quotationId})
           .populate('Payments')
@@ -99,9 +102,6 @@ module.exports = {
           CardCode: quotationBase.Address.CardCode,
           SlpCode: SlpCode,
           Store: user.companyActive
-          //User: quotationBase.User,
-          //SlpCode: quotationBase.User.SlpCode,
-          //Store: quotationBase.User.companyActive
         };
         delete quotationBase.Address.id;
         orderParams = _.extend(orderParams, quotationBase.Address);

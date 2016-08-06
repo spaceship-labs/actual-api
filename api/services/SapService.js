@@ -27,7 +27,14 @@ function createClient(form){
     var url = baseUrl + 'Contact';
     form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
     form.LicTradNum = 'XXAX010101000';
-    getSeriesNum(form.currentStore)
+    User.findOne({id:form.User}).populate('SlpCode')
+      .then(function(user){
+        form.SlpCode = -1;
+        if(user.SlpCode && user.SlpCode.length > 0){
+          form.SlpCode = user.SlpCode[0].id || -1;
+        }
+        return getSeriesNum(user.companyActive)
+      })
       .then(function(series){
         form.Series = series;
         var endPoint = appendQuery(url, form);
