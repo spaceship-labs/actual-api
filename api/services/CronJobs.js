@@ -11,11 +11,31 @@ module.exports.init = function(){
       time:'0 0 6 * * *'
       //time: '0 */4 * * * *'
       //s,m,h,d del mes,m,d de la semana
+    },
+    {
+      fn: function(d){
+        cacheCategoriesProducts();
+      },
+      time:'0 0 */6 * * *'
     }
   ].forEach(function(v){
     new cron(v.time,v.fn, true, true);
   });
 };
+
+function cacheCategoriesProducts(){
+  return ProductCategory.find({select:['id','Name']}).populate('Products')
+    .then(function(categories){
+      return Promise.each(categories, function(category){
+        var n = category.Products.length;
+        sails.log.info('Category : ' + category.Name + ' productos: ' + n);
+        return ProductCategory.update({id:category.id}, {productsNum: n});
+      });
+    })
+    .catch(function(err){
+      return err;
+    })
+}
 
 function getPromos(){
   //Excluding expired promotions

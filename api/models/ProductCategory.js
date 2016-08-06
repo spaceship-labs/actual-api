@@ -8,6 +8,7 @@ module.exports = {
 		Handle:{type:'string'},
 		IsMain:{type:'boolean'},
 		CategoryLevel:{type:'integer'},
+    productsNum: {type:'integer'},
 
     Parents:{
       collection: 'productcategory',
