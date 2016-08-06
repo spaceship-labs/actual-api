@@ -18,17 +18,31 @@ var passport = require('passport');
 function _onPassportAuth(req, res, error, user, info){
   if(error) return res.serverError(error);
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
-  /*Logging stuff*/
-  var message    = user.firstName + ' ingresó al sistema';
-  var action     = 'login';
-  Logger.log(user.id, message, action).then(function(log) {
-    return res.ok({
-      token: CipherService.createToken(user),
-      user: user
+  /*Company Active*/
+  var form          = req.allParams();
+  var companyActive = form.companyActive;
+  User.update(user.id, {companyActive: companyActive})
+    .then(function(users) {
+      return users[0];
+    })
+    .then(function(user) {
+      /*Logging stuff*/
+      var message    = user.firstName + ' ingresó al sistema';
+      var action     = 'login';
+      return [
+        Logger.log(user.id, message, action),
+        user
+      ];
+    })
+    .spread(function(log, user){
+      return res.ok({
+        token: CipherService.createToken(user),
+        user: user
+      });
+    })
+    .catch(function(err) {
+      return res.negotiate(err);
     });
-  }).catch(function(err) {
-    return res.negotiate(err);
-  });
 }
 
 

@@ -31,6 +31,7 @@ module.exports.policies = {
     update: ['isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
+    companies: true
   },
   MeController: {
     '*': ['isAuthenticated'],

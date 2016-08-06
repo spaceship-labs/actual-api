@@ -162,9 +162,20 @@ module.exports = {
         if (err) {return res.negotiate(err);}
         return res.json(role.owner);
       });
+  },
+
+  companies: function(req, res) {
+    var form  = req.allParams();
+    var email = form.email;
+    User.findOne({email: email})
+      .populate('companies')
+      .exec(function(err, user) {
+        if (err) {return res.negotiate(err);}
+        var companies = user && user.companies || [];
+        return res.json(companies);
+      });
+
   }
-
-
 };
 
 function validateToken(token, email, cb){
