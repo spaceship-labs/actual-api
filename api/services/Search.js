@@ -2,6 +2,7 @@ var assign   = require('object-assign');
 
 module.exports = {
   applyFilters: applyFilters,
+  applyOrFilters: applyOrFilters,
   getMultiIntersection: getMultiIntersection,
   getProductsByCategories: getProductsByCategories,
   getProductsByCategory: getProductsByCategory,
@@ -36,6 +37,25 @@ function applyFilters(query, filters){
       query[filter.key] = filter.value;
     }
   });
+  return query;
+}
+
+function applyOrFilters(query, filters){
+  if(filters.length > 0){
+    var and = [];
+    filters.forEach(function(filter){
+      var or = [];
+      filter.values.forEach(function(val){
+        var cond = {};
+        cond[filter.key] = val;
+        or.push(cond);
+      });
+      and.push({$or: or});
+    });
+    query.$and = and;
+  }
+  sails.log.info('query applyOrFilters');
+  sails.log.info(JSON.stringify(query));
   return query;
 }
 
@@ -157,6 +177,7 @@ function promotionCronJobSearch(opts) {
   var categories   = [].concat(opts.categories);
   var filtervalues = [].concat(opts.filtervalues);
   var groups       = [].concat(opts.groups);
+  var sas          = [].concat(opts.sas);
   var noIcons      = opts.noIcons || false;
   var price        = {
     '>=': opts.minPrice || 0,
@@ -165,17 +186,22 @@ function promotionCronJobSearch(opts) {
   var excluded     = opts.excluded ? [].concat(opts.excluded): [];
   var paginate = {
     page:  opts.page  || 1,
-    limit: opts.limit || 99999999999
+    limit: opts.limit || 99999999999999
   };
   var filters = [
     {key:'Price', value: price},
     {key:'Active', value: 'Y'},
-    {key:'CustomBrand', value: opts.customBrands },
     {key:'OnStudio', value: opts.OnStudio},
     {key:'OnHome', value: opts.OnHome},
     {key:'OnKids', value: opts.OnKids},
     {key:'OnAmueble', value: opts.OnAmueble},
-    {key:'U_Empresa', value: opts.U_Empresa}
+    //{key:'U_Empresa', value: opts.U_Empresa}
+    //{key:'CustomBrand', value: opts.customBrands }
+  ];
+
+  var orFilters = [
+    {key: 'CustomBrand', values: [].concat(opts.customBrands)},
+    {key: 'U_Empresa', values: sas},
   ];
 
   return getProductsByCategories(categories)
@@ -211,6 +237,7 @@ function promotionCronJobSearch(opts) {
       }
 
       var q = applyFilters(auxQuery,filters);
+      q = applyOrFilters(q , applyOrFilters);
       var find = Product.find(q)
         .paginate(paginate)
         .sort('Available DESC')

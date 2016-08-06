@@ -108,7 +108,10 @@ module.exports = {
     var categories   = [].concat(form.categories);
     var filtervalues = [].concat(form.filtervalues);
     var groups       = [].concat(form.groups);
+    var sas          = [].concat(form.sas);
     var noIcons      = form.noIcons || false;
+    var applyPopulate = form.applyPopulate || true;
+
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -121,12 +124,17 @@ module.exports = {
     var filters = [
       {key:'Price', value: price},
       {key:'Active', value: 'Y'},
-      {key:'CustomBrand', value: form.customBrands },
       {key:'OnStudio', value: form.OnStudio},
       {key:'OnHome', value: form.OnHome},
       {key:'OnKids', value: form.OnKids},
       {key:'OnAmueble', value: form.OnAmueble},
-      {key:'U_Empresa', value: form.U_Empresa}
+      //{key:'CustomBrand', value: form.customBrands },
+      //{key:'U_Empresa', value: form.U_Empresa}
+    ];
+
+    var orFilters = [
+      {key: 'CustomBrand', values: [].concat(form.customBrands)},
+      {key: 'U_Empresa', values: sas},
     ];
 
 
@@ -145,16 +153,19 @@ module.exports = {
         }
 
         var q = Search.applyFilters({},filters);
+        q = Search.applyOrFilters(q,orFilters);
         var currentDate = new Date();
-        var queryPromo = {
-          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
-          startDate: {'<=': currentDate},
-          endDate: {'>=': currentDate},
-        };
-        var find = Product.find(q)
-          .populate('Promotions',queryPromo)
+        var find = Product.find(q);
+        if(applyPopulate){
+          var queryPromo = {
+            startDate: {'<=': currentDate},
+            endDate: {'>=': currentDate},
+          };
+          find = find.populate('Promotions',queryPromo)
+        }
+        find = find
           .paginate(paginate)
-          .sort('Available DESC')
+          .sort('Available DESC');
 
         if(!noIcons){
           find.populate('files')

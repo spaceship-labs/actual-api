@@ -49,6 +49,20 @@ function createClient(form){
   });
 }
 
+function updateFiscalInfo(){
+  return new Promise(function(resolve, reject){
+    var url = baseUrl + 'AddressContact(\'' + cardcode + '\')';
+    var endPoint = appendQuery(url, form);
+    request.post( endPoint, function(err, response, body){
+      if(err){
+        reject(err);
+      }else{
+        resolve(response);
+      }
+    });
+  });
+}
+
 function getSeriesNum(companyId){
   return Company.findOne({id:companyId})
     .then(function(company){

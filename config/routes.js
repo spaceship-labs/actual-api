@@ -348,6 +348,13 @@ module.exports.routes = {
     action:'getContactsByClient'
   },
 
+  /*
+  '/client/update/contact/:contactId':{
+    controller:'client',
+    action:'updateContact'
+  },
+  */
+
   '/quotation/create':{
     controller: 'quotation',
     action: 'create'

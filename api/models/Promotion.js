@@ -1,8 +1,10 @@
 //APP COLLECTION
 module.exports = {
+  schema:true,
   migrate: 'alter',
   attributes: {
     name:{type:'string'},
+    publicName:{type:'string'},
     code:{type:'string',unique:true},
     handle:{type:'string'},
     type:{type:'string'},
@@ -25,7 +27,8 @@ module.exports = {
     OnHome:{type:'boolean'},
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
-    SA: {type:'string'},
+    sas: {type:'array'},
+    //SA: {type:'string'},
     //nameSA: {type:'string'},
     //U_Empresa: {type:'string'},
     excludedProducts: {type:'array'},

@@ -88,7 +88,6 @@ module.exports = {
     var form = req.params.all();
     var CardCode = form.CardCode;
     form = mapClientFields(form);
-
     SapService.updateClient(CardCode, form)
       .then(function(result){
         return Client.update({CardCode: CardCode}, form);
@@ -111,7 +110,24 @@ module.exports = {
       console.log(err);
       res.negotiate(err);
     })
+  },
+
+  /*
+  updateContact: function(req, res){
+    var form = req.params.all();
+    var contactCode = form.contactId;
+    SapService.updateContact(contactCode, form)
+      .then(function(result){
+        return ClientContact.update({CntctCode: contactCode}, form);
+      })
+      .then(function(updated){
+        res.json(updated);
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      });
   }
+  */
 
 };
 
