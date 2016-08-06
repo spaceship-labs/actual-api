@@ -15,6 +15,13 @@ module.exports = {
       if(err) {return res.negotiate(err)};
       return res.json(user[0]);
     });
+  },
+  companyActive: function(req, res) {
+    var user = req.user;
+    User.findOne(user.id).populate('companyActive').exec(function(err, user){
+      if (err) {return res.negotiate(err);}
+      return res.json(user.companyActive);
+    });
   }
 };
 
