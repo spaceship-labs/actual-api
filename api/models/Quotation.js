@@ -31,6 +31,9 @@ module.exports = {
       collection: 'Payment',
       via:'Quotation'
     },
+    Store:{
+      model:'company'
+    },
     isClosed:{type:'boolean'},
     isClosedReason:{type:'string'},
     isClosedNotes:{type:'text'},

@@ -11,6 +11,7 @@ module.exports = {
     User.findOne({select:['companyActive'], id: req.user.id})
       .then(function(user){
         opts.currentStore = user.companyActive;
+        form.Store = user.companyActive;
         return Quotation.create(form);
       })
       .then(function(created){
@@ -43,6 +44,7 @@ module.exports = {
     User.findOne({select:['companyActive'], id: req.user.id})
       .then(function(user){
         opts.currentStore = user.companyActive;
+        form.Store = user.companyActive;
         return Quotation.update({id:id}, form)
       })
       .then(function(){
@@ -279,8 +281,12 @@ module.exports = {
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
     }
-    Quotation.findOne(form.Quotation)
-      .populate('Client')
+    User.findOne({select:['companyActive'], id: req.user.id})
+      .then(function(user){
+        form.Store = user.companyActive;
+        form.User = user.id;
+        return Quotation.findOne(form.Quotation).populate('Client');
+      })
       .then(function(quotation){
         var client = quotation.Client;
         if (form.type != 'monedero') { return; }

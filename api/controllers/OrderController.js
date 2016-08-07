@@ -101,7 +101,8 @@ module.exports = {
           Address: _.clone(quotationBase.Address.id) || false,
           CardCode: quotationBase.Address.CardCode,
           SlpCode: SlpCode,
-          Store: user.companyActive
+          Store: opts.currentStore,
+          //Store: user.companyActive
         };
         delete quotationBase.Address.id;
         orderParams = _.extend(orderParams, quotationBase.Address);

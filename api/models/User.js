@@ -107,6 +107,10 @@ module.exports = {
           collection: 'role',
           via: 'owner'
         },
+        Payments:{
+          collection:'payment',
+          via: 'User'
+        },
         toJSON: function () {
           var obj = this.toObject();
           if (obj.SlpCode && isArray(obj.SlpCode) && obj.SlpCode.length > 0) {

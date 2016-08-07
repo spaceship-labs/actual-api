@@ -16,6 +16,7 @@ module.exports.init = function(){
       fn: function(d){
         cacheCategoriesProducts();
       },
+      //time: '0 */2 * * * *'
       time:'0 0 */6 * * *'
     }
   ].forEach(function(v){
@@ -24,7 +25,15 @@ module.exports.init = function(){
 };
 
 function cacheCategoriesProducts(){
-  return ProductCategory.find({select:['id','Name']}).populate('Products')
+  var price = {
+    '>=': 0,
+    '<=': Infinity
+  };
+  var qProducts = {
+    Price: price,
+    Active: 'Y'
+  };
+  return ProductCategory.find({select:['id','Name']}).populate('Products', qProducts)
     .then(function(categories){
       return Promise.each(categories, function(category){
         var n = category.Products.length;

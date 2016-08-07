@@ -41,11 +41,17 @@ module.exports = {
       type:'string',
       enum: ['paid','pending','cancelled']
     },
+    Store:{
+      model:'company'
+    },
     Order:{
       model:'Order'
     },
     Quotation:{
       model:'Quotation'
+    },
+    User:{
+      model:'User'
     }
   }
 }

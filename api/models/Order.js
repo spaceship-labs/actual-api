@@ -46,7 +46,7 @@ module.exports = {
     },
     Store:{
       model:'company',
-      required: 'true'
+      //required: 'true'
     },
 
 

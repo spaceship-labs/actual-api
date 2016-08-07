@@ -6,6 +6,7 @@
  */
 module.exports = {
   tableName: 'Warehouse',
+  schema: true,
   attributes: {
     //sap fields
     WhsCode:{
@@ -95,7 +96,19 @@ module.exports = {
     Promotions:{
       collection: 'promotion',
       via: 'Companies'
-    }
+    },
+    Payments: {
+      collection:'Payment',
+      via:'Store'
+    },
+    Quotations: {
+      collection:'Quotation',
+      via:'Store'
+    },
+    Orders: {
+      collection:'Order',
+      via:'Store'
+    },
   }
 };
 
