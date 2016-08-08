@@ -22,6 +22,24 @@ module.exports = {
       if (err) {return res.negotiate(err);}
       return res.json(user.companyActive);
     });
+  },
+  generateCashReport: function(req, res){
+    var form = req.params.all();
+    var user = req.user;
+    var startDate = form.startDate || new Date();
+    var endDate = form.endDate || new Date();
+    var q = {
+      User: user.id,
+      createdAt: { '>=': startDate, '<=': endDate }
+    };
+    Payment.find(q).populate('Order').populate('Store')
+      .then(function(payments){
+        res.json(payments);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 };
 

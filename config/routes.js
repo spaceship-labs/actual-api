@@ -465,6 +465,11 @@ module.exports.routes = {
     action:'update'
   },
 
+  '/me/cashreport':{
+    controller:'me',
+    action:'generateCashReport'
+  },
+
   '/promotion/create':{
     controller: 'promotion',
     action:'create'
