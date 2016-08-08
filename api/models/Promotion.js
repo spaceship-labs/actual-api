@@ -20,8 +20,31 @@ module.exports = {
     discountTextPg3:{type:'string'},
     discountTextPg4:{type:'string'},
     discountTextPg5:{type:'string'},
-    //tiendas aplicables
-    //productos aplicables, verificar si aplicar sobre producto o sobre filtros/categorias
+    ewalletPg1:{type:'float'},
+    ewalletPg2:{type:'float'},
+    ewalletPg3:{type:'float'},
+    ewalletPg4:{type:'float'},
+    ewalletPg5:{type:'float'},
+    ewalletTypePg1:{
+      type:'string',
+      enum: ['ammount','percentage']
+    },
+    ewalletTypePg2:{
+      type:'string',
+      enum: ['ammount','percentage']
+    },
+    ewalletTypePg3:{
+      type:'string',
+      enum: ['ammount','percentage']
+    },
+    ewalletTypePg4:{
+      type:'string',
+      enum: ['ammount','percentage']
+    },
+    ewalletTypePg5:{
+      type:'string',
+      enum: ['ammount','percentage']
+    },
     productSearchTerm: {type:'string'},
     OnStudio:{type:'boolean'},
     OnHome:{type:'boolean'},

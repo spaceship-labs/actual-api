@@ -1,4 +1,5 @@
 var assign   = require('object-assign');
+var _        = require('underscore');
 
 module.exports = {
   applyFilters: applyFilters,
@@ -44,15 +45,24 @@ function applyOrFilters(query, filters){
   if(filters.length > 0){
     var and = [];
     filters.forEach(function(filter){
-      var or = [];
-      filter.values.forEach(function(val){
-        var cond = {};
-        cond[filter.key] = val;
-        or.push(cond);
+      filter.values = filter.values.filter(function(v){
+        return v;
       });
-      and.push({$or: or});
+      if(filter.values.length > 0){
+        var or = [];
+        filter.values.forEach(function(val){
+          var cond = {};
+          cond[filter.key] = val;
+          or.push(cond);
+        });
+        if(or.length > 0){
+          and.push({$or: or});
+        }
+      }
     });
-    query.$and = and;
+    if(and.length > 0){
+      query.$and = and;
+    }
   }
   sails.log.info('query applyOrFilters');
   sails.log.info(JSON.stringify(query));
