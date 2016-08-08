@@ -12,7 +12,8 @@ module.exports = {
         'deposit',
         'transfer',
         'monedero',
-        'credit-card',
+        'credit-card', //TODO remove
+        'single-payment-terminal',
         '3-msi',
         '6-msi',
         '9-msi',
@@ -20,6 +21,7 @@ module.exports = {
         '18-msi'
       ]
     },
+    name:{type:'string'},
     ammount:{type:'float'},
     currency:{
       type:'string',
