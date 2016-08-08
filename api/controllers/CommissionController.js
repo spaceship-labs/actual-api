@@ -26,8 +26,7 @@ module.exports = {
   update: function(req, res) {
     var form = req.allParams();
     var id   = form.id;
-    delete form.id;
-    Commission.update(form.id, form).exec(function(err, commission) {
+    Commission.update(id, form).exec(function(err, commission) {
       if (err) {return res.negotiate(err);}
       return res.json(commission);
     });
