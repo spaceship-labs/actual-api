@@ -1,5 +1,6 @@
 //APP / SAP COLLECTION
 module.exports = {
+  schema: true,
   tableName: 'PersonContact',
   attributes: {
     //APP/SAP FIELDS

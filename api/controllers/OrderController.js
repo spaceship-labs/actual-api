@@ -120,7 +120,11 @@ module.exports = {
         return orderFound.save();
       })
       .then(function(){
-        return Quotation.update({id:quotationBase.id} , {Order: orderCreated.id});
+        var updateFields = {
+          Order: orderCreated.id,
+          status: 'to-order'
+        }
+        return Quotation.update({id:quotationBase.id} , updateFields);
       })
       .then(function(quotationUpdated){
         res.json(orderCreated);
