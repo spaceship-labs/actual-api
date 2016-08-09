@@ -43,6 +43,10 @@ module.exports = {
     .then(function(contacts){
       clientFound = clientFound.toObject();
       clientFound.Contacts = contacts;
+      return FiscalInfo.find({CardCode: clientFound.CardCode, AdresType:'S'});
+    })
+    .then(function(fiscalInfo){
+      clientFound.FiscalInfo = fiscalInfo;
       res.json(clientFound);
     })
     .catch(function(err){
@@ -128,6 +132,34 @@ module.exports = {
       });
   }
   */
+
+  updateFiscalInfo: function(req, res){
+    var form = req.params.all();
+    var CardCode = form.CardCode;
+    var id = form.id;
+    delete form.AdresType;
+    sails.log.info('form');
+    sails.log.info(form);
+    SapService.updateFiscalInfo(CardCode, form)
+      .then(function(result){
+        result = JSON.parse(result);
+        if(!result.value){
+          return {err: result};
+        }
+        return FiscalInfo.update({CardCode:CardCode}, form);
+      })
+      .then(function(updated){
+        if(updated.err){
+          return res.negotiate(err);
+        }
+        return res.json(updated);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  }
+
 
 };
 

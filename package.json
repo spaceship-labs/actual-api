@@ -5,11 +5,11 @@
   "description": "a Sails application",
   "keywords": [],
   "dependencies": {
-    "append-query": "^1.1.0",
     "async": "^1.5.2",
     "bcrypt": "^0.8.x",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.3.4",
+    "build-url": "^1.0.9",
     "connect-mongo": "0.8.2",
     "connect-timeout": "^1.7.0",
     "cron": "^1.1.0",

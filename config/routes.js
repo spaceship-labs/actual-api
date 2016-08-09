@@ -355,6 +355,11 @@ module.exports.routes = {
   },
   */
 
+  '/client/update/fiscalinfo/:id/:CardCode':{
+    controller:'client',
+    action:'updateFiscalInfo'
+  },
+
   '/quotation/create':{
     controller: 'quotation',
     action: 'create'
@@ -533,6 +538,11 @@ module.exports.routes = {
   '/store/:id/promotions':{
     controller:'company',
     action:'getPromosByStore'
+  },
+
+  '/common/states':{
+    controller:'common',
+    action:'getStates'
   }
 
 
