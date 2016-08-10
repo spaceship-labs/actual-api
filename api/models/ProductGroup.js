@@ -1,12 +1,24 @@
 //APP COLLECTION
 module.exports = {
+  schema:true,
+  migrate:'alter',
   attributes:{
     Name:{type:'string'},
-    Type:{type:'string'},
-    Handle:{type:'string'},
+    Type:{
+      type:'string',
+      enum:['variations','environments','packages','relations']
+    },
+    Handle:{
+      type:'string',
+      unique:true
+    },
+    code:{
+      type:'string',
+      unique:true
+    },
     Description:{type:'text'},
-    StartsOn: {type:'datetime'},
-    EndsOn: {type:'datetime'},
+    startDate: {type:'datetime'},
+    endDate: {type:'datetime'},
     HasExpiration: {type:'boolean'},
 
     icon_filename:{type:'string'},
@@ -16,11 +28,15 @@ module.exports = {
     icon_size:{type:'integer'},
     icon_description:{type:'string'},
 
+
+
+
     Products: {
       collection: 'Product',
       via: 'Groups'
     },
 
+    //Relation promotion search
     Promotions:{
       collection: 'Promotion',
       via:'Groups'

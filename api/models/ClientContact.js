@@ -4,10 +4,15 @@ module.exports = {
   tableName: 'PersonContact',
   attributes: {
     //APP/SAP FIELDS
+    E_Mail:{
+      type:'string'
+    },
+    /*
     email:{
       columnName:'E_MailL',
       type:'string'
     },
+    */
     firstName:{
       columnName:'FirstName',
       type:'string'
@@ -53,7 +58,7 @@ module.exports = {
     //APP FIELDS
     dialCode: {type:'string'},
     phone:{type:'string'},
-    email:{type:'string'},
+    //email:{type:'string'},
     mobileDialCode:{type:'string'},
     mobilePhone: {type:'string'},
     externalNumber:{type:'string'},
@@ -69,5 +74,8 @@ module.exports = {
     birthDate:{
       type:'date'
     },
+    coordsLat:{type:'string'},
+    coordsLng:{type:'string'}
+
   }
 };

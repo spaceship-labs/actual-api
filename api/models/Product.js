@@ -161,6 +161,11 @@ module.exports = {
       Promotions:{
         collection: 'Promotion',
         via:'Products'
+      },
+
+      PackagesInfo:{
+        collection:'ProductPackageInfo',
+        via:'Product'
       }
 
     },

@@ -192,4 +192,19 @@ module.exports = {
     });
   },
 
+  findPackages: function(req, res){
+    var form = req.params.all();
+    var model = 'productgroup';
+    var searchFields = ['Name'];
+    form.filters = form.filters || {};
+    form.filters.Type = 'packages';
+    //var populateFields = ['Categories'];
+    Common.find(model, form, searchFields).then(function(result){
+      res.ok(result);
+    },function(err){
+      console.log(err);
+      res.notFound();
+    })
+  },
+
 };
