@@ -85,6 +85,9 @@ module.exports = {
         bankAccount:{type:'string'},
         interbankClabe: {type:'string'},
 
+        brokerCode:{type:'string'},
+        brokerName:{type:'string'},
+
         //relations - permissions
         companies: {
           collection: 'company',

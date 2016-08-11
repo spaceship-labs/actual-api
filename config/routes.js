@@ -327,6 +327,11 @@ module.exports.routes = {
     action: 'importImagesSap'
   },
 
+  '/import/importbrokers': {
+    controller: 'import',
+    action: 'importBrokersToUsers'
+  },
+
   '/seller/getall':{
     controller: 'seller',
     action:'getAll'
