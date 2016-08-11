@@ -31,10 +31,8 @@ module.exports = {
         finalProducts = finalProducts.map(function(p){
           if(p.PackagesInfo.length > 0){
             p.packageInfo = _.clone(p.PackagesInfo[0]);
-            delete p.PackagesInfo;
-          }else{
-            delete p.PackagesInfo;
           }
+          delete p.PackagesInfo;
           return p;
         });
         res.json(finalProducts);

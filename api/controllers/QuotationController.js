@@ -66,6 +66,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var baseQuotation = false;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -77,27 +78,25 @@ module.exports = {
       //.populate('Address')
       .populate('Order')
       .populate('Payments')
-      .exec(function findCB(err, quotation){
-      if(err) console.log(err);
 
-      if(quotation){
+      .then(function(quotation){
+
         quotation = quotation.toObject();
-
+        quotationBase = quotation;
         var recordsIds = [];
         quotation.Records.forEach(function(record){
           recordsIds.push(record.id);
         });
-
-        QuotationRecord.find({id: recordsIds}).populate('files').exec(function findRecordsCB(errFiles, records){
-          if(errFiles) console.log(errFiles);
-          quotation.Records = records;
-          res.json(quotation);
-        });
-      }
-      else{
-        res.json(false);
-      }
-    });
+        return QuotationRecord.find({id: recordsIds}).populate('files');
+      })
+      .then(function(records){
+        quotationBase.Records = records;
+        return res.json(quotationBase);
+      })
+      .catch(function(err){
+        console.log(err);
+        return res.negotiate(err);
+      });
   },
 
   addRecord: function(req, res){

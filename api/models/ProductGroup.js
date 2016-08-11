@@ -29,7 +29,10 @@ module.exports = {
     icon_description:{type:'string'},
 
 
-
+    ProductsPackageInfo: {
+      collection:'ProductPackageInfo',
+      via:'Package'
+    },
 
     Products: {
       collection: 'Product',
