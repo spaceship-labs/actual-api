@@ -543,8 +543,22 @@ module.exports.routes = {
   '/common/states':{
     controller:'common',
     action:'getStates'
-  }
+  },
 
+  '/packages/find/:page':{
+    controller:'package',
+    action:'findPackages'
+  },
+
+  '/packages/:id/products':{
+    controller:'package',
+    action:'getProducts'
+  },
+
+  '/packages/packageproducts/update':{
+    controller:'package',
+    action:'updatePackageProducts'
+  }
 
   /***************************************************************************
   *                                                                          *

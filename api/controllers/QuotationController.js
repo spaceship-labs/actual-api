@@ -290,9 +290,8 @@ module.exports = {
       .then(function(quotation){
         var client = quotation.Client;
         if (form.type != 'monedero') { return; }
-        if (client.ewallet < form.ammount) {
-          console.log(client.ewallet, form.ammount);
-          return Promise.reject(new Error('fondos insuficientes'));
+        if (client.ewallet < form.ammount || !client.ewallet) {
+          return Promise.reject('Fondos insuficientes');
         }
         return Client.update(client.id, {ewallet: client.ewallet - form.ammount});
       })
@@ -327,6 +326,7 @@ module.exports = {
         }
       })
       .catch(function(err){
+        console.log('err');
         console.log(err);
         res.negotiate(err);
       });
