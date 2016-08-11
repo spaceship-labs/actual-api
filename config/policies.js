@@ -75,6 +75,9 @@ module.exports.policies = {
   },
   CompanyController: {
     find: true
+  },
+  ShippingController: {
+    product: true
   }
 
 

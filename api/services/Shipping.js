@@ -1,37 +1,34 @@
 var _ = require('underscore');
+
 module.exports = {
-  queryDate: queryDate,
-  product: productShipping
+  product: productShipping,
+  queryDate: queryDate
 };
 
-function productShipping(code) {
-  Product.findOne({ItemCode: code})
+function productShipping(productCode, companyCode) {
+  return Company
+    .findOne(companyCode).then(function(company) {
+      return ItemWarehouse.findOne({ItemCode: productCode, WhsCode: company.WhsCode})
+    })
     .then(function(product) {
-      var company = normalize(product.U_Empresa);
-      return Company.findOne({WhsCode: company});
-    })
-    .then(function(company) {
-      return Delivery.findOne({
-        FromCode: company.WhsCode,
-        ToCode: company.WhsCode
-      });
-    })
-    .then(function(delivery) {
       var qdate = Shipping.queryDate({}, new Date());
       return [
-        delivery,
+        product,
+        Delivery.findOne({FromCode: product.WhsCode, ToCode: product.WhsCode}),
         Season.findOne(qdate)
       ];
     })
-    .spread(function(deliveryDays, seasonDays) {
+    .spread(function(product, deliveryDays, seasonDays) {
       var seasonDays   = (seasonDays && seasonDays.Days) || 7;
-      var deliveryDays = deliveryDays.Days;
+      var deliveryDays = (deliveryDays && deliveryDays.Days);
+      var days         = seasonDays + deliveryDays;
+      var date         = addDays(days);
+      return [{
+        available: product.OnHand,
+        days: days,
+        delivery: date
+      }];
     });
-}
-
-function normalize(code) {
-  code = parseInt(code);
-  return code < 9 ? '0' + code : code.toString();
 }
 
 function queryDate(query, date) {
@@ -44,4 +41,14 @@ function queryDate(query, date) {
       '>=': date
     }
   });
+}
+
+function addDays(days, date) {
+  if (!date) {
+    date = new Date();
+  } else {
+    date = new Date(date);
+  }
+  date.setDate(date.getDate() + days);
+  return date;
 }

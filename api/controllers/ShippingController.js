@@ -8,7 +8,15 @@
 module.exports = {
   product: function(req, res) {
     var form = req.allParams();
-    var code = form.code;
+    var productCode = form.productCode;
+    var companyCode = form.companyCode;
+    Shipping.product(productCode, companyCode)
+      .then(function(shipping) {
+        return res.json(shipping);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
   }
 };
 
