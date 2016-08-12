@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var _ = require('underscore');
 
 module.exports = {
   findPackages: function(req, res){
@@ -27,6 +28,13 @@ module.exports = {
         return Product.find({id:productsIds}).populate('PackagesInfo',q);
       })
       .then(function(finalProducts){
+        finalProducts = finalProducts.map(function(p){
+          if(p.PackagesInfo.length > 0){
+            p.packageInfo = _.clone(p.PackagesInfo[0]);
+          }
+          delete p.PackagesInfo;
+          return p;
+        });
         res.json(finalProducts);
       })
       .catch(function(err){
