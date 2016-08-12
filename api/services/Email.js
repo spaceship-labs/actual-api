@@ -24,7 +24,7 @@ module.exports = {
       link: recoveryUrl,
 
       sender_name: 'Actual Studio',
-      image: 'http://actual.spaceshiplabs.com/assets/images/logo.png',
+      image: 'http://admin.miactual.com/assets/images/logo.png',
       sender_address: 'some address',
       sender_city: 'some city',
       sender_state: 'some state',
@@ -90,7 +90,7 @@ module.exports = {
       products_iva: products_iva,
       products_total: products_total,
       sender_name: 'Actual Studio',
-      image: 'http://actual.spaceshiplabs.com/assets/images/logo.png',
+      image: 'http://admin.miactual.com/assets/images/logo.png',
       sender_address: 'some address',
       sender_city: 'some city',
       sender_state: 'some state',
