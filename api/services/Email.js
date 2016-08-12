@@ -12,6 +12,15 @@ orderItemTemplate     = ejs.compile(orderItemTemplate);
 
 module.exports = {
   sendPasswordRecovery: function(userName, userEmail, recoveryUrl, cb) {
+    var user_name       = userName;
+    var user_link       = recoveryUrl;
+    var company_name    = 'actual group';
+    var company_img     = 'http://actual.spaceshiplabs.com/assets/images/logo.png';
+    var company_address = '';
+    var company_city    = '';
+    var company_state   = '';
+    var company_ip      = '';
+    var unsubscribe     = '#';
     var request         = sendgrid.emptyRequest();
     var requestBody     = undefined;
     var mail            = new helper.Mail();
@@ -20,16 +29,17 @@ module.exports = {
     var to              = new helper.Email(userEmail, userName);
     var subject         = 'recuperar contraseña';
     var res             = passwordTemplate({
-      user: userName,
-      link: recoveryUrl,
+      user_name: user_name,
+      user_link: user_link,
 
-      sender_name: 'Actual Studio',
-      image: 'http://actual.spaceshiplabs.com/assets/images/logo.png',
-      sender_address: 'some address',
-      sender_city: 'some city',
-      sender_state: 'some state',
-      sender_ip: 'some_ip',
-      unsubscribe: 'some_unsubscribe'
+      company_name: company_name,
+      company_img: company_img,
+      company_address: company_address,
+      company_city: company_city,
+      company_state: company_state,
+      company_ip: company_ip,
+
+      unsubscribe: unsubscribe
     });
     var content         = new helper.Content("text/html", res);
 
