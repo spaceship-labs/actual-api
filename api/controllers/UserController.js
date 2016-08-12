@@ -16,9 +16,8 @@ module.exports = {
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){
-      console.log(err);
       res.notFound();
-    })
+    });
   },
 
   findById: function(req, res){
@@ -56,16 +55,15 @@ module.exports = {
   },
 
   create: function(req, res){
-    var form = req.params.all();
-    User.create(_.omit(req.allParams(), 'id'))
-      .exec(function(err,_user){
-        if(err){
-          console.log(err);
-          res.negotiate(err);
-        }else{
-          return res.ok({user:_user});
-        }
-      })
+    var form = req.allParams();
+    User.create(form).exec(function(err, _user){
+      console.log(err);
+      if (err) {
+        return res.negotiate(err);
+      } else {
+        return res.ok({user: _user});
+      }
+    });
   },
 
   update: function(req, res) {
