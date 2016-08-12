@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 //APP COLLECTION
 module.exports = {
     migrate:'alter',
@@ -107,8 +109,7 @@ module.exports = {
           model:'Commission'
         },
         role: {
-          collection: 'role',
-          via: 'owner'
+          model: 'role',
         },
         Payments:{
           collection:'payment',
@@ -135,6 +136,19 @@ module.exports = {
           values.password = CipherService.hashPassword(values.password);
         }
         next();
+    },
+    beforeDestroy: function(criteria, next){
+      User.find(criteria).populate('SlpCode')
+        .then(function(users) {
+          return Promise.all(
+            users.map(function(user){
+              return Seller.update(user.SlpCode.id, {User: null});
+            })
+          );
+        })
+        .then(function(users){
+          next();
+        });
     }
 };
 
