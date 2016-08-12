@@ -80,7 +80,9 @@ module.exports = {
       .populate('Payments')
 
       .then(function(quotation){
-
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
         quotation = quotation.toObject();
         quotationBase = quotation;
         var recordsIds = [];
