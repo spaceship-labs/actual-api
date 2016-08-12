@@ -19,5 +19,9 @@ module.exports = {
     Product: {
       model:'Product'
     },
+    ShipDate: {
+      type: 'date',
+      required: true
+    }
   }
 };

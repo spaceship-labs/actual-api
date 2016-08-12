@@ -14,7 +14,10 @@ function productShipping(productCode, companyId) {
       productPurchased(productCode, companyId)
     ])
     .spread(function(product, products) {
-      return _.sortBy(products.concat(product), function(product) {
+      if (product) {
+        products = products.concat(product);
+      }
+      return _.sortBy(products, function(product) {
         return product.date;
       });
     });
@@ -30,6 +33,7 @@ function productAvailable(productCode, companyId) {
       });
     })
     .then(function(product) {
+      if (!product) {return [product];}
       var seasonQuery = queryDate({}, new Date());
       return [
         product,
@@ -41,6 +45,7 @@ function productAvailable(productCode, companyId) {
       ];
     })
     .spread(function(product, delivery, season) {
+      if (!product) {return product;}
       var seasonDays   = (season && season.Days) || 7;
       var deliveryDays = (delivery && delivery.Days) || 0;
       var days         = seasonDays + deliveryDays;
