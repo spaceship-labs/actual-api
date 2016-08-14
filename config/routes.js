@@ -390,12 +390,12 @@ module.exports.routes = {
     action:'find'
   },
 
-  '/quotation/gettotalsbyuser/:userid':{
+  '/quotation/user/:userId/totals':{
     controller: 'quotation',
     action:'getTotalsByuser'
   },
 
-  '/quotation/getcountbyuser/:userid':{
+  '/quotation/user/:userId/count':{
     controller: 'quotation',
     action:'getCountByUser'
   },
@@ -468,6 +468,16 @@ module.exports.routes = {
   '/order/findbyid/:id':{
     controller:'order',
     action:'findById'
+  },
+
+  '/order/user/:userId/totals':{
+    controller: 'order',
+    action:'getTotalsByuser'
+  },
+
+  '/order/user/:userId/count':{
+    controller: 'order',
+    action:'getCountByUser'
   },
 
   '/me/update':{

@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var Promise = require('bluebird');
 module.exports = {
   create: function(req, res){
     var form = req.params.all();
@@ -133,6 +134,72 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  }
+  },
+
+  getCountByUser: function(req, res){
+    var form = req.params.all();
+    var userId = form.userId;
+    var monthRange = Common.getMonthDateRange();
+    //Month range by default
+    var startDate = form.startDate || monthRange.start;
+    var endDate = form.endDate || monthRange.end;
+    var foundAll = 0;
+    var queryDateRange = {
+      User: userId,
+      createdAt: { '>=': startDate, '<=': endDate }
+    };
+    Promise.props({
+      foundAll: Order.count({User: userId}),
+      foundDateRange: Order.count(queryDateRange)
+    })
+      .then(function(result){
+        res.json({
+          all: result.foundAll,
+          dateRange: result.foundDateRange
+        });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
+  },
+
+
+  getTotalsByUser: function(req, res){
+    var form = req.params.all();
+    var userId = form.userId;
+    var monthRange = Common.getMonthDateRange();
+    //Month range by default
+    var startDate = form.startDate || monthRange.start;
+    var endDate = form.endDate || monthRange.end;
+    var queryDateRange = {
+      User: userId,
+      createdAt: { '>=': startDate, '<=': endDate }
+    };
+
+    //Find all totals
+    Promise.props({
+      total: Order.find({User: userId}).sum('total'),
+      totalDateRange: Order.find(queryDateRange).sum('total')
+    })
+      .then(function(result){
+        var all = 0;
+        var totalDateRange = 0;
+        if(result.total.length > 0){
+          all = result.total[0].total;
+        }
+        if(result.totalDateRange.length > 0){
+          totalDateRange = result.totalDateRange[0].total
+        }
+        res.json({
+          all: all,
+          dateRange: totalDateRange
+        });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
+  },
 
 }
