@@ -18,16 +18,11 @@ module.exports = {
     Dscription: {
       type: 'string'
     },
-    Quantity: {
+    OpenCreQty: {
       type: 'integer'
-    },
-    IsCommited: {
-      type: 'integer',
-      defaultsTo: 0
     },
     WhsCode: {
       type: 'string'
     }
   }
 };
-
