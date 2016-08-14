@@ -21,7 +21,7 @@ module.exports = {
     },
     ShipDate: {
       type: 'date',
-      required: true
+      //required: true
     }
   }
 };
