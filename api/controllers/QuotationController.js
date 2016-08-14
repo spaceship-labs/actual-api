@@ -234,44 +234,6 @@ module.exports = {
     });
   },
 
-
-  getTotalsByUser: function(req, res){
-    var form = req.params.all();
-    var userId = form.userid;
-    //Find all totals
-    Quotation.native(function(errNative, collection){
-      if(errNative) console.log(errNative);
-      collection.aggregate({
-          $group: {_id:null, subtotal: {$sum: '$subtotal'} }
-        },
-        function(err, resultAll){
-          if(err) console.log(err);
-
-          //Today range
-          var startDate = new Date();
-          startDate.setHours(0,0,0,0);
-          var endDate = new Date();
-          endDate.setHours(23,59,59,999);
-
-          //Finding by date range
-          Quotation.native(function(errNative, collection){
-            if(errNative) console.log(errNative);
-            collection.aggregate([
-                { $match: { createdAt: {$gte: startDate, $lte: endDate } } },
-                { $group: {_id:null, subtotal: {$sum: '$subtotal'} } },
-              ]
-            , function(err, resultRangeDate){
-                if(err) console.log(err);
-                res.json({
-                  all: resultAll || false,
-                  dateRange: resultRangeDate || false
-                });
-            });
-          });
-      });
-    });
-  },
-
   addPayment: function(req, res){
     var form          = req.params.all();
     var quotationId   = form.quotationid;
@@ -355,30 +317,6 @@ module.exports = {
     });
   },
 
-  getCountByUser: function(req, res){
-    var form = req.params.all();
-    var userId = form.userid;
-    //Today range
-    var startDate = new Date();
-    startDate.setHours(0,0,0,0);
-    var endDate = new Date();
-    endDate.setHours(23,59,59,999);
-    Quotation.count({User: userId}).exec(function(err, foundAll){
-      if(err) console.log(err);
-      var query = {
-        User: userId,
-        createdAt: { '>=': startDate, '<=': endDate }
-      };
-      Quotation.count(query).exec(function(err, foundToday){
-        if(err) console.log(err);
-        res.json({
-          all: foundAll,
-          dateRange: foundToday
-        });
-      });
-    });
-  },
-
   getRecords: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -392,7 +330,74 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  }
+  },
+
+
+  getCountByUser: function(req, res){
+    var form = req.params.all();
+    var userId = form.userId;
+    var monthRange = Common.getMonthDateRange();
+    //Month range by default
+    var startDate = form.startDate || monthRange.start;
+    var endDate = form.endDate || monthRange.end;
+    var foundAll = 0;
+    var queryDateRange = {
+      User: userId,
+      createdAt: { '>=': startDate, '<=': endDate }
+    };
+    Promise.props({
+      foundAll: Quotation.count({User: userId}),
+      foundDateRange: Quotation.count(queryDateRange)
+    })
+      .then(function(result){
+        res.json({
+          all: result.foundAll,
+          dateRange: result.foundDateRange
+        });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
+  },
+
+
+  getTotalsByUser: function(req, res){
+    var form = req.params.all();
+    var userId = form.userId;
+    var monthRange = Common.getMonthDateRange();
+    //Month range by default
+    var startDate = form.startDate || monthRange.start;
+    var endDate = form.endDate || monthRange.end;
+    var queryDateRange = {
+      User: userId,
+      createdAt: { '>=': startDate, '<=': endDate }
+    };
+
+    //Find all totals
+    Promise.props({
+      total: Quotation.find({User: userId}).sum('total'),
+      totalDateRange: Quotation.find(queryDateRange).sum('total')
+    })
+      .then(function(result){
+        var all = 0;
+        var totalDateRange = 0;
+        if(result.total.length > 0){
+          all = result.total[0].total;
+        }
+        if(result.totalDateRange.length > 0){
+          totalDateRange = result.totalDateRange[0].total
+        }
+        res.json({
+          all: all,
+          dateRange: totalDateRange
+        });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
+  },
 
 };
 
