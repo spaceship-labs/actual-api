@@ -2,9 +2,7 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 
 module.exports = {
-  product: productShipping,
-  productAvailable: productAvailable,
-  productPurchased: productPurchased
+  product: productShipping
 };
 
 function productShipping(productCode, companyId) {
@@ -18,6 +16,13 @@ function productShipping(productCode, companyId) {
         .concat(purchased)
         .filter(function(product) {
           return product.available > 0;
+        })
+        .map(function(product) {
+          var d = new Date(product.date);
+          d.setHours(0, 0, 0, 0, 0);
+          return _.assign({}, product, {
+            date: d
+          });
         });
       return _.sortBy(products, function(product) {
         return product.date;
