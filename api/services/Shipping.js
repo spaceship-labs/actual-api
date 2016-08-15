@@ -65,7 +65,7 @@ function productAvailable(productCode, companyId) {
         var days         = seasonDays + deliveryDays;
         var date         = addDays(new Date(), days);
         return {
-          available: product.OnHand,
+          available: product.Available,
           days: days,
           date: date,
           company: companyId

@@ -15,8 +15,8 @@ module.exports = {
     WhsCode: {
       type: 'string'
     },
-    OnHand: {
-      type: 'string'
+    Available: {
+      type: 'integer'
     },
     IsCommited: {
       type: 'integer'
