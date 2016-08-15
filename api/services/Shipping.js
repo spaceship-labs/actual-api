@@ -38,9 +38,13 @@ function productAvailable(productCode, companyId) {
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
-      var companies = deliveries.map(function(delivery) {
-        return delivery.FromCode;
-      });
+      var companies = deliveries
+        .filter(function(delivery) {
+          return delivery.Active == 'Y';
+        })
+        .map(function(delivery) {
+          return delivery.FromCode;
+        });
       return [
         ItemWarehouse.find({
           ItemCode: productCode,
@@ -78,9 +82,13 @@ function productPurchased(productCode, companyId) {
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
-      var companies = deliveries.map(function(delivery) {
-        return delivery.FromCode;
-      });
+      var companies = deliveries
+        .filter(function(delivery) {
+          return delivery.Active == 'Y';
+        })
+        .map(function(delivery) {
+          return delivery.FromCode;
+        });
       return [
         PurchaseOrder.find({
           ItemCode: productCode,
