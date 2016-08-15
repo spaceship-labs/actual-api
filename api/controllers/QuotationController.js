@@ -394,7 +394,6 @@ module.exports = {
         });
       })
       .catch(function(err){
-        console.log(err);
         res.negotiate(err);
       })
   },

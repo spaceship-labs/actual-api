@@ -63,7 +63,8 @@ function productAvailable(productCode, companyId) {
         return {
           available: product.OnHand,
           days: days,
-          date: date
+          shipDate: date,
+          shipCompany: companyId
         };
       });
     });
@@ -102,7 +103,8 @@ function productPurchased(productCode, companyId) {
         return {
           available: product.OpenCreQty,
           days: days,
-          date: date
+          shipDate: date,
+          shipCompany: companyId
         };
       });
     });
