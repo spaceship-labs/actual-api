@@ -34,7 +34,7 @@ function productAvailable(productCode, companyId) {
   return Company
     .findOne(companyId)
     .then(function(company) {
-      return Delivery.find({ToCode: company.WhsCode});
+      return Delivery.find({FromCode: company.WhsCode});
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
@@ -43,7 +43,7 @@ function productAvailable(productCode, companyId) {
           return delivery.Active == 'Y';
         })
         .map(function(delivery) {
-          return delivery.FromCode;
+          return delivery.ToCode;
         });
       return [
         ItemWarehouse.find({
@@ -58,7 +58,7 @@ function productAvailable(productCode, companyId) {
       if (!deliveries || !products) {return []};
       return products.map(function(product){
         var delivery     = _.find(deliveries, function(delivery) {
-          return delivery.FromCode == product.WhsCode;
+          return delivery.ToCode == product.WhsCode;
         });
         var seasonDays   = (season && season.Days) || 7;
         var deliveryDays = (delivery && delivery.Days) || 0;
@@ -78,7 +78,7 @@ function productPurchased(productCode, companyId) {
   return Company
     .findOne(companyId)
     .then(function(company) {
-      return Delivery.find({ToCode: company.WhsCode});
+      return Delivery.find({FromCode: company.WhsCode});
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
@@ -87,7 +87,7 @@ function productPurchased(productCode, companyId) {
           return delivery.Active == 'Y';
         })
         .map(function(delivery) {
-          return delivery.FromCode;
+          return delivery.ToCode;
         });
       return [
         PurchaseOrder.find({
@@ -102,7 +102,7 @@ function productPurchased(productCode, companyId) {
       if (!deliveries || !products) {return []};
       return products.map(function(product){
         var delivery     = _.find(deliveries, function(delivery) {
-          return delivery.FromCode == product.WhsCode;
+          return delivery.ToCode == product.WhsCode;
         });
         var seasonDays   = (season && season.Days) || 7;
         var deliveryDays = (delivery && delivery.Days) || 0;
