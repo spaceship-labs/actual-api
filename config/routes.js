@@ -42,6 +42,11 @@ module.exports.routes = {
     action: 'signin'
   },
 
+  '/auth/manager':{
+    controller:'auth',
+    action:'authorizeManager'
+  },
+
   '/user/create':{
     controller: 'user',
     action: 'create'

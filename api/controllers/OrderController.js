@@ -79,6 +79,9 @@ module.exports = {
       })
       .then(function(quotation){
         quotationBase = quotation;
+        if(quotation.Order){
+          return Promise.reject(new Error('Ya se ha creado un pedido sobre esta cotización'));
+        }
         return User.findOne({id:quotationBase.User.id}).populate('SlpCode');
       })
       .then(function(user){
@@ -93,7 +96,6 @@ module.exports = {
           subtotal: quotationBase.subtotal,
           discount: quotationBase.discount,
           paymentGroup: opts.paymentGroup,
-          status: 'paid',
           Client: quotationBase.Client,
           Quotation: quotationId,
           Payments: quotationBase.Payments,
@@ -103,8 +105,22 @@ module.exports = {
           CardCode: quotationBase.Address.CardCode,
           SlpCode: SlpCode,
           Store: opts.currentStore,
+          Manager: quotationBase.Manager
           //Store: user.companyActive
         };
+
+        var minPaidPercentage = quotationBase.minPaidPercentage || 100;
+
+        if( getPaidPercentage(quotationBase.ammountPaid, quotationBase.total) < minPaidPercentage){
+          return Promise.reject(new Error('No se ha pagado la cantidad minima de la orden'));
+        }
+
+        if(minPaidPercentage < 100){
+          orderParams.status = 'minimum-paid';
+        }else{
+          orderParams.status = 'paid';
+        }
+
         delete quotationBase.Address.id;
         orderParams = _.extend(orderParams, quotationBase.Address);
         return Order.create(orderParams);
@@ -202,4 +218,10 @@ module.exports = {
       })
   },
 
+}
+
+function getPaidPercentage(amountPaid, total){
+  var percentage = 0;
+  var percentage = amountPaid / (total / 100);
+  return percentage;
 }
