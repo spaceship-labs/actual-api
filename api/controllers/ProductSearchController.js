@@ -35,6 +35,7 @@ module.exports = {
           Product.find(query)
             .populate('Promotions', queryPromo)
             .paginate(paginate)
+            .sort('Available DESC')
         ];
       })
       .spread(function(total, products) {
