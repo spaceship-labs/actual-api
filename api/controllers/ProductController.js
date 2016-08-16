@@ -191,10 +191,8 @@ module.exports = {
     },function(e,product){
       if(e){
         console.log(e);
-        sails.log.info('todo mal');
         return res.json(false);
       }else{
-        sails.log.info('todo bien');
         //TODO check how to retrieve images instead of doing other query
         var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
         Product.findOne({ItemCode:form.id}, {select: selectedFields}).exec(function(e, updatedProduct){
@@ -236,8 +234,27 @@ module.exports = {
     });
   },
 
-  getDeliveryDates: function(req, res){
+  addSeenTime: function(req, res){
     var form = req.params.all();
-  }
+    var ItemCode = form.ItemCode;
+    Product.findOne({
+      select:['id','ItemCode','seenTimes'],
+      ItemCode: ItemCode
+    })
+    .then(function(product){
+      product.seenTimes = product.seenTimes || 0;
+      product.seenTimes++;
+      product.save(function(err,p){
+        if(err){
+          return Promise.reject(err);
+        }
+        res.json(p);
+      });
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    })
+  },
 
 }

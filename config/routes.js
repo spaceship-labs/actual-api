@@ -108,6 +108,12 @@ module.exports.routes = {
     action: 'getProductsbySuppCatNum'
   },
 
+  '/product/addseen/:ItemCode':{
+    controller:'product',
+    action:'addSeenTime'
+  },
+
+
   '/saleopportunity/find/:page':{
     controller: 'saleopportunity',
     action: 'find'
@@ -573,8 +579,12 @@ module.exports.routes = {
   '/packages/packageproducts/update':{
     controller:'package',
     action:'updatePackageProducts'
-  }
+  },
 
+  '/packages/details/:id':{
+    controller: 'package',
+    action:'getDetailedPackage'
+  }
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
