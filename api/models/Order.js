@@ -15,7 +15,7 @@ module.exports = {
     paymentGroup:{type:'integer'},
     status:{
       type:'string',
-      //enum:['lost','pending','on-delivery','minimum-paid','paid']
+      enum:['lost','pending','on-delivery','minimum-paid','paid']
     },
     Quotation:{
       model:'Quotation',
@@ -99,6 +99,11 @@ module.exports = {
     street: {type:'string'},
     street2: {type:'string'},
     references:{type:'text'},
+    minPaidPercentage: {
+      type:'float',
+      defaultsTo: 100
+    },
+
   },
 
   beforeCreate: function(val,cb){

@@ -118,6 +118,7 @@ module.exports = {
 
       freeSale: {type:'boolean'},
       slowMovement:{type:'boolean'},
+      seenTimes: {type:'integer'},
 
 
       //RELATIONS

@@ -53,6 +53,19 @@ module.exports = {
       .catch(function(err){
         res.negotiate(err);
       })
+  },
+
+  getDetailedPackage: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    ProductGroup.findOne({id:id,Type:'packages'}).populate('ProductsPackageInfo')
+      .then(function(pack){
+        return res.json(pack);
+      })
+      .catch(function(err){
+        console.log(err);
+        return res.negotiate(err);
+      })
   }
 
 }

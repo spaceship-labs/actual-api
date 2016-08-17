@@ -75,9 +75,10 @@ module.exports = {
       .populate('Records')
       .populate('User')
       .populate('Client')
-      //.populate('Address')
       .populate('Order')
       .populate('Payments')
+      .populate('Manager')
+      //.populate('Address')
 
       .then(function(quotation){
         if(!quotation){

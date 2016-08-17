@@ -20,8 +20,14 @@ function _onPassportAuth(req, res, error, user, info){
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
   /*Company Active*/
   var form          = req.allParams();
-  var companyActive = form.companyActive;
-  User.update(user.id, {companyActive: companyActive})
+  var companyActive = form.companyActive || false;
+  var updateParams = {
+    lastLogin : new Date()
+  };
+  if(companyActive){
+    updateParams.companyActive = companyActive;
+  }
+  User.update(user.id, updateParams)
     .then(function(users) {
       return users[0];
     })
@@ -57,6 +63,26 @@ module.exports = {
   signin: function (req, res) {
     passport.authenticate('local',
       _onPassportAuth.bind(this, req, res))(req, res);
+  },
+
+  authorizeManager: function(req, res){
+    var form = req.params.all();
+    var email = form.email;
+    var password = form.password;
+    User.findOne({email:email}).populate('role')
+      .then(function(user){
+        if( !user ||
+            !CipherService.comparePassword(password, user) ||
+            user.role.name != 'store manager'
+        ){
+          return res.unauthorized();
+        }
+        delete user.password;
+        return res.json(user);
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      })
   },
 
   homeStatus: function(req, res){

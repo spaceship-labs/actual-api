@@ -27,6 +27,13 @@ module.exports = {
     shipCompany: {
       model: 'company',
       required: true
-    }
+    },
+    shipDateFake:{
+      type:'date',
+      //required:true
+    },
+    PromotionPackage:{
+      model:'ProductGroup'
+    },
   }
 };

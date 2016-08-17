@@ -34,6 +34,9 @@ module.exports = {
     Store:{
       model:'company'
     },
+    Manager:{
+      model:'user'
+    },
     isClosed:{type:'boolean'},
     isClosedReason:{type:'string'},
     isClosedNotes:{type:'text'},
@@ -44,10 +47,14 @@ module.exports = {
     discount: {type:'float'},
     ammountPaid: {type:'float'},
     totalProducts: {type:'integer'},
+    minPaidPercentage: {
+      type:'float',
+      defaultsTo: 100
+    },
     //TODO: Check status types
     status:{
       type:'string',
-      enum:['closed','pending-payment','to-order']
+      //enum:['closed','pending-payment','to-order']
     }
   },
 

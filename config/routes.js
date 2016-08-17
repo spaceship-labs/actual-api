@@ -42,6 +42,11 @@ module.exports.routes = {
     action: 'signin'
   },
 
+  '/auth/manager':{
+    controller:'auth',
+    action:'authorizeManager'
+  },
+
   '/user/create':{
     controller: 'user',
     action: 'create'
@@ -107,6 +112,12 @@ module.exports.routes = {
     controller: 'product',
     action: 'getProductsbySuppCatNum'
   },
+
+  '/product/addseen/:ItemCode':{
+    controller:'product',
+    action:'addSeenTime'
+  },
+
 
   '/saleopportunity/find/:page':{
     controller: 'saleopportunity',
@@ -573,8 +584,12 @@ module.exports.routes = {
   '/packages/packageproducts/update':{
     controller:'package',
     action:'updatePackageProducts'
-  }
+  },
 
+  '/packages/details/:id':{
+    controller: 'package',
+    action:'getDetailedPackage'
+  }
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

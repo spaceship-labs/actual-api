@@ -34,14 +34,11 @@ function productAvailable(productCode, companyId) {
   return Company
     .findOne(companyId)
     .then(function(company) {
-      return Delivery.find({ToCode: company.WhsCode});
+      return Delivery.find({ToCode: company.WhsCode, Active:'Y'});
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
       var companies = deliveries
-        .filter(function(delivery) {
-          return delivery.Active == 'Y';
-        })
         .map(function(delivery) {
           return delivery.FromCode;
         });
@@ -78,14 +75,11 @@ function productPurchased(productCode, companyId) {
   return Company
     .findOne(companyId)
     .then(function(company) {
-      return Delivery.find({ToCode: company.WhsCode});
+      return Delivery.find({ToCode: company.WhsCode, Active:'Y'});
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
       var companies = deliveries
-        .filter(function(delivery) {
-          return delivery.Active == 'Y';
-        })
         .map(function(delivery) {
           return delivery.FromCode;
         });

@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 module.exports = {
   update: function(req, res){
     var form = req.params.all();
