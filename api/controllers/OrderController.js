@@ -5,14 +5,31 @@ module.exports = {
     var form = req.params.all();
     Order.create(form)
       .then(function(order) {
-        return Order.findOne(order.id).populate('User').populate('Client');
+        return [
+          Order
+            .findOne(order)
+            .populate('User')
+            .populate('Client')
+            .populate('Payments')
+            .populate('OrderAddress'),
+          OrderDetail.find({Order: order.id})
+            .populate('Product')
+        ];
       })
-      .then(function(order) {
-        var user     = order.User;
-        var customer = order.Client;
-      })
-      .then(function(store, user, customer, order, products){
-
+      .spread(function(order, details){
+        Email.sendOrderConfirmation(
+          order,
+          order.Address,
+          order.User,
+          order.Client,
+          details,
+          order.Payments,
+          function(err) {
+            if (err) {
+              sails.console(err);
+            }
+          }
+        );
       })
       .catch(function(err) {
         return res.negotiate(err);
