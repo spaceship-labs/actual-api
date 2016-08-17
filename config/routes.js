@@ -446,6 +446,11 @@ module.exports.routes = {
     action: 'getQuotationTotals'
   },
 
+  '/quotation/sendemail/:id':{
+    controller:'quotation',
+    action:'sendEmail'
+  },
+
   '/client/update/:CardCode':{
     controller: 'client',
     action: 'update'

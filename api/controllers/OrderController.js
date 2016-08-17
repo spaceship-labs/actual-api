@@ -161,7 +161,36 @@ module.exports = {
         return Quotation.update({id:quotationBase.id} , updateFields);
       })
       .then(function(quotationUpdated){
+        //RESPONSE
         res.json(orderCreated);
+
+        //STARTS EMAIL SENDING PROCESS
+        return [
+          Order
+            .findOne({id:orderCreated.id})
+            .populate('User')
+            .populate('Client')
+            .populate('Payments')
+            .populate('Address'),
+          OrderDetail.find({Order: orderCreated.id})
+            .populate('Product')
+        ];
+      })
+      .spread(function(order, details){
+        Email.sendOrderConfirmation(
+          order,
+          order.Address,
+          order.User,
+          order.Client,
+          details,
+          order.Payments,
+          function(err) {
+            sails.log.info('Email de pedido enviado | ' + new Date());
+            if (err) {
+              sails.console(err);
+            }
+          }
+        );
       })
       .catch(function(err){
         console.log(err);

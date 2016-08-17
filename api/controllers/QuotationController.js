@@ -399,6 +399,36 @@ module.exports = {
       })
   },
 
+  sendEmail: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Promise.props({
+      quotation: Quotation.findOne({id: id})
+        .populate('User')
+        .populate('Client'),
+      details: QuotationDetail.find({Quotation:id})
+        .populate('Product')
+    })
+    .then(function(result){
+      var quotation = result.quotation;
+      var details = result.details;
+      Email.sendQuotation(
+        quotation,
+        quotation.User,
+        quotation.Client,
+        details,
+        function(response){
+          console.log(response);
+          return res.json(response);
+        }
+      );
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });
+  }
+
 };
 
 
