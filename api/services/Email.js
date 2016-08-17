@@ -1,24 +1,29 @@
-var baseURL             = process.env.baseURL;
-var moment              = require('moment');
-var fs                  = require('fs');
-var ejs                 = require('ejs');
-var key                 = process.env.SENDGRIDAPIKEY;
-var sendgrid            = require('sendgrid').SendGrid(key);
-var helper              = require('sendgrid').mail;
-var passwordTemplate    = fs.readFileSync(sails.config.appPath + '/views/email/password/template.html').toString();
-var orderTemplate       = fs.readFileSync(sails.config.appPath + '/views/email/order/template.html').toString();
-var orderItemTemplate   = fs.readFileSync(sails.config.appPath + '/views/email/order/item.html').toString();
-var orderPNameTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/order/payment_name.html').toString();
-var orderPTotalTemplate = fs.readFileSync(sails.config.appPath + '/views/email/order/payment_total.html').toString();
-passwordTemplate        = ejs.compile(passwordTemplate);
-orderTemplate           = ejs.compile(orderTemplate);
-orderItemTemplate       = ejs.compile(orderItemTemplate);
-orderPNameTemplate      = ejs.compile(orderPNameTemplate);
-orderPTotalTemplate     = ejs.compile(orderPTotalTemplate);
+var baseURL               = process.env.baseURL;
+var moment                = require('moment');
+var fs                    = require('fs');
+var ejs                   = require('ejs');
+var key                   = process.env.SENDGRIDAPIKEY;
+var sendgrid              = require('sendgrid').SendGrid(key);
+var helper                = require('sendgrid').mail;
+var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password/template.html').toString();
+var orderTemplate         = fs.readFileSync(sails.config.appPath + '/views/email/order/template.html').toString();
+var orderItemTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/order/item.html').toString();
+var orderPNameTemplate    = fs.readFileSync(sails.config.appPath + '/views/email/order/payment_name.html').toString();
+var orderPTotalTemplate   = fs.readFileSync(sails.config.appPath + '/views/email/order/payment_total.html').toString();
+var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/quote/template.html').toString();
+var quotationItemTemplate = fs.readFileSync(sails.config.appPath + '/views/email/quote/item.html').toString();
+passwordTemplate          = ejs.compile(passwordTemplate);
+orderTemplate             = ejs.compile(orderTemplate);
+orderItemTemplate         = ejs.compile(orderItemTemplate);
+orderPNameTemplate        = ejs.compile(orderPNameTemplate);
+orderPTotalTemplate       = ejs.compile(orderPTotalTemplate);
+quotationTemplate         = ejs.compile(quotationTemplate);
+quotationItemTemplate     = ejs.compile(quotationItemTemplate);
 
 module.exports = {
   sendPasswordRecovery: password,
-  sendOrderConfirmation: order
+  sendOrderConfirmation: order,
+  sendQuotation: quotation
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -181,6 +186,71 @@ function order(order, orderAddress, user, client, details, payments, cb) {
   var from             = new helper.Email(user_email, user_name);
   var to               = new helper.Email('tugorez@gmail.com', client_name); //cambia
   var subject          = 'confirmación de compra';
+  var content          = new helper.Content("text/html", emailBody);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST'
+  request.path = '/v3/mail/send'
+  request.body = requestBody
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+}
+
+function quotation(quote, user, client, details, cb) {
+  var client_name      = client.CardName;
+  var products         = details.reduce(function(html, detail) {
+    return html + quotationItemTemplate({
+      product_name: detail.Product.ItemName,
+      product_image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+      product_quantity: detail.quantity,
+      product_total: parseFloat(detail.total).toFixed(2)
+    });
+  }, '');
+  var total            = parseFloat(quote.total).toFixed(2);
+  var subtotal         = parseFloat(quote.subtotal).toFixed(2);
+  var discount         = parseFloat(quote.discount).toFixed(2);
+  var user_name        = user.firstName;
+  var user_email       = user.email;
+  var user_phone       = user.phone;
+  var company_name     = 'Actual Group';
+  var company_address  = 'Av coba #10';
+  var company_city     = 'Cancún';
+  var company_state    = 'Quintana Roo';
+  var company_img      = 'http://actual.spaceshiplabs.com/assets/images/logo.png';
+  var unsubscribe      = '#';
+  var emailBody        = quotationTemplate({
+    client_name: client_name,
+    products: products,
+    subtotal: subtotal,
+    discount: discount,
+    total: total,
+    user_name: user_name,
+    user_email: user_email,
+    user_phone: user_phone,
+    company_name: company_name,
+    company_img: company_img,
+    company_address: company_address,
+    company_city: company_city,
+    company_state: company_state,
+    unsubscribe: unsubscribe
+  });
+  // mail stuff
+  var request          = sendgrid.emptyRequest();
+  var requestBody      = undefined;
+  var mail             = new helper.Mail();
+  var personalization  = new helper.Personalization();
+  var from             = new helper.Email(user_email, user_name);
+  var to               = new helper.Email('tugorez@gmail.com', client_name); //cambia
+  var subject          = 'cotización';
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
