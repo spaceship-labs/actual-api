@@ -7,6 +7,7 @@ var _ = require('underscore');
 module.exports = {
   createClient: createClient,
   updateClient: updateClient,
+  updateContact: updateContact,
   updateFiscalInfo: updateFiscalInfo
 };
 
@@ -59,6 +60,29 @@ function createClient(form){
   });
 }
 
+function updateContact(contactIndex, form){
+  return new Promise(function(resolve, reject){
+    var path = 'PersonContact('+  contactIndex +')';
+    form = _.omit(form, _.isUndefined);
+    var endPoint = buildUrl(baseUrl,{
+      path: path,
+      queryParams: form
+    });
+    sails.log.info('updateContact');
+    sails.log.info(endPoint);
+    request.post( endPoint, function(err, response, body){
+      if(err){
+        sails.log.info('err');
+        sails.log.info(err);
+        return reject(err);
+      }
+      sails.log.info('body');
+      sails.log.info(body);
+      resolve(body);
+    });
+  });
+}
+
 function updateFiscalInfo(cardcode, form){
   return new Promise(function(resolve, reject){
     var path = 'AddressContact(\'' + cardcode + '\')';
@@ -71,12 +95,11 @@ function updateFiscalInfo(cardcode, form){
     sails.log.info(endPoint);
     request.post( endPoint, function(err, response, body){
       if(err){
-        reject(err);
-      }else{
-        sails.log.info('body');
-        sails.log.info(body);
-        resolve(body);
+        return reject(err);
       }
+      sails.log.info('body');
+      sails.log.info(body);
+      resolve(body);
     });
   });
 }

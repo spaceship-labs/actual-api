@@ -88,6 +88,7 @@ module.exports = {
 		U_Procesado:{
       type:'integer'
     },
+
     //relations
     users: {
       collection: 'user',
@@ -109,6 +110,10 @@ module.exports = {
       collection:'Order',
       via:'Store'
     },
+    ProductsPackage:{
+      collection:'ProductGroup',
+      via:'Stores'
+    }
   }
 };
 

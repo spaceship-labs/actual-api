@@ -364,12 +364,10 @@ module.exports.routes = {
     action:'getContactsByClient'
   },
 
-  /*
-  '/client/update/contact/:contactId':{
+  '/client/:CardCode/update/contact/:CntctCode':{
     controller:'client',
     action:'updateContact'
   },
-  */
 
   '/client/update/fiscalinfo/:id/:CardCode':{
     controller:'client',
@@ -586,9 +584,9 @@ module.exports.routes = {
     action:'getProducts'
   },
 
-  '/packages/packageproducts/update':{
+  '/packages/update/:id':{
     controller:'package',
-    action:'updatePackageProducts'
+    action:'update'
   },
 
   '/packages/details/:id':{

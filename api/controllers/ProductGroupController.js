@@ -18,13 +18,15 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    ProductGroup.findOne({id:id}).populate('Products').exec(function(err, group){
-      if(err){
+    ProductGroup.findOne({id:id})
+      .populate('Products')
+      .then(function(group){
+        res.json(group);
+      })
+      .catch(function(err){
         console.log(err);
-        console.log(err);
-      }
-      res.json(group);
-    });
+        res.negotiate(err);
+      })
   },
 
   getVariantGroupProducts: function(req, res){

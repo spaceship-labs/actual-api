@@ -28,12 +28,6 @@ module.exports = {
     icon_size:{type:'integer'},
     icon_description:{type:'string'},
 
-
-    ProductsPackageInfo: {
-      collection:'ProductPackageInfo',
-      via:'Package'
-    },
-
     Products: {
       collection: 'Product',
       via: 'Groups'
@@ -43,6 +37,19 @@ module.exports = {
     Promotions:{
       collection: 'Promotion',
       via:'Groups'
+    },
+
+    /*-------------/
+      ONLY APPLIES TO PACKAGES GROUPS
+    /*------------*/
+    ProductsPackageInfo: {
+      collection:'ProductPackageInfo',
+      via:'Package'
+    },
+
+    Stores:{
+      collection:'Company',
+      via:'ProductsPackage'
     }
 
   }

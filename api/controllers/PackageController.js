@@ -43,22 +43,31 @@ module.exports = {
       })
   },
 
-  updatePackageProducts: function(req, res){
+  update: function(req, res){
     var form = req.params.all();
+    var id = form.id;
     var productsInfo = form.productsInfo || [];
-    Promise.each(productsInfo, updateProductInfo)
+    var updatedPackage = false;
+
+    ProductGroup.update({id:id, Type:'packages'}, form)
+      .then(function(updated){
+        updatedPackage = updated;
+        return Promise.each(productsInfo, updateProductInfo);
+      })
       .then(function(){
-        res.json(true);
+        res.json(updatedPackage);
       })
       .catch(function(err){
         res.negotiate(err);
-      })
+      });
   },
 
   getDetailedPackage: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    ProductGroup.findOne({id:id,Type:'packages'}).populate('ProductsPackageInfo')
+    ProductGroup.findOne({id:id,Type:'packages'})
+      .populate('Stores')
+      .populate('ProductsPackageInfo')
       .then(function(pack){
         return res.json(pack);
       })

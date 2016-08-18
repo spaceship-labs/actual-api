@@ -116,22 +116,29 @@ module.exports = {
     })
   },
 
-  /*
   updateContact: function(req, res){
     var form = req.params.all();
-    var contactCode = form.contactId;
-    SapService.updateContact(contactCode, form)
-      .then(function(result){
+    var contactCode = form.CntctCode;
+    var cardCode = form.CardCode;
+    ClientContact.find({CardCode: cardCode, select:['CntctCode']})
+      .then(function(contacts){
+        var contactIndex = getContactIndex(contacts, contactCode);
+        return SapService.updateContact(contactIndex, form);
+      })
+      .then(function(updatedSap){
+        sails.log.info('termino updatedSap');
         return ClientContact.update({CntctCode: contactCode}, form);
       })
-      .then(function(updated){
-        res.json(updated);
+      .then(function(updatedApp){
+        sails.log.info('termino update app');
+        sails.log.info(updatedApp);
+        res.json(updatedApp);
       })
       .catch(function(err){
+        console.log(err);
         res.negotiate(err);
       });
-  }
-  */
+  },
 
   updateFiscalInfo: function(req, res){
     var form = req.params.all();
@@ -182,4 +189,14 @@ function mapClientFields(fields){
   }
   fields.E_Mail = fields.email || fields.E_Mail;
   return fields;
+}
+
+function getContactIndex(contacts, contactCode){
+  var contactCodes = contacts.map(function(c){
+    return parseInt(c.CntctCode);
+  });
+  contactCodes = contactCodes.sort(function(a,b){
+    return a - b;
+  });
+  return contactCodes.indexOf(contactCode);
 }
