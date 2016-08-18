@@ -230,6 +230,7 @@ module.exports = {
   getTotalsByUser: function(req, res){
     var form = req.params.all();
     var userId = form.userId;
+    var getAll = !_.isUndefined(form.all) ? form.all : true;
     var monthRange = Common.getMonthDateRange();
     //Month range by default
     var startDate = form.startDate || monthRange.start;
@@ -238,23 +239,26 @@ module.exports = {
       User: userId,
       createdAt: { '>=': startDate, '<=': endDate }
     };
+    var props = {
+      totalDateRange: Order.find(queryDateRange).sum('total')
+    };
+    if(getAll){
+      props.total = Order.find({User: userId}).sum('total');
+    }
 
     //Find all totals
-    Promise.props({
-      total: Order.find({User: userId}).sum('total'),
-      totalDateRange: Order.find(queryDateRange).sum('total')
-    })
+    Promise.props(props)
       .then(function(result){
         var all = 0;
         var totalDateRange = 0;
-        if(result.total.length > 0){
+        if(getAll && result.total.length > 0){
           all = result.total[0].total;
         }
         if(result.totalDateRange.length > 0){
           totalDateRange = result.totalDateRange[0].total
         }
         res.json({
-          all: all,
+          all: all || false,
           dateRange: totalDateRange
         });
       })
