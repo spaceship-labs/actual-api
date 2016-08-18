@@ -30,6 +30,27 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getPackagesByStore: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var currentDate = new Date();
+    var queryPromo = {
+      startDate: {'<=': currentDate},
+      endDate: {'>=': currentDate},
+    };
+    Company.findOne({id:id})
+      .populate('ProductsPackages', queryPromo)
+      .then(function(store){
+        //sails.log.info(company);
+        res.json(store.ProductsPackages);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
+
 };
 

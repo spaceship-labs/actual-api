@@ -78,12 +78,13 @@ function updatePromo(promo){
     excluded = promo.excludedProducts.map(function(p){return p.id});
   }
   var opts = {
+    name: promo.name,
     OnStudio: promo.OnStudio || false,
     OnHome: promo.OnHome || false,
     OnKids: promo.OnKids || false,
     OnAmueble: promo.OnAmueble || false,
-    name: promo.name,
     U_Empresa: promo.U_Empresa || false,
+    itemCode: promo.itemCode || false,
     categories: categories,
     filtervalues: filtervalues,
     groups: groups,

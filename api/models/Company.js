@@ -7,6 +7,7 @@
 module.exports = {
   tableName: 'Warehouse',
   schema: true,
+  migrate:'alter',
   attributes: {
     //sap fields
     WhsCode:{
@@ -110,7 +111,7 @@ module.exports = {
       collection:'Order',
       via:'Store'
     },
-    ProductsPackage:{
+    ProductsPackages:{
       collection:'ProductGroup',
       via:'Stores'
     }

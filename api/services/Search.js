@@ -64,8 +64,8 @@ function applyOrFilters(query, filters){
       query.$and = and;
     }
   }
-  sails.log.info('query applyOrFilters');
-  sails.log.info(JSON.stringify(query));
+  //sails.log.info('query applyOrFilters');
+  //sails.log.info(JSON.stringify(query));
   return query;
 }
 
@@ -205,6 +205,8 @@ function promotionCronJobSearch(opts) {
     {key:'OnHome', value: opts.OnHome},
     {key:'OnKids', value: opts.OnKids},
     {key:'OnAmueble', value: opts.OnAmueble},
+    {key:'ItemCode', value: opts.itemCode}
+
     //{key:'U_Empresa', value: opts.U_Empresa}
     //{key:'CustomBrand', value: opts.customBrands }
   ];

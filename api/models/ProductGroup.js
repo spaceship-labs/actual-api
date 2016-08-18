@@ -49,7 +49,7 @@ module.exports = {
 
     Stores:{
       collection:'Company',
-      via:'ProductsPackage'
+      via:'ProductsPackages'
     }
 
   }

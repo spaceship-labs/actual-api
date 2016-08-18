@@ -129,6 +129,7 @@ module.exports = {
       {key:'OnHome', value: form.OnHome},
       {key:'OnKids', value: form.OnKids},
       {key:'OnAmueble', value: form.OnAmueble},
+      {key:'ItemCode', value: form.itemCode}
       //{key:'CustomBrand', value: form.customBrands },
       //{key:'U_Empresa', value: form.U_Empresa}
     ];
@@ -137,7 +138,6 @@ module.exports = {
       {key: 'CustomBrand', values: [].concat(form.customBrands)},
       {key: 'U_Empresa', values: sas},
     ];
-
 
     Search.getProductsByCategories(categories)
       .then(function(catprods) {

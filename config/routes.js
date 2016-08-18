@@ -569,6 +569,11 @@ module.exports.routes = {
     action:'getPromosByStore'
   },
 
+  '/store/:id/packages':{
+    controller:'company',
+    action:'getPackagesByStore'
+  },
+
   '/common/states':{
     controller:'common',
     action:'getStates'
