@@ -49,7 +49,8 @@ module.exports = {
     totalProducts: {type:'integer'},
     minPaidPercentage: {
       type:'float',
-      defaultsTo: 100
+      defaultsTo: 60
+      //defaultsTo: 100
     },
     //TODO: Check status types
     status:{

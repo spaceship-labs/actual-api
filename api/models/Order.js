@@ -101,7 +101,8 @@ module.exports = {
     references:{type:'text'},
     minPaidPercentage: {
       type:'float',
-      defaultsTo: 100
+      defaultsTo: 60
+      //defaultsTo: 100
     },
 
   },
