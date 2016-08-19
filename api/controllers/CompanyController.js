@@ -50,6 +50,23 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getSellersByStore: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    Role.findOne({name:'seller'})
+      .then(function(sellerRole){
+        var sellerRoleId = sellerRole.id;
+        return User.find({companyMain: id, role: sellerRoleId});
+      })
+      .then(function(sellers){
+        res.json(sellers);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 
 };

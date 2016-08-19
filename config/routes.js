@@ -574,6 +574,11 @@ module.exports.routes = {
     action:'getPackagesByStore'
   },
 
+  '/store/:id/sellers':{
+    controller:'company',
+    action:'getSellersByStore'
+  },
+
   '/common/states':{
     controller:'common',
     action:'getStates'

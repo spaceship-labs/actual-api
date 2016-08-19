@@ -184,7 +184,7 @@ function order(order, orderAddress, user, client, details, payments, cb) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user_email, user_name);
-  var to               = new helper.Email('luis19prz@gmail.com', client_name); //cambia
+  var to               = new helper.Email(user_email, client_name); //cambia
   //var to               = new helper.Email('tugorez@gmail.com', client_name); //cambia
   var subject          = 'confirmación de compra';
   var content          = new helper.Content("text/html", emailBody);
@@ -250,7 +250,7 @@ function quotation(quote, user, client, details, cb) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user_email, user_name);
-  var to               = new helper.Email('luis19prz@gmail.com', client_name); //cambia
+  var to               = new helper.Email(user_email, client_name); //cambia
   //var to               = new helper.Email('tugorez@gmail.com', client_name); //cambia
   var subject          = 'cotización';
   var content          = new helper.Content("text/html", emailBody);
