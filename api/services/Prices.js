@@ -49,7 +49,7 @@ function getDetailTotals(detail, opts){
   paymentGroup = opts.paymentGroup || 1;
   var subTotal = 0;
   var total = 0;
-  var product = detail.Product;
+  var productId = detail.Product;
   var qty = detail.quantity;
   var currentDate = new Date();
   var queryPromo = {};
@@ -58,7 +58,7 @@ function getDetailTotals(detail, opts){
     endDate: {'>=': currentDate},
   };
   //return new Promise(function(resolve, reject){
-  return Product.findOne({id:product.id})
+  return Product.findOne({id:productId})
     .populate('Promotions', queryPromo)
     .then(function(p){
       var mainPromo = getMainPromo(p);
@@ -154,7 +154,7 @@ function getQuotationTotals(quotationId, opts){
       var detailsIds = [];
       if(quotation.Details){
         detailsIds = quotation.Details.map(function(d){return d.id});
-        return QuotationDetail.find({id:detailsIds}).populate('Product');
+        return QuotationDetail.find({id:detailsIds}).populate('PromotionPackage');
       }else{
         return [];
       }

@@ -602,6 +602,11 @@ module.exports.routes = {
   '/packages/details/:id':{
     controller: 'package',
     action:'getDetailedPackage'
+  },
+
+  '/cuadros':{
+    controller: 'local',
+    action:'cuadros'
   }
   /***************************************************************************
   *                                                                          *
