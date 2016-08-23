@@ -6,6 +6,7 @@ var _ = require('underscore');
 
 module.exports = {
   createClient: createClient,
+  createContact: createContact,
   updateClient: updateClient,
   updateContact: updateContact,
   updateFiscalInfo: updateFiscalInfo
@@ -60,10 +61,12 @@ function createClient(form){
   });
 }
 
-function updateContact(contactIndex, form){
+function updateContact(cardCode, contactIndex, form){
   return new Promise(function(resolve, reject){
-    var path = 'PersonContact('+  contactIndex +')';
+    var path = 'PersonContact(\''+  cardCode +'\')';
     form = _.omit(form, _.isUndefined);
+    form.Line = contactIndex;
+    form.Address = form.Address.substring(0,100);
     var endPoint = buildUrl(baseUrl,{
       path: path,
       queryParams: form
@@ -82,6 +85,31 @@ function updateContact(contactIndex, form){
     });
   });
 }
+
+function createContact(cardCode, form){
+  return new Promise(function(resolve, reject){
+    var path = 'PersonContact(\''+  cardCode +'\')';
+    form = _.omit(form, _.isUndefined);
+    form.Address = form.Address.substring(0,100);
+    var endPoint = buildUrl(baseUrl,{
+      path: path,
+      queryParams: form
+    });
+    sails.log.info('createContact');
+    sails.log.info(endPoint);
+    request.post( endPoint, function(err, response, body){
+      if(err){
+        sails.log.info('err');
+        sails.log.info(err);
+        return reject(err);
+      }
+      sails.log.info('body');
+      sails.log.info(body);
+      resolve(body);
+    });
+  });
+}
+
 
 function updateFiscalInfo(cardcode, form){
   return new Promise(function(resolve, reject){
@@ -149,3 +177,4 @@ function mapWhsSeries(whsName){
 
   return series;
 }
+

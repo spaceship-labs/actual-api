@@ -125,7 +125,7 @@ module.exports = {
     ClientContact.find({CardCode: cardCode, select:['CntctCode']})
       .then(function(contacts){
         var contactIndex = getContactIndex(contacts, contactCode);
-        return SapService.updateContact(contactIndex, form);
+        return SapService.updateContact(cardCode ,contactIndex, form);
       })
       .then(function(updatedSap){
         sails.log.info('termino updatedSap');
@@ -135,6 +135,27 @@ module.exports = {
         sails.log.info('termino update app');
         sails.log.info(updatedApp);
         res.json(updatedApp);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
+  createContact: function(req, res){
+    var form = req.params.all();
+    var cardCode = form.CardCode;
+    form = mapContactFields(form);
+    SapService.createContact(cardCode, form)
+      .then(function(createdSap){
+        sails.log.info('createdSap');
+        sails.log.info(createdSap);
+        return ClientContact.create(form);
+      })
+      .then(function(createdApp){
+        sails.log.info('createdApp');
+        sails.log.info(createdApp);
+        res.json(createdApp);
       })
       .catch(function(err){
         console.log(err);
@@ -207,13 +228,13 @@ function mapContactFields(fields){
   //fields.Address = fields.Address;
   fields.Address = '';
   var addressFields = [
-    {key:'externalNumber', label: 'Número exterior'},
-    {key:'internalNumber', label: 'Número interior'},
+    {key:'externalNumber', label: 'No. ext.'},
+    {key:'internalNumber', label: 'No. int.'},
     {key:'neighborhood', label: 'Colonia'},
     {key:'municipality', label: 'Municipio'},
     {key:'city', label: 'Ciudad'},
     {key:'entity', label: 'Estado'},
-    {key:'zipCode', label: 'Código postal'},
+    {key:'zipCode', label: 'C.P.'},
     {key:'street', label: 'Calle'},
     {key:'street2', label: 'Entre calle'},
     {key:'street3', label: 'Y calle'},
