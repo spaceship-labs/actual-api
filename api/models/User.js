@@ -105,9 +105,6 @@ module.exports = {
           collection: 'permission',
           via: 'owners'
         },
-        Commission:{
-          model:'Commission'
-        },
         role: {
           model: 'role',
         },

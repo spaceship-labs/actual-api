@@ -67,7 +67,32 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  }
+  },
 
+  getAll: function(req, res) {
+    Company.find().exec(function(err, companies) {
+      if (err) {return res.negotiate(err);}
+      return res.json(companies);
+    });
+  },
+
+  countSellers: function(req, res) {
+    var form    = req.allParams();
+    var company = form.company;
+    Role
+      .findOne({name: 'seller'})
+      .then(function(role) {
+        return User.count({
+          role: role.id,
+          companyMain: company
+        })
+      })
+      .then(function(sellers) {
+        return res.json(sellers);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  }
 };
 
