@@ -5,6 +5,7 @@ module.exports = {
   attributes: {
     //APP/SAP FIELDS
     E_Mail:{
+      //columnName: 'E_Mail',
       type:'string'
     },
     /*
@@ -13,40 +14,32 @@ module.exports = {
       type:'string'
     },
     */
-    firstName:{
-      columnName:'FirstName',
+    FirstName:{
       type:'string'
     },
-    middleName:{
-      columnName: 'MiddleName',
+    MiddleName:{
       type:'string'
     },
-    lastName:{
-      columnName: 'LastName',
+    LastName:{
       type:'string'
     },
 
     //SAP FIELDS
     CntCtCode:{type:'integer'},
     CardCode:{type:'string'},
-    name:{
-      columnName:'Name',
+    Name:{
       type:'string'
     },
-    address: {
-      columnName:'Address',
+    Address: {
       type:'string'
     },
-    phone1:{
-      columnName:'Tel1',
+    Tel1:{
       type:'string'
     },
-    phone2:{
-      columnName:'Tel2',
+    Tel2:{
       type:'string'
     },
-    mobileSAP:{
-      columnName:'Cellolar',
+    Cellolar:{
       type:'string'
     },
 
@@ -70,6 +63,7 @@ module.exports = {
     zipCode: {type:'string'},
     street: {type:'string'},
     street2: {type:'string'},
+    street3: {type:'string'},
     references:{type:'text'},
     birthDate:{
       type:'date'

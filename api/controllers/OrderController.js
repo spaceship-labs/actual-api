@@ -139,7 +139,9 @@ module.exports = {
         }
 
         delete quotationBase.Address.id;
+        delete quotationBase.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotationBase.Address);
+
         return Order.create(orderParams);
       })
       .then(function(created){
