@@ -6,5 +6,5 @@ module.exports = {
     .catch(function(err){
       res.negotiate(err);
     })
-  }
+  },
 }

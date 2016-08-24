@@ -78,7 +78,12 @@ module.exports.policies = {
   },
   ShippingController: {
     product: true
+  },
+  /*
+  LocalController:{
+    '*':true
   }
+  */
 
 
   //Por ahora
