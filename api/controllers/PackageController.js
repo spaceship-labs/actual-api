@@ -89,6 +89,10 @@ function updateProductInfo(product){
       var params = {
         quantity: product.packageInfo.quantity,
         discount: product.packageInfo.discount,
+        discountPg2: product.packageInfo.discountPg2,
+        discountPg3: product.packageInfo.discountPg3,
+        discountPg4: product.packageInfo.discountPg4,
+        discountPg5: product.packageInfo.discountPg5,
         discountType: product.packageInfo.discountType,
         Product: product.productId,
         Package: product.packageId

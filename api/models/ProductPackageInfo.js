@@ -8,6 +8,12 @@ module.exports = {
       type:'string',
       enum:['ammount','percentage']
     },
+
+    discountPg2: {type:'float', required:true},
+    discountPg3: {type:'float', required:true},
+    discountPg4: {type:'float', required:true},
+    discountPg5: {type:'float', required:true},
+
     Product:{
       model:'Product'
     },
