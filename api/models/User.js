@@ -89,6 +89,11 @@ module.exports = {
 
         brokerCode:{type:'string'},
         brokerName:{type:'string'},
+        projectUser: {
+          type: 'boolean',
+          required: true,
+          defaultsTo: false
+        },
 
         //relations - permissions
         companies: {
