@@ -76,7 +76,7 @@ module.exports = {
     });
   },
 
-  countSellers: function(req, res) {
+  countSellersGeneral: function(req, res) {
     var form    = req.allParams();
     var company = form.company;
     Role
@@ -84,7 +84,28 @@ module.exports = {
       .then(function(role) {
         return User.count({
           role: role.id,
-          companyMain: company
+          companyMain: company,
+          projectUser: false
+        })
+      })
+      .then(function(sellers) {
+        return res.json(sellers);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  },
+
+  countSellersProject: function(req, res) {
+    var form    = req.allParams();
+    var company = form.company;
+    Role
+      .findOne({name: 'seller'})
+      .then(function(role) {
+        return User.count({
+          role: role.id,
+          companyMain: company,
+          projectUser: true
         })
       })
       .then(function(sellers) {
@@ -94,5 +115,6 @@ module.exports = {
         return res.negotiate(err);
       });
   }
+
 };
 

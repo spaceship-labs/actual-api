@@ -15,6 +15,16 @@ module.exports = {
       type: 'integer',
       required: true
     },
+    goalStore: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0,
+    },
+    sellersStore: {
+      type: 'integer',
+      required: true,
+      defaultsTo: 0,
+    },
     date: {
       type: 'date',
       required: true
@@ -23,6 +33,40 @@ module.exports = {
       model: 'company',
       required: true
     }
+  },
+  beforeCreate: function(val, cb){
+    var q = {
+      company: val.company,
+      date: val.date
+    };
+    Goal.findOne(q).exec(function(err, c) {
+      if (err) {
+        return cb(err);
+      }
+      if (c) {
+        return cb('No pueden haber 2 reglas en la misma tienda, en la misma fecha');
+      }
+      cb();
+    });
+  },
+  beforeUpdate: function(val, cb) {
+    console.log(val);
+    var q = {
+      id: {'!': val.id},
+      company: val.company,
+      date: val.date
+    };
+    Goal.findOne(q).exec(function(err, c) {
+      if (err) {
+        return cb(err);
+      }
+      console.log(c);
+      if (c) {
+        return cb('No pueden haber 2 reglas en la misma tienda, en la misma fecha');
+      }
+      cb();
+    });
+
   }
 };
 
