@@ -15,6 +15,16 @@ module.exports = {
       type: 'integer',
       required: true
     },
+    goalStore: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0,
+    },
+    sellersStore: {
+      type: 'integer',
+      required: true,
+      defaultsTo: 0,
+    },
     date: {
       type: 'date',
       required: true
