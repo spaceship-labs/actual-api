@@ -88,9 +88,10 @@ function updateContact(cardCode, contactIndex, form){
 
 function createContact(cardCode, form){
   return new Promise(function(resolve, reject){
-    var path = 'PersonContact(\''+  cardCode +'\')';
+    var path = 'PersonContact';
     form = _.omit(form, _.isUndefined);
     form.Address = form.Address.substring(0,100);
+    form.CardCode = cardCode;
     var endPoint = buildUrl(baseUrl,{
       path: path,
       queryParams: form

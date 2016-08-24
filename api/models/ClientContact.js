@@ -25,7 +25,7 @@ module.exports = {
     },
 
     //SAP FIELDS
-    CntCtCode:{type:'integer'},
+    CntctCode:{type:'integer'},
     CardCode:{type:'string'},
     Name:{
       type:'string'

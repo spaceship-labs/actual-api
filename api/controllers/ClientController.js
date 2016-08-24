@@ -128,12 +128,13 @@ module.exports = {
         return SapService.updateContact(cardCode ,contactIndex, form);
       })
       .then(function(updatedSap){
-        sails.log.info('termino updatedSap');
+        //sails.log.info('termino updatedSap');
+        //sails.log.info('contact code: ' + contactCode);
         return ClientContact.update({CntctCode: contactCode}, form);
       })
       .then(function(updatedApp){
-        sails.log.info('termino update app');
-        sails.log.info(updatedApp);
+        //sails.log.info('termino update app');
+        //sails.log.info(updatedApp);
         res.json(updatedApp);
       })
       .catch(function(err){
@@ -147,14 +148,19 @@ module.exports = {
     var cardCode = form.CardCode;
     form = mapContactFields(form);
     SapService.createContact(cardCode, form)
-      .then(function(createdSap){
-        sails.log.info('createdSap');
-        sails.log.info(createdSap);
+      .then(function(result){
+        result = JSON.parse(result);
+        //sails.log.info('result');
+        //sails.log.info(result);
+        if(!result.value){
+          return {err: result};
+        }
+        form.CntctCode = result.value;
         return ClientContact.create(form);
       })
       .then(function(createdApp){
-        sails.log.info('createdApp');
-        sails.log.info(createdApp);
+        //sails.log.info('createdApp');
+        //sails.log.info(createdApp);
         res.json(createdApp);
       })
       .catch(function(err){
@@ -223,6 +229,11 @@ function mapContactFields(fields){
   fields.Cellolar = fields.mobilePhone || fields.Cellolar;
   if(fields.mobilePhone && fields.mobileDialCode){
     fields.Cellolar = fields.mobileDialCode + fields.mobilePhone;
+  }
+
+  fields.Name = fields.Name || fields.FirstName;
+  if(fields.LastName){
+    fields.Name = fields.FirstName + ' ' + fields.LastName;
   }
 
   //fields.Address = fields.Address;
