@@ -48,7 +48,8 @@ module.exports = {
     },
 
     Stores:{
-      collection:'Company',
+      collection:'store',
+      //collection:'Company',
       via:'ProductsPackages'
     }
 

@@ -41,7 +41,7 @@ function createClient(form){
         if(user.SlpCode && user.SlpCode.length > 0){
           form.SlpCode = user.SlpCode[0].id || -1;
         }
-        return getSeriesNum(user.companyActive)
+        return getSeriesNum(user.activeStore)
       })
       .then(function(series){
         form.Series = series;
@@ -137,10 +137,10 @@ function updateFiscalInfo(cardcode, form){
   });
 }
 
-function getSeriesNum(companyId){
-  return Company.findOne({id:companyId})
-    .then(function(company){
-      return mapWhsSeries(company.WhsName);
+function getSeriesNum(storeId){
+  return Store.findOne({id:storeId}).populate('Warehouse')
+    .then(function(store){
+      return mapWhsSeries(store.Warehouse.WhsName);
     })
     .catch(function(err){
       console.log(err);

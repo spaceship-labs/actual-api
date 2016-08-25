@@ -91,6 +91,11 @@ module.exports = {
     },
 
     //relations
+    Stores:{
+      collection:'store',
+      via:'Warehouse'
+    }
+    /*
     users: {
       collection: 'user',
       via: 'companies'
@@ -115,6 +120,7 @@ module.exports = {
       collection:'ProductGroup',
       via:'Stores'
     }
+    */
   }
 };
 

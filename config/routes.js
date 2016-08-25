@@ -569,18 +569,23 @@ module.exports.routes = {
     action:'syncProducts'
   },
 
+  '/store/find':{
+    controller:'store',
+    action:'find'
+  },
+
   '/store/:id/promotions':{
-    controller:'company',
+    controller:'store',
     action:'getPromosByStore'
   },
 
   '/store/:id/packages':{
-    controller:'company',
+    controller:'store',
     action:'getPackagesByStore'
   },
 
   '/store/:id/sellers':{
-    controller:'company',
+    controller:'store',
     action:'getSellersByStore'
   },
 

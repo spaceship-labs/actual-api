@@ -98,8 +98,8 @@ module.exports = {
         return created;
       })
       .then(function(result){
-        sails.log.info('result');
-        sails.log.info(result);
+        //sails.log.info('result');
+        //sails.log.info(result);
         res.json(createdContact);
       })
       .catch(function(err){
@@ -178,8 +178,8 @@ module.exports = {
         return ClientContact.create(form);
       })
       .then(function(createdContact){
-        sails.log.info('createdContact');
-        sails.log.info(createdContact);
+        //sails.log.info('createdContact');
+        //sails.log.info(createdContact);
         res.json(createdContact);
       })
       .catch(function(err){
@@ -193,8 +193,8 @@ module.exports = {
     var CardCode = form.CardCode;
     var id = form.id;
     delete form.AdresType;
-    sails.log.info('form');
-    sails.log.info(form);
+    //sails.log.info('form');
+    //sails.log.info(form);
     SapService.updateFiscalInfo(CardCode, form)
       .then(function(result){
         result = JSON.parse(result);
@@ -276,8 +276,8 @@ function mapContactFields(fields){
       fields.Address += af.label + ': ' + fields[key] + ', ';
     }
   }
-  sails.log.info('fields addressFields');
-  sails.log.info(fields.Address);
+  //sails.log.info('fields addressFields');
+  //sails.log.info(fields.Address);
   return fields;
 }
 

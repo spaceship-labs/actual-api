@@ -24,9 +24,6 @@ module.exports = {
         lastLogin : {
           type: 'datetime'
         },
-        company: {
-            type:'string'
-        },
         SlpCode: {
           collection: 'Seller',
           via: 'User'
@@ -96,15 +93,15 @@ module.exports = {
         },
 
         //relations - permissions
-        companies: {
-          collection: 'company',
+        Stores: {
+          collection: 'store',
           via: 'users'
         },
-        companyMain: {
-          model: 'company'
+        mainStore: {
+          model: 'store'
         },
-        companyActive: {
-          model: 'company'
+        activeStore: {
+          model: 'store'
         },
         permissions: {
           collection: 'permission',

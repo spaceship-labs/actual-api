@@ -68,8 +68,8 @@ function getDetailTotals(detail, opts){
       var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
       var subtotal = qty * unitPrice;
       var total = qty * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
-      sails.log.info('mainPromo:');
-      sails.log.info(mainPromo);
+      //sails.log.info('mainPromo:');
+      //sails.log.info(mainPromo);
       var detailTotals = {
         id: detail.id,
         unitPrice: unitPrice,
@@ -98,7 +98,7 @@ function getPromosByStore(storeId){
     startDate: {'<=': currentDate},
     endDate: {'>=': currentDate},
   };
-  return Company.findOne({id:storeId}).populate('Promotions', queryPromo)
+  return Store.findOne({id:storeId}).populate('Promotions', queryPromo)
     .then(function(store){
       return store.Promotions;
     })

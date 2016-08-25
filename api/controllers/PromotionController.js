@@ -32,7 +32,7 @@ module.exports = {
       .populate('FilterValues')
       .populate('CustomBrands')
       .populate('Groups')
-      .populate('Companies')
+      .populate('Stores')
       .populate('Categories')
       .populate('Products')
       .then(function(promo){

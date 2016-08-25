@@ -84,7 +84,7 @@ module.exports = {
     var user = false;
       User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
-        opts.currentStore = u.companyActive;
+        opts.currentStore = u.activeStore;
         return Prices.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
@@ -123,7 +123,7 @@ module.exports = {
           SlpCode: SlpCode,
           Store: opts.currentStore,
           Manager: quotationBase.Manager
-          //Store: user.companyActive
+          //Store: user.activeStore
         };
 
         var minPaidPercentage = quotationBase.minPaidPercentage || 100;

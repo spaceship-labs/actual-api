@@ -82,10 +82,16 @@ module.exports = {
       collection:'Product',
       via:'Promotions'
     },
+    Stores:{
+      collection:'store',
+      via:'Promotions'
+    }
+    /*
     Companies:{
       collection:'company',
       via:'Promotions'
     }
+    */
 
   }
 };

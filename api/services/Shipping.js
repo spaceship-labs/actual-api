@@ -5,11 +5,11 @@ module.exports = {
   product: productShipping
 };
 
-function productShipping(productCode, companyId) {
+function productShipping(productCode, warehouseId) {
   return Promise
     .all([
-      productAvailable(productCode, companyId),
-      productPurchased(productCode, companyId)
+      productAvailable(productCode, warehouseId),
+      productPurchased(productCode, warehouseId)
     ])
     .spread(function(available, purchased) {
       var products = available
@@ -30,9 +30,9 @@ function productShipping(productCode, companyId) {
     });
 }
 
-function productAvailable(productCode, companyId) {
+function productAvailable(productCode, warehouseId) {
   return Company
-    .findOne(companyId)
+    .findOne(warehouseId)
     .then(function(company) {
       return Delivery.find({ToCode: company.WhsCode, Active:'Y'});
     })
@@ -65,15 +65,15 @@ function productAvailable(productCode, companyId) {
           available: product.Available,
           days: days,
           date: date,
-          company: companyId
+          company: warehouseId
         };
       });
     });
 }
 
-function productPurchased(productCode, companyId) {
+function productPurchased(productCode, warehouseId) {
   return Company
-    .findOne(companyId)
+    .findOne(warehouseId)
     .then(function(company) {
       return Delivery.find({ToCode: company.WhsCode, Active:'Y'});
     })
@@ -106,7 +106,7 @@ function productPurchased(productCode, companyId) {
           available: product.OpenCreQty,
           days: days,
           date: date,
-          company: companyId
+          company: warehouseId
         };
       });
     });

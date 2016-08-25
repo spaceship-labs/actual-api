@@ -44,7 +44,8 @@ module.exports = {
       enum: ['paid','pending','cancelled']
     },
     Store:{
-      model:'company'
+      model:'store'
+      //model:'company'
     },
     Order:{
       model:'Order'

@@ -9,10 +9,10 @@ module.exports = {
       paymentGroup:1,
       updateDetails: true,
     };
-    User.findOne({select:['companyActive'], id: req.user.id})
+    User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
-        opts.currentStore = user.companyActive;
-        form.Store = user.companyActive;
+        opts.currentStore = user.activeStore;
+        form.Store = user.activeStore;
         return Quotation.create(form);
       })
       .then(function(created){
@@ -42,10 +42,10 @@ module.exports = {
     if(form.Details){
       form.Details = formatProductsIds(form.Details);
     }
-    User.findOne({select:['companyActive'], id: req.user.id})
+    User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
-        opts.currentStore = user.companyActive;
-        form.Store = user.companyActive;
+        opts.currentStore = user.activeStore;
+        form.Store = user.activeStore;
         return Quotation.update({id:id}, form)
       })
       .then(function(){
@@ -154,9 +154,9 @@ module.exports = {
       paymentGroup:1,
       updateDetails: true,
     };
-    User.findOne({select:['companyActive'], id: req.user.id})
+    User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
-        opts.currentStore = user.companyActive;
+        opts.currentStore = user.activeStore;
         return QuotationDetail.create(form);
       })
       .then(function(created){
@@ -185,9 +185,9 @@ module.exports = {
       paymentGroup:1,
       updateDetails: true,
     };
-    User.findOne({select:['companyActive'], id: req.user.id})
+    User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
-        opts.currentStore = user.companyActive;
+        opts.currentStore = user.activeStore;
         return QuotationDetail.destroy({id:id});
       })
       .then(function(){
@@ -246,9 +246,9 @@ module.exports = {
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
     }
-    User.findOne({select:['companyActive'], id: req.user.id})
+    User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
-        form.Store = user.companyActive;
+        form.Store = user.activeStore;
         form.User = user.id;
         return Quotation.findOne(form.Quotation).populate('Client');
       })
@@ -305,9 +305,9 @@ module.exports = {
       update: false,
       paymentGroup: paymentGroup,
     };
-    User.findOne({select:['companyActive'], id: req.user.id})
+    User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
-        params.currentStore = user.companyActive;
+        params.currentStore = user.activeStore;
         return Prices.getQuotationTotals(id, params);
       })
       .then(function(totals){

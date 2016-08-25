@@ -9,8 +9,11 @@ module.exports = {
   product: function(req, res) {
     var form = req.allParams();
     var productCode = form.productCode;
-    var companyCode = form.companyCode;
-    Shipping.product(productCode, companyCode)
+    var storeId = form.storeId;
+    Store.findOne({id:storeId}).populate('Warehouse')
+      .then(function(store){
+        return Shipping.product(productCode, store.Warehouse.id)
+      })
       .then(function(shipping) {
         return res.json(shipping);
       })

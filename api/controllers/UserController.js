@@ -25,8 +25,8 @@ module.exports = {
     var id = form.id;
     User.findOne({id: id})
       .populate('permissions')
-      .populate('companies')
-      .populate('companyMain')
+      .populate('Stores')
+      .populate('mainStore')
       .populate('role')
       .populate('SlpCode')
       .exec(function(err, result){
@@ -162,15 +162,15 @@ module.exports = {
       });
   },
 
-  companies: function(req, res) {
+  stores: function(req, res) {
     var form  = req.allParams();
     var email = form.email;
     User.findOne({email: email})
-      .populate('companies')
+      .populate('Stores')
       .exec(function(err, user) {
         if (err) {return res.negotiate(err);}
-        var companies = user && user.companies || [];
-        return res.json(companies);
+        var stores = user && user.Stores || [];
+        return res.json(stores);
       });
 
   }

@@ -32,7 +32,8 @@ module.exports = {
       via:'Quotation'
     },
     Store:{
-      model:'company'
+      model:'store'
+      //model:'company'
     },
     Manager:{
       model:'user'

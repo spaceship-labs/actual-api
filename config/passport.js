@@ -24,7 +24,7 @@ var JWT_STRATEGY_CONFIG = {
 function _onLocalStrategyAuth(email, password, next){
   User.findOne({email: email})
     .populate('role')
-    .populate('companies')
+    .populate('Stores')
     .populate('SlpCode')
     .exec(function(error, user){
       if (error) return next(error, false, {});

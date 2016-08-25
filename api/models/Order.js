@@ -13,6 +13,7 @@ module.exports = {
     discount:{type:'float'},
     currency:{type:'string'},
     paymentGroup:{type:'integer'},
+    WhsCode:{type:'string'},
     status:{
       type:'string',
       enum:['lost','pending','on-delivery','minimum-paid','paid']
@@ -45,7 +46,8 @@ module.exports = {
       model:'ClientContact',
     },
     Store:{
-      model:'company',
+      model:'store'
+      //model:'company',
       //required: 'true'
     },
 

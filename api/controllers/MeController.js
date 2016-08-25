@@ -16,11 +16,11 @@ module.exports = {
       return res.json(user[0]);
     });
   },
-  companyActive: function(req, res) {
+  activeStore: function(req, res) {
     var user = req.user;
-    User.findOne(user.id).populate('companyActive').exec(function(err, user){
+    User.findOne(user.id).populate('activeStore').exec(function(err, user){
       if (err) {return res.negotiate(err);}
-      return res.json(user.companyActive);
+      return res.json(user.activeStore);
     });
   },
   generateCashReport: function(req, res){

@@ -20,12 +20,12 @@ function _onPassportAuth(req, res, error, user, info){
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
   /*Company Active*/
   var form          = req.allParams();
-  var companyActive = form.companyActive || false;
+  var activeStore = form.activeStore || false;
   var updateParams = {
     lastLogin : new Date()
   };
-  if(companyActive){
-    updateParams.companyActive = companyActive;
+  if(activeStore){
+    updateParams.activeStore = activeStore;
   }
   User.update(user.id, updateParams)
     .then(function(users) {
