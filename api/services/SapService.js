@@ -50,10 +50,14 @@ function createClient(form){
           path: path,
           queryParams: form
         });
+        sails.log.info('endPoint');
+        sails.log.info(endPoint);
         request.post( endPoint, function(err, response, body){
           if(err){
             reject(err);
           }else{
+            sails.log.info('body');
+            sails.log.info(body);
             resolve(body);
           }
         });

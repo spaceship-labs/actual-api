@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var Promise = require('bluebird');
 
 module.exports = {
   find: function(req, res){
@@ -58,9 +59,10 @@ module.exports = {
   },
 
   create: function(req, res) {
-    var form       = req.params.all();
-    var email      = form.email;
-    var actualMail =  /@actualgroup.com$/
+    var form           = req.params.all();
+    var email          = form.email;
+    var actualMail     =  /@actualgroup.com$/;
+    var createdContact = false;
     if (email && email.match(actualMail)) {
       return res.badRequest({
         error: 'user could not be created with an employee\'s mail'
@@ -68,6 +70,10 @@ module.exports = {
     }
     form = mapClientFields(form);
     form.User = req.user.id;
+    var contacts = form.contacts || [];
+    contacts = contacts.filter(function(c){
+      return !_.isUndefined(c.FirstName);
+    })
     SapService.createClient(form)
       .then(function(result){
         result = JSON.parse(result);
@@ -81,7 +87,20 @@ module.exports = {
         if(created.err){
           return res.negotiate(created.err);
         }
-        return res.json(created);
+        createdContact = created;
+        if(contacts && contacts.length > 0){
+          contacts = contacts.map(function(c){
+            c.CardCode = createdContact.CardCode;
+            return c;
+          });
+          return Promise.each(contacts, createContactPromise);
+        }
+        return created;
+      })
+      .then(function(result){
+        sails.log.info('result');
+        sails.log.info(result);
+        res.json(createdContact);
       })
       .catch(function(err){
         console.log(err);
@@ -158,10 +177,10 @@ module.exports = {
         form.CntctCode = result.value;
         return ClientContact.create(form);
       })
-      .then(function(createdApp){
-        //sails.log.info('createdApp');
-        //sails.log.info(createdApp);
-        res.json(createdApp);
+      .then(function(createdContact){
+        sails.log.info('createdContact');
+        sails.log.info(createdContact);
+        res.json(createdContact);
       })
       .catch(function(err){
         console.log(err);
@@ -270,4 +289,25 @@ function getContactIndex(contacts, contactCode){
     return a - b;
   });
   return contactCodes.indexOf(contactCode);
+}
+
+function createContactPromise(params){
+  var cardCode = params.CardCode;
+  params = mapContactFields(params);
+  return SapService.createContact(cardCode, params)
+    .then(function(result){
+      result = JSON.parse(result);
+      if(!result.value){
+        return {err: result};
+      }
+      params.CntctCode = result.value;
+      return ClientContact.create(params);
+    })
+    .then(function(createdApp){
+      return createdApp;
+    })
+    .catch(function(err){
+      console.log('err createContactPromise');
+      console.log(err);
+    });
 }
