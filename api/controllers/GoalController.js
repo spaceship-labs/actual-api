@@ -10,7 +10,7 @@ module.exports = {
     var form = req.allParams();
     var model = 'goal';
     var searchFields   = ['goal', 'sellers', 'date'];
-    var populateFields = ['company'];
+    var populateFields = ['store'];
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){

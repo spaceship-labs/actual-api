@@ -15,28 +15,18 @@ module.exports = {
       type: 'integer',
       required: true
     },
-    goalStore: {
-      type: 'float',
-      required: true,
-      defaultsTo: 0,
-    },
-    sellersStore: {
-      type: 'integer',
-      required: true,
-      defaultsTo: 0,
-    },
     date: {
       type: 'date',
       required: true
     },
-    company: {
-      model: 'company',
+    store: {
+      model: 'store',
       required: true
     }
   },
   beforeCreate: function(val, cb){
     var q = {
-      company: val.company,
+      store: val.store,
       date: val.date
     };
     Goal.findOne(q).exec(function(err, c) {
@@ -50,10 +40,9 @@ module.exports = {
     });
   },
   beforeUpdate: function(val, cb) {
-    console.log(val);
     var q = {
       id: {'!': val.id},
-      company: val.company,
+      store: val.store,
       date: val.date
     };
     Goal.findOne(q).exec(function(err, c) {
@@ -66,7 +55,6 @@ module.exports = {
       }
       cb();
     });
-
   }
 };
 
