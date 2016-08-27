@@ -69,17 +69,16 @@ module.exports = {
     });
   },
 
-  countSellersGeneral: function(req, res) {
-    var form    = req.allParams();
-    var company = form.company;
+  countSellers: function(req, res) {
+    var form  = req.allParams();
+    var store = form.store;
     Role
       .findOne({name: 'seller'})
       .then(function(role) {
         return User.count({
           role: role.id,
-          MainStore: company,
-          projectUser: false
-        })
+          mainStore: store
+        });
       })
       .then(function(sellers) {
         return res.json(sellers);
@@ -88,25 +87,4 @@ module.exports = {
         return res.negotiate(err);
       });
   },
-
-  countSellersProject: function(req, res) {
-    var form    = req.allParams();
-    var store = form.store;
-    Role
-      .findOne({name: 'seller'})
-      .then(function(role) {
-        return User.count({
-          role: role.id,
-          MainStore: store,
-          projectUser: true
-        })
-      })
-      .then(function(sellers) {
-        return res.json(sellers);
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  }
-
 };
