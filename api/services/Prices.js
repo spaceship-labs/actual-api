@@ -68,6 +68,7 @@ function getDetailTotals(detail, opts){
       var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
       var subtotal = qty * unitPrice;
       var total = qty * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
+      var discount = total - subtotal;
       //sails.log.info('mainPromo:');
       //sails.log.info(mainPromo);
       var detailTotals = {
@@ -75,11 +76,12 @@ function getDetailTotals(detail, opts){
         unitPrice: unitPrice,
         Promotion: promo, //Promotion id
         discountPercent: discountPercent,
-        discountKey: discountKey,
+        discountKey: discountKey, //Payment group discountKey
         subtotal: subtotal,
         total:total,
         paymentGroup: opts.paymentGroup,
         quantity: qty,
+        discount: discount
       }
       return detailTotals;
       //resolve(detailTotals);

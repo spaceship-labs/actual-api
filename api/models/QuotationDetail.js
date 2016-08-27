@@ -4,10 +4,10 @@ module.exports = {
   tableName: 'QuotationDetail',
   attributes: {
     quantity: 'integer',
-    discount: 'float',
+    discount: 'float', //total discount
     subtotal: 'float',
     total: 'float',
-    discountPercent: 'float',
+    discountPercent: 'float', //by unit
     paymentGroup: 'integer',
     unitPrice: 'float',
     Promotion:{

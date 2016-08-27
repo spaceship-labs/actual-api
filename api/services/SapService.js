@@ -5,10 +5,11 @@ var buildUrl = require('build-url');
 var _ = require('underscore');
 
 module.exports = {
-  createClient: createClient,
-  createContact: createContact,
-  updateClient: updateClient,
-  updateContact: updateContact,
+  createClient    : createClient,
+  createContact   : createContact,
+  createFiscalInfo: createFiscalInfo,
+  updateClient    : updateClient,
+  updateContact   : updateContact,
   updateFiscalInfo: updateFiscalInfo
 };
 
@@ -34,9 +35,10 @@ function createClient(form){
   return new Promise(function(resolve, reject){
     var path = 'Contact';
     form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
-    form.LicTradNum = 'XXAX010101000';
+    form.LicTradNum = form.LicTradNum || 'XXAX010101000';
     User.findOne({id:form.User}).populate('SlpCode')
       .then(function(user){
+        //Assigns seller code from SAP
         form.SlpCode = -1;
         if(user.SlpCode && user.SlpCode.length > 0){
           form.SlpCode = user.SlpCode[0].id || -1;
@@ -44,6 +46,7 @@ function createClient(form){
         return getSeriesNum(user.activeStore)
       })
       .then(function(series){
+        //Assigns series number depending on activeStore
         form.Series = series;
         form = _.omit(form, _.isUndefined);
         var endPoint = buildUrl(baseUrl, {
@@ -136,6 +139,30 @@ function updateFiscalInfo(cardcode, form){
     });
   });
 }
+
+function createFiscalInfo(cardcode, form){
+  return new Promise(function(resolve, reject){
+    var path = 'AddressContact';
+    form = _.omit(form, _.isUndefined);
+    form.CardCode = cardcode;
+    form.Address = form.companyName;
+    var endPoint = buildUrl(baseUrl, {
+      path: path,
+      queryParams: form
+    });
+    sails.log.info('createFiscalInfo');
+    sails.log.info(endPoint);
+    request.post( endPoint, function(err, response, body){
+      if(err){
+        return reject(err);
+      }
+      sails.log.info('body');
+      sails.log.info(body);
+      resolve(body);
+    });
+  });
+}
+
 
 function getSeriesNum(storeId){
   return Store.findOne({id:storeId}).populate('Warehouse')
