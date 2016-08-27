@@ -34,8 +34,16 @@ module.exports = {
   create: function(req, res) {
     var form = req.allParams();
     var goal = form.goal;
-    Goal
-      .create(goal)
+    exists(goal)
+      .then(function(entries) {
+        if (entries) {
+          return Promise.reject({
+            originalError: 'No pueden existir reglas duplicadas. Corrija las reglas y reintente',
+            entries: entries
+          });
+        }
+        return Goal.create(goal);
+      })
       .then(function(goal) {
         return res.json(goal);
       })
@@ -58,3 +66,16 @@ module.exports = {
   }
 };
 
+function exists(goals) {
+  var query = goals.map(function(goal) {
+    return {
+      store: goal.store,
+      date: goal.date
+    };
+  });
+  return Goal
+    .find({or: query})
+    .then(function(goals) {
+      return goals.length > 0 && goals;
+    });
+}
