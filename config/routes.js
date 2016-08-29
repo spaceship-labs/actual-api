@@ -374,9 +374,9 @@ module.exports.routes = {
     action:'createContact'
   },
 
-  '/client/update/fiscalinfo/:id/:CardCode':{
+  '/client/update/fiscaladdress/:id/:CardCode':{
     controller:'client',
-    action:'updateFiscalInfo'
+    action:'updateFiscalAddress'
   },
 
   '/quotation/create':{

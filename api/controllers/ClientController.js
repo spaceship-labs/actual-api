@@ -1,29 +1,33 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
+var ADDRESS_TYPE = 'S';
 
 module.exports = {
   find: function(req, res){
-    var form = req.params.all();
-    var model = 'client';
-    var searchFields = ['id','CardName','CardCode','firstName','lastName','E_Mail','phone'];
-    var selectFields =[];
+    var form           = req.params.all();
+    var model          = 'client';
+    var searchFields   = ['id','CardName','CardCode','firstName','lastName','E_Mail','phone'];
+    var selectFields   =[];
     var populateFields = [];
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+    Common.find(model, form, searchFields, populateFields, selectFields)
+    .then(function(result){
       res.ok(result);
-    },function(err){
+    })
+    .catch(function(err){
       console.log(err);
-      res.notFound();
+      res.negotiate(err);
     })
   },
 
   findBySeller: function(req, res){
-    var form = req.params.all();
-    var model = 'client';
-    var searchFields = ['CardCode','CardName'];
-    var selectFields =[];
-    var populateFields = ['Quotations'];
-    form.filters = {SlpCode: form.seller};
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+    var form            = req.params.all();
+    var model           = 'client';
+    var searchFields    = ['CardCode','CardName'];
+    var selectFields    = [];
+    var populateFields  = ['Quotations'];
+    form.filters        = {SlpCode: form.seller};
+    Common.find(model, form, searchFields, populateFields, selectFields)
+    .then(function(result){
       res.ok(result);
     },function(err){
       console.log(err);
@@ -32,8 +36,8 @@ module.exports = {
   },
 
   findById: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
+    var form        = req.params.all();
+    var id          = form.id;
     var clientFound = false;
     Client.findOne({id:id}).then(function(client){
       if(client){
@@ -48,10 +52,10 @@ module.exports = {
       }
       clientFound = clientFound.toObject();
       clientFound.Contacts = contacts;
-      return FiscalInfo.find({CardCode: clientFound.CardCode, AdresType:'S'});
+      return FiscalAddress.find({CardCode: clientFound.CardCode, AdresType: ADDRESS_TYPE});
     })
-    .then(function(fiscalInfo){
-      clientFound.FiscalInfo = fiscalInfo;
+    .then(function(fiscalAddresses){
+      clientFound.FiscalAddresses = fiscalAddresses;
       res.json(clientFound);
     })
     .catch(function(err){
@@ -71,14 +75,10 @@ module.exports = {
         error: 'user could not be created with an employee\'s mail'
       });
     }
-    form            = mapClientFields(form);
-    form.User       = req.user.id;
-    var contacts    = (form.contacts || []).filter(function(c){
-      return !_.isUndefined(c.FirstName);
-    });
-    var fiscalData  = (form.fiscalData || []).filter(function(f){
-      return !_.isUndefined(f.companyName);
-    });
+    form                 = mapClientFields(form);
+    form.User            = req.user.id;
+    var contacts         = filterContacts(form.contacts);
+    var fiscalAddresses  = filteredAddresses(form.fiscalAddresses);
 
     SapService.createClient(form)
       .then(function(result){
@@ -91,9 +91,6 @@ module.exports = {
         return Client.create(form);
       })
       .then(function(created){
-        if(created.err){
-          return res.negotiate(created.err);
-        }
         createdContact = created;
         if(contacts && contacts.length > 0){
           contacts = contacts.map(function(c){
@@ -105,12 +102,12 @@ module.exports = {
         return created;
       })
       .then(function(result){
-        if(fiscalData && fiscalData.length > 0){
-          fiscalData = fiscalData.map(function(f){
+        if(fiscalAddresses && fiscalAddresses.length > 0){
+          fiscalAddresses = fiscalAddresses.map(function(f){
             f.CardCode = createdContact.CardCode;
             return f;
           });
-          return Promise.each(fiscalData, createFiscalInfoPromise);
+          return Promise.each(fiscalAddresses, createFiscalAddressPromise);
         }
         return result;
       })
@@ -200,24 +197,21 @@ module.exports = {
       });
   },
 
-  updateFiscalInfo: function(req, res){
+  updateFiscalAddress: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
     var id = form.id;
     delete form.AdresType;
-    SapService.updateFiscalInfo(CardCode, form)
+    SapService.updateFiscalAddress(CardCode, form)
       .then(function(result){
         result = JSON.parse(result);
         if(!result.value){
           var err = result.value || 'Error al actualizar direccion fiscal';
           return Promise.reject(err);
         }
-        return FiscalInfo.update({CardCode:CardCode}, form);
+        return FiscalAddress.update({CardCode:CardCode}, form);
       })
       .then(function(updated){
-        if(updated.err){
-          return res.negotiate(err);
-        }
         return res.json(updated);
       })
       .catch(function(err){
@@ -304,12 +298,12 @@ function createContactPromise(params){
     });
 }
 
-function createFiscalInfoPromise(params){
+function createFiscalAddressPromise(params){
   var cardCode = params.CardCode;
-  params.AdresType = 'S';
-  return SapService.createFiscalInfo(cardCode,params)
+  params.AdresType = ADDRESS_TYPE;
+  return SapService.createFiscalAddress(cardCode,params)
     .then(function(result){
-      return FiscalInfo.create(params);
+      return FiscalAddress.create(params);
     })
     .then(function(createdApp){
       return createdApp;
@@ -324,4 +318,17 @@ function isValidCardCode(cardCode){
     return false;
   }
   return cardCode.length <= 15;
+}
+
+function filterContacts(contacts){
+  var filteredContacts = (contacts || []).filter(function(contact){
+    return !_.isUndefined(contact.FirstName);
+  });
+  return filteredContacts;
+}
+
+function filterFiscalAddresses(addresses){
+  var filteredAddresses = (addresses || []).filter(function(fiscalAddress){
+    return !_.isUndefined(fiscalAddress.companyName);
+  });  
 }

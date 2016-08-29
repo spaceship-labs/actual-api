@@ -18,7 +18,8 @@ var passport = require('passport');
 function _onPassportAuth(req, res, error, user, info){
   if(error) return res.serverError(error);
   if(!user) return res.unauthorized(null, info && info.code, info && info.message);
-  /*Company Active*/
+  
+  /*Active store*/
   var form          = req.allParams();
   var activeStore = form.activeStore || false;
   var updateParams = {
