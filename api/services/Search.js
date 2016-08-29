@@ -18,7 +18,9 @@ module.exports = {
 };
 
 function queryIdsProducts(query, idProducts) {
-  return assign(query, {id: idProducts});
+  return assign(query, {
+    id: idProducts
+  });
 }
 
 function queryPrice(query, minPrice, maxPrice) {
@@ -26,15 +28,16 @@ function queryPrice(query, minPrice, maxPrice) {
     '>=': minPrice || 0,
     '<=': maxPrice || Infinity
   };
-  return assign(query, {Price: price});
+  return assign(query, {
+    Price: price
+  });
 }
 
-function applyFilters(query, filters){
-  filters.forEach(function(filter){
-    if(filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0 ){
+function applyFilters(query, filters) {
+  filters.forEach(function(filter) {
+    if (filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0) {
       query[filter.key] = filter.value;
-    }
-    else if(filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)  ){
+    } else if (filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)) {
       query[filter.key] = filter.value;
     }
   });
@@ -64,8 +67,6 @@ function applyOrFilters(query, filters){
       query.$and = and;
     }
   }
-  //sails.log.info('query applyOrFilters');
-  //sails.log.info(JSON.stringify(query));
   return query;
 }
 
@@ -81,13 +82,17 @@ function queryTerms(query, terms) {
     'DetailedColor'
   ];
   var filter = searchFields.reduce(function(acum, sf){
+    
     var and = terms.reduce(function(acum, term){
       var fname = {};
       fname[sf] = {contains: term};
       return acum.concat(fname);
     }, []);
-    return acum.concat({$and: and})
+
+    return acum.concat({$and: and});
+
   }, []);
+
   return assign(query, {$or: filter});
 }
 
@@ -104,20 +109,30 @@ function getProductsByCategory(categoryQuery) {
     });
 }
 
-function getProductsByCategories(categoriesIds) {
+function getProductsByCategories(categoriesIds, options) {
+  var productsIds = [];
+  options = options || {};
   return Product_ProductCategory.find({productCategory: categoriesIds})
     .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
-      relations = relations.filter(function(relation) {
-        return _.isEqual(categoriesIds, relation[1]);
-      });
-      return relations.map(function(relation) {
-        return relation[0];
-      });
+      if(options.intersections){
+        relations = relations.reduce(function(prodMap, current){
+          prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
+          return prodMap;
+        }, {});
+        relations = hashToArray(relations);
+        relations = relations.filter(function(relation) {
+          return _.isEqual(categoriesIds, relation[1]);
+        });
+        productsIds = relations.map(function(relation) {
+          return relation[0];
+        });
+
+      }else{ 
+        productsIds = relations.map(function(relation){
+          return relation.product; //Product id
+        });
+      }
+      return productsIds;
     });
 }
 

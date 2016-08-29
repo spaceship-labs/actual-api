@@ -22,14 +22,12 @@ module.exports = {
         if (filtervalues.length != 0) {
           query = Search.queryIdsProducts(query, idProducts);
         }
-
         var currentDate = new Date();
         var queryPromo = {
           //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
           startDate: {'<=': currentDate},
           endDate: {'>=': currentDate},
         };
-
         return [
           Product.count(query),
           Product.find(query)
@@ -105,14 +103,13 @@ module.exports = {
   },
 
   advancedSearch: function(req, res) {
-    var form         = req.params.all();
-    var categories   = [].concat(form.categories);
-    var filtervalues = [].concat(form.filtervalues);
-    var groups       = [].concat(form.groups);
-    var sas          = [].concat(form.sas);
-    var noIcons      = form.noIcons || false;
+    var form          = req.params.all();
+    var categories    = [].concat(form.categories);
+    var filtervalues  = [].concat(form.filtervalues);
+    var groups        = [].concat(form.groups);
+    var sas           = [].concat(form.sas);
+    var noIcons       = form.noIcons || false;
     var applyPopulate = form.applyPopulate || true;
-
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -130,8 +127,6 @@ module.exports = {
       {key:'OnKids', value: form.OnKids},
       {key:'OnAmueble', value: form.OnAmueble},
       {key:'ItemCode', value: form.itemCode}
-      //{key:'CustomBrand', value: form.customBrands },
-      //{key:'U_Empresa', value: form.U_Empresa}
     ];
 
     var orFilters = [
@@ -141,7 +136,11 @@ module.exports = {
 
     Search.getProductsByCategories(categories)
       .then(function(catprods) {
-        return [catprods, Search.getProductsByFilterValue(filtervalues), Search.getProductsByGroup(groups)];
+        return [
+          catprods, 
+          Search.getProductsByFilterValue(filtervalues), 
+          Search.getProductsByGroup(groups)
+        ];
       })
       .spread(function(catprods, filterprods, groupsprods) {
         return Search.getMultiIntersection([catprods, filterprods, groupsprods]);
@@ -185,31 +184,3 @@ module.exports = {
   }
 
 };
-
-
-
-  /*
-  advancedSearch: function(req, res){
-    var form         = req.params.all();
-    var terms        = [].concat(form.keywords || []);
-    var minPrice     = form.minPrice;
-    var maxPrice     = form.maxPrice;
-    var paginate     = {
-      page:  form.page  || 1,
-      limit: form.items || 10
-    };
-    var query        = {};
-    query            = Search.queryTerms(query, terms);
-    query            = Search.queryPrice(query, minPrice, maxPrice);
-    query.Active     = 'Y';
-    Product.count(query)
-      .then(function(total) {
-        return [total, Product.find(query).paginate(paginate)];
-      })
-      .spread(function(total, products) {
-        return res.json({total: total, data: products});
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  },*/
