@@ -7,10 +7,18 @@
 
 module.exports = {
   attributes: {
+    user: {
+      model: 'user',
+      required: true
+    },
+    rate: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
+    },
     payment: {
       model: 'payment',
       required: true,
-      unique: true
     }
   }
 };
