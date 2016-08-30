@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
 var storePromotions = [];
+var DEFAULT_EXCHANGE_RATE = 18.78;
 
 module.exports = {
   processDetails: processDetails,
@@ -96,11 +97,8 @@ function getDetailTotals(detail, opts){
 
 function getPromosByStore(storeId){
   var currentDate = new Date();
-  var queryPromo = {
-    startDate: {'<=': currentDate},
-    endDate: {'>=': currentDate},
-  };
-  return Store.findOne({id:storeId}).populate('Promotions', queryPromo)
+  var queryPromos = Search.getPromotionsQuery();
+  return Store.findOne({id:storeId}).populate('Promotions', queryPromos)
     .then(function(store){
       return store.Promotions;
     })
@@ -186,6 +184,6 @@ function getQuotationTotals(quotationId, opts){
 
 function getExchangeRate(){
   return Site.findOne({handle:'actual-group'}).then(function(site){
-    return site.exchangeRate || 18.78;
+    return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
   });
 }
