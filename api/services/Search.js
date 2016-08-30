@@ -2,17 +2,20 @@ var assign   = require('object-assign');
 var _        = require('underscore');
 
 module.exports = {
-  applyFilters: applyFilters,
-  applyOrFilters: applyOrFilters,
-  getProductsByCategories: getProductsByCategories,
-  getProductsByCategory: getProductsByCategory,
+  applyFilters            : applyFilters,
+  applyOrFilters          : applyOrFilters,
+  areFiltersApplied       : areFiltersApplied,
+  getMultiIntersection    : getMultiIntersection,
+  getProductsByCategories : getProductsByCategories,
+  getProductsByCategory   : getProductsByCategory,
   getProductsByFilterValue: getProductsByFilterValue,
-  getProductsByGroup: getProductsByGroup,
-  hashToArray: hashToArray,
-  promotionCronJobSearch: promotionCronJobSearch,
-  queryIdsProducts: queryIdsProducts,
-  queryPrice: queryPrice,
-  queryTerms: queryTerms,
+  getProductsByGroup      : getProductsByGroup,
+  getPromotionsQuery      : getPromotionsQuery,
+  hashToArray             : hashToArray,
+  promotionCronJobSearch  : promotionCronJobSearch,
+  queryIdsProducts        : queryIdsProducts,
+  queryPrice              : queryPrice,
+  queryTerms              : queryTerms,
 };
 
 function queryIdsProducts(query, idProducts) {
@@ -44,25 +47,26 @@ function applyFilters(query, filters) {
 
 function applyOrFilters(query, filters){
   if(filters.length > 0){
-    var and = [];
+    var andConditions = [];
     filters.forEach(function(filter){
+      //TODO check what is this
       filter.values = filter.values.filter(function(v){
         return v;
       });
       if(filter.values.length > 0){
-        var or = [];
+        var orConditions = [];
         filter.values.forEach(function(val){
-          var cond = {};
-          cond[filter.key] = val;
-          or.push(cond);
+          var condition = {};
+          condition[filter.key] = val;
+          orConditions.push(condition);
         });
-        if(or.length > 0){
-          and.push({$or: or});
+        if(orConditions.length > 0){
+          andConditions.push({$or: orConditions});
         }
       }
     });
-    if(and.length > 0){
-      query.$and = and;
+    if(andConditions.length > 0){
+      query.$and = andConditions;
     }
   }
   return query;
@@ -80,15 +84,12 @@ function queryTerms(query, terms) {
     'DetailedColor'
   ];
   var filter = searchFields.reduce(function(acum, sf){
-    
     var and = terms.reduce(function(acum, term){
       var fname = {};
       fname[sf] = {contains: term};
       return acum.concat(fname);
     }, []);
-
     return acum.concat({$and: and});
-
   }, []);
 
   return assign(query, {$or: filter});
@@ -110,32 +111,18 @@ function getProductsByCategory(categoryQuery) {
 function getProductsByCategories(categoriesIds, options) {
   var productsIds         = [];
   var excludedProductsIds = []; //Flag variable
+  var relationsHash       = {};
+  var relationsArray      = [];
   options = options || {};
   return Product_ProductCategory.find({productCategory: categoriesIds})
     .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
-      //TODO revisar esto, no funciona
-      if(options.excludedCategories){
-        relations = relations.filter(function(relation){
-          var productId         = relation[0];
-          var productCategories = relation[1];
-          var intersection = _.intersection(productCategories, options.excludedCategories);
-          return intersection.length == 0;
-        });
-      }
-
+      relationsHash   = getProductRelationsHash(relations, 'product', 'productCategory');
+      relationsArray  = hashToArray(relationsHash);
       if(options.applyIntersection){
         //If product has all the searching categories        
-        relations = relations.filter(function(relation) {
-          var productCategories = relation[1];
-          return _.isEqual(categoriesIds, productCategories);
-        });
+        relationsArray = getRelationsWithCategories(relationsArray, categoriesIds);
       }
-      productsIds = relations.map(function(relation) {
+      productsIds = relationsArray.map(function(relation) {
         return relation[0]; //Product ID
       });
 
@@ -143,20 +130,16 @@ function getProductsByCategories(categoriesIds, options) {
     });
 }
 
-function getProductsByFilterValue(filtervalues){
-  return Product_ProductFilterValue.find({productfiltervalue: filtervalues})
+function getProductsByFilterValue(filtervaluesIds){
+  var relationsHash       = {};
+  var relationsArray      = [];  
+  return Product_ProductFilterValue.find({productfiltervalue: filtervaluesIds})
     .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productfiltervalue);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
+      relationsHash   = getProductRelationsHash(relations, 'product', 'productfiltervalue');
+      relationsArray  = hashToArray(relationsHash);
        //Check if product has all the filter values
-      relations = relations.filter(function(relation) {
-        var productFilterValues = relation[1];
-        return _.isEqual(filtervalues, productFilterValues);
-      });
-      return relations.map(function(relation) {
+      relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      return relationsArray.map(function(relation) {
         return relation[0]; //Product ID
       });
     });
@@ -183,30 +166,6 @@ function hashToArray(hash) {
   });
 }
 
-function intersection(set1, set2) {
-  return set1.filter(function(si) {
-    return set2.indexOf(si) != -1;
-  });
-}
-
-//TODO change for underscore intersection number
-function getMultiIntersection(arrays){
-  arrays = arrays.filter(function(arr){return arr.length > 0});
-  var finalIntersection = [];
-  if(arrays.length > 0){
-    finalIntersection = arrays.shift().reduce(function(intersection, value) {
-        var valueIsInArrays = arrays.every(function(arr) {
-          return arr.indexOf(value) !== -1;
-        });
-        if (intersection.indexOf(value) === -1 && valueIsInArrays){
-          intersection.push(value);
-        }
-        return intersection;
-    }, []);
-  }
-  return finalIntersection;
-}
-
 //Advanced search for marketing cron job
 function promotionCronJobSearch(opts) {
   var categories          = [].concat(opts.categories);
@@ -215,10 +174,12 @@ function promotionCronJobSearch(opts) {
   var sas                 = [].concat(opts.sas);
   var excluded            = opts.excluded || [];
   var excludedCategories  = opts.excludedCategories || [];
-  var price             = {
+  var price               = {
     '>=': opts.minPrice || 0,
     '<=': opts.maxPrice || Infinity
   };
+  var query               = {};
+  var products            = [];
   var filters = [
     {key:'Price', value: price},
     {key:'Active', value: 'Y'},
@@ -245,20 +206,17 @@ function promotionCronJobSearch(opts) {
       ];
     })
     .spread(function(catprods, filterprods, groupsprods) {
-      return _.intersection.apply(null, [catprods, filterprods, groupsprods]);
+      return getMultiIntersection([catprods, filterprods, groupsprods]);
     })
     .then(function(idProducts) {
-      if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
+      if( areFiltersApplied(categories, filtervalues, groups) && idProducts.length > 0){
         if(excluded.length > 0){
           var ids = _.difference(idProducts, excluded);
-          filters.push({
-            key:'id',
-            value:ids
-          });
+          filters.push({key:'id',value:ids});
         }else{
           filters.push({key:'id', value: idProducts});
         }
-      }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
+      }else if( areFiltersApplied(categories, filtervalues, groups) && idProducts.length == 0){
         return [];
       }
 
@@ -268,10 +226,9 @@ function promotionCronJobSearch(opts) {
           value:{'!':excluded}
         });
       }
-
-      var query = applyFilters({},filters)
+      query = applyFilters({},filters)
       query     = applyOrFilters(query , applyOrFilters);
-      var products = Product.find(query);
+      products = Product.find(query);
       return products;
     })
     .then(function(products) {
@@ -281,4 +238,62 @@ function promotionCronJobSearch(opts) {
       console.log(err);
       return err;
     });
+}
+
+function getPromotionsQuery(){
+  var currentDate = new Date();
+  var query = {
+    //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+    startDate: {'<=': currentDate},
+    endDate: {'>=': currentDate},
+  };
+  return query;
+}
+
+
+//@param: relations: array of objects
+function getProductRelationsHash(relations, productKey, relateToKey){
+  var relationsHash = relations.reduce(function(productMap, relation){
+    var productId  = relation[productKey];
+    var relateToId = relation[relateToKey];
+    productMap[productId] = (productMap[productId] || []).concat(relateToId);
+    return productMap;
+  }, {});  
+  return relationsHash;
+}
+
+function areFiltersApplied(categories, filtervalues, groups){
+  return (categories.length > 0 || filtervalues.length > 0 || groups.length > 0);  
+}
+
+/*
+* @param Array of arrays, eg: 
+* [ 
+*   [ productId , [<categoryId/filterValuesIds>, <categoryId/filterValuesIds>, <categoryId/filterValuesIds>] ],
+*   [ productId , [<categoryId/filterValuesIds>, <categoryId/filterValuesIds>, <categoryId/filterValuesIds>] ]
+* ]
+*/
+function getRelationsWithCategories(relations, categoriesIds){
+  var filteredRelations = relations.filter(function(relation) {
+    var productCategories = relation[1];
+    return _.isEqual(categoriesIds, productCategories);
+  });
+  return filteredRelations;
+}
+
+function getRelationsWithFilterValues(relations, filterValuesIds){
+  var filteredRelations = relations.filter(function(relation) {
+    var productFilterValues = relation[1];
+    return _.isEqual(filterValuesIds, productFilterValues);
+  });
+  return filteredRelations;
+}
+
+
+function getMultiIntersection(arrays, options){
+  options = options || {ignoreEmptyArrays:true};
+  if(options.ignoreEmptyArrays){
+    arrays = arrays.filter(function(arr){return arr.length > 0});
+  }
+  return _.intersection(arrays[0], arrays[1]);
 }

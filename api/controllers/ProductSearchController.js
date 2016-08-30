@@ -10,6 +10,7 @@ module.exports = {
     var filtervalues = [].concat(form.ids || []);
     var minPrice     = form.minPrice;
     var maxPrice     = form.maxPrice;
+    var queryPromos  = Search.getPromotionsQuery();
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -23,16 +24,10 @@ module.exports = {
         if (filtervalues.length != 0) {
           query = Search.queryIdsProducts(query, idProducts);
         }
-        var currentDate = new Date();
-        var queryPromo = {
-          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
-          startDate: {'<=': currentDate},
-          endDate: {'>=': currentDate},
-        };
         return [
           Product.count(query),
           Product.find(query)
-            .populate('Promotions', queryPromo)
+            .populate('Promotions', queryPromos)
             .paginate(paginate)
             .sort('Available DESC')
         ];
@@ -49,6 +44,8 @@ module.exports = {
     var form         = req.params.all();
     var handle       = [].concat(form.category);
     var filtervalues = [].concat(form.filtervalues);
+    var queryPromos  = Search.getPromotionsQuery();
+    var query        = {};
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -69,28 +66,21 @@ module.exports = {
           return catprods;
         } else {
           return _.intersection(catprods, filterprods);
-          //return Search.intersection(catprods, filterprods);
         }
       })
       .then(function(idProducts) {
-        var q = {
+        query = {
           id: idProducts,
           Price: price,
           Active: 'Y'
         };
-        var currentDate = new Date();
-        var queryPromo = {
-          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
-          startDate: {'<=': currentDate},
-          endDate: {'>=': currentDate},
-        };
         return [
-          Product.count(q),
-          Product.find(q)
+          Product.count(query),
+          Product.find(query)
             .paginate(paginate)
             .sort('Available DESC')
             .populate('files')
-            .populate('Promotions',queryPromo)
+            .populate('Promotions',queryPromos)
         ];
       })
       .spread(function(total, products) {
@@ -112,6 +102,9 @@ module.exports = {
     var sas                = [].concat(form.sas);
     var populateImgs       = form.populateImgs || true;
     var populatePromotions = form.populatePromotions || true;
+    var queryPromos        = Search.getPromotionsQuery();
+    var query              = {};
+    var products           = [];
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -129,7 +122,6 @@ module.exports = {
       {key:'OnAmueble', value: form.OnAmueble},
       {key:'ItemCode', value: form.itemCode}
     ];
-
     var orFilters = [
       {key: 'CustomBrand', values: [].concat(form.customBrands)},
       {key: 'U_Empresa', values: sas},
@@ -147,41 +139,32 @@ module.exports = {
         ];
       })
       .spread(function(catprods, filterprods, groupsprods) {
-        return _.intersection.apply(null, [catprods, filterprods, groupsprods]);
+        return Search.getMultiIntersection([catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
-        if( 
-            (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) 
-            && idProducts.length > 0
-        ){
+        if( Search.areFiltersApplied(categories, filtervalues, groups) && idProducts.length > 0 ){
           filters.push({key:'id', value: idProducts});
-        }else if( 
-          (categories.length > 0 || filtervalues.length > 0 || groups.length > 0)
-          && idProducts.length == 0
-        ){
+        }
+        else if( Search.areFiltersApplied(categories, filtervalues, groups) && idProducts.length === 0 ){
           return [
             Promise.resolve(0), //total products number
             Promise.resolve([])  //products
           ];
         }
-        var query = Search.applyFilters({},filters);
-        query     = Search.applyOrFilters(query,orFilters);
-        var currentDate = new Date();
-        var products = Product.find(query);
+        query    = Search.applyFilters({},filters);
+        query    = Search.applyOrFilters(query,orFilters);
+        products = Product.find(query);
+        
         if(populatePromotions){
-          var queryPromo = {
-            startDate: {'<=': currentDate},
-            endDate: {'>=': currentDate},
-          };
-          products = products.populate('Promotions',queryPromo)
+          products = products.populate('Promotions',queryPromos)
+        }
+        if(populateImgs){
+          products.populate('files')
         }
         products = products
           .paginate(paginate)
           .sort('Available DESC');
 
-        if(populateImgs){
-          products.populate('files')
-        }
         return [
           Product.count(query),
           products

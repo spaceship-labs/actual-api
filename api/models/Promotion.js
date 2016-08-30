@@ -53,7 +53,6 @@ module.exports = {
     OnAmueble:{type:'boolean'},
     sas: {type:'array'}, //Sociedades
     excludedProducts: {type:'array'},
-    excludedCategories: {type:'array'},
     hasLM:{type:'boolean'},
     pushMoneyUnit:{type:'float'},
     pushMoneyUnitType:{
