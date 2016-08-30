@@ -26,17 +26,12 @@ module.exports = {
   },
 
   getPackagesByStore: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var currentDate = new Date();
-    var queryPromo = {
-      startDate: {'<=': currentDate},
-      endDate: {'>=': currentDate},
-    };
+    var form        = req.params.all();
+    var id          = form.id;
+    var queryPromos = Search.getPromotionsQuery();
     Store.findOne({id:id})
       .populate('ProductsPackages', queryPromo)
       .then(function(store){
-        //sails.log.info(company);
         res.json(store.ProductsPackages);
       })
       .catch(function(err){
