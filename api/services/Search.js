@@ -4,13 +4,11 @@ var _        = require('underscore');
 module.exports = {
   applyFilters: applyFilters,
   applyOrFilters: applyOrFilters,
-  getMultiIntersection: getMultiIntersection,
   getProductsByCategories: getProductsByCategories,
   getProductsByCategory: getProductsByCategory,
   getProductsByFilterValue: getProductsByFilterValue,
   getProductsByGroup: getProductsByGroup,
   hashToArray: hashToArray,
-  intersection: intersection,
   promotionCronJobSearch: promotionCronJobSearch,
   queryIdsProducts: queryIdsProducts,
   queryPrice: queryPrice,
@@ -110,28 +108,37 @@ function getProductsByCategory(categoryQuery) {
 }
 
 function getProductsByCategories(categoriesIds, options) {
-  var productsIds = [];
+  var productsIds         = [];
+  var excludedProductsIds = []; //Flag variable
   options = options || {};
   return Product_ProductCategory.find({productCategory: categoriesIds})
     .then(function(relations) {
-      if(options.intersections){
-        relations = relations.reduce(function(prodMap, current){
-          prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
-          return prodMap;
-        }, {});
-        relations = hashToArray(relations);
-        relations = relations.filter(function(relation) {
-          return _.isEqual(categoriesIds, relation[1]);
-        });
-        productsIds = relations.map(function(relation) {
-          return relation[0];
-        });
-
-      }else{ 
-        productsIds = relations.map(function(relation){
-          return relation.product; //Product id
+      relations = relations.reduce(function(prodMap, current){
+        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
+        return prodMap;
+      }, {});
+      relations = hashToArray(relations);
+      //TODO revisar esto, no funciona
+      if(options.excludedCategories){
+        relations = relations.filter(function(relation){
+          var productId         = relation[0];
+          var productCategories = relation[1];
+          var intersection = _.intersection(productCategories, options.excludedCategories);
+          return intersection.length == 0;
         });
       }
+
+      if(options.applyIntersection){
+        //If product has all the searching categories        
+        relations = relations.filter(function(relation) {
+          var productCategories = relation[1];
+          return _.isEqual(categoriesIds, productCategories);
+        });
+      }
+      productsIds = relations.map(function(relation) {
+        return relation[0]; //Product ID
+      });
+
       return productsIds;
     });
 }
@@ -144,11 +151,13 @@ function getProductsByFilterValue(filtervalues){
         return prodMap;
       }, {});
       relations = hashToArray(relations);
+       //Check if product has all the filter values
       relations = relations.filter(function(relation) {
-        return _.isEqual(filtervalues, relation[1]);
+        var productFilterValues = relation[1];
+        return _.isEqual(filtervalues, productFilterValues);
       });
       return relations.map(function(relation) {
-        return relation[0];
+        return relation[0]; //Product ID
       });
     });
 }
@@ -180,6 +189,7 @@ function intersection(set1, set2) {
   });
 }
 
+//TODO change for underscore intersection number
 function getMultiIntersection(arrays){
   arrays = arrays.filter(function(arr){return arr.length > 0});
   var finalIntersection = [];
@@ -199,19 +209,15 @@ function getMultiIntersection(arrays){
 
 //Advanced search for marketing cron job
 function promotionCronJobSearch(opts) {
-  var categories   = [].concat(opts.categories);
-  var filtervalues = [].concat(opts.filtervalues);
-  var groups       = [].concat(opts.groups);
-  var sas          = [].concat(opts.sas);
-  var noIcons      = opts.noIcons || false;
-  var price        = {
+  var categories          = [].concat(opts.categories);
+  var filtervalues        = [].concat(opts.filtervalues);
+  var groups              = [].concat(opts.groups);
+  var sas                 = [].concat(opts.sas);
+  var excluded            = opts.excluded || [];
+  var excludedCategories  = opts.excludedCategories || [];
+  var price             = {
     '>=': opts.minPrice || 0,
     '<=': opts.maxPrice || Infinity
-  };
-  var excluded     = opts.excluded ? [].concat(opts.excluded): [];
-  var paginate = {
-    page:  opts.page  || 1,
-    limit: opts.limit || 99999999999999
   };
   var filters = [
     {key:'Price', value: price},
@@ -221,26 +227,27 @@ function promotionCronJobSearch(opts) {
     {key:'OnKids', value: opts.OnKids},
     {key:'OnAmueble', value: opts.OnAmueble},
     {key:'ItemCode', value: opts.itemCode}
-
-    //{key:'U_Empresa', value: opts.U_Empresa}
-    //{key:'CustomBrand', value: opts.customBrands }
   ];
-
   var orFilters = [
     {key: 'CustomBrand', values: [].concat(opts.customBrands)},
     {key: 'U_Empresa', values: sas},
   ];
 
-  return getProductsByCategories(categories)
+  return getProductsByCategories(
+    categories, 
+    {excludedCategories: form.excludedCategories}
+  )
     .then(function(catprods) {
-      return [catprods, getProductsByFilterValue(filtervalues), getProductsByGroup(groups)];
+      return [
+        catprods,
+        getProductsByFilterValue(filtervalues),
+        getProductsByGroup(groups)
+      ];
     })
     .spread(function(catprods, filterprods, groupsprods) {
-      return getMultiIntersection([catprods, filterprods, groupsprods]);
+      return _.intersection.apply(null, [catprods, filterprods, groupsprods]);
     })
     .then(function(idProducts) {
-      var auxQuery = {};
-
       if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
         if(excluded.length > 0){
           var ids = _.difference(idProducts, excluded);
@@ -251,9 +258,8 @@ function promotionCronJobSearch(opts) {
         }else{
           filters.push({key:'id', value: idProducts});
         }
-
       }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
-        return [Promise.resolve(0),Promise.resolve(0)];
+        return [];
       }
 
       if(excluded.length > 0 && idProducts.length == 0){
@@ -263,26 +269,16 @@ function promotionCronJobSearch(opts) {
         });
       }
 
-      var q = applyFilters(auxQuery,filters);
-      q = applyOrFilters(q , applyOrFilters);
-      var find = Product.find(q)
-        .paginate(paginate)
-        .sort('Available DESC')
-
-      return [Product.count(q), find];
-    })
-    .spread(function(total, products) {
-      //console.log('Total: ' + products);
+      var query = applyFilters({},filters)
+      query     = applyOrFilters(query , applyOrFilters);
+      var products = Product.find(query);
       return products;
-      /*return res.json({
-        products: products,
-        total: total
-      });
-      */
+    })
+    .then(function(products) {
+      return products;
     })
     .catch(function(err) {
       console.log(err);
       return err;
-      //return res.negotiate(err);
     });
 }

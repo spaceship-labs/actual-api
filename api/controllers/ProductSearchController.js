@@ -1,6 +1,7 @@
 var util     = require('util');
 var ObjectId = require('mongodb').ObjectID;
 var assign   = require('object-assign');
+var _        = require('underscore');
 
 module.exports = {
   searchByFilters: function(req, res){
@@ -67,7 +68,8 @@ module.exports = {
         } else if(!filtervalues || filtervalues.length == 0) {
           return catprods;
         } else {
-          return Search.intersection(catprods, filterprods);
+          return _.intersection(catprods, filterprods);
+          //return Search.intersection(catprods, filterprods);
         }
       })
       .then(function(idProducts) {
@@ -103,13 +105,13 @@ module.exports = {
   },
 
   advancedSearch: function(req, res) {
-    var form          = req.params.all();
-    var categories    = [].concat(form.categories);
-    var filtervalues  = [].concat(form.filtervalues);
-    var groups        = [].concat(form.groups);
-    var sas           = [].concat(form.sas);
-    var noIcons       = form.noIcons || false;
-    var applyPopulate = form.applyPopulate || true;
+    var form               = req.params.all();
+    var categories         = [].concat(form.categories);
+    var filtervalues       = [].concat(form.filtervalues);
+    var groups             = [].concat(form.groups);
+    var sas                = [].concat(form.sas);
+    var populateImgs       = form.populateImgs || true;
+    var populatePromotions = form.populatePromotions || true;
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -118,7 +120,6 @@ module.exports = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
-
     var filters = [
       {key:'Price', value: price},
       {key:'Active', value: 'Y'},
@@ -134,7 +135,10 @@ module.exports = {
       {key: 'U_Empresa', values: sas},
     ];
 
-    Search.getProductsByCategories(categories)
+    Search.getProductsByCategories(
+      categories, 
+      {excludedCategories: form.excludedCategories}
+    )
       .then(function(catprods) {
         return [
           catprods, 
@@ -143,39 +147,50 @@ module.exports = {
         ];
       })
       .spread(function(catprods, filterprods, groupsprods) {
-        return Search.getMultiIntersection([catprods, filterprods, groupsprods]);
+        return _.intersection.apply(null, [catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
-        if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
+        if( 
+            (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) 
+            && idProducts.length > 0
+        ){
           filters.push({key:'id', value: idProducts});
-        }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
-          return [Promise.resolve(0),Promise.resolve(0)];
+        }else if( 
+          (categories.length > 0 || filtervalues.length > 0 || groups.length > 0)
+          && idProducts.length == 0
+        ){
+          return [
+            Promise.resolve(0), //total products number
+            Promise.resolve([])  //products
+          ];
         }
-
-        var q = Search.applyFilters({},filters);
-        q = Search.applyOrFilters(q,orFilters);
+        var query = Search.applyFilters({},filters);
+        query     = Search.applyOrFilters(query,orFilters);
         var currentDate = new Date();
-        var find = Product.find(q);
-        if(applyPopulate){
+        var products = Product.find(query);
+        if(populatePromotions){
           var queryPromo = {
             startDate: {'<=': currentDate},
             endDate: {'>=': currentDate},
           };
-          find = find.populate('Promotions',queryPromo)
+          products = products.populate('Promotions',queryPromo)
         }
-        find = find
+        products = products
           .paginate(paginate)
           .sort('Available DESC');
 
-        if(!noIcons){
-          find.populate('files')
+        if(populateImgs){
+          products.populate('files')
         }
-        return [Product.count(q), find];
+        return [
+          Product.count(query),
+          products
+        ];
       })
       .spread(function(total, products) {
         return res.json({
-          products: products,
-          total: total
+          total: total,
+          products: products
         });
       })
       .catch(function(err) {

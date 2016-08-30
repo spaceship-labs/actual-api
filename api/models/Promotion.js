@@ -51,11 +51,9 @@ module.exports = {
     OnHome:{type:'boolean'},
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
-    sas: {type:'array'},
-    //SA: {type:'string'},
-    //nameSA: {type:'string'},
-    //U_Empresa: {type:'string'},
+    sas: {type:'array'}, //Sociedades
     excludedProducts: {type:'array'},
+    excludedCategories: {type:'array'},
     hasLM:{type:'boolean'},
     pushMoneyUnit:{type:'float'},
     pushMoneyUnitType:{
@@ -86,12 +84,5 @@ module.exports = {
       collection:'store',
       via:'Promotions'
     }
-    /*
-    Companies:{
-      collection:'company',
-      via:'Promotions'
-    }
-    */
-
   }
 };
