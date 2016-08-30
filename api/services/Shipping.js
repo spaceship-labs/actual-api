@@ -6,31 +6,6 @@ module.exports = {
 };
 
 function productShipping(productCode, warehouseId) {
-  return Promise
-    .all([
-      productAvailable(productCode, warehouseId),
-      productPurchased(productCode, warehouseId)
-    ])
-    .spread(function(available, purchased) {
-      var products = available
-        .concat(purchased)
-        .filter(function(product) {
-          return product.available > 0;
-        })
-        .map(function(product) {
-          var d = new Date(product.date);
-          d.setHours(0, 0, 0, 0, 0);
-          return _.assign({}, product, {
-            date: d
-          });
-        });
-      return _.sortBy(products, function(product) {
-        return product.date;
-      });
-    });
-}
-
-function productAvailable(productCode, warehouseId) {
   return Company
     .findOne(warehouseId)
     .then(function(company) {
@@ -38,14 +13,16 @@ function productAvailable(productCode, warehouseId) {
     })
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
-      var companies = deliveries
-        .map(function(delivery) {
-          return delivery.FromCode;
-        });
+      var companies = deliveries.map(function(delivery) {
+        return delivery.FromCode;
+      });
       return [
-        ItemWarehouse.find({
+        DatesDelivery.find({
           ItemCode: productCode,
-          WhsCode: companies
+          whsCode: companies,
+          OpenCreQty: {
+            '>': 0
+          }
         }),
         deliveries,
         Season.findOne(seasonQuery)
@@ -55,48 +32,7 @@ function productAvailable(productCode, warehouseId) {
       if (!deliveries || !products) {return []};
       return products.map(function(product){
         var delivery     = _.find(deliveries, function(delivery) {
-          return delivery.FromCode == product.WhsCode;
-        });
-        var seasonDays   = (season && season.Days) || 7;
-        var deliveryDays = (delivery && delivery.Days) || 0;
-        var days         = seasonDays + deliveryDays;
-        var date         = addDays(new Date(), days);
-        return {
-          available: product.Available,
-          days: days,
-          date: date,
-          company: warehouseId
-        };
-      });
-    });
-}
-
-function productPurchased(productCode, warehouseId) {
-  return Company
-    .findOne(warehouseId)
-    .then(function(company) {
-      return Delivery.find({ToCode: company.WhsCode, Active:'Y'});
-    })
-    .then(function(deliveries) {
-      var seasonQuery = queryDate({}, new Date());
-      var companies = deliveries
-        .map(function(delivery) {
-          return delivery.FromCode;
-        });
-      return [
-        PurchaseOrder.find({
-          ItemCode: productCode,
-          WhsCode: companies
-        }),
-        deliveries,
-        Season.findOne(seasonQuery)
-      ];
-    })
-    .spread(function(products, deliveries, season){
-      if (!deliveries || !products) {return []};
-      return products.map(function(product){
-        var delivery     = _.find(deliveries, function(delivery) {
-          return delivery.FromCode == product.WhsCode;
+          return delivery.FromCode == product.whsCode;
         });
         var seasonDays   = (season && season.Days) || 7;
         var deliveryDays = (delivery && delivery.Days) || 0;
@@ -111,8 +47,6 @@ function productPurchased(productCode, warehouseId) {
       });
     });
 }
-
-
 
 function queryDate(query, date) {
   var date = new Date(date);
@@ -130,11 +64,4 @@ function addDays(date, days) {
   date = new Date(date);
   date.setDate(date.getDate() + days);
   return date;
-}
-
-function daysDiff(a, b) {
-  var _MS_PER_DAY = 1000 * 60 * 60 * 24;
-  var utc1        = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-  var utc2        = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }

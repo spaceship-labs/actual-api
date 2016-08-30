@@ -55,6 +55,10 @@ module.exports = {
     },
     User:{
       model:'User'
+    },
+    Commissions: {
+      collection: 'commission',
+      via: 'payment'
     }
   }
 }

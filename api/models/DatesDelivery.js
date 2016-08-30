@@ -1,24 +1,29 @@
 /**
- * Commission.js
+ * DatesDelivery.js
  *
  * @description :: TODO: You might write a short summary of how this model works and what it represents here.
  * @docs        :: http://sailsjs.org/documentation/concepts/models-and-orm/models
  */
 
 module.exports = {
+  tableName: 'DatesDelivery',
+  schema: true,
   attributes: {
-    user: {
-      model: 'user',
+    ItemCode: {
+      type: 'string',
       required: true
     },
-    rate: {
-      type: 'float',
-      required: true,
-      defaultsTo: 0
+    ShipDate: {
+      type: 'date',
+      required: true
     },
-    payment: {
-      model: 'payment',
-      required: true,
+    OpenCreQty: {
+      type: 'integer',
+      required: true
+    },
+    whsCode: {
+      type: 'string',
+      required: true
     }
   }
 };
