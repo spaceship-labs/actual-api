@@ -1,6 +1,7 @@
 var util     = require('util');
 var ObjectId = require('mongodb').ObjectID;
 var assign   = require('object-assign');
+var _        = require('underscore');
 
 module.exports = {
   searchByFilters: function(req, res){
@@ -9,6 +10,7 @@ module.exports = {
     var filtervalues = [].concat(form.ids || []);
     var minPrice     = form.minPrice;
     var maxPrice     = form.maxPrice;
+    var queryPromos  = Search.getPromotionsQuery();
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -22,18 +24,10 @@ module.exports = {
         if (filtervalues.length != 0) {
           query = Search.queryIdsProducts(query, idProducts);
         }
-
-        var currentDate = new Date();
-        var queryPromo = {
-          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
-          startDate: {'<=': currentDate},
-          endDate: {'>=': currentDate},
-        };
-
         return [
           Product.count(query),
           Product.find(query)
-            .populate('Promotions', queryPromo)
+            .populate('Promotions', queryPromos)
             .paginate(paginate)
             .sort('Available DESC')
         ];
@@ -50,6 +44,8 @@ module.exports = {
     var form         = req.params.all();
     var handle       = [].concat(form.category);
     var filtervalues = [].concat(form.filtervalues);
+    var queryPromos  = Search.getPromotionsQuery();
+    var query        = {};
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -69,28 +65,22 @@ module.exports = {
         } else if(!filtervalues || filtervalues.length == 0) {
           return catprods;
         } else {
-          return Search.intersection(catprods, filterprods);
+          return _.intersection(catprods, filterprods);
         }
       })
       .then(function(idProducts) {
-        var q = {
+        query = {
           id: idProducts,
           Price: price,
           Active: 'Y'
         };
-        var currentDate = new Date();
-        var queryPromo = {
-          //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
-          startDate: {'<=': currentDate},
-          endDate: {'>=': currentDate},
-        };
         return [
-          Product.count(q),
-          Product.find(q)
+          Product.count(query),
+          Product.find(query)
             .paginate(paginate)
             .sort('Available DESC')
             .populate('files')
-            .populate('Promotions',queryPromo)
+            .populate('Promotions',queryPromos)
         ];
       })
       .spread(function(total, products) {
@@ -105,14 +95,16 @@ module.exports = {
   },
 
   advancedSearch: function(req, res) {
-    var form         = req.params.all();
-    var categories   = [].concat(form.categories);
-    var filtervalues = [].concat(form.filtervalues);
-    var groups       = [].concat(form.groups);
-    var sas          = [].concat(form.sas);
-    var noIcons      = form.noIcons || false;
-    var applyPopulate = form.applyPopulate || true;
-
+    var form               = req.params.all();
+    var categories         = [].concat(form.categories);
+    var filtervalues       = [].concat(form.filtervalues);
+    var groups             = [].concat(form.groups);
+    var sas                = [].concat(form.sas);
+    var populateImgs       = form.populateImgs || true;
+    var populatePromotions = form.populatePromotions || true;
+    var queryPromos        = Search.getPromotionsQuery();
+    var query              = {};
+    var products           = [];
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -121,7 +113,6 @@ module.exports = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
-
     var filters = [
       {key:'Price', value: price},
       {key:'Active', value: 'Y'},
@@ -130,53 +121,59 @@ module.exports = {
       {key:'OnKids', value: form.OnKids},
       {key:'OnAmueble', value: form.OnAmueble},
       {key:'ItemCode', value: form.itemCode}
-      //{key:'CustomBrand', value: form.customBrands },
-      //{key:'U_Empresa', value: form.U_Empresa}
     ];
-
     var orFilters = [
       {key: 'CustomBrand', values: [].concat(form.customBrands)},
       {key: 'U_Empresa', values: sas},
     ];
 
-    Search.getProductsByCategories(categories)
+    Search.getProductsByCategories(
+      categories, 
+      {excludedCategories: form.excludedCategories}
+    )
       .then(function(catprods) {
-        return [catprods, Search.getProductsByFilterValue(filtervalues), Search.getProductsByGroup(groups)];
+        return [
+          catprods, 
+          Search.getProductsByFilterValue(filtervalues), 
+          Search.getProductsByGroup(groups)
+        ];
       })
       .spread(function(catprods, filterprods, groupsprods) {
         return Search.getMultiIntersection([catprods, filterprods, groupsprods]);
       })
       .then(function(idProducts) {
-        if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
+        if( Search.areFiltersApplied(categories, filtervalues, groups) && idProducts.length > 0 ){
           filters.push({key:'id', value: idProducts});
-        }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
-          return [Promise.resolve(0),Promise.resolve(0)];
         }
-
-        var q = Search.applyFilters({},filters);
-        q = Search.applyOrFilters(q,orFilters);
-        var currentDate = new Date();
-        var find = Product.find(q);
-        if(applyPopulate){
-          var queryPromo = {
-            startDate: {'<=': currentDate},
-            endDate: {'>=': currentDate},
-          };
-          find = find.populate('Promotions',queryPromo)
+        else if( Search.areFiltersApplied(categories, filtervalues, groups) && idProducts.length === 0 ){
+          return [
+            Promise.resolve(0), //total products number
+            Promise.resolve([])  //products
+          ];
         }
-        find = find
+        query    = Search.applyFilters({},filters);
+        query    = Search.applyOrFilters(query,orFilters);
+        products = Product.find(query);
+        
+        if(populatePromotions){
+          products = products.populate('Promotions',queryPromos)
+        }
+        if(populateImgs){
+          products.populate('files')
+        }
+        products = products
           .paginate(paginate)
           .sort('Available DESC');
 
-        if(!noIcons){
-          find.populate('files')
-        }
-        return [Product.count(q), find];
+        return [
+          Product.count(query),
+          products
+        ];
       })
       .spread(function(total, products) {
         return res.json({
-          products: products,
-          total: total
+          total: total,
+          products: products
         });
       })
       .catch(function(err) {
@@ -185,31 +182,3 @@ module.exports = {
   }
 
 };
-
-
-
-  /*
-  advancedSearch: function(req, res){
-    var form         = req.params.all();
-    var terms        = [].concat(form.keywords || []);
-    var minPrice     = form.minPrice;
-    var maxPrice     = form.maxPrice;
-    var paginate     = {
-      page:  form.page  || 1,
-      limit: form.items || 10
-    };
-    var query        = {};
-    query            = Search.queryTerms(query, terms);
-    query            = Search.queryPrice(query, minPrice, maxPrice);
-    query.Active     = 'Y';
-    Product.count(query)
-      .then(function(total) {
-        return [total, Product.find(query).paginate(paginate)];
-      })
-      .spread(function(total, products) {
-        return res.json({total: total, data: products});
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  },*/

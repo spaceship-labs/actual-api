@@ -2,23 +2,26 @@ var assign   = require('object-assign');
 var _        = require('underscore');
 
 module.exports = {
-  applyFilters: applyFilters,
-  applyOrFilters: applyOrFilters,
-  getMultiIntersection: getMultiIntersection,
-  getProductsByCategories: getProductsByCategories,
-  getProductsByCategory: getProductsByCategory,
+  applyFilters            : applyFilters,
+  applyOrFilters          : applyOrFilters,
+  areFiltersApplied       : areFiltersApplied,
+  getMultiIntersection    : getMultiIntersection,
+  getProductsByCategories : getProductsByCategories,
+  getProductsByCategory   : getProductsByCategory,
   getProductsByFilterValue: getProductsByFilterValue,
-  getProductsByGroup: getProductsByGroup,
-  hashToArray: hashToArray,
-  intersection: intersection,
-  promotionCronJobSearch: promotionCronJobSearch,
-  queryIdsProducts: queryIdsProducts,
-  queryPrice: queryPrice,
-  queryTerms: queryTerms,
+  getProductsByGroup      : getProductsByGroup,
+  getPromotionsQuery      : getPromotionsQuery,
+  hashToArray             : hashToArray,
+  promotionCronJobSearch  : promotionCronJobSearch,
+  queryIdsProducts        : queryIdsProducts,
+  queryPrice              : queryPrice,
+  queryTerms              : queryTerms,
 };
 
 function queryIdsProducts(query, idProducts) {
-  return assign(query, {id: idProducts});
+  return assign(query, {
+    id: idProducts
+  });
 }
 
 function queryPrice(query, minPrice, maxPrice) {
@@ -26,15 +29,16 @@ function queryPrice(query, minPrice, maxPrice) {
     '>=': minPrice || 0,
     '<=': maxPrice || Infinity
   };
-  return assign(query, {Price: price});
+  return assign(query, {
+    Price: price
+  });
 }
 
-function applyFilters(query, filters){
-  filters.forEach(function(filter){
-    if(filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0 ){
+function applyFilters(query, filters) {
+  filters.forEach(function(filter) {
+    if (filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0) {
       query[filter.key] = filter.value;
-    }
-    else if(filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)  ){
+    } else if (filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)) {
       query[filter.key] = filter.value;
     }
   });
@@ -43,29 +47,28 @@ function applyFilters(query, filters){
 
 function applyOrFilters(query, filters){
   if(filters.length > 0){
-    var and = [];
+    var andConditions = [];
     filters.forEach(function(filter){
+      //TODO check what is this
       filter.values = filter.values.filter(function(v){
         return v;
       });
       if(filter.values.length > 0){
-        var or = [];
+        var orConditions = [];
         filter.values.forEach(function(val){
-          var cond = {};
-          cond[filter.key] = val;
-          or.push(cond);
+          var condition = {};
+          condition[filter.key] = val;
+          orConditions.push(condition);
         });
-        if(or.length > 0){
-          and.push({$or: or});
+        if(orConditions.length > 0){
+          andConditions.push({$or: orConditions});
         }
       }
     });
-    if(and.length > 0){
-      query.$and = and;
+    if(andConditions.length > 0){
+      query.$and = andConditions;
     }
   }
-  //sails.log.info('query applyOrFilters');
-  //sails.log.info(JSON.stringify(query));
   return query;
 }
 
@@ -86,8 +89,9 @@ function queryTerms(query, terms) {
       fname[sf] = {contains: term};
       return acum.concat(fname);
     }, []);
-    return acum.concat({$and: and})
+    return acum.concat({$and: and});
   }, []);
+
   return assign(query, {$or: filter});
 }
 
@@ -104,36 +108,39 @@ function getProductsByCategory(categoryQuery) {
     });
 }
 
-function getProductsByCategories(categoriesIds) {
+function getProductsByCategories(categoriesIds, options) {
+  var productsIds         = [];
+  var excludedProductsIds = []; //Flag variable
+  var relationsHash       = {};
+  var relationsArray      = [];
+  options = options || {};
   return Product_ProductCategory.find({productCategory: categoriesIds})
     .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productCategory);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
-      relations = relations.filter(function(relation) {
-        return _.isEqual(categoriesIds, relation[1]);
+      relationsHash   = getProductRelationsHash(relations, 'product', 'productCategory');
+      relationsArray  = hashToArray(relationsHash);
+      if(options.applyIntersection){
+        //If product has all the searching categories        
+        relationsArray = getRelationsWithCategories(relationsArray, categoriesIds);
+      }
+      productsIds = relationsArray.map(function(relation) {
+        return relation[0]; //Product ID
       });
-      return relations.map(function(relation) {
-        return relation[0];
-      });
+
+      return productsIds;
     });
 }
 
-function getProductsByFilterValue(filtervalues){
-  return Product_ProductFilterValue.find({productfiltervalue: filtervalues})
+function getProductsByFilterValue(filtervaluesIds){
+  var relationsHash       = {};
+  var relationsArray      = [];  
+  return Product_ProductFilterValue.find({productfiltervalue: filtervaluesIds})
     .then(function(relations) {
-      relations = relations.reduce(function(prodMap, current){
-        prodMap[current.product] = (prodMap[current.product] || []).concat(current.productfiltervalue);
-        return prodMap;
-      }, {});
-      relations = hashToArray(relations);
-      relations = relations.filter(function(relation) {
-        return _.isEqual(filtervalues, relation[1]);
-      });
-      return relations.map(function(relation) {
-        return relation[0];
+      relationsHash   = getProductRelationsHash(relations, 'product', 'productfiltervalue');
+      relationsArray  = hashToArray(relationsHash);
+       //Check if product has all the filter values
+      relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      return relationsArray.map(function(relation) {
+        return relation[0]; //Product ID
       });
     });
 }
@@ -159,45 +166,20 @@ function hashToArray(hash) {
   });
 }
 
-function intersection(set1, set2) {
-  return set1.filter(function(si) {
-    return set2.indexOf(si) != -1;
-  });
-}
-
-function getMultiIntersection(arrays){
-  arrays = arrays.filter(function(arr){return arr.length > 0});
-  var finalIntersection = [];
-  if(arrays.length > 0){
-    finalIntersection = arrays.shift().reduce(function(intersection, value) {
-        var valueIsInArrays = arrays.every(function(arr) {
-          return arr.indexOf(value) !== -1;
-        });
-        if (intersection.indexOf(value) === -1 && valueIsInArrays){
-          intersection.push(value);
-        }
-        return intersection;
-    }, []);
-  }
-  return finalIntersection;
-}
-
 //Advanced search for marketing cron job
 function promotionCronJobSearch(opts) {
-  var categories   = [].concat(opts.categories);
-  var filtervalues = [].concat(opts.filtervalues);
-  var groups       = [].concat(opts.groups);
-  var sas          = [].concat(opts.sas);
-  var noIcons      = opts.noIcons || false;
-  var price        = {
+  var categories          = [].concat(opts.categories);
+  var filtervalues        = [].concat(opts.filtervalues);
+  var groups              = [].concat(opts.groups);
+  var sas                 = [].concat(opts.sas);
+  var excluded            = opts.excluded || [];
+  var excludedCategories  = opts.excludedCategories || [];
+  var price               = {
     '>=': opts.minPrice || 0,
     '<=': opts.maxPrice || Infinity
   };
-  var excluded     = opts.excluded ? [].concat(opts.excluded): [];
-  var paginate = {
-    page:  opts.page  || 1,
-    limit: opts.limit || 99999999999999
-  };
+  var query               = {};
+  var products            = [];
   var filters = [
     {key:'Price', value: price},
     {key:'Active', value: 'Y'},
@@ -206,39 +188,36 @@ function promotionCronJobSearch(opts) {
     {key:'OnKids', value: opts.OnKids},
     {key:'OnAmueble', value: opts.OnAmueble},
     {key:'ItemCode', value: opts.itemCode}
-
-    //{key:'U_Empresa', value: opts.U_Empresa}
-    //{key:'CustomBrand', value: opts.customBrands }
   ];
-
   var orFilters = [
     {key: 'CustomBrand', values: [].concat(opts.customBrands)},
     {key: 'U_Empresa', values: sas},
   ];
 
-  return getProductsByCategories(categories)
+  return getProductsByCategories(
+    categories, 
+    {excludedCategories: form.excludedCategories}
+  )
     .then(function(catprods) {
-      return [catprods, getProductsByFilterValue(filtervalues), getProductsByGroup(groups)];
+      return [
+        catprods,
+        getProductsByFilterValue(filtervalues),
+        getProductsByGroup(groups)
+      ];
     })
     .spread(function(catprods, filterprods, groupsprods) {
       return getMultiIntersection([catprods, filterprods, groupsprods]);
     })
     .then(function(idProducts) {
-      var auxQuery = {};
-
-      if( (categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length > 0){
+      if( areFiltersApplied(categories, filtervalues, groups) && idProducts.length > 0){
         if(excluded.length > 0){
           var ids = _.difference(idProducts, excluded);
-          filters.push({
-            key:'id',
-            value:ids
-          });
+          filters.push({key:'id',value:ids});
         }else{
           filters.push({key:'id', value: idProducts});
         }
-
-      }else if((categories.length > 0 || filtervalues.length > 0 || groups.length > 0) && idProducts.length == 0){
-        return [Promise.resolve(0),Promise.resolve(0)];
+      }else if( areFiltersApplied(categories, filtervalues, groups) && idProducts.length == 0){
+        return [];
       }
 
       if(excluded.length > 0 && idProducts.length == 0){
@@ -247,27 +226,74 @@ function promotionCronJobSearch(opts) {
           value:{'!':excluded}
         });
       }
-
-      var q = applyFilters(auxQuery,filters);
-      q = applyOrFilters(q , applyOrFilters);
-      var find = Product.find(q)
-        .paginate(paginate)
-        .sort('Available DESC')
-
-      return [Product.count(q), find];
-    })
-    .spread(function(total, products) {
-      //console.log('Total: ' + products);
+      query = applyFilters({},filters)
+      query     = applyOrFilters(query , applyOrFilters);
+      products = Product.find(query);
       return products;
-      /*return res.json({
-        products: products,
-        total: total
-      });
-      */
+    })
+    .then(function(products) {
+      return products;
     })
     .catch(function(err) {
       console.log(err);
       return err;
-      //return res.negotiate(err);
     });
+}
+
+function getPromotionsQuery(){
+  var currentDate = new Date();
+  var query = {
+    //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
+    startDate: {'<=': currentDate},
+    endDate: {'>=': currentDate},
+  };
+  return query;
+}
+
+
+//@param: relations: array of objects
+function getProductRelationsHash(relations, productKey, relateToKey){
+  var relationsHash = relations.reduce(function(productMap, relation){
+    var productId  = relation[productKey];
+    var relateToId = relation[relateToKey];
+    productMap[productId] = (productMap[productId] || []).concat(relateToId);
+    return productMap;
+  }, {});  
+  return relationsHash;
+}
+
+function areFiltersApplied(categories, filtervalues, groups){
+  return (categories.length > 0 || filtervalues.length > 0 || groups.length > 0);  
+}
+
+/*
+* @param Array of arrays, eg: 
+* [ 
+*   [ productId , [<categoryId/filterValuesIds>, <categoryId/filterValuesIds>, <categoryId/filterValuesIds>] ],
+*   [ productId , [<categoryId/filterValuesIds>, <categoryId/filterValuesIds>, <categoryId/filterValuesIds>] ]
+* ]
+*/
+function getRelationsWithCategories(relations, categoriesIds){
+  var filteredRelations = relations.filter(function(relation) {
+    var productCategories = relation[1];
+    return _.isEqual(categoriesIds, productCategories);
+  });
+  return filteredRelations;
+}
+
+function getRelationsWithFilterValues(relations, filterValuesIds){
+  var filteredRelations = relations.filter(function(relation) {
+    var productFilterValues = relation[1];
+    return _.isEqual(filterValuesIds, productFilterValues);
+  });
+  return filteredRelations;
+}
+
+
+function getMultiIntersection(arrays, options){
+  options = options || {ignoreEmptyArrays:true};
+  if(options.ignoreEmptyArrays){
+    arrays = arrays.filter(function(arr){return arr.length > 0});
+  }
+  return _.intersection(arrays[0], arrays[1]);
 }

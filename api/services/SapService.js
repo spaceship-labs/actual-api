@@ -5,12 +5,12 @@ var buildUrl = require('build-url');
 var _ = require('underscore');
 
 module.exports = {
-  createClient    : createClient,
-  createContact   : createContact,
-  createFiscalInfo: createFiscalInfo,
-  updateClient    : updateClient,
-  updateContact   : updateContact,
-  updateFiscalInfo: updateFiscalInfo
+  createClient        : createClient,
+  createContact       : createContact,
+  createFiscalAddress : createFiscalAddress,
+  updateClient        : updateClient,
+  updateContact       : updateContact,
+  updateFiscalAddress : updateFiscalAddress
 };
 
 function updateClient(cardcode, form){
@@ -119,15 +119,16 @@ function createContact(cardCode, form){
 }
 
 
-function updateFiscalInfo(cardcode, form){
+function updateFiscalAddress(cardcode, form){
   return new Promise(function(resolve, reject){
     var path = 'AddressContact(\'' + cardcode + '\')';
     form = _.omit(form, _.isUndefined);
+    form.Address = form.companyName;
     var endPoint = buildUrl(baseUrl, {
       path: path,
       queryParams: form
     });
-    sails.log.info('updateFiscalInfo');
+    sails.log.info('updateFiscalAddress');
     sails.log.info(endPoint);
     request.post( endPoint, function(err, response, body){
       if(err){
@@ -140,7 +141,7 @@ function updateFiscalInfo(cardcode, form){
   });
 }
 
-function createFiscalInfo(cardcode, form){
+function createFiscalAddress(cardcode, form){
   return new Promise(function(resolve, reject){
     var path = 'AddressContact';
     form = _.omit(form, _.isUndefined);
@@ -150,7 +151,7 @@ function createFiscalInfo(cardcode, form){
       path: path,
       queryParams: form
     });
-    sails.log.info('createFiscalInfo');
+    sails.log.info('createFiscalAddress');
     sails.log.info(endPoint);
     request.post( endPoint, function(err, response, body){
       if(err){
