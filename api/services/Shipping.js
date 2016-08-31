@@ -28,6 +28,20 @@ function productShipping(productCode, warehouseId) {
         Season.findOne(seasonQuery)
       ];
     })
+    .spread(function(products, deliveries, season) {
+      var codes = products.map(function(p){return p.whsCode});
+      return Company
+        .find({WhsCode: codes})
+        .then(function(codes) {
+          products = products.map(function(p) {
+            p.company = _.find(codes, function(ci) {
+              return ci.WhsCode == p.whsCode
+            }).id;
+            return p;
+          });
+          return [products, deliveries, season];
+        });
+    })
     .spread(function(products, deliveries, season){
       if (!deliveries || !products) {return []};
       return products.map(function(product){
@@ -42,7 +56,8 @@ function productShipping(productCode, warehouseId) {
           available: product.OpenCreQty,
           days: days,
           date: date,
-          company: warehouseId
+          company: warehouseId,
+          companyFrom: product.company
         };
       });
     });
