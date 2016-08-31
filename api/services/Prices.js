@@ -1,6 +1,9 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
-var storePromotions = [];
+var storePromotions         = [];
+var storePackages           = [];
+var currentPromotionPackage = false;
+var DEFAULT_EXCHANGE_RATE   = 18.78;
 
 module.exports = {
   processDetails: processDetails,
@@ -69,8 +72,6 @@ function getDetailTotals(detail, opts){
       var subtotal = qty * unitPrice;
       var total = qty * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
       var discount = total - subtotal;
-      //sails.log.info('mainPromo:');
-      //sails.log.info(mainPromo);
       var detailTotals = {
         id: detail.id,
         unitPrice: unitPrice,
@@ -84,23 +85,17 @@ function getDetailTotals(detail, opts){
         discount: discount
       }
       return detailTotals;
-      //resolve(detailTotals);
     })
     .catch(function(err){
       console.log(err);
       reject(err);
     });
-
-    //});
 }
 
 function getPromosByStore(storeId){
   var currentDate = new Date();
-  var queryPromo = {
-    startDate: {'<=': currentDate},
-    endDate: {'>=': currentDate},
-  };
-  return Store.findOne({id:storeId}).populate('Promotions', queryPromo)
+  var queryPromos = Search.getPromotionsQuery();
+  return Store.findOne({id:storeId}).populate('Promotions', queryPromos)
     .then(function(store){
       return store.Promotions;
     })
@@ -113,22 +108,36 @@ function getPromosByStore(storeId){
 //Populated with promotions
 function getMainPromo(product){
   if(product.Promotions && product.Promotions.length > 0){
-    var indexMaxPromo = 0;
-    var maxPromo = 0;
     //Filter product promotions with store promotions
-    product.Promotions = product.Promotions.filter(function(promotion){
-      return _.findWhere(storePromotions, {id:promotion.id});
-    });
-    product.Promotions.forEach(function(promo, index){
-      if(promo.discountPg1 >= maxPromo){
-        maxPromo = promo.discountPg1;
-        indexMaxPromo = index;
-      }
-    });
-    return product.Promotions[indexMaxPromo];
+    product.Promotions = matchWithStorePromotions(product.Promotions);
+    return getPromotionWithHighestDiscount(product.Promotions);
   }else{
     return false;
   }
+}
+
+function matchWithStorePromotions(productPromotions){
+  var promotions = productPromotions.filter(function(promotion){
+    return _.findWhere(storePromotions, {id:promotion.id});
+  });  
+  return promotions;
+}
+
+function isAStorePackage(promotionPackageId){
+  return _.findWhere(storePackages, {id: promotionPackageId});
+}
+
+function getPromotionWithHighestDiscount(productPromotions){
+  var indexMaxPromo = 0;
+  var maxDiscount = 0;
+  productPromotions = productPromotions || [];
+  productPromotions.forEach(function(promo, index){
+    if(promo.discountPg1 >= maxDiscount){
+      maxDiscount   = promo.discountPg1;
+      indexMaxPromo = index;
+    }
+  });
+  return productPromotions[indexMaxPromo] || false;
 }
 
 function getDiscountKey(group){
@@ -148,23 +157,34 @@ function updateQuotationTotals(quotationId, opts){
 
 function getQuotationTotals(quotationId, opts){
   opts = opts || {paymentGroup:1 , updateDetails: true};
+  var quotationAux = false;
+  var isValidPackage = false;
 
   return getPromosByStore(opts.currentStore)
     .then(function(promos){
       storePromotions = promos;
-      return Quotation.findOne({id:quotationId}).populate('Details')
+      return Quotation.findOne({id:quotationId}).populate('Details') 
     })
     .then(function(quotation){
-      var detailsIds = [];
-      if(quotation.Details){
-        detailsIds = quotation.Details.map(function(d){return d.id});
-        return QuotationDetail.find({id:detailsIds}).populate('PromotionPackage');
-      }else{
-        return [];
+      quotationAux = quotation; 
+      var currentPromotionPackageId = packageExist(quotation.Details);
+      if(currentPromotionPackageId){
+        return [
+          getPackagesByStore(opts.currentStore),
+          ProductGroup.findOne({id:currentPromotionPackageId}).populate('ProductsPackageInfo')
+        ];
       }
+      return [ [], false ];
     })
-    .then(function(details){
-      return processDetails(details,opts)
+    .spread(function(storePackagesFound, promotionPackage){
+      storePackages = storePackagesFound;
+      currentPromotionPackage = promotionPackage;
+
+      if( isAStorePackage( promotionPackage.id  || false ) ){
+        isValidPackage = validatePackageRules(currentPromotionPackage);
+      }
+      
+      return processDetails(quotationAux.Details, opts);
     })
     .then(function(processedDetails){
       var totals = {
@@ -181,11 +201,47 @@ function getQuotationTotals(quotationId, opts){
       });
       return totals;
     });
+}
 
+function packageExist(details){
+  var exists = false;
+  for (var i=0;i<details.length;i++){
+    if(details[i].PromotionPackage){
+      currentPromotionPackage = details[i].PromotionPackage;
+      exists = details[i].PromotionPackage;
+    }
+  }
+  return exists;
+}
+
+function getPackagesByStore(storeId){
+  var queryPromos = Search.getPromotionsQuery();
+  return Store.findOne({id:storeId})
+    .populate('ProductsPackages', queryPromos)
+    .then(function(store){
+      if(store){
+        return store.ProductsPackages;
+      }
+      return [];
+    });
 }
 
 function getExchangeRate(){
   return Site.findOne({handle:'actual-group'}).then(function(site){
-    return site.exchangeRate || 18.78;
+    return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
   });
+}
+
+function validatePackageRules(rules, details){
+  var validFlag = true;
+  for(var i = 0; i < rules.length; i++){
+    var rule = rules[i];
+    var isValidRule = _.find(details, function(detail){
+      return (detail.Product.id === rule.Product && detail.quantity === detail.quantity)
+    });
+    if(!isValidRule){
+      validFlag = false;
+    }
+  }
+  return validFlag;
 }
