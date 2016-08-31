@@ -61,19 +61,18 @@ module.exports.policies = {
     getProducts: true
   },
   ProductSearchController:{
+    /*
     advancedSearch: true,
     searchByFilters: true,
     searchByCategory: true,
     searchByFilterValues: true
+    */
   },
   LoggingController: {
     find: true,
     create: true
   },
   PermissionController: {
-    find: true
-  },
-  CompanyController: {
     find: true
   },
   ShippingController: {

@@ -226,8 +226,8 @@ function promotionCronJobSearch(opts) {
           value:{'!':excluded}
         });
       }
-      query = applyFilters({},filters)
-      query     = applyOrFilters(query , applyOrFilters);
+      query    = applyFilters({},filters)
+      query    = applyOrFilters(query , applyOrFilters);
       products = Product.find(query);
       return products;
     })
@@ -295,5 +295,5 @@ function getMultiIntersection(arrays, options){
   if(options.ignoreEmptyArrays){
     arrays = arrays.filter(function(arr){return arr.length > 0});
   }
-  return _.intersection(arrays[0], arrays[1]);
+  return _.intersection.apply(null, arrays);
 }
