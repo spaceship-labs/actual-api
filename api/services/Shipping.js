@@ -53,7 +53,7 @@ function productShipping(productCode, warehouseId) {
         var seasonDays   = (season && season.Days) || 7;
         var deliveryDays = (delivery && delivery.Days) || 0;
         var days         = productDays + seasonDays + deliveryDays;
-        var date         = addDays(productDate, days);
+        var date         = addDays(new Date(), days);
         return {
           available: product.OpenCreQty,
           days: days,
