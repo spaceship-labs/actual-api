@@ -42,15 +42,15 @@ module.exports = {
     /*-------------/
       ONLY APPLIES TO PACKAGES GROUPS
     /*------------*/
-    ProductsPackageInfo: {
-      collection:'ProductPackageInfo',
-      via:'Package'
+    PackageRules: {
+      collection:'PackageRule',
+      via:'PromotionPackage'
     },
 
     Stores:{
       collection:'store',
       //collection:'Company',
-      via:'ProductsPackages'
+      via:'PromotionPackages'
     }
 
   }

@@ -37,7 +37,7 @@ module.exports = {
       collection:'Order',
       via:'Store'
     },
-    ProductsPackages:{
+    PromotionPackages:{
       collection:'ProductGroup',
       via:'Stores'
     }

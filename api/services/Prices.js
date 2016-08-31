@@ -171,7 +171,7 @@ function getQuotationTotals(quotationId, opts){
       if(currentPromotionPackageId){
         return [
           getPackagesByStore(opts.currentStore),
-          ProductGroup.findOne({id:currentPromotionPackageId}).populate('ProductsPackageInfo')
+          ProductGroup.findOne({id:currentPromotionPackageId}).populate('PackageRules')
         ];
       }
       return [ [], false ];
@@ -215,10 +215,10 @@ function packageExist(details){
 function getPackagesByStore(storeId){
   var queryPromos = Search.getPromotionsQuery();
   return Store.findOne({id:storeId})
-    .populate('ProductsPackages', queryPromos)
+    .populate('PromotionPackages', queryPromos)
     .then(function(store){
       if(store){
-        return store.ProductsPackages;
+        return store.PromotionPackages;
       }
       return [];
     });

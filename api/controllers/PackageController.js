@@ -24,15 +24,15 @@ module.exports = {
       .then(function(group){
         var products = group.Products;
         var productsIds = products.map(function(p){return p.id});
-        var q = {Package: id, limit:1};
-        return Product.find({id:productsIds}).populate('PackagesInfo',q);
+        var q = {PromotionPackage: id, limit:1};
+        return Product.find({id:productsIds}).populate('PackageRules',q);
       })
       .then(function(finalProducts){
         finalProducts = finalProducts.map(function(p){
-          if(p.PackagesInfo.length > 0){
-            p.packageInfo = _.clone(p.PackagesInfo[0]);
+          if(p.PackageRules.length > 0){
+            p.packageRule = _.clone(p.PackageRules[0]);
           }
-          delete p.PackagesInfo;
+          delete p.PackageRules;
           return p;
         });
         res.json(finalProducts);
@@ -46,13 +46,13 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var productsInfo = form.productsInfo || [];
+    var packageRules = form.packageRules || [];
     var updatedPackage = false;
 
     ProductGroup.update({id:id, Type:'packages'}, form)
       .then(function(updated){
         updatedPackage = updated;
-        return Promise.each(productsInfo, updateProductInfo);
+        return Promise.each(packageRules, updatePackageRule);
       })
       .then(function(){
         res.json(updatedPackage);
@@ -67,7 +67,7 @@ module.exports = {
     var id = form.id;
     ProductGroup.findOne({id:id,Type:'packages'})
       .populate('Stores')
-      .populate('ProductsPackageInfo')
+      .populate('PackageRules')
       .then(function(pack){
         return res.json(pack);
       })
@@ -79,28 +79,28 @@ module.exports = {
 
 }
 
-function updateProductInfo(product){
+function updatePackageRule(product){
   var q = {
-    Product: product.productId,
-    Package: product.packageId
+    Product         : product.productId,
+    PromotionPackage: product.packageId
   };
-  return ProductPackageInfo.findOne(q)
+  return PackageRule.findOne(q)
     .then(function(productPackage){
       var params = {
-        quantity: product.packageInfo.quantity,
-        discount: product.packageInfo.discount,
-        discountPg2: product.packageInfo.discountPg2,
-        discountPg3: product.packageInfo.discountPg3,
-        discountPg4: product.packageInfo.discountPg4,
-        discountPg5: product.packageInfo.discountPg5,
-        discountType: product.packageInfo.discountType,
+        quantity: product.packageRule.quantity,
+        discount: product.packageRule.discount,
+        discountPg2: product.packageRule.discountPg2,
+        discountPg3: product.packageRule.discountPg3,
+        discountPg4: product.packageRule.discountPg4,
+        discountPg5: product.packageRule.discountPg5,
+        discountType: product.packageRule.discountType,
         Product: product.productId,
-        Package: product.packageId
+        PromotionPackage: product.packageId
       };
       if(!productPackage){
-        return ProductPackageInfo.create(params);
+        return PackageRule.create(params);
       }else{
-        return ProductPackageInfo.update({id:productPackage.id}, params);
+        return PackageRule.update({id:productPackage.id}, params);
       }
     })
     .then(function(createdOrUpdated){
