@@ -48,10 +48,12 @@ function productShipping(productCode, warehouseId) {
         var delivery     = _.find(deliveries, function(delivery) {
           return delivery.FromCode == product.whsCode;
         });
+        var productDate  = new Date(product.ShipDate);
+        var productDays  = daysDiff(new Date(), productDate);
         var seasonDays   = (season && season.Days) || 7;
         var deliveryDays = (delivery && delivery.Days) || 0;
-        var days         = seasonDays + deliveryDays;
-        var date         = addDays(new Date(), days);
+        var days         = productDays + seasonDays + deliveryDays;
+        var date         = addDays(productDate, days);
         return {
           available: product.OpenCreQty,
           days: days,
@@ -80,3 +82,11 @@ function addDays(date, days) {
   date.setDate(date.getDate() + days);
   return date;
 }
+
+function daysDiff(a, b) {
+  var _MS_PER_DAY = 1000 * 60 * 60 * 24;
+  var utc1        = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+  var utc2        = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+
