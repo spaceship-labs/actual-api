@@ -7,9 +7,17 @@
 
 module.exports = {
   attributes: {
-    user: {
-      model: 'user',
+    folio: {
+      type: 'integer',
       required: true
+    },
+    datePayment: {
+      type: 'date',
+    },
+    ammountPayment: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
     },
     rate: {
       type: 'float',
@@ -21,15 +29,29 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
-    ammountPayment: {
+    ammountPaid: {
       type: 'float',
       required: true,
       defaultsTo: 0
     },
+    ammountLeft: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
+    },
+    user: {
+      model: 'user',
+      required: true
+    },
     payment: {
       model: 'payment',
-      required: true,
+      required: true
     }
-  }
+  },
+  beforeValidate: function(val, cb){
+    Common.orderCustomAI(val, 'commissionFolio', function(val){
+      cb();
+    });
+  },
 };
 

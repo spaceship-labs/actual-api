@@ -57,7 +57,10 @@ function calculateUser(user, dateFrom, dateTo) {
           })
           .then(function(commission) {
             var ammount = (rate * payment.ammount).toFixed(2);
-            return Commission.update({payment: payment.id, user: user}, {rate: rate, ammount: ammount, ammountPayment: payment.ammount});
+            return Commission.update(
+              {payment: payment.id, user: user},
+              {datePayment: payment.createdAt, ammountPayment: payment.ammount, rate: rate, ammount: ammount }
+            );
           })
       });
     })
