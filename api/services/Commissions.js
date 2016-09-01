@@ -82,8 +82,8 @@ function userRate(user, dateFrom, dateTo) {
     })
     .spread(function(goal, role, utotal, stotal) {
       var sellers     = goal.sellers;
-      var gstore1     = goal.goal;
-      var gstore2     = goal.goal * 1.25;
+      var gstore1     = goal.goal / 2;
+      var gstore2     = gstore1 * 1.25;
       var gseller1    = gstore1 / sellers;
       var gseller2    = gstore2 / sellers;
       var baseSeller  = 3;
