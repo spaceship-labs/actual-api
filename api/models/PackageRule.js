@@ -17,7 +17,7 @@ module.exports = {
     Product:{
       model:'Product'
     },
-    Package:{
+    PromotionPackage:{
       model:'ProductGroup'
     }
   }

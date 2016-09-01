@@ -171,7 +171,7 @@ function getQuotationTotals(quotationId, opts){
       if(currentPromotionPackageId){
         return [
           getPackagesByStore(opts.currentStore),
-          ProductGroup.findOne({id:currentPromotionPackageId}).populate('ProductsPackageInfo')
+          ProductGroup.findOne({id:currentPromotionPackageId}).populate('PackageRules')
         ];
       }
       return [ [], false ];
@@ -179,11 +179,9 @@ function getQuotationTotals(quotationId, opts){
     .spread(function(storePackagesFound, promotionPackage){
       storePackages = storePackagesFound;
       currentPromotionPackage = promotionPackage;
-
       if( isAStorePackage( promotionPackage.id  || false ) ){
         isValidPackage = validatePackageRules(currentPromotionPackage);
       }
-      
       return processDetails(quotationAux.Details, opts);
     })
     .then(function(processedDetails){
@@ -217,10 +215,10 @@ function packageExist(details){
 function getPackagesByStore(storeId){
   var queryPromos = Search.getPromotionsQuery();
   return Store.findOne({id:storeId})
-    .populate('ProductsPackages', queryPromos)
+    .populate('PromotionPackages', queryPromos)
     .then(function(store){
       if(store){
-        return store.ProductsPackages;
+        return store.PromotionPackages;
       }
       return [];
     });
@@ -236,12 +234,16 @@ function validatePackageRules(rules, details){
   var validFlag = true;
   for(var i = 0; i < rules.length; i++){
     var rule = rules[i];
-    var isValidRule = _.find(details, function(detail){
-      return (detail.Product.id === rule.Product && detail.quantity === detail.quantity)
-    });
-    if(!isValidRule){
+    if(!isValidRule(rule, detail)){
       validFlag = false;
     }
   }
   return validFlag;
+}
+
+function validatePackageRule(rule, detail){
+  var isValidRule = _.find(details, function(detail){
+    return (detail.Product.id === rule.Product && detail.quantity === detail.quantity);
+  });
+  return isValidRule;  
 }

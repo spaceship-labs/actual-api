@@ -1,7 +1,4 @@
-var util     = require('util');
-var ObjectId = require('mongodb').ObjectID;
-var assign   = require('object-assign');
-var _        = require('underscore');
+var _  = require('underscore');
 
 module.exports = {
   searchByFilters: function(req, res){
@@ -11,6 +8,7 @@ module.exports = {
     var minPrice     = form.minPrice;
     var maxPrice     = form.maxPrice;
     var queryPromos  = Search.getPromotionsQuery();
+    var activeStore  = req.user.activeStore;
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -19,7 +17,13 @@ module.exports = {
     query            = Search.queryTerms(query, terms);
     query            = Search.queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
-    Search.getProductsByFilterValue(filtervalues)
+    
+    Shipping.getStoreWarehouses(activeStore)
+      .then(function(warehouses){
+        sails.log.info('warehouses');
+        sails.log.info(warehouses);
+        return Search.getProductsByFilterValue(filtervalues)
+      })
       .then(function(idProducts) {
         if (filtervalues.length != 0) {
           query = Search.queryIdsProducts(query, idProducts);

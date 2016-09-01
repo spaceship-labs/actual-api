@@ -164,8 +164,8 @@ module.exports = {
         via:'Products'
       },
 
-      PackagesInfo:{
-        collection:'ProductPackageInfo',
+      PackageRules:{
+        collection:'PackageRule',
         via:'Product'
       }
 

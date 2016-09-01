@@ -30,9 +30,9 @@ module.exports = {
     var id          = form.id;
     var queryPromos = Search.getPromotionsQuery();
     Store.findOne({id:id})
-      .populate('ProductsPackages', queryPromo)
+      .populate('PromotionPackages', queryPromos)
       .then(function(store){
-        res.json(store.ProductsPackages);
+        res.json(store.PromotionPackages);
       })
       .catch(function(err){
         console.log(err);
