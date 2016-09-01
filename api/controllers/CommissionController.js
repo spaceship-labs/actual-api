@@ -9,8 +9,8 @@ module.exports = {
   find: function(req, res) {
     var form = req.params.all();
     var model = 'commission';
-    var searchFields   = [];
-    var populateFields = [];
+    var searchFields   = ['user', 'rate', 'ammount'];
+    var populateFields = ['payment'];
     Common.find(model, form, searchFields, populateFields).then(function(result){
       res.ok(result);
     },function(err){

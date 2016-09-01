@@ -16,6 +16,16 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
+    ammount: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
+    },
+    ammountPayment: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
+    },
     payment: {
       model: 'payment',
       required: true,
