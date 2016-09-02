@@ -2,19 +2,8 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 
 module.exports = {
-  getStoreWarehouses: getStoreWarehouses,
   product           : productShipping
 };
-
-function getStoreWarehouses(storeId){
-  return Store.findOne({id:storeId}).populate('Warehouse')
-    .then(function(store){
-      if(!store || !store.Warehouse){
-        return Promise.reject([]);
-      }
-      return Delivery.find({ToCode: store.Warehouse.WhsCode, Active:'Y' });
-    });
-}
 
 function productShipping(productCode, warehouseId) {
   return Company

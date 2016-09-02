@@ -75,9 +75,7 @@ module.exports = {
   express:{
     customMiddleware: function(app){
       var timeout = require('connect-timeout');
-      //app.use(passport.initialize());
-      //app.use(passport.session());
-      app.use(timeout('360s'));
+      app.use(timeout('3600s'));
       app.use(Files.middleware);
     }
   }

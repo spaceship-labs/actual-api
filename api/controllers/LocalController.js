@@ -16,6 +16,20 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       })
+  },
+
+  cacheStock: function(req, res){
+    sails.log.info('Empezo el stock map en controller : ' + new Date() );
+    StockService.cacheStoresStock()
+      .then(function(result){
+        sails.log.info('Termino el stock map en controller: ' + new Date() );
+        return res.json(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate('err');
+      })
+
   }
 
 };
