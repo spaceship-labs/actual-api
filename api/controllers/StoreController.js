@@ -46,13 +46,12 @@ module.exports = {
     Role.findOne({name:'seller'})
       .then(function(sellerRole){
         var sellerRoleId = sellerRole.id;
-        return User.find({MainStore: id, role: sellerRoleId});
+        return User.find({mainStore: id, role: sellerRoleId});
       })
       .then(function(sellers){
         res.json(sellers);
       })
       .catch(function(err){
-        console.log(err);
         res.negotiate(err);
       });
   },
