@@ -16,6 +16,30 @@ module.exports = {
     },function(err){
       res.notFound();
     });
+  },
+
+  total: function(req, res) {
+    var form  = req.allParams();
+    var query = {
+      user: form.user,
+      datePayment: {
+        '>=': form.dateFrom,
+        '<': form.dateTo
+      }
+    };
+    Commission
+      .find(query)
+      .then(function(commissions) {
+        return commissions.reduce(function(acum, current) {
+          return acum + current.ammount;
+        }, 0);
+      })
+      .then(function(total) {
+        return res.json(total);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
   }
 };
 
