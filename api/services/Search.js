@@ -49,11 +49,7 @@ function applyOrFilters(query, filters){
   if(filters.length > 0){
     var andConditions = [];
     filters.forEach(function(filter){
-      //TODO check what is this
-      filter.values = filter.values.filter(function(v){
-        return v;
-      });
-      if(filter.values.length > 0){
+      if( isFilterValid(filter) ){
         var orConditions = [];
         filter.values.forEach(function(val){
           var condition = {};
@@ -70,6 +66,16 @@ function applyOrFilters(query, filters){
     }
   }
   return query;
+}
+
+function isFilterValid(filter){
+  filter.values = filter.values.filter(function(v){
+    return !_.isUndefined(v);
+  });
+  if(filter.values && filter.values.length > 0){
+    return true;
+  }
+  return false;
 }
 
 function queryTerms(query, terms) {
@@ -110,7 +116,6 @@ function getProductsByCategory(categoryQuery) {
 
 function getProductsByCategories(categoriesIds, options) {
   var productsIds         = [];
-  var excludedProductsIds = []; //Flag variable
   var relationsHash       = {};
   var relationsArray      = [];
   options = options || {};
@@ -196,7 +201,7 @@ function promotionCronJobSearch(opts) {
 
   return getProductsByCategories(
     categories, 
-    {excludedCategories: form.excludedCategories}
+    {excludedCategories: opts.excludedCategories}
   )
     .then(function(catprods) {
       return [

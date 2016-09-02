@@ -88,7 +88,7 @@ function updatePackageRule(product){
     .then(function(productPackage){
       var params = {
         quantity: product.packageRule.quantity,
-        discount: product.packageRule.discount,
+        discountPg1: product.packageRule.discountPg1,
         discountPg2: product.packageRule.discountPg2,
         discountPg3: product.packageRule.discountPg3,
         discountPg4: product.packageRule.discountPg4,

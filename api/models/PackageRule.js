@@ -3,12 +3,7 @@ module.exports = {
   migrate:'alter',
   attributes:{
     quantity: {type:'integer', required:true},
-    discount: {type:'float', required:true},
-    discountType: {
-      type:'string',
-      enum:['ammount','percentage']
-    },
-
+    discountPg1: {type:'float', required:true},
     discountPg2: {type:'float', required:true},
     discountPg3: {type:'float', required:true},
     discountPg4: {type:'float', required:true},
