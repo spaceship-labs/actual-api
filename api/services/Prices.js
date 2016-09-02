@@ -4,7 +4,6 @@ var storePromotions         = [];
 var storePackages           = [];
 var currentPromotionPackage = false;
 var DEFAULT_EXCHANGE_RATE   = 18.78;
-var currentPackageRules     = [];
 
 module.exports = {
   processDetails: processDetails,
@@ -57,22 +56,19 @@ function getDetailTotals(detail, opts){
   var quantity = detail.quantity;
   var currentDate = new Date();
   var queryPromos = Search.getPromotionsQuery();
-  //return new Promise(function(resolve, reject){
   return Product.findOne({id:productId})
     .populate('Promotions', queryPromos)
     .then(function(p){
-      var mainPromo = getProductMainPromo(p);
-      var unitPrice = p.Price;
-      var promo = mainPromo ? mainPromo.id : false;
-      var discountKey = getDiscountKey(opts.paymentGroup);
+      var mainPromo       = getProductMainPromo(p, quantity);
+      var unitPrice       = p.Price;
+      var discountKey     = getDiscountKey(opts.paymentGroup);
       var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
-      var subtotal = quantity * unitPrice;
-      var total = quantity * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
-      var discount = total - subtotal;
-      var detailTotals = {
+      var subtotal        = quantity * unitPrice;
+      var total           = quantity * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
+      var discount        = total - subtotal;
+      var detailTotals    = {
         id: detail.id,
         unitPrice: unitPrice,
-        Promotion: promo, //Promotion id
         discountPercent: discountPercent,
         discountKey: discountKey, //Payment group discountKey
         subtotal: subtotal,
@@ -81,12 +77,21 @@ function getDetailTotals(detail, opts){
         quantity: quantity,
         discount: discount
       }
+      if(mainPromo.id && !mainPromo.PromotionPackage){
+        detailTotals.Promotion = mainPromo.id;
+      }
+
+/*      
+      sails.log.info('Product: ' + p.ItemCode);
+      sails.log.info('paymentGroup: ' + opts.paymentGroup);
+      sails.log.info('mainPromo');
+      sails.log.info(mainPromo);
+      sails.log.info('detail total: ' + total);
+      sails.log.info('discountPercent: ' + discountPercent);
+      sails.log.info('--------------');
+*/
       return detailTotals;
     })
-    .catch(function(err){
-      console.log(err);
-      reject(err);
-    });
 }
 
 function getPromosByStore(storeId){
@@ -96,33 +101,25 @@ function getPromosByStore(storeId){
     .then(function(store){
       return store.Promotions;
     })
-    .catch(function(err){
-      console.log(err);
-    })
 }
 
 //@params product Object from model Product
 //Populated with promotions
-function getProductMainPromo(product){
-  if(product.Promotions && product.Promotions.length > 0){
-    product.Promotions = matchWithStorePromotions(product.Promotions);
-    return getPromotionWithHighestDiscount(product.Promotions);
+function getProductMainPromo(product, quantity){
+  var promotions = product.Promotions;
+  var packageRule = getDetailPackageRule(product.id, quantity)
+  promotions = matchWithStorePromotions(promotions);
+  //Taking package rule as a promotion
+  if(packageRule){
+    promotions = promotions.concat([packageRule]);
   }
-  return false;  
-}
-
-function matchWithStorePromotions(productPromotions){
-  var promotions = productPromotions.filter(function(promotion){
-    return _.findWhere(storePromotions, {id:promotion.id});
-  });  
-  return promotions;
-}
-
-function isAStorePackage(promotionPackageId){
-  return _.findWhere(storePackages, {id: promotionPackageId});
+  return getPromotionWithHighestDiscount(promotions);
 }
 
 function getPromotionWithHighestDiscount(productPromotions){
+  if(productPromotions.length <= 0){
+    return false;
+  }
   var indexMaxPromo = 0;
   var maxDiscount = 0;
   productPromotions = productPromotions || [];
@@ -135,6 +132,34 @@ function getPromotionWithHighestDiscount(productPromotions){
   return productPromotions[indexMaxPromo] || false;
 }
 
+function getDetailPackageRule(productId, quantity){
+  if(currentPromotionPackage.PackageRules.length > 0){
+    var query = {
+      Product : productId,
+      quantity: quantity
+    };
+    var detailRuleMatch = _.findWhere(currentPromotionPackage.PackageRules, query)
+    //if( detailRuleMatch && !detailRuleMatch.applied){
+    if( detailRuleMatch && !detailRuleMatch.applied){    
+      detailRuleMatch.applied = true;
+      return detailRuleMatch;
+    }
+  }
+  return false;
+}
+
+
+function matchWithStorePromotions(productPromotions){
+  var promotions = productPromotions.filter(function(promotion){
+    return _.findWhere(storePromotions, {id:promotion.id});
+  });  
+  return promotions;
+}
+
+function isAStorePackage(promotionPackageId){
+  return _.findWhere(storePackages, {id: promotionPackageId});
+}
+
 function getDiscountKey(group){
   var keys = ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'];
   return keys[group-1];
@@ -142,16 +167,23 @@ function getDiscountKey(group){
 
 function updateQuotationTotals(quotationId, opts){
   opts = opts || {paymentGroup:1 , updateDetails: true};
-  return getQuotationTotals(quotationId, opts).then(function(totals){
-    if(opts && opts.updateParams){
-      totals = _.extend(totals, opts.updateParams);
-    }
-    return Quotation.update({id:quotationId}, totals);
-  });
+  return getQuotationTotals(quotationId, opts)
+    .then(function(totals){
+      if(opts && opts.updateParams){
+        totals = _.extend(totals, opts.updateParams);
+      }
+      return Quotation.update({id:quotationId}, totals);
+    });
 }
 
 function getQuotationTotals(quotationId, opts){
   opts = opts || {paymentGroup:1 , updateDetails: true};
+  sails.log.warn('corrio getQuotationTotals');
+  sails.log.info('currentPromotionPackage')
+  sails.log.info(currentPromotionPackage);
+  sails.log.info('--------------------------------');
+  //currentPromotionPackage = false;
+  //currentPackageRules = []; 
   var quotationAux = false;
 
   return getPromosByStore(opts.currentStore)
@@ -172,9 +204,8 @@ function getQuotationTotals(quotationId, opts){
     })
     .spread(function(storePackagesFound, promotionPackage){
       storePackages = storePackagesFound;
-      if( isValidPromotionPackage(promotionPackage) ){
+      if( isValidPromotionPackage(promotionPackage, quotationAux.Details) ){
         currentPromotionPackage = promotionPackage;
-        currentPackageRules     = promotionPackage.PackageRules;
       }
       return processDetails(quotationAux.Details, opts);
     })
@@ -195,9 +226,12 @@ function getQuotationTotals(quotationId, opts){
     });
 }
 
-function isValidPromotionPackage(promotionPackage){
+function isValidPromotionPackage(promotionPackage, details){
   if(promotionPackage && promotionPackage.id){
-    if (isAStorePackage(promotionPackage.id) && validatePackageRules(promotionPackage) ){
+    if (
+      isAStorePackage(promotionPackage.id) && 
+      validatePackageRules(promotionPackage.PackageRules, details) 
+    ){
       return true;
     }
   }
@@ -208,7 +242,6 @@ function getCurrentPromotionPackageId(details){
   var exists = false;
   for (var i=0;i<details.length;i++){
     if(details[i].PromotionPackage){
-      currentPromotionPackage = details[i].PromotionPackage;
       exists = details[i].PromotionPackage;
     }
   }
@@ -235,18 +268,23 @@ function getExchangeRate(){
 
 function validatePackageRules(rules, details){
   var validFlag = true;
+  var rulesValidated = 0;
   for(var i = 0; i < rules.length; i++){
     var rule = rules[i];
-    if(!isValidRule(rule, detail)){
+    if(!isValidPackageRule(rule, details)){
       validFlag = false;
     }
+    rulesValidated++;    
+  }
+  if(rulesValidated < rules.length){
+    validFlag = false;
   }
   return validFlag;
 }
 
-function validatePackageRule(rule, detail){
+function isValidPackageRule(rule, details){
   var isValidRule = _.find(details, function(detail){
-    return (detail.Product.id === rule.Product && detail.quantity === detail.quantity);
+    return (detail.Product === rule.Product && detail.quantity === rule.quantity);
   });
   return isValidRule;  
 }

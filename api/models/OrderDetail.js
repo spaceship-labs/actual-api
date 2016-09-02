@@ -13,6 +13,9 @@ module.exports = {
     Promotion:{
       model:'Promotion'
     },
+    PromotionPackage:{
+      model:'ProductGroup'
+    },    
     Order:{
       model:'Order',
     },
