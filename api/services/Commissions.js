@@ -2,17 +2,39 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 
 module.exports = {
-  calculate: calculate,
-  calculateUser: calculateUser
+  calculate: calculate
 };
 
-function calculate(store, dateFrom, dateTo) {
+function calculate(store) {
+  var date  = new Date();
+  var first = setFirstDay(new Date());
+  var last  = setLastDay(new Date());
+  if (date.getDate() <= 15) {
+    var fdate = first;
+    var ldate = addDays(first, 14);
+  } else {
+    var fdate = addDays(first, 15);
+    var ldate = last;
+  }
+  return calculateStore(store, fdate, ldate);
+}
+
+function calculateStore(store, dateFrom, dateTo) {
   var query = queryDate({Store: store}, dateFrom, dateTo);
   return Payment
     .find(query)
     .sort('createdAt ASC')
     .then(function(payments) {
-      return payments.map(function(p) {return p.User});
+      return payments
+        .map(function(p) {
+          return p.User
+        })
+        .reduce(function(acum, current) {
+          if (acum.indexOf(current) == -1) {
+            return acum.concat(current);
+          }
+          return acum;
+        }, []);
     })
     .then(function(users) {
       return users.map(function(user) {
@@ -29,9 +51,16 @@ function calculateUser(user, dateFrom, dateTo) {
     .spread(function(rate, payments) {
       return payments.map(function(payment) {
         return Commission
-          .findOrCreate({payment: payment, user: user}, {payment: payment, user: user})
+          .findOne({payment: payment.id, user: user})
           .then(function(commission) {
-            return Commission.update({payment: payment.id, user: user}, {rate: rate});
+            return commission || Commission.create({payment: payment.id, user: user});
+          })
+          .then(function(commission) {
+            var ammount = (rate * payment.ammount).toFixed(2);
+            return Commission.update(
+              {payment: payment.id, user: user},
+              {datePayment: payment.createdAt, ammountPayment: payment.ammount, rate: rate, ammount: ammount }
+            );
           })
       });
     })
@@ -56,8 +85,8 @@ function userRate(user, dateFrom, dateTo) {
     })
     .spread(function(goal, role, utotal, stotal) {
       var sellers     = goal.sellers;
-      var gstore1     = goal.goal;
-      var gstore2     = goal.goal * 1.25;
+      var gstore1     = goal.goal / 2;
+      var gstore2     = gstore1 * 1.25;
       var gseller1    = gstore1 / sellers;
       var gseller2    = gstore2 / sellers;
       var baseSeller  = 3;
@@ -134,6 +163,11 @@ function queryDate(query, dateFrom, dateTo) {
   });
 }
 
+function setLastDay(date) {
+  var date = new Date(date);
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}
+
 function setFirstDay(date) {
   var date = new Date(date);
   date.setDate(1);
@@ -144,5 +178,11 @@ function setFirstDay(date) {
 function addOneDay(date) {
   var date = new Date(date);
   date.setDate(date.getDate() + 1);
+  return date;
+}
+
+function addDays(date, days) {
+  var date = new Date(date);
+  date.setDate(date.getDate() + days);
   return date;
 }
