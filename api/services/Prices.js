@@ -4,6 +4,7 @@ var storePromotions         = [];
 var storePackages           = [];
 var currentPromotionPackage = false;
 var DEFAULT_EXCHANGE_RATE   = 18.78;
+var currentPackageRules     = [];
 
 module.exports = {
   processDetails: processDetails,
@@ -53,24 +54,20 @@ function getDetailTotals(detail, opts){
   var subTotal = 0;
   var total = 0;
   var productId = detail.Product;
-  var qty = detail.quantity;
+  var quantity = detail.quantity;
   var currentDate = new Date();
-  var queryPromo = {};
-  queryPromo = {
-    startDate: {'<=': currentDate},
-    endDate: {'>=': currentDate},
-  };
+  var queryPromos = Search.getPromotionsQuery();
   //return new Promise(function(resolve, reject){
   return Product.findOne({id:productId})
-    .populate('Promotions', queryPromo)
+    .populate('Promotions', queryPromos)
     .then(function(p){
-      var mainPromo = getMainPromo(p);
+      var mainPromo = getProductMainPromo(p);
       var unitPrice = p.Price;
       var promo = mainPromo ? mainPromo.id : false;
       var discountKey = getDiscountKey(opts.paymentGroup);
       var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
-      var subtotal = qty * unitPrice;
-      var total = qty * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
+      var subtotal = quantity * unitPrice;
+      var total = quantity * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
       var discount = total - subtotal;
       var detailTotals = {
         id: detail.id,
@@ -81,7 +78,7 @@ function getDetailTotals(detail, opts){
         subtotal: subtotal,
         total:total,
         paymentGroup: opts.paymentGroup,
-        quantity: qty,
+        quantity: quantity,
         discount: discount
       }
       return detailTotals;
@@ -106,14 +103,12 @@ function getPromosByStore(storeId){
 
 //@params product Object from model Product
 //Populated with promotions
-function getMainPromo(product){
+function getProductMainPromo(product){
   if(product.Promotions && product.Promotions.length > 0){
-    //Filter product promotions with store promotions
     product.Promotions = matchWithStorePromotions(product.Promotions);
     return getPromotionWithHighestDiscount(product.Promotions);
-  }else{
-    return false;
   }
+  return false;  
 }
 
 function matchWithStorePromotions(productPromotions){
@@ -158,7 +153,6 @@ function updateQuotationTotals(quotationId, opts){
 function getQuotationTotals(quotationId, opts){
   opts = opts || {paymentGroup:1 , updateDetails: true};
   var quotationAux = false;
-  var isValidPackage = false;
 
   return getPromosByStore(opts.currentStore)
     .then(function(promos){
@@ -167,7 +161,7 @@ function getQuotationTotals(quotationId, opts){
     })
     .then(function(quotation){
       quotationAux = quotation; 
-      var currentPromotionPackageId = packageExist(quotation.Details);
+      var currentPromotionPackageId = getCurrentPromotionPackageId(quotation.Details);
       if(currentPromotionPackageId){
         return [
           getPackagesByStore(opts.currentStore),
@@ -178,9 +172,9 @@ function getQuotationTotals(quotationId, opts){
     })
     .spread(function(storePackagesFound, promotionPackage){
       storePackages = storePackagesFound;
-      currentPromotionPackage = promotionPackage;
-      if( isAStorePackage( promotionPackage.id  || false ) ){
-        isValidPackage = validatePackageRules(currentPromotionPackage);
+      if( isValidPromotionPackage(promotionPackage) ){
+        currentPromotionPackage = promotionPackage;
+        currentPackageRules     = promotionPackage.PackageRules;
       }
       return processDetails(quotationAux.Details, opts);
     })
@@ -201,7 +195,16 @@ function getQuotationTotals(quotationId, opts){
     });
 }
 
-function packageExist(details){
+function isValidPromotionPackage(promotionPackage){
+  if(promotionPackage && promotionPackage.id){
+    if (isAStorePackage(promotionPackage.id) && validatePackageRules(promotionPackage) ){
+      return true;
+    }
+  }
+  return false;
+}
+
+function getCurrentPromotionPackageId(details){
   var exists = false;
   for (var i=0;i<details.length;i++){
     if(details[i].PromotionPackage){

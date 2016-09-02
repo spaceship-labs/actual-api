@@ -613,11 +613,6 @@ module.exports.routes = {
     controller: 'package',
     action:'getDetailedPackage'
   },
-
-  '/cuadros':{
-    controller: 'local',
-    action:'cuadros'
-  }
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

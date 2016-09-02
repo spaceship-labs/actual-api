@@ -1,7 +1,7 @@
 //APP/SAP COLLECTION
 module.exports = {
     schema: true,
-    //migrate: 'alter',
+    migrate: 'alter',
     tableName: 'Product',
     attributes: {
       /*----------------/

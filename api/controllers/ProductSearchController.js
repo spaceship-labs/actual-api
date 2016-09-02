@@ -2,13 +2,15 @@ var _  = require('underscore');
 
 module.exports = {
   searchByFilters: function(req, res){
-    var form         = req.params.all();
-    var terms        = [].concat(form.keywords || []);
-    var filtervalues = [].concat(form.ids || []);
-    var minPrice     = form.minPrice;
-    var maxPrice     = form.maxPrice;
-    var queryPromos  = Search.getPromotionsQuery();
-    var activeStore  = req.user.activeStore;
+    var form           = req.params.all();
+    var terms          = [].concat(form.keywords || []);
+    var filtervalues   = [].concat(form.ids || []);
+    var minPrice       = form.minPrice;
+    var maxPrice       = form.maxPrice;
+    var queryPromos    = Search.getPromotionsQuery();
+    var activeStore    = req.user.activeStore;
+    var warehouses     = [];
+    var productsIds    = [];
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -18,15 +20,11 @@ module.exports = {
     query            = Search.queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
     
-    Shipping.getStoreWarehouses(activeStore)
-      .then(function(warehouses){
-        sails.log.info('warehouses');
-        sails.log.info(warehouses);
-        return Search.getProductsByFilterValue(filtervalues)
-      })
-      .then(function(idProducts) {
-        if (filtervalues.length != 0) {
-          query = Search.queryIdsProducts(query, idProducts);
+    Search.getProductsByFilterValue(filtervalues)
+      .then(function(productsIdsResult) {
+        productsIds = productsIdsResult;
+        if (filtervalues.length > 0) {
+          query = Search.queryIdsProducts(query, productsIds);
         }
         return [
           Product.count(query),
@@ -34,7 +32,7 @@ module.exports = {
             .populate('Promotions', queryPromos)
             .paginate(paginate)
             .sort('Available DESC')
-        ];
+        ];        
       })
       .spread(function(total, products) {
         return res.json({total: total, products: products});
@@ -45,23 +43,27 @@ module.exports = {
   },
 
   searchByCategory: function(req, res) {
-    var form         = req.params.all();
-    var handle       = [].concat(form.category);
-    var filtervalues = [].concat(form.filtervalues);
-    var queryPromos  = Search.getPromotionsQuery();
-    var query        = {};
-    var price        = {
+    var form           = req.params.all();
+    var handle         = [].concat(form.category);
+    var filtervalues   = [].concat(form.filtervalues);
+    var queryPromos    = Search.getPromotionsQuery();
+    var query          = {};
+    var price          = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
     };
-    var paginate     = {
+    var paginate       = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
+    var productsIdsAux = [];
 
     Search.getProductsByCategory({Handle:handle})
       .then(function(catprods) {
-        return [catprods, Search.getProductsByFilterValue(filtervalues)];
+        return [
+          catprods, 
+          Search.getProductsByFilterValue(filtervalues)
+        ];
       })
       .spread(function(catprods, filterprods) {
         if (!handle || handle.length == 0) {
@@ -72,9 +74,9 @@ module.exports = {
           return _.intersection(catprods, filterprods);
         }
       })
-      .then(function(idProducts) {
+      .then(function(productsIds) {
         query = {
-          id: idProducts,
+          id: productsIds,
           Price: price,
           Active: 'Y'
         };
