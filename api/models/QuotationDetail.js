@@ -35,5 +35,8 @@ module.exports = {
     PromotionPackage:{
       model:'ProductGroup'
     },
+    PromotionPackageApplied:{
+      model:'ProductGroup'
+    }
   }
 };

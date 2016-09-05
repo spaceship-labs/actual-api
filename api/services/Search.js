@@ -35,18 +35,20 @@ function queryPrice(query, minPrice, maxPrice) {
 }
 
 function applyFilters(query, filters) {
-  filters.forEach(function(filter) {
-    if (filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0) {
-      query[filter.key] = filter.value;
-    } else if (filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)) {
-      query[filter.key] = filter.value;
-    }
-  });
+  if( _.isArray(filters) && filters.length > 0 ){
+    filters.forEach(function(filter) {
+      if (filter.value && !_.isUndefined(filter.value) && _.isArray(filter.value) && filter.value.length > 0) {
+        query[filter.key] = filter.value;
+      } else if (filter.value && !_.isUndefined(filter.value) && !_.isArray(filter.value)) {
+        query[filter.key] = filter.value;
+      }
+    });
+  }
   return query;
 }
 
 function applyOrFilters(query, filters){
-  if(filters.length > 0){
+  if( _.isArray(filters) && filters.length > 0 ){
     var andConditions = [];
     filters.forEach(function(filter){
       if( isFilterValid(filter) ){

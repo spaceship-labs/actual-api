@@ -16,7 +16,9 @@ module.exports = {
         return Quotation.create(form);
       })
       .then(function(created){
-        return Prices.updateQuotationTotals(created.id, opts);
+        //return Prices.updateQuotationTotals(created.id, opts);
+        var calculator = Prices.Calculator();
+        return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -49,7 +51,9 @@ module.exports = {
         return Quotation.update({id:id}, form)
       })
       .then(function(){
-        return Prices.updateQuotationTotals(id, opts);
+        //return Prices.updateQuotationTotals(id, opts);
+        var calculator = Prices.Calculator();
+        return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -160,7 +164,9 @@ module.exports = {
         return QuotationDetail.create(form);
       })
       .then(function(created){
-        return Prices.updateQuotationTotals(id, opts);
+         var calculator = Prices.Calculator();
+         return calculator.updateQuotationTotals(id, opts);
+        //return Prices.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -191,7 +197,9 @@ module.exports = {
         return QuotationDetail.destroy({id:id});
       })
       .then(function(){
-        return Prices.updateQuotationTotals(quotationId, opts);
+        var calculator = Prices.Calculator();
+        return calculator.updateQuotationTotals(id, opts);
+        //return Prices.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -308,7 +316,8 @@ module.exports = {
     User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
         params.currentStore = user.activeStore;
-        return Prices.getQuotationTotals(id, params);
+        var calculator = Prices.Calculator();
+        return calculator.getQuotationTotals(id, params);
       })
       .then(function(totals){
         res.json(totals);
