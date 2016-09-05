@@ -30,12 +30,19 @@ module.exports = {
     Commission
       .find(query)
       .then(function(commissions) {
-        return commissions.reduce(function(acum, current) {
+        var commission = commissions.reduce(function(acum, current) {
           return acum + current.ammount;
         }, 0);
+        var total = commissions.reduce(function(acum, current) {
+          return acum + current.ammountPayment;
+        }, 0);
+        return [commission, total];
       })
-      .then(function(total) {
-        return res.json(total);
+      .spread(function(commissions, total) {
+        return res.json({
+          commissions: commissions,
+          total: total
+        });
       })
       .catch(function(err) {
         return res.negotiate(err);
