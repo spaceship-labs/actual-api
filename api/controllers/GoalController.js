@@ -4,6 +4,7 @@
  * @description :: Server-side logic for managing goals
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var _ = require('underscore');
 
 module.exports = {
   find: function(req, res) {
@@ -63,6 +64,15 @@ module.exports = {
       .catch(function(err) {
         return res.negotiate(err);
       });
+  },
+
+  searchByDate: function(req, res) {
+    var form  = req.allParams();
+    var query = queryDate({store: form.store}, form.dateFrom, form.dateTo);
+    Goal.findOne(query).exec(function(err, c) {
+      if (err) {return res.negotiate(err);}
+      return res.json(c);
+    });
   }
 };
 
@@ -78,4 +88,23 @@ function exists(goals) {
     .then(function(goals) {
       return goals.length > 0 && goals;
     });
+}
+
+function queryDate(query, dateFrom, dateTo) {
+  var dateFrom = new Date(dateFrom);
+  var dateTo   = new Date(dateTo);
+  dateFrom.setHours(0, 0, 0, 0);
+  dateTo.setHours(0, 0, 0, 0);
+  return _.assign(query, {
+    date: {
+      '>=': dateFrom,
+      '<': addOneDay(dateTo)
+    }
+  });
+}
+
+function addOneDay(date) {
+  var date = new Date(date);
+  date.setDate(date.getDate() + 1);
+  return date;
 }
