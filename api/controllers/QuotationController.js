@@ -198,7 +198,7 @@ module.exports = {
       })
       .then(function(){
         var calculator = Prices.Calculator();
-        return calculator.updateQuotationTotals(id, opts);
+        return calculator.updateQuotationTotals(quotationId, opts);
         //return Prices.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
