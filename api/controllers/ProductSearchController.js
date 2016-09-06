@@ -8,7 +8,8 @@ module.exports = {
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
     var queryPromos    = Search.getPromotionsQuery();
-    var activeStore    = req.user.activeStore;
+    var activeStoreId  = req.user.activeStore || false;
+    var filterByStore  = form.filterByStore || true;    
     var warehouses     = [];
     var productsIds    = [];
     var paginate     = {
@@ -21,11 +22,23 @@ module.exports = {
     query.Active     = 'Y';
     
     Search.getProductsByFilterValue(filtervalues)
+
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
+        if(filterByStore && activeStoreId){
+          return Store.findOne({id:activeStoreId});
+        }
+        return false;
+      })  
+      .then(function(activeStore) {
         if (filtervalues.length > 0) {
           query = Search.queryIdsProducts(query, productsIds);
         }
+        if(filterByStore && activeStore.code){
+          query[activeStore.code] = {'>':0};
+        }          
+        sails.log.info('query');
+        sails.log.info(query);
         return [
           Product.count(query),
           Product.find(query)
@@ -47,7 +60,10 @@ module.exports = {
     var handle         = [].concat(form.category);
     var filtervalues   = [].concat(form.filtervalues);
     var queryPromos    = Search.getPromotionsQuery();
+    var activeStoreId  = req.user.activeStore || false;
+    var filterByStore  = form.filterByStore || true;    
     var query          = {};
+    var productsIds    = [];
     var price          = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -74,12 +90,22 @@ module.exports = {
           return _.intersection(catprods, filterprods);
         }
       })
-      .then(function(productsIds) {
+      .then(function(productsIdsResult) {
+        productsIds = productsIdsResult;
+        if(filterByStore && activeStoreId){
+          return Store.findOne({id:activeStoreId});
+        }
+        return false;
+      })      
+      .then(function(activeStore) {
         query = {
           id: productsIds,
           Price: price,
           Active: 'Y'
         };
+        if(filterByStore && activeStore.code){
+          query[activeStore.code] = {'>':0};
+        }        
         return [
           Product.count(query),
           Product.find(query)
@@ -109,8 +135,11 @@ module.exports = {
     var populateImgs       = form.populateImgs || true;
     var populatePromotions = form.populatePromotions || true;
     var queryPromos        = Search.getPromotionsQuery();
+    var activeStoreId      = req.user.activeStore || false;
+    var filterByStore      = form.filterByStore || true;
     var query              = {};
     var products           = [];
+    var productsIds        = [];
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -147,11 +176,24 @@ module.exports = {
       .spread(function(catprods, filterprods, groupsprods) {
         return Search.getMultiIntersection([catprods, filterprods, groupsprods]);
       })
-      .then(function(idProducts) {
-        if( Search.areFiltersApplied(categories, filtervalues, groups) && idProducts.length > 0 ){
-          filters.push({key:'id', value: idProducts});
+      .then(function(productsIdsResult) {
+        productsIds = productsIdsResult;
+        if(filterByStore && activeStoreId){
+          return Store.findOne({id:activeStoreId});
         }
-        else if( Search.areFiltersApplied(categories, filtervalues, groups) && idProducts.length === 0 ){
+        return false;
+      })
+      .then(function(activeStore){
+        if(filterByStore && activeStore.code){
+          filters.push(
+            {key:activeStore.code, value: {'>':0} }
+          );
+        }
+
+        if( Search.areFiltersApplied(categories, filtervalues, groups) && productsIds.length > 0 ){
+          filters.push({key:'id', value: productsIds});
+        }
+        else if( Search.areFiltersApplied(categories, filtervalues, groups) && productsIds.length === 0 ){
           return [
             Promise.resolve(0), //total products number
             Promise.resolve([])  //products
