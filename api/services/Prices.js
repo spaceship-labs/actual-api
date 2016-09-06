@@ -220,15 +220,12 @@ function Calculator(){
     var promotions = product.Promotions;
     var packageRule = getDetailPackageRule(product.id, quantity)
     promotions = matchWithStorePromotions(promotions);
-    if(packageRule){
-      return packageRule;
-    }
+
     //Taking package rule as a promotion
-    /*
     if(packageRule){
       promotions = promotions.concat([packageRule]);
+      //return packageRule;
     }
-    */
     return getPromotionWithHighestDiscount(promotions);
   }
 
