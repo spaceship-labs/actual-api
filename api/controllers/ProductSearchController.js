@@ -9,7 +9,7 @@ module.exports = {
     var maxPrice       = form.maxPrice;
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore || false;
-    var filterByStore  = form.filterByStore || true;    
+    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var warehouses     = [];
     var productsIds    = [];
     var paginate     = {
@@ -37,8 +37,6 @@ module.exports = {
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
         }          
-        sails.log.info('query');
-        sails.log.info(query);
         return [
           Product.count(query),
           Product.find(query)
@@ -61,7 +59,7 @@ module.exports = {
     var filtervalues   = [].concat(form.filtervalues);
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore || false;
-    var filterByStore  = form.filterByStore || true;    
+    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var query          = {};
     var productsIds    = [];
     var price          = {
@@ -136,7 +134,7 @@ module.exports = {
     var populatePromotions = form.populatePromotions || true;
     var queryPromos        = Search.getPromotionsQuery();
     var activeStoreId      = req.user.activeStore || false;
-    var filterByStore      = form.filterByStore || true;
+    var filterByStore      = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var query              = {};
     var products           = [];
     var productsIds        = [];
@@ -144,6 +142,7 @@ module.exports = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
     };
+
     var paginate     = {
       page:  form.page  || 1,
       limit: form.limit || 10
