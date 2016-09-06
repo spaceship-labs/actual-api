@@ -16,7 +16,6 @@ module.exports = {
         return Quotation.create(form);
       })
       .then(function(created){
-        //return Prices.updateQuotationTotals(created.id, opts);
         var calculator = Prices.Calculator();
         return calculator.updateQuotationTotals(created.id, opts);
       })
@@ -199,14 +198,16 @@ module.exports = {
       .then(function(){
         var calculator = Prices.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
-        //return Prices.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
-          res.json(updatedQuotation[0]);
-        }else{
-          res.json(null);
+          return Quotation.findOne({id: updatedQuotation[0].id}).populate('Details');
+          //return res.json(updatedQuotation[0]);
         }
+        return Promise.reject('No hay cotización');
+      })
+      .then(function(quotation){
+        res.json(quotation);
       })
       .catch(function(err){
         console.log(err);

@@ -68,11 +68,6 @@ function Calculator(){
           totals.discount += (pd.subtotal - pd.total);
           totals.totalProducts += pd.quantity;
         });
-
-        sails.log.info('------------');
-        sails.log.info('packagesRules');
-        sails.log.info(packagesRules);
-
         return totals;
       });
   }
@@ -109,10 +104,10 @@ function Calculator(){
   }
 
   function getAllPackagesRules(promotionPackages, details){
-    var promotionPackages = filterPromotionPackages(promotionPackages, details);
+    var filteredPackages = filterPromotionPackages(promotionPackages, details);
     var rules             = [];
-    for(var i=0;i<promotionPackages.length;i++){
-      rules = rules.concat(promotionPackages[i].PackageRules);
+    for(var i=0;i<filteredPackages.length;i++){
+      rules = rules.concat(filteredPackages[i].PackageRules);
     }
     return rules;
   }
@@ -209,10 +204,6 @@ function Calculator(){
           PromotionPackageApplied: null
         }
 
-        sails.log.info('Product: ' + p.ItemCode);
-        sails.log.info('mainPromo');
-        sails.log.info(mainPromo);
-
         if(mainPromo.id && !mainPromo.PromotionPackage){
           detailTotals.Promotion = mainPromo.id;
         }
@@ -230,10 +221,8 @@ function Calculator(){
     var packageRule = getDetailPackageRule(product.id, quantity)
     promotions = matchWithStorePromotions(promotions);
     if(packageRule){
-      sails.log.info('packagerule');
       return packageRule;
     }
-    sails.log.warn('promotion or nothing');
     //Taking package rule as a promotion
     /*
     if(packageRule){
