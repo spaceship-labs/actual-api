@@ -8,15 +8,16 @@ module.exports = {
 };
 
 function getExchangeRate(){
-  return Site.findOne({handle:'actual-group'}).then(function(site){
-    return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
-  });
+  return Site.findOne({handle:'actual-group'})
+    .then(function(site){
+      return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
+    });
 }
 
 function Calculator(){
-  var storePromotions          = [];
-  var storePackages            = [];
-  var packagesRules            = [];
+  var storePromotions = [];
+  var storePackages   = [];
+  var packagesRules   = [];
 
   function updateQuotationTotals(quotationId, opts){
     opts = opts || {paymentGroup:1 , updateDetails: true};
@@ -52,7 +53,11 @@ function Calculator(){
       })
       .spread(function(storePackagesFound, promotionPackages){
         storePackages = storePackagesFound;
+        sails.log.info('promotion packages');
+        sails.log.info(promotionPackages);
         packagesRules = getAllPackagesRules(promotionPackages, quotationAux.Details);
+        sails.log.info('all packages rules');
+        sails.log.info(packagesRules);
         return processDetails(quotationAux.Details, opts);
       })
       .then(function(processedDetails){
@@ -105,8 +110,12 @@ function Calculator(){
 
   function getAllPackagesRules(promotionPackages, details){
     var filteredPackages = filterPromotionPackages(promotionPackages, details);
+    sails.log.info('FILTERED PACKAGES NUM:');
+    sails.log.info(filteredPackages.length);
     var rules             = [];
     for(var i=0;i<filteredPackages.length;i++){
+      sails.log.info('filteredPackages[i]Rules: ');
+      sails.log.info(filteredPackages[i].PackageRules);
       rules = rules.concat(filteredPackages[i].PackageRules);
     }
     return rules;
@@ -176,9 +185,9 @@ function Calculator(){
     opts = opts || {};
     paymentGroup = opts.paymentGroup || 1;
     var subTotal = 0;
-    var total = 0;
-    var productId = detail.Product;
-    var quantity = detail.quantity;
+    var total    = 0;
+    var productId   = detail.Product;
+    var quantity    = detail.quantity;
     var currentDate = new Date();
     var queryPromos = Search.getPromotionsQuery();
     return Product.findOne({id:productId})
@@ -220,7 +229,6 @@ function Calculator(){
     var promotions = product.Promotions;
     var packageRule = getDetailPackageRule(product.id, quantity)
     promotions = matchWithStorePromotions(promotions);
-
     //Taking package rule as a promotion
     if(packageRule){
       promotions = promotions.concat([packageRule]);

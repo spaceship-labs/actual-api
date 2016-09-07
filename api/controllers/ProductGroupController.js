@@ -6,13 +6,14 @@ module.exports = {
     var form = req.params.all();
     var model = 'productgroup';
     var searchFields = ['Name'];
-    //var populateFields = ['Categories'];
-    Common.find(model, form, searchFields).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    })
+    Common.find(model, form, searchFields)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
   },
 
   findById: function(req, res){
@@ -32,94 +33,111 @@ module.exports = {
   getVariantGroupProducts: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    ProductGroup.findOne({id:id, Type:'variations'}).populate('Products').exec(function(err, group){
-      if(err){
+    ProductGroup.findOne({id:id, Type:'variations'}).populate('Products')
+      .then(function(group){
+        if(group.Products.length > 0){
+          var productsIds = [];
+          group.Products.forEach(function(prod){
+            productsIds.push(prod.ItemCode);
+          });
+          return Product.find({ItemCode: productsIds}).populate('FilterValues')
+        }else{
+          return false;
+        }
+      })
+      .then(function(products){
+        if(products){
+          return res.json(products);
+        }
+        return res.json(false);
+      })
+      .catch(function(err){
         console.log(err);
-      }
-      if(group.Products.length > 0){
-        var productsIds = [];
-        group.Products.forEach(function(prod){
-          productsIds.push(prod.ItemCode);
-        });
-        Product.find({ItemCode: productsIds}).populate('FilterValues').exec(function(err2, prods){
-          if(err2) console.log(err2);
-          res.json(prods);
-        });
-
-      }else{
-        res.json(false);
-      }
-    });
+        res.negotiate(err);
+      })
   },
 
   create: function(req, res){
     var form = req.params.all();
-    sails.log.debug(form);
-    ProductGroup.create(form).exec(function(err, created){
-      if(err){
+    ProductGroup.create(form)
+      .then(function(created){
+        res.json(created);
+      })
+      .catch(function(err){
         console.log(err);
-      }
-      res.json(created);
-    });
+        res.negotiate(err);
+      });
   },
 
   update: function(req,res){
     var form = req.params.all();
     delete form.Products;
-    ProductGroup.update({id: form.id}, form).exec(function updateCB(err, updated){
-      if(err) console.log(err);
-      res.json(updated);
-    });
+    ProductGroup.update({id: form.id}, form)
+      .then(function(updated){
+        res.json(updated);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   destroy: function(req, res){
     var form = req.params.all();
-    ProductGroup.destroy({id: form.id}).exec(function destroyCB(err){
-      if(err) console.log(err);
-
-      res.json({destroyed: true});
-
-    });
+    ProductGroup.destroy({id: form.id})
+      .then(function(){
+        res.json({destroyed:true});
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   addProductToGroup: function(req, res){
     var form = req.params.all();
     var product = form.product;
     var group = form.group;
-    ProductGroup.findOne({id: group}).populate('Products').exec(function(err, prod){
-      if(err){
+    ProductGroup.findOne({id: group}).populate('Products')
+      .then(function(group){
+        if(group){
+          group.Products.add(product);
+          group.save(function(errSave, result){
+            if(errSave){
+              console.log(errSave);
+              return Promise.reject(errSave);
+            }
+            sails.log.debug('product added to group');
+            return res.json(result);
+          });
+        }
+        return res.json(group)
+      })
+      .catch(function(err){
         console.log(err);
-      }
-      if(product){
-        prod.Products.add(product);
-        prod.save(function(errSave, result){
-          if(errSave){
-            console.log(errSave);
-          }
-          sails.log.debug('product added to group');
-          res.json(result);
-        });
-      }else{
-        res.json(prod);
-      }
-    });
+        res.negotiate(err);
+      })
   },
+
   removeProductFromGroup: function(req, res){
     var form = req.params.all();
     var product = form.product;
     var group = form.group;
-    ProductGroup.findOne({id: group}).populate('Products').exec(function(err, prod){
-      if(err){
+    ProductGroup.findOne({id: group}).populate('Products')
+      .then(function(group){
+        group.Products.remove(product);
+        group.save(function(errSave, result){
+          if(errSave){
+            console.log(errSave);
+            return Promise.reject(errSave);
+          }
+          res.json(result);
+        });
+      })
+      .catch(function(err){
         console.log(err);
-      }
-      prod.Products.remove(product);
-      prod.save(function(errSave, result){
-        if(errSave){
-          console.log(errSave);
-        }
-        res.json(result);
-      });
-    });
+        res.negotiate(err);
+      })
 
   },
 
@@ -132,7 +150,8 @@ module.exports = {
     var querySearchAux = {};
     var model = ProductGroup;
     var searchFields = ['Name'];
-
+    var groups = false;
+    var groupsCount = false;
     if(term){
       if(searchFields.length > 0){
         query.or = [];
@@ -145,23 +164,21 @@ module.exports = {
       }
       querySearchAux = _.clone(query);
     }
-
     query.skip = (page-1) * items;
     query.limit = items;
-
-    var read = model.find(query);
-
-    read.exec(function(err, results){
-      model.count(querySearchAux).exec(function(err,count){
-        if(err){
-          console.log(err);
-          return res.notFound();
-        }else{
-          return res.ok({data:results, total:count});
-        }
+    
+    ProductGroup.find(query)
+      .then(function(results){
+        groups = results;
+        return model.count(querySearchAux)
       })
-    });
-
+      .then(function(count){
+        return res.ok({data:groups, total:count});
+      })
+      .catch(function(err){
+        console.log(err);
+        return res.negotiate(err);
+      })
   },
 
   updateIcon: function(req,res){
@@ -173,11 +190,20 @@ module.exports = {
     },function(e,group){
       if(e) console.log(e);
       //TODO check how to retrieve images instead of doing other query
-      var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
-      ProductGroup.findOne({id:form.id}, {select: selectedFields}).exec(function(err2, updatedGroup){
-        if(err2) console.log(err2);
-        return res.json(updatedGroup);
-      });
+      var selectedFields = [
+        'icon_filename',
+        'icon_name',
+        'icon_size',
+        'icon_type',
+        'icon_typebase'
+      ];
+      ProductGroup.findOne({id:form.id}, {select: selectedFields})
+        .then(function(updatedGroup){
+          res.json(updatedGroup);
+        })
+        .catch(function(err){
+          res.negotiate(err);
+        })
       //res.json(product);
     });
   },
@@ -189,7 +215,10 @@ module.exports = {
       profile: 'avatar',
       id : form.id,
     },function(e,group){
-      if(e) console.log(e);
+      if(e) {
+        console.log(e);
+        return res.negotiate(e);
+      }
       res.json(group);
     });
   },
@@ -201,12 +230,14 @@ module.exports = {
     form.filters = form.filters || {};
     form.filters.Type = 'packages';
     //var populateFields = ['Categories'];
-    Common.find(model, form, searchFields).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    })
+    Common.find(model, form, searchFields)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
   },
 
 };

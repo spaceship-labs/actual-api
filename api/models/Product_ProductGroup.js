@@ -10,5 +10,11 @@ module.exports = {
       columnName:'productgroup_Products',
       model: 'productgroup'
     }
+  },
+
+  afterDestroy: function(destroyedRecords, cb){
+    sails.log.info('destroyedRecords');
+    sails.log.info(destroyedRecords);
+    cb();
   }
 };
