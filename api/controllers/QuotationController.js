@@ -82,7 +82,6 @@ module.exports = {
       .populate('Order')
       .populate('Payments')
       .populate('Manager')
-      //.populate('Address')
 
       .then(function(quotation){
         if(!quotation){
@@ -109,41 +108,51 @@ module.exports = {
   addRecord: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var createdRecord = false;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
     delete form.id;
     form.Quotation = id;
-    QuotationRecord.create(form).exec( function createCB(err, createdRecord){
-      if(err) console.log(err);
 
-      QuotationRecord.findOne({id:createdRecord.id}).exec(function cb(errFind, record){
-        if(errFind) console.log(errFind);
-
+    QuotationRecord.create(form)
+      .then(function(createdRecordResult){
+        createdRecord = createdRecordResult;
+        return QuotationRecord.findOne({id:createdRecord.id})
+      })
+      .then(function(){
         if(req.file('file')._files[0]){
           sails.log.info('adding file');
+          
           record.addFiles(req,{
             dir : 'records/gallery',
             profile: 'gallery'
-          },function(e,record){
-            if(e){
-              console.log(e);
-              res.json(false);
-            }else{
-              //TODO check how to retrieve images instead of doing other query
-              QuotationRecord.findOne({id:createdRecord.id}).populate('User').populate('files').exec(function findCB(err2, recordUpdated){
-                if(err2) console.log(err2);
-                res.json(recordUpdated);
-              });
-            }
+            },function(e,record){
+              if(e){
+                console.log(e);
+                return Promise.reject(e);
+              }else{
+                //TODO check how to retrieve images instead of doing other query
+                return QuotationRecord.findOne({id:createdRecord.id})
+                  .populate('User')
+                  .populate('files')
+              }
           });
+        
         }else{
           sails.log.info('not adding file');
           res.json(record);
         }
-      });
-      //res.json(record);
-    });
+        return record;        
+      })
+      .then(function(record){
+        res.json(record);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
+
   },
 
 
