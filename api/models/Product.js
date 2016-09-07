@@ -7,19 +7,15 @@ module.exports = {
       /*----------------/
           #SAP FIELDS
       /*---------------*/
-
       ItemCode:{
         type:'string',
         //primaryKey:true
       },
-
       ItemName:{type:'string'},
-
       ItmsGrpCod:{ //Brand
           type:'integer',
           model:'productbrand'
       },
-
       SuppCatNum:{type:'string',size:17},
       CodeBars:{type:'string'},
       OnHand:{type:'float'},
@@ -127,43 +123,35 @@ module.exports = {
         via:'Product',
         //excludeSync: true
       },
-
       Sizes: {
         collection: 'productsize',
         via:'Product',
       },
-
       Categories:{
         collection: 'ProductCategory',
         via: 'Products',
         dominant: true
       },
-
       FilterValues:{
         collection:'ProductFilterValue',
         via: 'Products',
         dominant: true
       },
-
       Groups: {
         collection: 'ProductGroup',
         via: 'Products'
       },
-
       CustomBrand: {
         model: 'CustomBrand'
       },
-
       QuotationDetails:{
         collection:'QuotationDetail',
         via:'Product'
       },
-
       Promotions:{
         collection: 'Promotion',
         via:'Products'
       },
-
       PackageRules:{
         collection:'PackageRule',
         via:'Product'

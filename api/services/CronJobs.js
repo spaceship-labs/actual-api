@@ -1,5 +1,6 @@
 var cron = require('cron').CronJob;
-var Promise = require('bluebird')
+var Promise = require('bluebird');
+var storesCodes = [];
 
 module.exports.init = function(){
   console.log('initing cronJobs');
@@ -16,7 +17,6 @@ module.exports.init = function(){
       fn: function(d){
         cacheCategoriesProducts();
       },
-      //time: '0 */2 * * * *'
       time:'0 0 */2 * * *'
     }
   ].forEach(function(v){
@@ -29,21 +29,57 @@ function cacheCategoriesProducts(){
     '>=': 0,
     '<=': Infinity
   };
-  var qProducts = {
+  var productsQuery = {
     Price: price,
     Active: 'Y'
   };
-  return ProductCategory.find({select:['id','Name']}).populate('Products', qProducts)
+  sails.log.info('cache categories stock start : ' + new Date());
+  return getAllStoresCodes().then(function(codes){
+      storesCodes = codes;
+      return ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
+    })
     .then(function(categories){
-      return Promise.each(categories, function(category){
-        var n = category.Products.length;
-        sails.log.info('Category : ' + category.Name + ' productos: ' + n);
-        return ProductCategory.update({id:category.id}, {productsNum: n});
-      });
+      return Promise.each(categories, updateCategory);
+    })
+    .then(function(){
+      sails.log.info('cache categories stock end: ' + new Date());
+      return true;
     })
     .catch(function(err){
+      console.log(err);
       return err;
     })
+}
+
+function updateCategory(category){
+  var categoryStock = getProductsStoresStock(category.Products);
+  return ProductCategory.update({id:category.id}, categoryStock);
+}
+
+function getProductsStoresStock(products){
+  var stock = {};
+  stock = products.reduce(function(stockAux, product){
+    for(var i = 0;i < storesCodes.length;i++){
+      stockAux[storesCodes[i]] = stockAux[storesCodes[i]] || 0;
+      if(product[storesCodes[i]]){
+        stockAux[storesCodes[i]]++;
+      }
+    }
+    return stockAux;
+  },{});
+  stock.productsNum = products.length;
+  return stock;
+}
+
+
+function getAllStoresCodes(){
+  return Store.find({select:['code']})
+    .then(function(stores){
+      var storesCodes = stores.map(function(s){
+        return s.code;
+      });    
+      return storesCodes;
+    });
 }
 
 function getPromos(){
