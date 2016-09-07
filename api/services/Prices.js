@@ -53,11 +53,7 @@ function Calculator(){
       })
       .spread(function(storePackagesFound, promotionPackages){
         storePackages = storePackagesFound;
-        sails.log.info('promotion packages');
-        sails.log.info(promotionPackages);
         packagesRules = getAllPackagesRules(promotionPackages, quotationAux.Details);
-        sails.log.info('all packages rules');
-        sails.log.info(packagesRules);
         return processDetails(quotationAux.Details, opts);
       })
       .then(function(processedDetails){
@@ -110,12 +106,8 @@ function Calculator(){
 
   function getAllPackagesRules(promotionPackages, details){
     var filteredPackages = filterPromotionPackages(promotionPackages, details);
-    sails.log.info('FILTERED PACKAGES NUM:');
-    sails.log.info(filteredPackages.length);
     var rules             = [];
     for(var i=0;i<filteredPackages.length;i++){
-      sails.log.info('filteredPackages[i]Rules: ');
-      sails.log.info(filteredPackages[i].PackageRules);
       rules = rules.concat(filteredPackages[i].PackageRules);
     }
     return rules;

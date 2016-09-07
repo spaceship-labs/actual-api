@@ -98,47 +98,30 @@ module.exports = {
     var form = req.params.all();
     var product = form.product;
     var group = form.group;
-    ProductGroup.findOne({id: group}).populate('Products')
-      .then(function(group){
-        if(group){
-          group.Products.add(product);
-          group.save(function(errSave, result){
-            if(errSave){
-              console.log(errSave);
-              return Promise.reject(errSave);
-            }
-            sails.log.debug('product added to group');
-            return res.json(result);
-          });
-        }
-        return res.json(group)
+
+    Product_ProductGroup.create({product:product, productgroup:group})
+      .then(function(created){
+        res.json(created);
       })
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
   removeProductFromGroup: function(req, res){
     var form = req.params.all();
     var product = form.product;
     var group = form.group;
-    ProductGroup.findOne({id: group}).populate('Products')
-      .then(function(group){
-        group.Products.remove(product);
-        group.save(function(errSave, result){
-          if(errSave){
-            console.log(errSave);
-            return Promise.reject(errSave);
-          }
-          res.json(result);
-        });
+
+    Product_ProductGroup.destroy({product:product, productgroup:group})
+      .then(function(){
+        res.json({destroyed:true});
       })
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
-
+      });
   },
 
   search: function(req, res){
