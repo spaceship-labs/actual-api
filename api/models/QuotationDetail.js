@@ -10,6 +10,7 @@ module.exports = {
     discountPercent: 'float', //by unit
     paymentGroup: 'integer',
     unitPrice: 'float',
+    unitPriceWithDiscount: 'float',
     Promotion:{
       model:'Promotion'
     },

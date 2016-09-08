@@ -17,7 +17,7 @@ module.exports.init = function(){
       fn: function(d){
         cacheCategoriesProducts();
       },
-      time:'0 0 */2 * * *'
+      time:'0 0 */1 * * *'
     }
   ].forEach(function(v){
     new cron(v.time,v.fn, true, true);

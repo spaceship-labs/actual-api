@@ -171,6 +171,11 @@ function Calculator(){
     });
   }
 
+  function getUnitPriceWithDiscount(unitPrice,discountPercent){
+    var result = unitPrice - ( ( unitPrice / 100) * discountPercent );
+    return result;
+  }
+
   //@params: detail Object from model Detail
   //Must contain a Product object populated
   function getDetailTotals(detail, opts){
@@ -185,16 +190,18 @@ function Calculator(){
     return Product.findOne({id:productId})
       .populate('Promotions', queryPromos)
       .then(function(p){
-        var mainPromo       = getProductMainPromo(p, quantity);
-        var unitPrice       = p.Price;
-        var discountKey     = getDiscountKey(opts.paymentGroup);
-        var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
-        var subtotal        = quantity * unitPrice;
-        var total           = quantity * ( unitPrice - ( ( unitPrice / 100) * discountPercent ) );
-        var discount        = total - subtotal;
-        var detailTotals    = {
+        var mainPromo             = getProductMainPromo(p, quantity);
+        var unitPrice             = p.Price;
+        var discountKey           = getDiscountKey(opts.paymentGroup);
+        var discountPercent       = mainPromo ? mainPromo[discountKey] : 0;
+        var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
+        var subtotal              = quantity * unitPrice;
+        var total                 = quantity * unitPriceWithDiscount;
+        var discount              = total - subtotal;
+        var detailTotals          = {
           id: detail.id,
           unitPrice: unitPrice,
+          unitPriceWithDiscount: unitPriceWithDiscount,
           discountPercent: discountPercent,
           discountKey: discountKey, //Payment group discountKey
           subtotal: subtotal,
