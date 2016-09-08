@@ -48,6 +48,7 @@ module.exports = {
     discount: {type:'float'},
     ammountPaid: {type:'float'},
     totalProducts: {type:'integer'},
+    paymentGroup:{type:'integer'},    
     minPaidPercentage: {
       type:'float',
       defaultsTo: 60

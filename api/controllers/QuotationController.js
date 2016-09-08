@@ -71,18 +71,22 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var baseQuotation = false;
+    var userId = req.user.id;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Quotation.findOne({id: id})
-      .populate('Details')
-      .populate('Records')
-      .populate('User')
-      .populate('Client')
-      .populate('Order')
-      .populate('Payments')
-      .populate('Manager')
 
+    updateQuotationToLatest(id, userId, {update:true})
+      .then(function(){
+        return Quotation.findOne({id: id})
+          .populate('Details')
+          .populate('Records')
+          .populate('User')
+          .populate('Client')
+          .populate('Order')
+          .populate('Payments')
+          .populate('Manager');
+      })
       .then(function(quotation){
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
@@ -465,4 +469,24 @@ function formatProductsIds(details){
     });
   }
   return result;
+}
+
+function updateQuotationToLatest(quotationId, userId, options){
+  var params = {
+    paymentGroup:1,
+    updateDetails: true,
+  };
+  return User.findOne({select:['activeStore'], id: userId})
+    .then(function(user){
+      params.currentStore = user.activeStore;
+      return Quotation.findOne({
+        id:quotationId,
+        select:['paymentGroup']
+      });
+    })
+    .then(function(quotation){
+      params.paymentGroup = quotation.paymentGroup || 1;
+      var calculator = Prices.Calculator();
+      return calculator.updateQuotationTotals(quotationId, params)
+    });
 }

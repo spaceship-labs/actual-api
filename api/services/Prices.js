@@ -61,7 +61,8 @@ function Calculator(){
           subtotal:0,
           total:0,
           discount:0,
-          totalProducts: 0
+          totalProducts: 0,
+          paymentGroup: opts.paymentGroup
         };
         processedDetails.forEach(function(pd){
           totals.total+= pd.total;
