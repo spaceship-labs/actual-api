@@ -42,7 +42,7 @@ module.exports = {
           Product.find(query)
             .populate('Promotions', queryPromos)
             .paginate(paginate)
-            .sort('Available DESC')
+            .sort('Price ASC')
         ];        
       })
       .spread(function(total, products) {
@@ -108,7 +108,7 @@ module.exports = {
           Product.count(query),
           Product.find(query)
             .paginate(paginate)
-            .sort('Available DESC')
+            .sort('Price ASC')
             .populate('files')
             .populate('Promotions',queryPromos)
         ];
@@ -210,7 +210,7 @@ module.exports = {
         }
         products = products
           .paginate(paginate)
-          .sort('Available DESC');
+          .sort('Price ASC');
 
         return [
           Product.count(query),
