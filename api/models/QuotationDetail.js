@@ -29,9 +29,9 @@ module.exports = {
       model: 'company',
       required: true
     },
-    shipDateFake:{
-      type:'date',
-      //required:true
+    shipCompanyFrom:{
+      model:'company',
+      required: true
     },
     PromotionPackage:{
       model:'ProductGroup'

@@ -33,7 +33,11 @@ module.exports = {
     shipCompany: {
       model: 'company',
       required: true
-    }
+    },
+    shipCompanyFrom: {
+      model: 'company',
+      required: true
+    }    
 
   }
 };
