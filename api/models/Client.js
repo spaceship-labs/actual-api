@@ -39,6 +39,11 @@ module.exports = {
       via: 'Client',
     },
 
+    EwalletRecords: {
+      collection:'EwalletRecord',
+      via: 'Client',
+    },
+
     firstName:{type:'string'},
     lastName:{type:'string'},
     title:{type:'string'},

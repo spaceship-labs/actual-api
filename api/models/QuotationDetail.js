@@ -11,6 +11,7 @@ module.exports = {
     paymentGroup: 'integer',
     unitPrice: 'float',
     unitPriceWithDiscount: 'float',
+    ewallet: 'float',
     Promotion:{
       model:'Promotion'
     },
@@ -38,6 +39,6 @@ module.exports = {
     },
     PromotionPackageApplied:{
       model:'ProductGroup'
-    }
+    },
   }
 };

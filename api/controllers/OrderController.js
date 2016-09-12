@@ -1,5 +1,7 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
+var EWALLET_POSITIVE = 'positive';
+
 module.exports = {
   create: function(req, res){
     var form = req.params.all();
@@ -43,12 +45,14 @@ module.exports = {
     var searchFields = [];
     var selectFields = form.fields;
     var populateFields = ['Client'];
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    });
+    Common.find(model, form, searchFields, populateFields, selectFields)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      })
   },
 
   findById: function(req, res){
@@ -64,9 +68,11 @@ module.exports = {
       .populate('Address')
       .populate('Payments')
       .populate('Store')
+      .populate('EwalletRecords')
       .then(function(order){
         res.json(order);
-      }).catch(function(err){
+      })
+      .catch(function(err){
         console.log(err);
         res.negotiate(err);
       })
@@ -81,11 +87,11 @@ module.exports = {
     };
     var quotationBase = false;
     var orderCreated = false;
-    var user = false;
       User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
         opts.currentStore = u.activeStore;
-        return Prices.updateQuotationTotals(quotationId, opts);
+        var calculator = Prices.Calculator();
+        return calculator.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
         return Quotation.findOne({id: quotationId})
@@ -116,6 +122,7 @@ module.exports = {
           Client: quotationBase.Client,
           Quotation: quotationId,
           Payments: quotationBase.Payments,
+          EwalletRecords: quotationBase.EwalletRecords,
           User: user.id,
           Broker: quotationBase.Broker,
           Address: _.clone(quotationBase.Address.id) || false,
@@ -162,7 +169,18 @@ module.exports = {
         }
         return Quotation.update({id:quotationBase.id} , updateFields);
       })
-      .then(function(quotationUpdated){
+      .then(function(){
+        var params = {
+          details: quotationBase.Details,
+          storeId: opts.currentStore,
+          orderId: orderCreated.id,
+          quotationId: quotationBase.id,
+          userId: quotationBase.User.id,
+          clientId: quotationBase.Client          
+        };
+        return processEwalletBalance(params);
+      })
+      .then(function(){
         //RESPONSE
         res.json(orderCreated);
 
@@ -173,6 +191,7 @@ module.exports = {
             .populate('User')
             .populate('Client')
             .populate('Payments')
+            .populate('EwalletRecords')
             .populate('Address'),
           OrderDetail.find({Order: orderCreated.id})
             .populate('Product')
@@ -270,6 +289,43 @@ module.exports = {
       })
   },
 
+}
+
+
+//@params
+/*
+  params: {
+    Details (array of objects),
+    storeId 
+    orderId
+    quotationId,
+    userId (object),
+    Client (object)
+  }
+*/
+function processEwalletBalance(params){
+  var generated = params.details.reduce(function(acum, detail){
+    acum += detail.ewallet || 0;
+    return acum;
+  },0);
+  var ewalletRecord = {
+    Store: params.storeId,
+    Order: params.orderId,
+    Quotation: params.quotationId,
+    User: params.userId,
+    Client: params.clientId,
+    amount: generated,
+    type:'positive'
+  };
+  var balanceUpdated = (Client.ewallet || 0) + generated;
+
+  return EwalletRecord.create(ewalletRecord)
+    .then(function(created){
+      return Client.update({id:params.clientId},{ewallet:balanceUpdated});
+    })
+    .then(function(clientUpdated){
+      return;
+    })
 }
 
 function getPaidPercentage(amountPaid, total){

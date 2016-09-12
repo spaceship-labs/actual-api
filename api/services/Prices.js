@@ -177,6 +177,24 @@ function Calculator(){
     return result;
   }
 
+  function getEwalletEntryByDetail(options){
+    var ewalletEntry = 0;
+    if(options.Promotion && !options.Promotion.PromotionPackage){
+      var ewalletKeys = ['ewalletPg1','ewalletPg2','ewalletPg3','ewalletPg4','ewalletPg5'];
+      var ewalletTypesKeys = ['ewalletTypePg1','ewalletTypePg2','ewalletTypePg3','ewalletTypePg4','ewalletTypePg5'];
+      var paymentGroup = options.paymentGroup || 1;
+      var eKey = paymentGroup - 1;
+      var ewallet = options.Promotion[ ewalletKeys[eKey] ];
+      var ewalletType = options.Promotion[ ewalletTypesKeys[eKey] ];
+      if(ewalletType == 'ammount'){
+        ewalletEntry = options.total - ewallet;
+      }else{
+        ewalletEntry = ( options.total / 100) * ewallet;
+      }
+    }
+    return ewalletEntry;
+  }  
+
   //@params: detail Object from model Detail
   //Must contain a Product object populated
   function getDetailTotals(detail, opts){
@@ -199,6 +217,11 @@ function Calculator(){
         var subtotal              = quantity * unitPrice;
         var total                 = quantity * unitPriceWithDiscount;
         var discount              = total - subtotal;
+        var ewallet               = getEwalletEntryByDetail({
+          Promotion: mainPromo,
+          paymentGroup: opts.paymentGroup,
+          total: total
+        });
         var detailTotals          = {
           id: detail.id,
           unitPrice: unitPrice,
@@ -210,6 +233,7 @@ function Calculator(){
           paymentGroup: opts.paymentGroup,
           quantity: quantity,
           discount: discount,
+          ewallet: ewallet,
           PromotionPackageApplied: null
         }
 

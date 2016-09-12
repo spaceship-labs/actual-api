@@ -11,7 +11,7 @@ module.exports = {
         'cheque',
         'deposit',
         'transfer',
-        'monedero',
+        'ewallet',
         'credit-card', //TODO remove
         'single-payment-terminal',
         '3-msi',
@@ -59,7 +59,10 @@ module.exports = {
     Commissions: {
       collection: 'commission',
       via: 'payment'
-    }
+    },
+    Client:{
+      model: 'Client'
+    }    
   },
   afterCreate: function(val, cb) {
     Payment

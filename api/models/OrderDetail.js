@@ -10,6 +10,7 @@ module.exports = {
     discountPercent: 'float',
     paymentGroup: 'integer',
     unitPrice: 'float',
+    ewallet: 'float',
     Promotion:{
       model:'Promotion'
     },

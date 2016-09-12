@@ -31,6 +31,10 @@ module.exports = {
       collection: 'Payment',
       via:'Quotation'
     },
+    EwalletRecords:{
+      collection:'EwalletRecord',
+      via:'Quotation'
+    },
     Store:{
       model:'store'
       //model:'company'

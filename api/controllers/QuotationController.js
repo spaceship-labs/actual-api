@@ -1,5 +1,8 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
+var EWALLET_TYPE = 'ewallet';
+var EWALLET_NEGATIVE = 'applied';
+
 module.exports = {
 
   create: function(req, res){
@@ -264,6 +267,7 @@ module.exports = {
     var totalDiscount = form.totalDiscount || 0;
     var paymentGroup  = form.group || 1;
     var payments      = [];
+    var client        = false;
     form.Quotation    = quotationId;
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
@@ -275,14 +279,29 @@ module.exports = {
         return Quotation.findOne(form.Quotation).populate('Client');
       })
       .then(function(quotation){
-        var client = quotation.Client;
-        if (form.type != 'monedero') { return; }
+        client = quotation.Client;
+        if (form.type != EWALLET_TYPE) { return; }
         if (client.ewallet < form.ammount || !client.ewallet) {
           return Promise.reject('Fondos insuficientes');
         }
+        form.Client = client.id;
         return Client.update(client.id, {ewallet: client.ewallet - form.ammount});
       })
-      .then(function(client) {
+      .then(function(client){
+        if(form.type == EWALLET_TYPE){
+          var ewalletRecord = {
+            Store: form.Store,
+            Quotation: quotationId,
+            User: req.userId,
+            Client: client.id,
+            type: EWALLET_NEGATIVE,
+            amount: form.ammount
+          };
+          return EwalletRecord.create(ewalletRecord);
+        } 
+        return null;
+      })
+      .then(function(result) {
         return Payment.create(form);
       })
       .then(function(paymentCreated){
