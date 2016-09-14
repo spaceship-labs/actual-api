@@ -304,28 +304,33 @@ module.exports = {
   }
 */
 function processEwalletBalance(params){
-  var generated = params.details.reduce(function(acum, detail){
-    acum += detail.ewallet || 0;
-    return acum;
-  },0);
-  var ewalletRecord = {
-    Store: params.storeId,
-    Order: params.orderId,
-    Quotation: params.quotationId,
-    User: params.userId,
-    Client: params.clientId,
-    amount: generated,
-    type:'positive'
-  };
-  var balanceUpdated = (Client.ewallet || 0) + generated;
+  var ewalletRecords = [];
+  var generated = 0;
+  for(var i=0;i < params.details.length; i++){
+    generated += params.details[i].ewallet || 0;
+    if( (params.details[i].ewallet || 0) > 0){
+      ewalletRecords.push({
+        Store: params.storeId,
+        Order: params.orderId,
+        Quotation: params.quotationId,
+        QuotationDetail: params.details[i].id,
+        User: params.userId,
+        Client: params.clientId,
+        amount: params.details[i].ewallet,
+        type:'positive'
+      });
+    }
+  }
 
-  return EwalletRecord.create(ewalletRecord)
-    .then(function(created){
-      return Client.update({id:params.clientId},{ewallet:balanceUpdated});
-    })
+  var clientBalance = (Client.ewallet || 0) + generated;
+  return Client.update({id:params.clientId},{ewallet:generated})
     .then(function(clientUpdated){
-      return;
-    })
+      return Promise.each(ewalletRecords, createEwalletRecord);
+    });
+}
+
+function createEwalletRecord(record){
+  return EwalletRecord.create(record);
 }
 
 function getPaidPercentage(amountPaid, total){

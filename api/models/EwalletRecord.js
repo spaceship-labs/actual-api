@@ -19,6 +19,9 @@ module.exports = {
     Quotation:{
       model:'Quotation'
     },
+    QuotationDetail:{
+      model:'QuotationDetail'
+    },
     User:{
       model:'User'
     },		
