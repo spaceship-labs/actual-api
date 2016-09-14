@@ -1,7 +1,7 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
 var EWALLET_TYPE = 'ewallet';
-var EWALLET_NEGATIVE = 'applied';
+var EWALLET_NEGATIVE = 'negative';
 
 module.exports = {
 

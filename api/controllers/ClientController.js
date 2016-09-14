@@ -218,6 +218,19 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getEwalletByClient: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    Client.findOne({id:id, select:['ewallet']})
+      .then(function(client){
+        res.json(client.ewallet);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 
 

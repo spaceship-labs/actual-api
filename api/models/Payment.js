@@ -64,6 +64,13 @@ module.exports = {
       model: 'Client'
     }    
   },
+
+  beforeCreate: function(val,cb){
+    Common.orderCustomAI(val, 'paymentFolio',function(val){
+      cb();
+    });
+  },
+
   afterCreate: function(val, cb) {
     Payment
       .findOne(val.id)

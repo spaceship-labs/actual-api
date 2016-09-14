@@ -99,6 +99,7 @@ module.exports = {
           .populate('Details')
           .populate('Address')
           .populate('User')
+          .populate('EwalletRecords')
       })
       .then(function(quotation){
         quotationBase = quotation;

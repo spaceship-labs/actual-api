@@ -353,7 +353,6 @@ module.exports.routes = {
     action:'find'
   },
 
-
   '/client/findbyid/:id':{
     controller: 'client',
     action:'findById'
@@ -377,6 +376,11 @@ module.exports.routes = {
   '/client/update/fiscaladdress/:id/:CardCode':{
     controller:'client',
     action:'updateFiscalAddress'
+  },
+
+  '/client/:id/ewallet':{
+    controller:'client',
+    action:'getEwalletByClient'
   },
 
   '/quotation/create':{
