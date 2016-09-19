@@ -82,7 +82,7 @@ module.exports = {
   },
 
   send_password_recovery: function(req, res){
-    var form = req.params.all();
+    var form  = req.params.all();
     var email = form.email || false;
     if(email && Common.validateEmail(email) ){
       User.findOne( {email:email}, {select: ['id', 'password', 'email']} ).exec(function(err,user){

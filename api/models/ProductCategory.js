@@ -29,7 +29,5 @@ module.exports = {
       collection:'Promotion',
       via:'Categories'
     }
-
-
 	}
 }

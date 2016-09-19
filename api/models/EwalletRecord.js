@@ -24,7 +24,7 @@ module.exports = {
     },
     User:{
       model:'User'
-    },		
+    },
     Client:{
     	model: 'Client'
     }

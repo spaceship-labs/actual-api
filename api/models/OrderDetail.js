@@ -16,10 +16,10 @@ module.exports = {
     },
     PromotionPackage:{
       model:'ProductGroup'
-    }, 
+    },
     PromotionPackageApplied:{
       model:'ProductGroup'
-    },        
+    },
     Order:{
       model:'Order',
     },
@@ -38,7 +38,7 @@ module.exports = {
     shipCompanyFrom: {
       model: 'company',
       required: true
-    }    
+    }
 
   }
 };

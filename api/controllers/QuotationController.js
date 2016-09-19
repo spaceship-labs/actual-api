@@ -130,7 +130,7 @@ module.exports = {
       .then(function(){
         if(req.file('file')._files[0]){
           sails.log.info('adding file');
-          
+
           record.addFiles(req,{
             dir : 'records/gallery',
             profile: 'gallery'
@@ -145,12 +145,12 @@ module.exports = {
                   .populate('files')
               }
           });
-        
+
         }else{
           sails.log.info('not adding file');
           res.json(record);
         }
-        return record;        
+        return record;
       })
       .then(function(record){
         res.json(record);
@@ -298,7 +298,7 @@ module.exports = {
             amount: form.ammount
           };
           return EwalletRecord.create(ewalletRecord);
-        } 
+        }
         return null;
       })
       .then(function(result) {
@@ -447,31 +447,14 @@ module.exports = {
   sendEmail: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Promise.props({
-      quotation: Quotation.findOne({id: id})
-        .populate('User')
-        .populate('Client'),
-      details: QuotationDetail.find({Quotation:id})
-        .populate('Product')
-    })
-    .then(function(result){
-      var quotation = result.quotation;
-      var details = result.details;
-      Email.sendQuotation(
-        quotation,
-        quotation.User,
-        quotation.Client,
-        details,
-        function(response){
-          console.log(response);
-          return res.json(response);
-        }
-      );
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });
+    Email
+      .sendQuotation(id)
+      .then(function(quotation) {
+        return res.json(quotation);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
   }
 
 };

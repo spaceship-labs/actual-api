@@ -62,7 +62,7 @@ module.exports = {
     },
     Client:{
       model: 'Client'
-    }    
+    }
   },
 
   beforeCreate: function(val,cb){

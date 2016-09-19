@@ -26,7 +26,7 @@ module.exports = {
       model:'Sale'
     },
     Client:{
-      model:'Client'
+      model: 'Client'
     },
     Details: {
       collection:'OrderDetail',
@@ -39,7 +39,7 @@ module.exports = {
     EwalletRecords:{
       collection:'EwalletRecord',
       via:'Order'
-    },    
+    },
     User:{
       model: 'User',
     },

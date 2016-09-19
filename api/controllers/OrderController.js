@@ -5,33 +5,13 @@ var EWALLET_POSITIVE = 'positive';
 module.exports = {
   create: function(req, res){
     var form = req.params.all();
-    Order.create(form)
+    Order
+      .create(form)
       .then(function(order) {
-        return [
-          Order
-            .findOne(order)
-            .populate('User')
-            .populate('Client')
-            .populate('Payments')
-            .populate('OrderAddress'),
-          OrderDetail.find({Order: order.id})
-            .populate('Product')
-        ];
+        return Email.sendOrderConfirmation(order.id);
       })
-      .spread(function(order, details){
-        Email.sendOrderConfirmation(
-          order,
-          order.Address,
-          order.User,
-          order.Client,
-          details,
-          order.Payments,
-          function(err) {
-            if (err) {
-              sails.console(err);
-            }
-          }
-        );
+      .then(function(order) {
+        return res.json(order);
       })
       .catch(function(err) {
         return res.negotiate(err);
@@ -177,7 +157,7 @@ module.exports = {
           orderId: orderCreated.id,
           quotationId: quotationBase.id,
           userId: quotationBase.User.id,
-          clientId: quotationBase.Client          
+          clientId: quotationBase.Client
         };
         return processEwalletBalance(params);
       })
@@ -297,7 +277,7 @@ module.exports = {
 /*
   params: {
     Details (array of objects),
-    storeId 
+    storeId
     orderId
     quotationId,
     userId (object),

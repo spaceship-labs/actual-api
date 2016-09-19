@@ -8,10 +8,15 @@ module.exports = {
   schema: true,
   migrate:'alter',
   attributes: {
-    name:{type:'string'},
+    name:{
+      type:'string'
+    },
     group:{
       type:'string',
       enum:['home','studio','kids','proyectos']
+    },
+    logo: {
+      type: 'string'
     },
     //relations
     users: {
