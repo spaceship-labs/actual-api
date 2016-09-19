@@ -70,7 +70,6 @@ function calculateUser(user, dateFrom, dateTo) {
 
 
 function userRate(user, dateFrom, dateTo) {
-  console.log(user, dateFrom, dateTo);
   return User
     .findOne(user)
     .populate('mainStore')
@@ -85,6 +84,7 @@ function userRate(user, dateFrom, dateTo) {
       ];
     })
     .spread(function(goal, role, utotal, stotal) {
+      console.log(user, dateFrom, dateTo, goal, role, utotal, stotal);
       var sellers     = goal.sellers;
       var gstore1     = goal.goal / 2;
       var gstore2     = gstore1 * 1.25;
