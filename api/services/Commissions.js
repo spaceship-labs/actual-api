@@ -70,6 +70,7 @@ function calculateUser(user, dateFrom, dateTo) {
 
 
 function userRate(user, dateFrom, dateTo) {
+  console.log(user, dateFrom, dateTo);
   return User
     .findOne(user)
     .populate('mainStore')
