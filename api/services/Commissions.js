@@ -170,7 +170,7 @@ function setLastDay(date) {
 
 function setFirstDay(date) {
   var date = new Date(date);
-  return new Date(date.getMont() + '-' + date.getDate()  + '-' + date.getFullYear());
+  return new Date(date.getFullYear(), date.getMonth() + 1, 1);
 }
 
 function addOneDay(date) {
