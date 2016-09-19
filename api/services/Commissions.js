@@ -76,7 +76,6 @@ function userRate(user, dateFrom, dateTo) {
     .populate('role')
     .then(function(user) {
       var date = setFirstDay(dateFrom);
-      console.log({date: date, store: user.mainStore.id})
       return [
         Goal.findOne({date: date, store: user.mainStore.id}),
         user.role.name,
@@ -85,7 +84,6 @@ function userRate(user, dateFrom, dateTo) {
       ];
     })
     .spread(function(goal, role, utotal, stotal) {
-      console.log(user, dateFrom, dateTo, goal, role, utotal, stotal);
       var sellers     = goal.sellers;
       var gstore1     = goal.goal / 2;
       var gstore2     = gstore1 * 1.25;
@@ -172,9 +170,7 @@ function setLastDay(date) {
 
 function setFirstDay(date) {
   var date = new Date(date);
-  date.setDate(1);
-  date.setHours(0, 0, 0, 0);
-  return date;
+  return new Date(date.getMont() + '-' + date.getDate()  + '-' + date.getFullYear());
 }
 
 function addOneDay(date) {
