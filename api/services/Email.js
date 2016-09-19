@@ -157,7 +157,7 @@ function sendOrder(client, user, order, products, payments, store) {
       prev: '',
       received: '',
       paid: '',
-      balance: ''
+      balance: Number(client.ewallet).toFixed(2)
     }
   });
 
@@ -197,18 +197,15 @@ function quotation(quotationId) {
     .populate('User')
     .populate('Store')
     .populate('Details')
-    .populate('Payments')
     .then(function(quotation) {
       var client   = quotation.Client;
       var user     = quotation.User;
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
-      var payments = quotation.Payments.map(function(payment) { return payment.id; });
       details      = QuotationDetail.find(details).populate('Product');
-      payments     = Payment.find(payments);
-      return [client, user,  quotation, details, payments, store];
+      return [client, user,  quotation, details, store];
     })
-    .spread(function(client, user, quotation, details, payments, store) {
+    .spread(function(client, user, quotation, details, store) {
       var products = details.map(function(detail) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
@@ -226,29 +223,12 @@ function quotation(quotationId) {
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
-      var payments = payments.map(function(payment) {
-        var ammount =  payment.currency == 'usd' ? payment.ammount * payment.exchangeRate: payment.ammount;
-        ammount = ammount.toFixed(2);
-        var date    = moment(payment.createdAt);
-        moment.locale('es');
-        date.locale(false);
-        date = date.format('LL');
-        return {
-          method: paymentType(payment),
-          date: date,
-          folio: payment.folio,
-          type: paymentType(payment),
-          ammount: ammount,
-          currency: payment.currency
-        };
-      });
-      return sendQuotation(client, user, quotation, products, payments, store);
+      return sendQuotation(client, user, quotation, products, store);
     });
-
 }
 
-function sendQuotation(client, user, quotation, products, payments, store) {
-  var emailBody = orderTemplate({
+function sendQuotation(client, user, quotation, products, store) {
+  var emailBody = quotationTemplate({
     client: {
       name: client.CardName,
       address: '',
@@ -260,24 +240,18 @@ function sendQuotation(client, user, quotation, products, payments, store) {
       email: user.email,
       phone: user.phone
     },
-    order: {
+    quotation: {
       folio: quotation.folio,
       subtotal: Number(quotation.subtotal).toFixed(2),
       discount: Number(quotation.discount).toFixed(2),
       total: Number(quotation.total).toFixed(2),
-      paid: Number(quotation.ammountPaid).toFixed(2),
-      pending: Number(quotation.total - quotation.ammountPaid).toFixed(2)
     },
     company: {
       image: store.logo
     },
     products: products,
-    payments: payments,
     ewallet: {
-      prev: '',
-      received: '',
-      paid: '',
-      balance: ''
+      balance: Number(client.ewallet).toFixed(2)
     }
   });
 
@@ -302,7 +276,7 @@ function sendQuotation(client, user, quotation, products, payments, store) {
   return new Promise(function(resolve, reject){
     sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
-        resolve(order);
+        resolve(quotation);
       } else {
         reject(response);
       }
