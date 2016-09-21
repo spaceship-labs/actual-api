@@ -179,20 +179,10 @@ module.exports = {
         ];
       })
       .spread(function(order, details){
-        Email.sendOrderConfirmation(
-          order,
-          order.Address,
-          order.User,
-          order.Client,
-          details,
-          order.Payments,
-          function(err) {
-            sails.log.info('Email de pedido enviado | ' + new Date());
-            if (err) {
-              sails.console(err);
-            }
-          }
-        );
+        Email.sendOrderConfirmation(order.id);
+      })
+      .then(function(emailSent){
+        sails.log.info('Email de orden enviado');
       })
       .catch(function(err){
         console.log(err);
