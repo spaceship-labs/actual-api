@@ -111,7 +111,7 @@ module.exports = {
     var SlpCode = -1;
     User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
-        opts.activeStore = u.activeStore;
+        opts.currentStore = u.activeStore;
         var calculator = Prices.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
@@ -121,7 +121,7 @@ module.exports = {
           .populate('Details')
           .populate('Address')
           .populate('User')
-          .populate('EwalletRecords')
+          .populate('EwalletRecords');
       })
       .then(function(quotationFound){
         quotation = quotationFound;
@@ -138,7 +138,7 @@ module.exports = {
         if(user.SlpCode && user.SlpCode.length > 0){
           SlpCode = user.SlpCode[0].id;
         }
-        var payments = quotation.Payments.map(function(p){return p.id});
+        var payments = quotation.Payments.map(function(p){return p.id;});
         orderParams = {
           ammountPaid: quotation.ammountPaid,
           total: quotation.total,
@@ -155,7 +155,7 @@ module.exports = {
           Address: _.clone(quotation.Address.id) || false,
           CardCode: quotation.Address.CardCode,
           SlpCode: SlpCode,
-          Store: opts.activeStore,
+          Store: opts.currentStore,
           Manager: quotation.Manager
           //Store: user.activeStore
         };
@@ -174,11 +174,13 @@ module.exports = {
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotation.Address);
+
         return QuotationDetail.find({Quotation: quotation.id})
           .populate('Product');
       })
       .then(function(quotationDetails){
         return SapService.createSaleOrder(
+          orderParams.groupCode,
           orderParams.CardCode,
           SlpCode,
           orderParams.CntctCode,

@@ -231,7 +231,7 @@ function buildSaleOrderRequestParams(
           OpenCreQty: detail.quantity,
           WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
           ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
-          DiscountPercent: 0,
+          DiscountPercent: detail.discountPercent,
           Company: detail.Product.U_Empresa
         };
         return product;
