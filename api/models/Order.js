@@ -5,6 +5,9 @@ module.exports = {
   attributes:{
     DocEntry:{type:'integer'},
     folio:{type:'integer'},
+    documents:{
+      type:'array'
+    },
     SlpCode: {type:'integer'},
     CardCode: {type:'string'},
     ammountPaid: {type:'float'},

@@ -3,11 +3,15 @@ var request = require('request');
 var Promise = require('bluebird');
 var buildUrl = require('build-url');
 var _ = require('underscore');
+var moment = require('moment');
+var MOMENT_FORMAT = 'YYYY-MM-D';
 
 module.exports = {
   createClient        : createClient,
   createContact       : createContact,
+  createSaleOrder     : createSaleOrder,
   createFiscalAddress : createFiscalAddress,
+  buildSaleOrderRequestParams: buildSaleOrderRequestParams,
   updateClient        : updateClient,
   updateContact       : updateContact,
   updateFiscalAddress : updateFiscalAddress
@@ -43,7 +47,7 @@ function createClient(form){
         if(user.SlpCode && user.SlpCode.length > 0){
           form.SlpCode = user.SlpCode[0].id || -1;
         }
-        return getSeriesNum(user.activeStore)
+        return getSeriesNum(user.activeStore);
       })
       .then(function(series){
         //Assigns series number depending on activeStore
@@ -165,6 +169,106 @@ function createFiscalAddress(cardcode, form){
 }
 
 
+function createSaleOrder(
+  cardCode, 
+  slpCode,
+  cntctCode, 
+  quotationDetails //Populated with products
+){
+  return new Promise(function(resolve, reject){
+    buildSaleOrderRequestParams(
+      cardCode, 
+      slpCode,
+      cntctCode, 
+      quotationDetails
+    ).then(function(requestParams){
+      var endPoint = baseUrl + requestParams;
+      sails.log.info('endPoint');
+      sails.log.info(endPoint);
+      request.get( endPoint, function(err, response, body){
+        if(err){
+          sails.log.info('err');
+          sails.log.info(err);
+          return reject(err);
+        }
+        resolve(body);
+      });
+    });
+  });
+}
+
+function buildSaleOrderRequestParams(
+  cardCode, 
+  slpCode,
+  cntctCode, 
+  quotationDetails //Populated with products
+){
+  var requestParams = '/SalesOrder?sales=';
+  var products = [];
+  var saleOrderRequest = {
+    Serie:6,
+    ContactPersonCode: cntctCode,
+    Currency: 'MXP',
+    ShipDate: moment(getFarthestShipDate(quotationDetails))
+      .format(MOMENT_FORMAT),
+    SalesPersonCode: slpCode || -1,
+    DescuentoPDocumento: 0,
+    CardCode: cardCode,
+  };
+
+  if(saleOrderRequest.SalesPersonCode === []){
+    saleOrderRequest.SalesPersonCode = -1;
+  }
+
+  return getAllWarehouses()
+    .then(function(warehouses){
+      products = quotationDetails.map(function(detail){
+        var product = {
+          ItemCode: detail.Product.ItemCode,
+          OpenCreQty: detail.quantity,
+          WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
+          ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
+          DiscountPercent: 0,
+          Company: detail.Product.U_Empresa
+        };
+        return product;
+      });
+      requestParams += JSON.stringify(saleOrderRequest);
+      requestParams += '&products=' + JSON.stringify(products);
+      return requestParams;
+    });
+}
+
+function getWhsCodeById(whsId, warehouses){
+  var warehouse = _.findWhere(warehouses, {id: whsId});
+  if(warehouse){
+    return warehouse.WhsCode;
+  }
+  return false;
+}
+
+function getFarthestShipDate(quotationDetails){
+  var farthestShipDate = false;
+  for(var i=0; i<quotationDetails.length; i++){
+    if(
+      (
+        farthestShipDate && 
+        new Date(quotationDetails[i].shipDate) >= farthestShipDate
+      ) || 
+      i === 0
+    ){
+      farthestShipDate = quotationDetails[i].shipDate;
+    }
+  }
+  return farthestShipDate;
+}
+
+
+function getAllWarehouses(){
+  return Company.find({});
+}
+
+
 function getSeriesNum(storeId){
   return Store.findOne({id:storeId}).populate('Warehouse')
     .then(function(store){
@@ -173,7 +277,7 @@ function getSeriesNum(storeId){
     .catch(function(err){
       console.log(err);
       return err;
-    })
+    });
 }
 
 function mapWhsSeries(whsName){

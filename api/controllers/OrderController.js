@@ -35,6 +35,46 @@ module.exports = {
       })
   },
 
+  test: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var order;
+    var details;
+    var orderPromise = Order.findOne({id: id})
+      .populate('User')
+      .populate('Client')
+      .populate('Address')
+      .populate('Payments')
+      .populate('Store')
+      .populate('EwalletRecords');
+    var detailsPromise = OrderDetail.find({Order: id})
+      .populate('Product');
+
+    Promise.props({order:orderPromise, details:detailsPromise})
+      .then(function(result){
+        order = result.order;
+        details = result.details;
+        return User.findOne({id: order.User.id})
+          .populate('SlpCode');
+      })
+      .then(function(user){
+        return SapService.buildSaleOrderRequestParams(
+          order,
+          order.Client,
+          user.SlpCode[0].id,
+          order.Address,
+          details
+        );
+      })
+      .then(function(url){
+        res.json(url);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  },
+
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -55,7 +95,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
   createFromQuotation: function(req, res){
@@ -65,9 +105,11 @@ module.exports = {
       paymentGroup: form.paymentGroup || 1,
       updateDetails: true,
     };
-    var quotationBase = false;
+    var quotation;
+    var orderParams;
     var orderCreated = false;
-      User.findOne({id:req.user.id}).populate('SlpCode')
+    var SlpCode = -1;
+    User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
         opts.currentStore = u.activeStore;
         var calculator = Prices.Calculator();
@@ -81,63 +123,79 @@ module.exports = {
           .populate('User')
           .populate('EwalletRecords')
       })
-      .then(function(quotation){
-        quotationBase = quotation;
+      .then(function(quotationFound){
+        quotation = quotationFound;
         if(quotation.Order){
-          return Promise.reject(new Error('Ya se ha creado un pedido sobre esta cotización'));
+          return Promise.reject(
+            new Error('Ya se ha creado un pedido sobre esta cotización')
+          );
         }
-        return User.findOne({id:quotationBase.User.id}).populate('SlpCode');
+        return User.findOne({id:quotation.User.id})
+          .populate('SlpCode');
       })
       .then(function(user){
-        var SlpCode = -1;
         if(user.SlpCode && user.SlpCode.length > 0){
           SlpCode = user.SlpCode[0].id;
         }
-        var payments = quotationBase.Payments.map(function(p){return p.id});
-        var orderParams = {
-          ammountPaid: quotationBase.ammountPaid,
-          total: quotationBase.total,
-          subtotal: quotationBase.subtotal,
-          discount: quotationBase.discount,
+        var payments = quotation.Payments.map(function(p){return p.id});
+        orderParams = {
+          ammountPaid: quotation.ammountPaid,
+          total: quotation.total,
+          subtotal: quotation.subtotal,
+          discount: quotation.discount,
           paymentGroup: opts.paymentGroup,
-          Client: quotationBase.Client,
+          Client: quotation.Client,
           Quotation: quotationId,
-          Payments: quotationBase.Payments,
-          EwalletRecords: quotationBase.EwalletRecords,
+          Payments: quotation.Payments,
+          EwalletRecords: quotation.EwalletRecords,
           User: user.id,
-          Broker: quotationBase.Broker,
-          Address: _.clone(quotationBase.Address.id) || false,
-          CardCode: quotationBase.Address.CardCode,
+          Broker: quotation.Broker,
+          Address: _.clone(quotation.Address.id) || false,
+          CardCode: quotation.Address.CardCode,
           SlpCode: SlpCode,
           Store: opts.currentStore,
-          Manager: quotationBase.Manager
+          Manager: quotation.Manager
           //Store: user.activeStore
         };
 
-        var minPaidPercentage = quotationBase.minPaidPercentage || 100;
-
-        if( getPaidPercentage(quotationBase.ammountPaid, quotationBase.total) < minPaidPercentage){
+        var minPaidPercentage = quotation.minPaidPercentage || 100;
+        if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
           return Promise.reject(new Error('No se ha pagado la cantidad minima de la orden'));
         }
-
         if(minPaidPercentage < 100){
           orderParams.status = 'minimum-paid';
         }else{
           orderParams.status = 'paid';
         }
-
-        delete quotationBase.Address.id;
-        delete quotationBase.Address.Address; //Address field in person contact
-        orderParams = _.extend(orderParams, quotationBase.Address);
-
-        return Order.create(orderParams);
+        delete quotation.Address.id;
+        delete quotation.Address.Address; //Address field in person contact
+        orderParams = _.extend(orderParams, quotation.Address);
+        return QuotationDetail.find({Quotation: quotation.id})
+          .populate('Product');
+      })
+      .then(function(quotationDetails){
+        return SapService.createSaleOrder(
+          orderParams.CardCode,
+          SlpCode,
+          orderParams.CntctCode,
+          quotationDetails
+        );
+      })
+      .then(function(sapResponse){
+        var sapResult = JSON.parse(sapResponse);
+        if(!sapResult.value || !_.isArray(sapResult.value)){
+          return Promise.reject('Error en la respuesta de SAP');
+        }
+        orderParams.documents = sapResult.value;
+        return Order.create(orderParams);        
       })
       .then(function(created){
         orderCreated = created;
         return Order.findOne({id:created.id}).populate('Details');
       })
       .then(function(orderFound){
-        quotationBase.Details.forEach(function(d){
+        //Cloning quotation details to order details
+        quotation.Details.forEach(function(d){
           delete d.id;
           orderFound.Details.add(d);
         });
@@ -147,17 +205,17 @@ module.exports = {
         var updateFields = {
           Order: orderCreated.id,
           status: 'to-order'
-        }
-        return Quotation.update({id:quotationBase.id} , updateFields);
+        };
+        return Quotation.update({id:quotation.id} , updateFields);
       })
       .then(function(){
         var params = {
-          details: quotationBase.Details,
+          details: quotation.Details,
           storeId: opts.currentStore,
           orderId: orderCreated.id,
-          quotationId: quotationBase.id,
-          userId: quotationBase.User.id,
-          clientId: quotationBase.Client
+          quotationId: quotation.id,
+          userId: quotation.User.id,
+          clientId: quotation.Client
         };
         return processEwalletBalance(params);
       })
@@ -202,20 +260,20 @@ module.exports = {
       User: userId,
       createdAt: { '>=': startDate, '<=': endDate }
     };
-    Promise.props({
-      foundAll: Order.count({User: userId}),
-      foundDateRange: Order.count(queryDateRange)
-    })
-      .then(function(result){
+    Promise.join(
+      Order.count({User: userId}),
+      Order.count(queryDateRange)
+    )
+      .then(function(foundAll, foundDateRange){
         res.json({
-          all: result.foundAll,
-          dateRange: result.foundDateRange
+          all: foundAll,
+          dateRange: foundDateRange
         });
       })
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
 
@@ -247,7 +305,7 @@ module.exports = {
           all = result.total[0].total;
         }
         if(result.totalDateRange.length > 0){
-          totalDateRange = result.totalDateRange[0].total
+          totalDateRange = result.totalDateRange[0].total;
         }
         res.json({
           all: all || false,
