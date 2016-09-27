@@ -288,8 +288,8 @@ function sendQuotation(client, user, quotation, products, store) {
   var requestBody      = undefined;
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
-  var from             = new helper.Email('tugorez@gmail.com', 'juanjo');
-  var to               = new helper.Email('tugorez@gmail.com', 'juanjo'); //cambia
+  var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var subject          = 'Cotización';
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
