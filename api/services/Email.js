@@ -102,6 +102,7 @@ function orderEmail(orderId) {
           code:  detail.Product.ItemCode,
           color: detail.Product.DetailedColor,
           material: 'add_material',
+          ewallet: detail.ewallet && detail.ewallet.toFixed(2),
           warranty: detail.Product.U_garantia,
           qty: detail.quantity,
           ship: date,
@@ -196,7 +197,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var subject          = 'confirmación de compra';
+  var subject          = 'Confirmación de compra';
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
@@ -244,6 +245,7 @@ function quotation(quotationId) {
           code:  detail.Product.ItemCode,
           color: detail.Product.DetailedColor,
           material: 'add_material',
+          ewallet: detail.ewallet && detail.ewallet.toFixed(2),
           warranty: detail.Product.U_garantia,
           qty: detail.quantity,
           ship: date,
