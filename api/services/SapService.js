@@ -170,6 +170,7 @@ function createFiscalAddress(cardcode, form){
 
 
 function createSaleOrder(
+  groupCode,
   cardCode, 
   slpCode,
   cntctCode, 
@@ -177,6 +178,7 @@ function createSaleOrder(
 ){
   return new Promise(function(resolve, reject){
     buildSaleOrderRequestParams(
+      groupCode,
       cardCode, 
       slpCode,
       cntctCode, 
@@ -198,6 +200,7 @@ function createSaleOrder(
 }
 
 function buildSaleOrderRequestParams(
+  groupCode,
   cardCode, 
   slpCode,
   cntctCode, 
@@ -206,7 +209,7 @@ function buildSaleOrderRequestParams(
   var requestParams = '/SalesOrder?sales=';
   var products = [];
   var saleOrderRequest = {
-    Serie:6,
+    GroupCode: groupCode,
     ContactPersonCode: cntctCode,
     Currency: 'MXP',
     ShipDate: moment(getFarthestShipDate(quotationDetails))

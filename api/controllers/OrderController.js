@@ -111,7 +111,7 @@ module.exports = {
     var SlpCode = -1;
     User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
-        opts.currentStore = u.activeStore;
+        opts.activeStore = u.activeStore;
         var calculator = Prices.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
@@ -131,6 +131,7 @@ module.exports = {
           );
         }
         return User.findOne({id:quotation.User.id})
+          .populate('activeStore')
           .populate('SlpCode');
       })
       .then(function(user){
@@ -144,6 +145,7 @@ module.exports = {
           subtotal: quotation.subtotal,
           discount: quotation.discount,
           paymentGroup: opts.paymentGroup,
+          groupCode: user.activeStore.GroupCode,
           Client: quotation.Client,
           Quotation: quotationId,
           Payments: quotation.Payments,
@@ -153,14 +155,16 @@ module.exports = {
           Address: _.clone(quotation.Address.id) || false,
           CardCode: quotation.Address.CardCode,
           SlpCode: SlpCode,
-          Store: opts.currentStore,
+          Store: opts.activeStore,
           Manager: quotation.Manager
           //Store: user.activeStore
         };
 
         var minPaidPercentage = quotation.minPaidPercentage || 100;
         if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
-          return Promise.reject(new Error('No se ha pagado la cantidad minima de la orden'));
+          return Promise.reject(
+            new Error('No se ha pagado la cantidad minima de la orden')
+          );
         }
         if(minPaidPercentage < 100){
           orderParams.status = 'minimum-paid';
