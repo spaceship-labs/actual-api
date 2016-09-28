@@ -174,7 +174,8 @@ function createSaleOrder(
   cardCode, 
   slpCode,
   cntctCode, 
-  quotationDetails //Populated with products
+  quotationDetails, //Populated with products
+  payments
 ){
   return new Promise(function(resolve, reject){
     buildSaleOrderRequestParams(
@@ -182,7 +183,8 @@ function createSaleOrder(
       cardCode, 
       slpCode,
       cntctCode, 
-      quotationDetails
+      quotationDetails,
+      payments
     ).then(function(requestParams){
       var endPoint = baseUrl + requestParams;
       sails.log.info('endPoint');
@@ -206,7 +208,8 @@ function buildSaleOrderRequestParams(
   cardCode, 
   slpCode,
   cntctCode, 
-  quotationDetails //Populated with products
+  quotationDetails, //Populated with products
+  payments
 ){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
@@ -217,8 +220,8 @@ function buildSaleOrderRequestParams(
     ShipDate: moment(getFarthestShipDate(quotationDetails))
       .format(MOMENT_FORMAT),
     SalesPersonCode: slpCode || -1,
-    DescuentoPDocumento: 0,
     CardCode: cardCode,
+    DescuentoPDocumento: calculateUsedEwalletByPayments(payments)
   };
 
   if(saleOrderRequest.SalesPersonCode === []){
@@ -235,6 +238,7 @@ function buildSaleOrderRequestParams(
           ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
           DiscountPercent: detail.discountPercent,
           Company: detail.Product.U_Empresa,
+          Price: detail.total
           //unitPrice: detail.Product.Price
         };
         return product;
@@ -269,6 +273,16 @@ function getFarthestShipDate(quotationDetails){
   return farthestShipDate;
 }
 
+function calculateUsedEwalletByPayments(payments){
+  var ewallet = 0;
+  ewallet = payments.reduce(function(amount, payment){
+    if(payment.type === 'ewallet'){
+      amount += payment.ammount;
+    }
+    return amount;
+  },0);
+  return ewallet;
+}
 
 function getAllWarehouses(){
   return Company.find({});

@@ -35,45 +35,6 @@ module.exports = {
       })
   },
 
-  test: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var order;
-    var details;
-    var orderPromise = Order.findOne({id: id})
-      .populate('User')
-      .populate('Client')
-      .populate('Address')
-      .populate('Payments')
-      .populate('Store')
-      .populate('EwalletRecords');
-    var detailsPromise = OrderDetail.find({Order: id})
-      .populate('Product');
-
-    Promise.props({order:orderPromise, details:detailsPromise})
-      .then(function(result){
-        order = result.order;
-        details = result.details;
-        return User.findOne({id: order.User.id})
-          .populate('SlpCode');
-      })
-      .then(function(user){
-        return SapService.buildSaleOrderRequestParams(
-          order,
-          order.Client,
-          user.SlpCode[0].id,
-          order.Address,
-          details
-        );
-      })
-      .then(function(url){
-        res.json(url);
-      })
-      .catch(function(err){
-        console.log('err', err);
-        res.negotiate(err);
-      });
-  },
 
   findById: function(req, res){
     var form = req.params.all();
@@ -138,7 +99,7 @@ module.exports = {
         if(user.SlpCode && user.SlpCode.length > 0){
           SlpCode = user.SlpCode[0].id;
         }
-        var payments = quotation.Payments.map(function(p){return p.id;});
+        var paymentsIds = quotation.Payments.map(function(p){return p.id;});
         orderParams = {
           ammountPaid: quotation.ammountPaid,
           total: quotation.total,
@@ -148,7 +109,7 @@ module.exports = {
           groupCode: user.activeStore.GroupCode,
           Client: quotation.Client,
           Quotation: quotationId,
-          Payments: quotation.Payments,
+          Payments: paymentsIds,
           EwalletRecords: quotation.EwalletRecords,
           User: user.id,
           Broker: quotation.Broker,
@@ -184,7 +145,8 @@ module.exports = {
           orderParams.CardCode,
           SlpCode,
           orderParams.CntctCode,
-          quotationDetails
+          quotationDetails,
+          quotation.Payments
         );
       })
       .then(function(sapResponse){
