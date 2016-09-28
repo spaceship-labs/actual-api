@@ -187,12 +187,14 @@ function createSaleOrder(
       var endPoint = baseUrl + requestParams;
       sails.log.info('endPoint');
       sails.log.info(endPoint);
-      request.get( endPoint, function(err, response, body){
+      request.post( endPoint, function(err, response, body){
         if(err){
           sails.log.info('err');
           sails.log.info(err);
           return reject(err);
         }
+        sails.log.info('body');
+        sails.log.info(body);
         resolve(body);
       });
     });
@@ -233,7 +235,7 @@ function buildSaleOrderRequestParams(
           ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
           DiscountPercent: detail.discountPercent,
           Company: detail.Product.U_Empresa,
-          unitPrice: detail.Product.Price
+          //unitPrice: detail.Product.Price
         };
         return product;
       });
