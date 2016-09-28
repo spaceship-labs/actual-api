@@ -98,10 +98,11 @@ function orderEmail(orderId) {
         date.locale(false);
         date = date.format('LL');
         return {
+          id: detail.Product.id,
           name:  detail.Product.ItemName,
           code:  detail.Product.ItemCode,
           color: detail.Product.DetailedColor,
-          material: 'add_material',
+          material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
           warranty: detail.Product.U_garantia,
           qty: detail.quantity,
@@ -152,7 +153,20 @@ function orderEmail(orderId) {
         spent: sewallet.toFixed(2),
         balance: bewallet.toFixed(2)
       };
-      return sendOrder(client, user, order, products, payments, ewallet, store);
+      return [client, user, order, products, payments, ewallet, store];
+    })
+    .spread(function (client, user, order, products, payments, ewallet, store) {
+      var mats = products.map(function(p) {
+        return materials(p.id);
+      });
+      return Promise
+        .all(mats)
+        .then(function(mats) {
+          mats.forEach(function(m, i) {
+            products[i].material = m;
+          });
+          return sendOrder(client, user, order, products, payments, ewallet, store);
+        });
     });
 }
 
@@ -241,6 +255,7 @@ function quotation(quotationId) {
         date.locale(false);
         date = date.format('LL');
         return {
+          id: detail.Product.id,
           name:  detail.Product.ItemName,
           code:  detail.Product.ItemCode,
           color: detail.Product.DetailedColor,
@@ -253,7 +268,20 @@ function quotation(quotationId) {
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
-      return sendQuotation(client, user, quotation, products, store);
+      return [client, user, quotation, products, store];
+    })
+    .spread(function(client, user, quotation, products, store) {
+      var mats = products.map(function(p) {
+        return materials(p.id);
+      });
+      return Promise
+        .all(mats)
+        .then(function(mats) {
+          mats.forEach(function(m, i) {
+            products[i].material = m;
+          });
+          return sendQuotation(client, user, quotation, products, store);
+        });
     });
 }
 
@@ -389,4 +417,32 @@ function paymentType(payment) {
       break;
   }
   return payment_name;
+}
+
+function materials(product) {
+  var material = 'Material';
+  var filter = ProductFilter
+    .findOne({Name: material})
+    .populate('Values')
+    .then(function(filter){
+      return filter.Values.map(function(v) {return v.id});
+    });
+  var product = Product
+    .findOne(product)
+    .populate('FilterValues')
+    .then(function(product) {
+      return product.FilterValues;
+    });
+  return Promise
+    .all([filter, product])
+    .spread(function(idfilters, pfilters) {
+      return pfilters
+        .filter(function(f) {
+          return idfilters.indexOf(f.id) != -1;
+        })
+        .map(function(f) {
+          return f.Name;
+        })
+        .join(',');
+    });
 }
