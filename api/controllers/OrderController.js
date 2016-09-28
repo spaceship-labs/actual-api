@@ -121,7 +121,7 @@ module.exports = {
           .populate('Details')
           .populate('Address')
           .populate('User')
-          .populate('EwalletRecords')
+          .populate('EwalletRecords');
       })
       .then(function(quotationFound){
         quotation = quotationFound;
@@ -131,19 +131,21 @@ module.exports = {
           );
         }
         return User.findOne({id:quotation.User.id})
+          .populate('activeStore')
           .populate('SlpCode');
       })
       .then(function(user){
         if(user.SlpCode && user.SlpCode.length > 0){
           SlpCode = user.SlpCode[0].id;
         }
-        var payments = quotation.Payments.map(function(p){return p.id});
+        var payments = quotation.Payments.map(function(p){return p.id;});
         orderParams = {
           ammountPaid: quotation.ammountPaid,
           total: quotation.total,
           subtotal: quotation.subtotal,
           discount: quotation.discount,
           paymentGroup: opts.paymentGroup,
+          groupCode: user.activeStore.GroupCode,
           Client: quotation.Client,
           Quotation: quotationId,
           Payments: quotation.Payments,
@@ -160,7 +162,9 @@ module.exports = {
 
         var minPaidPercentage = quotation.minPaidPercentage || 100;
         if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
-          return Promise.reject(new Error('No se ha pagado la cantidad minima de la orden'));
+          return Promise.reject(
+            new Error('No se ha pagado la cantidad minima de la orden')
+          );
         }
         if(minPaidPercentage < 100){
           orderParams.status = 'minimum-paid';
@@ -170,11 +174,13 @@ module.exports = {
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotation.Address);
+
         return QuotationDetail.find({Quotation: quotation.id})
           .populate('Product');
       })
       .then(function(quotationDetails){
         return SapService.createSaleOrder(
+          orderParams.groupCode,
           orderParams.CardCode,
           SlpCode,
           orderParams.CntctCode,

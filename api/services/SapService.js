@@ -170,6 +170,7 @@ function createFiscalAddress(cardcode, form){
 
 
 function createSaleOrder(
+  groupCode,
   cardCode, 
   slpCode,
   cntctCode, 
@@ -177,6 +178,7 @@ function createSaleOrder(
 ){
   return new Promise(function(resolve, reject){
     buildSaleOrderRequestParams(
+      groupCode,
       cardCode, 
       slpCode,
       cntctCode, 
@@ -185,12 +187,14 @@ function createSaleOrder(
       var endPoint = baseUrl + requestParams;
       sails.log.info('endPoint');
       sails.log.info(endPoint);
-      request.get( endPoint, function(err, response, body){
+      request.post( endPoint, function(err, response, body){
         if(err){
           sails.log.info('err');
           sails.log.info(err);
           return reject(err);
         }
+        sails.log.info('body');
+        sails.log.info(body);
         resolve(body);
       });
     });
@@ -198,6 +202,7 @@ function createSaleOrder(
 }
 
 function buildSaleOrderRequestParams(
+  groupCode,
   cardCode, 
   slpCode,
   cntctCode, 
@@ -206,7 +211,7 @@ function buildSaleOrderRequestParams(
   var requestParams = '/SalesOrder?sales=';
   var products = [];
   var saleOrderRequest = {
-    Serie:6,
+    GroupCode: groupCode,
     ContactPersonCode: cntctCode,
     Currency: 'MXP',
     ShipDate: moment(getFarthestShipDate(quotationDetails))
@@ -228,8 +233,9 @@ function buildSaleOrderRequestParams(
           OpenCreQty: detail.quantity,
           WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
           ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
-          DiscountPercent: 0,
-          Company: detail.Product.U_Empresa
+          DiscountPercent: detail.discountPercent,
+          Company: detail.Product.U_Empresa,
+          //unitPrice: detail.Product.Price
         };
         return product;
       });
