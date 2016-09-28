@@ -232,7 +232,8 @@ function buildSaleOrderRequestParams(
           WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
           ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
           DiscountPercent: detail.discountPercent,
-          Company: detail.Product.U_Empresa
+          Company: detail.Product.U_Empresa,
+          unitPrice: detail.Product.Price
         };
         return product;
       });
