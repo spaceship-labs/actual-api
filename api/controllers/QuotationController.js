@@ -126,12 +126,14 @@ module.exports = {
       .then(function(createdRecordResult){
         createdRecord = createdRecordResult;
         return QuotationRecord.findOne({id:createdRecord.id})
+          .populate('User')
       })
-      .then(function(){
+      .then(function(foundRecord){
+        createdRecord = foundRecord;
         if(req.file('file')._files[0]){
           sails.log.info('adding file');
 
-          record.addFiles(req,{
+          createdRecord.addFiles(req,{
             dir : 'records/gallery',
             profile: 'gallery'
             },function(e,record){
@@ -148,11 +150,13 @@ module.exports = {
 
         }else{
           sails.log.info('not adding file');
-          res.json(record);
+          //res.json(createdRecord);
         }
-        return record;
+        return createdRecord;
       })
       .then(function(record){
+        sails.log.info('record');
+        sails.log.info(record);
         res.json(record);
       })
       .catch(function(err){
