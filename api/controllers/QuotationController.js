@@ -130,7 +130,8 @@ module.exports = {
       })
       .then(function(foundRecord){
         createdRecord = foundRecord;
-        if(req.file('file')._files[0]){
+        //if(req.file('file')._files[0]){
+        if(req._fileparser.upstreams.length){
           sails.log.info('adding file');
 
           createdRecord.addFiles(req,{
@@ -155,8 +156,6 @@ module.exports = {
         return createdRecord;
       })
       .then(function(record){
-        sails.log.info('record');
-        sails.log.info(record);
         res.json(record);
       })
       .catch(function(err){

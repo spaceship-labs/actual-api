@@ -17,7 +17,8 @@ module.exports.saveFiles = function(req,opts,cb){
   var $files = req.file && req.file('file')._files || [],
   maxBytes = 22020096;//max 21mb.
 
-  if(req.file('file')._files[0] && $files.length > 0){
+  if(req._fileparser.upstreams.length && $files.length > 0){
+  //if(req.file('file')._files[0] && $files.length > 0){
     //sails.log.info('entro');
     if(req._fileparser.form.bytesExpected>=maxBytes){
       //cb(new Error('exceeds maxBytes')); //throw en controllers
