@@ -192,6 +192,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       pending: Number(0).toFixed(2)
     },
     company: {
+      url: baseURL,
       image: store.logo
     },
     products: products,
@@ -305,6 +306,7 @@ function sendQuotation(client, user, quotation, products, store) {
       total: Number(quotation.total).toFixed(2),
     },
     company: {
+      url: baseURL,
       image: store.logo
     },
     products: products,
