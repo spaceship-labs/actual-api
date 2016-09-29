@@ -273,6 +273,16 @@ function getFarthestShipDate(quotationDetails){
   return farthestShipDate;
 }
 
+function applyExchangeRateToPayments(payments){
+  var mapped = payments.map(function(payment){
+    if(currency === 'usd'){
+      payment.ammount = payment.ammount * payment.exchangeRate;
+    }
+    return payment;
+  });
+}
+
+
 function calculateUsedEwalletByPayments(payments){
   var ewallet = 0;
   ewallet = payments.reduce(function(amount, payment){
@@ -299,6 +309,7 @@ function getSeriesNum(storeId){
       return err;
     });
 }
+
 
 function mapWhsSeries(whsName){
   var series = 209;
