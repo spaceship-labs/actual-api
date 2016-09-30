@@ -324,7 +324,10 @@ module.exports = {
         var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
           return paymentA + paymentB;
         });
-        var params = {ammountPaid: ammountPaid};
+        var params = {
+          ammountPaid: ammountPaid,
+          paymentGroup: paymentGroup
+        };
         return Quotation.update({id:quotationId}, params);
       })
       .then(function(updatedQuotation){
