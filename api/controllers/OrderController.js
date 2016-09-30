@@ -82,10 +82,12 @@ module.exports = {
           .populate('Details')
           .populate('Address')
           .populate('User')
+          .populate('Client')
           .populate('EwalletRecords');
       })
       .then(function(quotationFound){
         quotation = quotationFound;
+
         if(quotation.Order){
           return Promise.reject(
             new Error('Ya se ha creado un pedido sobre esta cotización')
@@ -107,7 +109,7 @@ module.exports = {
           discount: quotation.discount,
           paymentGroup: opts.paymentGroup,
           groupCode: user.activeStore.GroupCode,
-          Client: quotation.Client,
+          Client: quotation.Client.id,
           Quotation: quotationId,
           Payments: paymentsIds,
           EwalletRecords: quotation.EwalletRecords,
@@ -183,7 +185,7 @@ module.exports = {
           orderId: orderCreated.id,
           quotationId: quotation.id,
           userId: quotation.User.id,
-          clientId: quotation.Client
+          client: quotation.Client
         };
         return processEwalletBalance(params);
       })
@@ -312,14 +314,14 @@ function processEwalletBalance(params){
         Quotation: params.quotationId,
         QuotationDetail: params.details[i].id,
         User: params.userId,
-        Client: params.clientId,
+        Client: params.Client.id,
         amount: params.details[i].ewallet,
         type:'positive'
       });
     }
   }
 
-  var clientBalance = (Client.ewallet || 0) + generated;
+  var clientBalance = (params.client.ewallet || 0) + generated;
   return Client.update({id:params.clientId},{ewallet:generated})
     .then(function(clientUpdated){
       return Promise.each(ewalletRecords, createEwalletRecord);
