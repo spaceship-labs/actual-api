@@ -62,6 +62,9 @@ module.exports = {
     status:{
       type:'string',
       //enum:['closed','pending-payment','to-order']
+    },
+    source:{
+      type:'string',
     }
   },
 

@@ -461,6 +461,42 @@ module.exports = {
       .catch(function(err) {
         return res.negotiate(err);
       });
+  },
+
+  updateSource: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var source = form.source;
+    var params = {
+      Broker: null,
+      source: source
+    };    
+    Quotation.update({id:id}, params)
+      .then(function(updated){
+        res.json(updated);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
+  updateBroker: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var brokerId = form.brokerId;
+    var params = {
+      Broker: brokerId,
+      source: null
+    };
+    Quotation.update({id:id}, params)
+      .then(function(updated){
+        res.json(updated);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 
 };
