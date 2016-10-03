@@ -458,6 +458,16 @@ module.exports.routes = {
     action:'sendEmail'
   },
 
+  '/quotation/:id/source':{
+    controller:'quotation',
+    action: 'updateSource'
+  },
+
+  '/quotation/:id/broker':{
+    controller:'quotation',
+    action: 'updateBroker'
+  },
+
   '/client/update/:CardCode':{
     controller: 'client',
     action: 'update'

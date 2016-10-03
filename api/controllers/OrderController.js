@@ -103,6 +103,7 @@ module.exports = {
         }
         var paymentsIds = quotation.Payments.map(function(p){return p.id;});
         orderParams = {
+          source: quotation.source,
           ammountPaid: quotation.ammountPaid,
           total: quotation.total,
           subtotal: quotation.subtotal,
