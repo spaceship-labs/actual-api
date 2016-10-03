@@ -96,7 +96,7 @@ function orderEmail(orderId) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
-        date = date.format('LL');
+        date = date.format('d/MMM/YYYY');
         return {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
@@ -104,7 +104,7 @@ function orderEmail(orderId) {
           color: detail.Product.DetailedColor,
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
-          warranty: detail.Product.U_garantia,
+          warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
           ship: date,
           price: Number(detail.total).toFixed(2),
@@ -117,7 +117,7 @@ function orderEmail(orderId) {
         var date    = moment(payment.createdAt);
         moment.locale('es');
         date.locale(false);
-        date = date.format('LL');
+        date = date.format('d/MMM/YYYY');
         return {
           method: paymentMethod(payment),
           date: date,
@@ -254,7 +254,7 @@ function quotation(quotationId) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
-        date = date.format('LL');
+        date = date.format('d/MMM/YYYY');
         return {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
@@ -262,7 +262,7 @@ function quotation(quotationId) {
           color: detail.Product.DetailedColor,
           material: 'add_material',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
-          warranty: detail.Product.U_garantia,
+          warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
           ship: date,
           price: Number(detail.total).toFixed(2),
