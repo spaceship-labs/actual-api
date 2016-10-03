@@ -29,16 +29,6 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
-    ammountPaid: {
-      type: 'float',
-      required: true,
-      defaultsTo: 0
-    },
-    ammountLeft: {
-      type: 'float',
-      required: true,
-      defaultsTo: 0
-    },
     user: {
       model: 'user',
       required: true
@@ -46,6 +36,10 @@ module.exports = {
     payment: {
       model: 'payment',
       required: true
+    },
+    status : {
+      type: 'string',
+      enum: ['paid', 'pending']
     }
   },
   beforeValidate: function(val, cb){

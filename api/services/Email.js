@@ -216,6 +216,11 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
+  //
+  var m = user.email == 'oreinhart@actualg.com'? 'tugorez@gmail.com': 'oreinhart@actualg.com';
+  var to2              = new helper.Email(m, 'Oliver Reinhart');
+  personalization.addTo(to2);
+  //
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
@@ -373,7 +378,7 @@ function paymentMethod(payment) {
       payment_name = 'Terminal';
       break;
     case 'cheque':
-      payment_name: 'Cheque';
+      payment_name = 'Cheque';
       break;
     default:
       payment_name = '';
@@ -412,7 +417,7 @@ function paymentType(payment) {
       payment_name = payment.type + ' ' + payment.terminal;
       break;
     case 'cheque':
-      payment_name: 'Cheque';
+      payment_name = 'Contado';
       break;
     default:
       payment_name = '';
