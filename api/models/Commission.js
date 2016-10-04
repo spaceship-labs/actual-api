@@ -47,6 +47,12 @@ module.exports = {
       model: 'payment',
       required: true
     },
+    toJSON: function () {
+      var obj = this.toObject();
+      obj.order = obj.payment.Order;
+      obj.quotation = obj.payment.Quotation;
+      return obj;
+    }
   },
   beforeValidate: function(val, cb){
     Common.orderCustomAI(val, 'commissionFolio', function(val){
