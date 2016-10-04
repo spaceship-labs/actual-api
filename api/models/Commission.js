@@ -29,6 +29,16 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
+    status : {
+      type: 'string',
+      enum: ['paid', 'pending'],
+      required: true,
+      defaultsTo: 'pending'
+    },
+    store: {
+      model: 'store',
+      required: true
+    },
     user: {
       model: 'user',
       required: true
@@ -37,10 +47,6 @@ module.exports = {
       model: 'payment',
       required: true
     },
-    status : {
-      type: 'string',
-      enum: ['paid', 'pending']
-    }
   },
   beforeValidate: function(val, cb){
     Common.orderCustomAI(val, 'commissionFolio', function(val){

@@ -2,7 +2,7 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 
 module.exports = {
-  calculate: calculate
+  calculate: calculate,
 };
 
 function calculate(store) {
@@ -25,7 +25,7 @@ function calculateStore(store, dateFrom, dateTo) {
     .find(query)
     .sort('createdAt ASC')
     .then(function(payments) {
-      return payments
+      var users = payments
         .map(function(p) {
           return p.User
         })
@@ -35,16 +35,17 @@ function calculateStore(store, dateFrom, dateTo) {
           }
           return acum;
         }, []);
+      return User.find(users);
     })
     .then(function(users) {
       return users.map(function(user) {
-        return calculateUser(user, dateFrom, dateTo);
+        return calculateUser(user.mainStore, user.id, dateFrom, dateTo);
       });
     })
     .all();
 }
 
-function calculateUser(user, dateFrom, dateTo) {
+function calculateUser(store, user, dateFrom, dateTo) {
   var query = queryDate({User: user}, dateFrom, dateTo);
   return Promise
     .all([userRate(user, dateFrom, dateTo), Payment.find(query)])
@@ -53,7 +54,7 @@ function calculateUser(user, dateFrom, dateTo) {
         return Commission
           .findOne({payment: payment.id, user: user})
           .then(function(commission) {
-            return commission || Commission.create({payment: payment.id, user: user});
+            return commission || Commission.create({payment: payment.id, user: user, store: store});
           })
           .then(function(commission) {
             var ammount = (rate * payment.ammount).toFixed(2);
@@ -61,7 +62,7 @@ function calculateUser(user, dateFrom, dateTo) {
               {payment: payment.id, user: user},
               {datePayment: payment.createdAt, ammountPayment: payment.ammount, rate: rate, ammount: ammount }
             );
-          })
+          });
       });
     })
     .all();
@@ -170,7 +171,7 @@ function setLastDay(date) {
 
 function setFirstDay(date) {
   var date = new Date(date);
-  return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 function addOneDay(date) {
