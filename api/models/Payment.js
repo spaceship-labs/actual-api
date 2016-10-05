@@ -37,7 +37,16 @@ module.exports = {
     isRecurring: {type:'boolean'},
     msi:{type:'float'},
     paymentType: {type:'string'},
-    terminal: {type:'string'},
+    terminal: {
+      type:'string',
+      enum:[
+        'american-express',
+        'banamex',
+        'bancomer',
+        'banorte',
+        'santander'        
+      ]
+    },
     group:{type:'integer'},
     description:{type:'string'},
     status:{
