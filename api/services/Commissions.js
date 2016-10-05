@@ -78,6 +78,7 @@ function userRate(user, dateFrom, dateTo) {
     .populate('role')
     .then(function(user) {
       var date = withOutTimeZone(setFirstDay(dateFrom));
+      console.log(JSON.stringify({date: date, store: user.mainStore.id}));
       return [
         Goal.findOne({date: date, store: user.mainStore.id}),
         user.role.name,
