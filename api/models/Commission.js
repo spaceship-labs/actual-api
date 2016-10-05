@@ -29,15 +29,15 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
-    ammountPaid: {
-      type: 'float',
+    status : {
+      type: 'string',
+      enum: ['paid', 'pending'],
       required: true,
-      defaultsTo: 0
+      defaultsTo: 'pending'
     },
-    ammountLeft: {
-      type: 'float',
-      required: true,
-      defaultsTo: 0
+    store: {
+      model: 'store',
+      required: true
     },
     user: {
       model: 'user',
@@ -46,6 +46,12 @@ module.exports = {
     payment: {
       model: 'payment',
       required: true
+    },
+    toJSON: function () {
+      var obj = this.toObject();
+      obj.order = obj.payment.Order;
+      obj.quotation = obj.payment.Quotation;
+      return obj;
     }
   },
   beforeValidate: function(val, cb){

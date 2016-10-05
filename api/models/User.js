@@ -111,6 +111,7 @@ module.exports = {
         },
         toJSON: function () {
           var obj = this.toObject();
+          obj.name = obj.firstName + ' ' + obj.lastName;
           if (obj.SlpCode && isArray(obj.SlpCode) && obj.SlpCode.length > 0) {
             obj.SlpCode = obj.SlpCode[0];
           }
