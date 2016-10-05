@@ -16,6 +16,7 @@ function calculate(store) {
     var fdate = addDays(first, 15);
     var ldate = last;
   }
+  console.log(store, JSON.stringify(fdate), JSON.stringify(ldate));
   return calculateStore(store, fdate, ldate);
 }
 
@@ -77,7 +78,7 @@ function userRate(user, dateFrom, dateTo) {
     .populate('role')
     .then(function(user) {
       var date = setFirstDay(dateFrom);
-      console.log('88:20', JSON.stringify(date), user);
+      console.log('88:20', JSON.stringify(date), user.mainStore.id);
       return [
         Goal.findOne({date: date, store: user.mainStore.id}),
         user.role.name,
