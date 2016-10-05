@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var moment  = require('moment');
 var _       = require('underscore');
 
 module.exports = {
@@ -16,7 +17,6 @@ function calculate(store) {
     var fdate = addDays(first, 15);
     var ldate = last;
   }
-  console.log(store, JSON.stringify(fdate), JSON.stringify(ldate));
   return calculateStore(store, fdate, ldate);
 }
 
@@ -77,8 +77,7 @@ function userRate(user, dateFrom, dateTo) {
     .populate('mainStore')
     .populate('role')
     .then(function(user) {
-      var date = setFirstDay(dateFrom);
-      console.log('88:20', JSON.stringify(date), user.mainStore.id);
+      var date = withOutTimeZone(setFirstDay(dateFrom));
       return [
         Goal.findOne({date: date, store: user.mainStore.id}),
         user.role.name,
@@ -87,6 +86,7 @@ function userRate(user, dateFrom, dateTo) {
       ];
     })
     .spread(function(goal, role, utotal, stotal) {
+      console.log(dateFrom, dateTo, goal);
       var sellers     = goal.sellers;
       var gstore1     = goal.goal / 2;
       var gstore2     = gstore1 * 1.25;
@@ -186,4 +186,9 @@ function addDays(date, days) {
   var date = new Date(date);
   date.setDate(date.getDate() + days);
   return date;
+}
+
+function withOutTimeZone(date) {
+  var date = new Date(date);
+  return moment(date).format('MM-DD-YYYY');
 }
