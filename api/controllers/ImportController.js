@@ -32,48 +32,18 @@ module.exports = {
     });
   },
   importBrokersToUsers: function(req, res){
-    var brokersInfo = [];
-    BrokerSAP.find({})
-      .then(function(brokers){
-        brokers = brokers.map(createUserFromBroker);
-        sails.log.info('brokers');
-        sails.log.info(brokers);
-        brokersInfo = brokers;
-        return User.create(brokers);
-        //return brokers;
-        //return Promise.each(brokers, createUserFromBroker)
-      })
-      .then(function(resultCreate){
-        return res.json(brokersInfo)
-        //return res.json(resultCreate);
+    SyncService.importBrokersToUsers()
+      .then(function(created){
+        res.json(created);
       })
       .catch(function(err){
-        console.log(err);
+        sails.log.info('err');
+        sails.log.info(err);
         res.negotiate(err);
-      })
+      });
   }
 }
 
-function createUserFromBroker(broker){
-  var params = {
-    firstName : broker.Name,
-    brokerName : broker.Name,
-    brokerCode: broker.Code,
-    password: generateRandomString(8),
-    email: 'eeee@eee',
-    userType: 'broker'
-  }
-  return params;
-}
-
-function generateRandomString(length) {
-    var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-        retVal = "";
-    for (var i = 0, n = charset.length; i < length; ++i) {
-        retVal += charset.charAt(Math.floor(Math.random() * n));
-    }
-    return retVal;
-}
 
 function updateIcon(prod, callback){
   var itemCode = prod.ItemCode;

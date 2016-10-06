@@ -221,7 +221,7 @@ function buildSaleOrderRequestParams(
       .format(MOMENT_FORMAT),
     SalesPersonCode: slpCode || -1,
     CardCode: cardCode,
-    DescuentoPDocumento: calculateUsedEwalletByPayments(payments)
+    DescuentoPDocumento: calculateUsedEwalletByPayments(payments),
   };
 
   if(saleOrderRequest.SalesPersonCode === []){
