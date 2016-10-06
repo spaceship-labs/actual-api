@@ -87,6 +87,7 @@ function userRate(user, dateFrom, dateTo) {
       ];
     })
     .spread(function(goal, role, utotal, stotal) {
+      console.log('the goal of this period is : ', goal);
       var sellers     = goal.sellers;
       var gstore1     = goal.goal / 2;
       var gstore2     = gstore1 * 1.25;
