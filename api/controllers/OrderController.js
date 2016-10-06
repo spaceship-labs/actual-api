@@ -70,6 +70,7 @@ module.exports = {
     var orderParams;
     var orderCreated = false;
     var SlpCode = -1;
+    var currentStore = false;
     User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
         opts.currentStore = u.activeStore;
@@ -138,18 +139,24 @@ module.exports = {
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotation.Address);
+        currentStore = user.activeStore;
 
-        return QuotationDetail.find({Quotation: quotation.id})
-          .populate('Product');
+        return [
+          QuotationDetail.find({Quotation: quotation.id})
+            .populate('Product'),
+          Site.findOne({handle:'actual-group'})
+        ];
       })
-      .then(function(quotationDetails){
+      .spread(function(quotationDetails, site){
         return SapService.createSaleOrder(
           orderParams.groupCode,
           orderParams.CardCode,
           SlpCode,
           orderParams.CntctCode,
           quotationDetails,
-          quotation.Payments
+          quotation.Payments,
+          site.exchangeRate,
+          currentStore
         );
       })
       .then(function(sapResponse){
