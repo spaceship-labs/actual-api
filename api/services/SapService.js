@@ -4,7 +4,7 @@ var Promise = require('bluebird');
 var buildUrl = require('build-url');
 var _ = require('underscore');
 var moment = require('moment');
-var MOMENT_FORMAT = 'YYYY-MM-D';
+var SAP_DATE_FORMAT = 'YYYY-MM-DD';
 
 module.exports = {
   createClient        : createClient,
@@ -175,7 +175,9 @@ function createSaleOrder(
   slpCode,
   cntctCode, 
   quotationDetails, //Populated with products
-  payments
+  payments,
+  exchangeRate,
+  currentStore
 ){
   return new Promise(function(resolve, reject){
     buildSaleOrderRequestParams(
@@ -184,7 +186,9 @@ function createSaleOrder(
       slpCode,
       cntctCode, 
       quotationDetails,
-      payments
+      payments,
+      exchangeRate,
+      currentStore
     ).then(function(requestParams){
       var endPoint = baseUrl + requestParams;
       sails.log.info('endPoint');
@@ -209,7 +213,9 @@ function buildSaleOrderRequestParams(
   slpCode,
   cntctCode, 
   quotationDetails, //Populated with products
-  payments
+  payments,
+  exchangeRate,
+  currentStore
 ){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
@@ -218,10 +224,12 @@ function buildSaleOrderRequestParams(
     ContactPersonCode: cntctCode,
     Currency: 'MXP',
     ShipDate: moment(getFarthestShipDate(quotationDetails))
-      .format(MOMENT_FORMAT),
+      .format(SAP_DATE_FORMAT),
     SalesPersonCode: slpCode || -1,
     CardCode: cardCode,
-    DescuentoPDocumento: calculateUsedEwalletByPayments(payments)
+    DescuentoPDocumento: calculateUsedEwalletByPayments(payments),
+    WhsCode: "02",
+    Group: currentStore.group
   };
 
   if(saleOrderRequest.SalesPersonCode === []){
@@ -235,7 +243,7 @@ function buildSaleOrderRequestParams(
           ItemCode: detail.Product.ItemCode,
           OpenCreQty: detail.quantity,
           WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
-          ShipDate: moment(detail.shipDate).format(MOMENT_FORMAT),
+          ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
           DiscountPercent: detail.discountPercent,
           Company: detail.Product.U_Empresa,
           Price: detail.total
@@ -243,10 +251,32 @@ function buildSaleOrderRequestParams(
         };
         return product;
       });
+
+      saleOrderRequest.WhsCode = getWhsCodeById(currentStore.Warehouse, warehouses);
       requestParams += JSON.stringify(saleOrderRequest);
       requestParams += '&products=' + JSON.stringify(products);
+      requestParams += '&payments=' + JSON.stringify(mapPaymentsToSap(payments, exchangeRate));
+
       return requestParams;
     });
+}
+
+function mapPaymentsToSap(payments, exchangeRate){
+  return payments.map(function(payment){
+    var paymentSap = {
+      TypePay: payment.type,
+      amount: payment.ammount
+    };
+    if(payment.currency === 'usd'){
+      paymentSap.rate = exchangeRate;
+    }
+    if(payment.terminal){
+      paymentSap.Terminal = payment.terminal;
+      paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
+      paymentSap.ReferenceTerminal = payment.verificationCode;
+    }
+    return paymentSap;
+  });
 }
 
 function getWhsCodeById(whsId, warehouses){

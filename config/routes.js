@@ -333,6 +333,7 @@ module.exports.routes = {
     action: 'removeIcon'
   },
 
+  /*
   '/import/importimagessap': {
     controller: 'import',
     action: 'importImagesSap'
@@ -342,6 +343,7 @@ module.exports.routes = {
     controller: 'import',
     action: 'importBrokersToUsers'
   },
+  */
 
   '/seller/getall':{
     controller: 'seller',
