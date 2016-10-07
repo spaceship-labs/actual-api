@@ -46,7 +46,6 @@ module.exports = {
       collection:'PackageRule',
       via:'PromotionPackage'
     },
-
     Stores:{
       collection:'store',
       //collection:'Company',

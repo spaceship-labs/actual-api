@@ -169,6 +169,8 @@ module.exports = {
       .populate('Stores')
       .exec(function(err, user) {
         if (err) {return res.negotiate(err);}
+        sails.log.info('user');
+        sails.log.info(user);
         var stores = user && user.Stores || [];
         return res.json(stores);
       });
