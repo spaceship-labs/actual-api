@@ -2,6 +2,7 @@ var baseURL               = process.env.baseURL;
 var key                   = process.env.SENDGRIDAPIKEY;
 var Promise               = require('bluebird');
 var moment                = require('moment');
+var numeral               = require('numeral');
 var fs                    = require('fs');
 var ejs                   = require('ejs');
 var moment                = require('moment');
@@ -270,7 +271,7 @@ function quotation(quotationId) {
           warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
           ship: date,
-          price: Number(detail.total).toFixed(2),
+          price: numeral(detail.total).format('0,0.00'),
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
@@ -306,9 +307,9 @@ function sendQuotation(client, user, quotation, products, store) {
     },
     quotation: {
       folio: quotation.folio,
-      subtotal: Number(quotation.subtotal).toFixed(2),
-      discount: Number(quotation.discount).toFixed(2),
-      total: Number(quotation.total).toFixed(2),
+      subtotal: numeral(quotation.subtotal).format('0,0.00'),
+      discount: numeral(quotation.discount).format('0,0.00'),
+      total: numeral(quotation.total).format('0,0.00'),
     },
     company: {
       url: baseURL,
@@ -316,7 +317,7 @@ function sendQuotation(client, user, quotation, products, store) {
     },
     products: products,
     ewallet: {
-      balance: Number(client.ewallet).toFixed(2)
+      balance: numeral(client.ewallet).format('0,0.00')
     }
   });
 
