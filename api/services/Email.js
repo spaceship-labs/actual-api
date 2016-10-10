@@ -108,7 +108,7 @@ function orderEmail(orderId) {
           warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
           ship: date,
-          price: Number(detail.total).toFixed(2),
+          price: numeral(detail.total).format('0,0.00'),
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
@@ -124,7 +124,7 @@ function orderEmail(orderId) {
           date: date,
           folio: payment.folio,
           type: paymentType(payment),
-          ammount: ammount,
+          ammount: numeral(ammount).format('0,0.00'),
           currency: payment.currency
         };
       });
@@ -149,10 +149,10 @@ function orderEmail(orderId) {
 
       }, 0);
       ewallet = {
-        prev: pewallet.toFixed(2),
-        earned: eewallet.toFixed(2),
-        spent: sewallet.toFixed(2),
-        balance: bewallet.toFixed(2)
+        prev: numeral(pewallet).format('0,0.00'),
+        earned: numeral(eewallet).format('0,0.00'),
+        spent: numeral(sewallet).format('0,0.00'),
+        balance: numeral(bewallet).format('0,0.00'),
       };
       return [client, user, order, products, payments, ewallet, store];
     })
@@ -186,11 +186,11 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     },
     order: {
       folio: order.folio,
-      subtotal: Number(order.subtotal).toFixed(2),
-      discount: Number(order.discount).toFixed(2),
-      total: Number(order.total).toFixed(2),
-      paid: Number(order.total).toFixed(2),
-      pending: Number(0).toFixed(2)
+      subtotal: numeral(order.subtotal).format('0,0.00'),
+      discount: numeral(order.discount).format('0,0.00'),
+      total: numeral(order.total).format('0,0.00'),
+      paid: numeral(order.total).format('0,0.00'),
+      pending: numeral(0).format('0,0.00'),
     },
     company: {
       url: baseURL,
@@ -199,10 +199,10 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     products: products,
     payments: payments,
     ewallet: {
-      prev: ewallet.prev,
-      received: ewallet.earned,
-      paid: ewallet.spent,
-      balance: ewallet.balance
+      prev: numeral(ewallet.prev).format('0,0.00'),
+      received: numeral(ewallet.earned).format('0,0.00'),
+      paid: numeral(ewallet.spent).format('0,0.00'),
+      balance: numeral(ewallet.balance).format('0,0.00'),
     }
   });
 
@@ -212,16 +212,16 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var to               = new helper.Email('tugorez@gmail.com', user.firstName + ' ' + user.lastName);
   var subject          = 'Confirmación de compra';
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
-  //
+  /*
   var m = user.email == 'oreinhart@actualg.com'? 'tugorez@gmail.com': 'oreinhart@actualg.com';
   var to2              = new helper.Email(m, 'Oliver Reinhart');
   personalization.addTo(to2);
-  //
+  */
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
