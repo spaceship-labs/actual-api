@@ -37,7 +37,7 @@ function Calculator(){
     return getPromosByStore(opts.currentStore)
       .then(function(promos){
         storePromotions = promos;
-        return Quotation.findOne({id:quotationId}).populate('Details') 
+        return Quotation.findOne({id:quotationId}).populate('Details');
       })
       .then(function(quotation){
         quotationAux = quotation; 
@@ -80,7 +80,7 @@ function Calculator(){
     return Store.findOne({id:storeId}).populate('Promotions', queryPromos)
       .then(function(store){
         return store.Promotions;
-      })
+      });
   }
 
   function getQuotationPackagesIds(details){
@@ -209,20 +209,20 @@ function Calculator(){
     return Product.findOne({id:productId})
       .populate('Promotions', queryPromos)
       .then(function(p){
-        var mainPromo             = getProductMainPromo(p, quantity);
-        var unitPrice             = p.Price;
-        var discountKey           = getDiscountKey(opts.paymentGroup);
-        var discountPercent       = mainPromo ? mainPromo[discountKey] : 0;
+        var mainPromo = getProductMainPromo(p, quantity);
+        var unitPrice = p.Price;
+        var discountKey = getDiscountKey(opts.paymentGroup);
+        var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
         var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
-        var subtotal              = quantity * unitPrice;
-        var total                 = quantity * unitPriceWithDiscount;
-        var discount              = total - subtotal;
-        var ewallet               = getEwalletEntryByDetail({
+        var subtotal = quantity * unitPrice;
+        var total = quantity * unitPriceWithDiscount;
+        var discount = total - subtotal;
+        var ewallet = getEwalletEntryByDetail({
           Promotion: mainPromo,
           paymentGroup: opts.paymentGroup,
           total: total
         });
-        var detailTotals          = {
+        var detailTotals = {
           id: detail.id,
           unitPrice: unitPrice,
           unitPriceWithDiscount: unitPriceWithDiscount,
@@ -235,7 +235,7 @@ function Calculator(){
           discount: discount,
           ewallet: ewallet,
           PromotionPackageApplied: null
-        }
+        };
 
         if(mainPromo.id && !mainPromo.PromotionPackage){
           detailTotals.Promotion = mainPromo.id;
@@ -256,7 +256,6 @@ function Calculator(){
     //Taking package rule as a promotion
     if(packageRule){
       promotions = promotions.concat([packageRule]);
-      //return packageRule;
     }
     return getPromotionWithHighestDiscount(promotions);
   }
