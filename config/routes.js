@@ -440,9 +440,9 @@ module.exports.routes = {
     action:'addDetail'
   },
 
-  '/quotation/removedetail/:id/:quotation':{
+  '/quotation/removedetailsgroup/:quotation':{
     controller:'quotation',
-    action:'removeDetail'
+    action:'removeDetailsGroup'
   },
 
   '/quotation/addpayment/:quotationid':{

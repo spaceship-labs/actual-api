@@ -200,11 +200,11 @@ module.exports = {
 
   },
 
-  removeDetail: function(req, res){
+
+  removeDetailsGroup: function(req, res){
     var form = req.params.all();
-    var id = form.id;
+    var detailsIds = form.detailsIds;
     var quotationId = form.quotation;
-    form.Details = formatProductsIds(form.Details);
     var opts = {
       paymentGroup:1,
       updateDetails: true,
@@ -212,7 +212,7 @@ module.exports = {
     User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
         opts.currentStore = user.activeStore;
-        return QuotationDetail.destroy({id:id});
+        return QuotationDetail.destroy({id:detailsIds});
       })
       .then(function(){
         var calculator = Prices.Calculator();
