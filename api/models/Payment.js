@@ -47,6 +47,7 @@ module.exports = {
         'santander'        
       ]
     },
+    card: {type:'string'},
     cardLastDigits: {type:'string'},
     cardExpDate: {type:'string'},
     group:{type:'integer'},
