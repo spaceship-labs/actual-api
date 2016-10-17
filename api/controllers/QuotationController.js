@@ -502,21 +502,22 @@ module.exports = {
   validateQuotationStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.quotationId;
-    var whsId;
+    var warehouse;
     Promise.join(
       User.findOne({id: req.user.id}).populate('activeStore'),
       Quotation.findOne({id: quotationId}).populate('Details')
     ).then(function(results){
-      sails.log.info('results');
-      sails.log.info(results);
       var user = results[0];
-      whsId = user.activeStore.Warehouse;
+      var whsId = user.activeStore.Warehouse;
       details = results[1].Details;
       var detailsIds = details.map(function(d){ return d.id; });
-      return  QuotationDetail.find({id: detailsIds}).populate('Product');
+      return [
+        Company.findOne({id: whsId}),
+        QuotationDetail.find({id: detailsIds}).populate('Product')
+      ];
     })
-    .then(function(details){
-      return StockService.getDetailsDeliveries(details, whsId);    
+    .spread(function(warehouse,details){
+      return StockService.getDetailsDeliveries(details, warehouse);    
     })
     .then(function(results){
       res.json(results);

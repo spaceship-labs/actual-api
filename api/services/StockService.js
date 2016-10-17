@@ -8,19 +8,17 @@ module.exports = {
 };
 
 //details must be populated with products
-function getDetailsDeliveries(details, whsId){
+function getDetailsDeliveries(details, warehouse){
 	var promises = [];
 	var productsItemCodes = details.map(function(detail){
 		return detail.Product.ItemCode;
 	});
 	productsItemCodes = _.uniq(productsItemCodes);
 	for(var i=0;i<productsItemCodes.length; i++){
-		promises.push( Shipping.product(productsItemCodes[i], whsId) );
+		promises.push( Shipping.product(productsItemCodes[i], warehouse) );
 	}
 	return Promise.all(promises)
 		.then(function(results){
-			sails.log.info('results');
-			sails.log.info(results);
 			return results;
-		})
+		});
 }
