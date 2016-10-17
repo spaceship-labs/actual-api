@@ -212,16 +212,17 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email('tugorez@gmail.com', user.firstName + ' ' + user.lastName);
+  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var subject          = 'Confirmación de compra';
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
-  /*
-  var m = user.email == 'oreinhart@actualg.com'? 'tugorez@gmail.com': 'oreinhart@actualg.com';
-  var to2              = new helper.Email(m, 'Oliver Reinhart');
-  personalization.addTo(to2);
-  */
+  /**/
+    var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
+    var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
+    personalization.addTo(to2);
+    personalization.addTo(to3);
+  /**/
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
@@ -330,6 +331,12 @@ function sendQuotation(client, user, quotation, products, store) {
   var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var subject          = 'Cotización';
   var content          = new helper.Content("text/html", emailBody);
+  /**/
+    var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
+    var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
+    personalization.addTo(to2);
+    personalization.addTo(to3);
+  /**/
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
