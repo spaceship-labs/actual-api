@@ -5,12 +5,8 @@ module.exports = {
   product           : productShipping
 };
 
-function productShipping(productCode, warehouseId) {
-  return Company
-    .findOne(warehouseId)
-    .then(function(company) {
-      return Delivery.find({ToCode: company.WhsCode, Active:'Y'});
-    })
+function productShipping(productCode, warehouse) {
+  return Delivery.find({ToCode: warehouse.WhsCode, Active:'Y'})
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
       var companies = deliveries.map(function(delivery) {
@@ -58,7 +54,7 @@ function productShipping(productCode, warehouseId) {
           available: product.OpenCreQty,
           days: days,
           date: date,
-          company: warehouseId,
+          company: warehouse.id,
           companyFrom: product.company
         };
       });
