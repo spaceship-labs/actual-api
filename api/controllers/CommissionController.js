@@ -47,6 +47,25 @@ module.exports = {
       .catch(function(err) {
         return res.negotiate(err);
       });
+  },
+
+  report: function(req, res) {
+    var form  = req.allParams();
+    var query = {
+      createdAt: form.createdAt,
+    };
+    if (form.user) {
+      query['user'] = form.user;
+    }
+    if (form.store) {
+      query['store'] = form.store;
+    }
+    Commission.update(query, {status: 'paid'}).exec(function(err, commissions){
+      if (err) {
+        return res.negotiate(err);
+      }
+      return  res.json(commissions);
+    });
   }
 };
 
