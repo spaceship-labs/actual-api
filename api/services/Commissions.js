@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var moment  = require('moment');
 var _       = require('underscore');
+var IVA     = 0.16;
 
 module.exports = {
   calculate: calculate,
@@ -58,7 +59,10 @@ function calculateUser(store, user, dateFrom, dateTo) {
             return commission || Commission.create({payment: payment.id, user: user, store: store});
           })
           .then(function(commission) {
-            var ammount = (rate * payment.ammount).toFixed(2);
+            var ammount = (rate * payment.ammount / (1 + IVA)).toFixed(2);
+            if (payment.type == 'ewallet') {
+              ammount = 0;
+            }
             return Commission.update(
               {payment: payment.id, user: user},
               {datePayment: payment.createdAt, ammountPayment: payment.ammount, rate: rate, ammount: ammount }
@@ -126,7 +130,7 @@ function userRate(user, dateFrom, dateTo) {
 }
 
 function userTotal(user, dateFrom, dateTo) {
-  var query = queryDate({User: user}, dateFrom, dateTo);
+  var query = queryDate({User: user, type: {'!': 'ewallet'}}, dateFrom, dateTo);
   return Payment
     .find(query)
     .then(function(payments) {
@@ -135,7 +139,7 @@ function userTotal(user, dateFrom, dateTo) {
 }
 
 function storeTotal(store, dateFrom, dateTo) {
-  var query = queryDate({Store: store}, dateFrom, dateTo);
+  var query = queryDate({Store: store, type: {'!': 'ewallet'}}, dateFrom, dateTo);
   return Payment
     .find(query)
     .then(function(payments) {
@@ -145,11 +149,13 @@ function storeTotal(store, dateFrom, dateTo) {
 
 function sumPayments(payments) {
   return payments.reduce(function(acum, current) {
+    var ammount = 0;
     if (current.currency == 'usd') {
-      return acum + (current.ammount * current.exchangeRate);
+      ammount = acum + (current.ammount * current.exchangeRate);
     } else {
-      return acum + current.ammount;
+      ammount = acum + current.ammount;
     }
+    return ammount / (1 + IVA);
   }, 0);
 }
 
