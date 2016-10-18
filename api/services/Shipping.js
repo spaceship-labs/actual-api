@@ -41,6 +41,10 @@ function productShipping(productCode, warehouse) {
     .spread(function(products, deliveries, season){
       if (!deliveries || !products) {return []};
       return products.map(function(product){
+        /*
+        sails.log.info('product');
+        sails.log.info(product);
+        */
         var delivery     = _.find(deliveries, function(delivery) {
           return delivery.FromCode == product.whsCode;
         });
@@ -55,7 +59,8 @@ function productShipping(productCode, warehouse) {
           days: days,
           date: date,
           company: warehouse.id,
-          companyFrom: product.company
+          companyFrom: product.company,
+          itemCode: product.ItemCode
         };
       });
     });

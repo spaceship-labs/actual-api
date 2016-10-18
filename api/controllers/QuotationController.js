@@ -499,7 +499,7 @@ module.exports = {
       });
   },
 
-  validateQuotationStock: function(req, res){
+  getCurrentStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.quotationId;
     var warehouse;
@@ -517,7 +517,7 @@ module.exports = {
       ];
     })
     .spread(function(warehouse,details){
-      return StockService.getDetailsDeliveries(details, warehouse);    
+      return StockService.getDetailsStock(details, warehouse);    
     })
     .then(function(results){
       res.json(results);

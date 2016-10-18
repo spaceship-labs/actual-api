@@ -630,9 +630,9 @@ module.exports.routes = {
     action:'getDetailedPackage'
   },
 
-  '/quotation/validatestock/:quotationId':{
+  '/quotation/getcurrentstock/:quotationId':{
     controller:'quotation',
-    action: 'validateQuotationStock'
+    action: 'getCurrentStock'
   }
   /***************************************************************************
   *                                                                          *
