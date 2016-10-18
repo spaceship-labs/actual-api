@@ -629,6 +629,11 @@ module.exports.routes = {
     controller: 'package',
     action:'getDetailedPackage'
   },
+
+  '/quotation/getcurrentstock/:quotationId':{
+    controller:'quotation',
+    action: 'getCurrentStock'
+  }
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

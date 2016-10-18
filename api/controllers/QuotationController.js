@@ -497,6 +497,36 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getCurrentStock: function(req, res){
+    var form = req.allParams();
+    var quotationId = form.quotationId;
+    var warehouse;
+    Promise.join(
+      User.findOne({id: req.user.id}).populate('activeStore'),
+      Quotation.findOne({id: quotationId}).populate('Details')
+    ).then(function(results){
+      var user = results[0];
+      var whsId = user.activeStore.Warehouse;
+      details = results[1].Details;
+      var detailsIds = details.map(function(d){ return d.id; });
+      return [
+        Company.findOne({id: whsId}),
+        QuotationDetail.find({id: detailsIds}).populate('Product')
+      ];
+    })
+    .spread(function(warehouse,details){
+      return StockService.getDetailsStock(details, warehouse);    
+    })
+    .then(function(results){
+      res.json(results);
+    })
+    .catch(function(err){
+      console.log('err', err);
+      res.negotiate(err);
+    });
+
   }
 
 };
