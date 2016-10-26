@@ -22,17 +22,18 @@ module.exports = {
     var form = req.params.all();
     var client = form.client;
     var model = 'order';
-    var searchFields = [];
-    var selectFields = form.fields;
-    var populateFields = ['Client'];
-    Common.find(model, form, searchFields, populateFields, selectFields)
+    var extraParams = {
+      selectFields: form.fields,
+      populateFields: ['Client']
+    };
+    Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
       })
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
 

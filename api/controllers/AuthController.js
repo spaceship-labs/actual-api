@@ -55,12 +55,6 @@ function _onPassportAuth(req, res, error, user, info){
 
 
 module.exports = {
-
-  /**
-   * Sign in by local strategy in passport
-   * @param {Object} req Request object
-   * @param {Object} res Response object
-   */
   signin: function (req, res) {
     passport.authenticate('local',
       _onPassportAuth.bind(this, req, res))(req, res);

@@ -4,8 +4,6 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'product';
-    var searchFields = ['ItemName','ItemCode','Name'];
-    var selectFields = form.fields;
     var populateFields = form.noimages ? [] : ['files'];
     if(form.populate_fields){
       populateFields = form.populate_fields;
@@ -14,7 +12,12 @@ module.exports = {
     if(form.getAll){
       sails.log.info('Exportando productos');
     }
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+    var extraParams = {
+      searchFields: ['ItemName','ItemCode','Name'],
+      populateFields: populateFields,
+      selectFields:  ['ItemName','ItemCode','Name']
+    };
+    Common.find(model, form, extraParams).then(function(result){
       if(form.getAll){
         sails.log.info('Termino exportacion de productos');
       }

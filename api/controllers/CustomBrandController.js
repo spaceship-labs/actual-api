@@ -3,8 +3,10 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'custombrand';
-    var searchFields = ['Name'];
-    Common.find(model, form, searchFields).then(function(result){
+    var extraParams = {
+      searchFields: ['Name']
+    };
+    Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
     })
     .catch(function(err){

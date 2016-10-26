@@ -238,10 +238,11 @@ module.exports = {
     var form = req.params.all();
     var client = form.client;
     var model = 'quotation';
-    var searchFields = [];
-    var selectFields = form.fields;
-    var populateFields = ['Client'];
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+    var extraParams = {
+      selectFields: form.fields,
+      populateFields: ['Client']
+    };
+    Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
     },function(err){
       console.log(err);
@@ -253,10 +254,12 @@ module.exports = {
     var form = req.params.all();
     var client = form.client;
     var model = 'quotation';
-    var searchFields = ['DocEntry','CardCode','CardName'];
-    var selectFields = form.fields;
-    var populateFields = ['Client'];
-    Common.find(model, form, searchFields, populateFields, selectFields).then(function(result){
+    var extraParams = {
+      searchFields: ['DocEntry','CardCode','CardName'],
+      selectFields: form.fields,
+      populateFields: ['Client']
+    };
+    Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
     },function(err){
       console.log(err);

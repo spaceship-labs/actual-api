@@ -11,9 +11,11 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'user';
-    var searchFields   = ['firstName','email'];
-    var populateFields = ['role', 'SlpCode'];
-    Common.find(model, form, searchFields, populateFields).then(function(result){
+    var extraParams = {
+      searchFields: ['firstName','email'],
+      populateFields: ['role', 'SlpCode']
+    };
+    Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
     },function(err){
       res.notFound();

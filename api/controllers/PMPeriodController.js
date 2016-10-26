@@ -47,10 +47,11 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'pmperiod';
-    var searchFields = ['name','code'];
-    var selectFields = form.fields;
-    var populateFields = [];
-    Common.find(model, form, searchFields, populateFields, selectFields)
+    var extraParams = {
+      searchFields: ['name', 'code'],
+      selectFields: form.fields
+    };
+    Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
       })

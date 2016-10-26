@@ -2,8 +2,10 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'saleopportunity';
-    var searchFields = ['CardCode','CardName'];
-    Common.find(model, form, searchFields).then(function(result){
+    var extraParams = {
+      searchFields: ['CardCode','CardName']
+    };
+    Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
     },function(err){
       console.log(err);

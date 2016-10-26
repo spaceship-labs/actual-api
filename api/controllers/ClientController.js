@@ -6,33 +6,34 @@ module.exports = {
   find: function(req, res){
     var form           = req.params.all();
     var model          = 'client';
-    var searchFields   = ['id','CardName','CardCode','firstName','lastName','E_Mail','phone'];
-    var selectFields   =[];
-    var populateFields = [];
-    Common.find(model, form, searchFields, populateFields, selectFields)
-    .then(function(result){
-      res.ok(result);
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    })
+    var extraParams = {
+      searchFields: ['id','CardName','CardCode','firstName','lastName','E_Mail','phone']
+    };
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   findBySeller: function(req, res){
-    var form            = req.params.all();
-    var model           = 'client';
-    var searchFields    = ['CardCode','CardName'];
-    var selectFields    = [];
-    var populateFields  = ['Quotations'];
-    form.filters        = {SlpCode: form.seller};
-    Common.find(model, form, searchFields, populateFields, selectFields)
-    .then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    })
+    var form = req.params.all();
+    var model = 'client';
+    var extraParams = {
+      searchFields: ['CardCode','CardName'],
+      populateFields: ['Quotations']
+    };
+    form.filters = {SlpCode: form.seller};
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      },function(err){
+        console.log(err);
+        res.notFound();
+      });
   },
 
   findById: function(req, res){

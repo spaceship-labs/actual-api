@@ -7,22 +7,24 @@ module.exports = {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
   },
-  find: function(modelName,form,searchFields, populateFields, selectFields){
+  find: function(modelName,form, extraParams){
     var deferred = q.defer();
+    var searchFields = extraParams.searchFields || [];
+    var populateFields = extraParams.populateFields || [];
+    var selectFields = extraParams.selectFields || [];
     var items = form.items || 10;
     var page = form.page || 1;
-    var term = form.term || false;
-    var orderBy = form.orderby || false;
-    var populateFields = populateFields || false;
+    var term = form.term;
+    var orderBy = form.orderby;
     var query = {};
     var querySearchAux = {};
     var model = sails.models[modelName];
     var filters = form.filters;
     var selectObj = false;
     var read = false;
-    var getAll = form.getAll || false;
-    var dateRange = form.dateRange || false;
-    var keywords = form.keywords || false;
+    var getAll = form.getAll;
+    var dateRange = form.dateRange;
+    var keywords = form.keywords;
 
     //console.log(model);
     if(term){
