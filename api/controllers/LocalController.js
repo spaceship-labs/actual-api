@@ -1,4 +1,5 @@
 module.exports = {
+  /*
   cuadros: function(req, res){
     ProductCategory.findOne({id:"57436fb9ef7d5e62e508e206"}) //Cuadros
       .populate('Products')
@@ -15,21 +16,9 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
+  */
 
-  cacheStock: function(req, res){
-    sails.log.info('Empezo el stock map en controller : ' + new Date() );
-    StockService.cacheStoresStock()
-      .then(function(result){
-        sails.log.info('Termino el stock map en controller: ' + new Date() );
-        return res.json(result);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate('err');
-      })
-
-  }
 
 };

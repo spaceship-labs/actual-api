@@ -304,8 +304,8 @@ function createContactPromise(params){
       params.CntctCode = result.value;
       return ClientContact.create(params);
     })
-    .then(function(createdApp){
-      return createdApp;
+    .then(function(createdInApp){
+      return createdInApp;
     })
     .catch(function(err){
       console.log('err createContactPromise');
@@ -320,8 +320,8 @@ function createFiscalAddressPromise(params){
     .then(function(result){
       return FiscalAddress.create(params);
     })
-    .then(function(createdApp){
-      return createdApp;
+    .then(function(createdInApp){
+      return createdInApp;
     })
     .catch(function(err){
       console.log(err);

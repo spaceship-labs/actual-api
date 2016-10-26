@@ -15,7 +15,7 @@ module.exports = {
     },function(err){
       console.log(err);
       res.notFound();
-    })
+    });
   },
 
   getProducts: function(req, res){
@@ -24,7 +24,7 @@ module.exports = {
     ProductGroup.findOne({id: id, Type:'packages'}).populate('Products')
       .then(function(group){
         var products = group.Products;
-        var productsIds = products.map(function(p){return p.id});
+        var productsIds = products.map(function(p){return p.id;});
         var q = {PromotionPackage: id, limit:1};
         return Product.find({id:productsIds}).populate('PackageRules',q);
       })
@@ -41,7 +41,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
   update: function(req, res){
@@ -75,7 +75,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         return res.negotiate(err);
-      })
+      });
   }
 
 }

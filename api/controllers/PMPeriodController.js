@@ -4,7 +4,6 @@ module.exports = {
     var startDate = new Date(form.startDate);
     var endDate = new Date(form.endDate);
     overlapsRange(startDate, endDate).then(function(overlaps){
-      console.log(overlaps);
       if(!overlaps){
         PMPeriod.create(form).then(function(created){
           return res.json(created);
@@ -22,6 +21,7 @@ module.exports = {
     });
 
   },
+
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -42,8 +42,9 @@ module.exports = {
     }).catch(function(err){
       console.log(err);
       res.negotiate(err);
-    })
+    });
   },
+
   find: function(req, res){
     var form = req.params.all();
     var model = 'pmperiod';
@@ -87,7 +88,7 @@ module.exports = {
     });
   }
 
-}
+};
 
 //Params must be Date objects
 function overlapsRange(newStart, newEnd, currentPeriodId){
@@ -102,5 +103,5 @@ function overlapsRange(newStart, newEnd, currentPeriodId){
     return result;
   }).catch(function(err){
     console.log(err);
-  })
+  });
 }

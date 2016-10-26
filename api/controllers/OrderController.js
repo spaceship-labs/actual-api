@@ -3,20 +3,6 @@ var Promise = require('bluebird');
 var EWALLET_POSITIVE = 'positive';
 
 module.exports = {
-  create: function(req, res){
-    var form = req.params.all();
-    Order
-      .create(form)
-      .then(function(order) {
-        return Email.sendOrderConfirmation(order.id);
-      })
-      .then(function(order) {
-        return res.json(order);
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  },
 
   find: function(req, res){
     var form = req.params.all();
@@ -295,10 +281,10 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
-  },
+      });
+  }
 
-}
+};
 
 
 //@params
@@ -343,7 +329,6 @@ function createEwalletRecord(record){
 }
 
 function getPaidPercentage(amountPaid, total){
-  var percentage = 0;
   var percentage = amountPaid / (total / 100);
   return percentage;
 }

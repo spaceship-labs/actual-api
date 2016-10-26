@@ -53,7 +53,7 @@ module.exports = {
     })
     .catch(function(err){
       res.negotiate(err);
-    })
+    });
   },
 
   findById: function(req, res){
@@ -67,5 +67,4 @@ module.exports = {
     });
   },
 
-
-}
+};

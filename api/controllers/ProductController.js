@@ -17,15 +17,18 @@ module.exports = {
       populateFields: populateFields,
       selectFields:  ['ItemName','ItemCode','Name']
     };
-    Common.find(model, form, extraParams).then(function(result){
-      if(form.getAll){
-        sails.log.info('Termino exportacion de productos');
-      }
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    })
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        if(form.getAll){
+          sails.log.info('Termino exportacion de productos');
+        }
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+
   },
   findById: function(req, res){
     var form = req.params.all();
@@ -45,14 +48,14 @@ module.exports = {
       .populate('Groups')
       .populate('Promotions', queryPromo)
       //.populate('stock')
-      .exec(function(err, product){
-      if(err){
-        console.log(err);
-        res.notFound();
-      }else{
+      .then(function(product){
         res.ok({data:product});
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+
   },
   search: function(req, res){
     var form = req.params.all();
@@ -100,20 +103,22 @@ module.exports = {
         read = model.find(query).populate('files');
       }
 
+      var resultsRead;
       read.sort('Available DESC');
-
-      read.exec(function(err, results){
-        model.count(querySearchAux).exec(function(err,count){
-          if(err){
-            console.log(err);
-            return res.notFound();
-          }else{
-            return res.ok({data:results, total:count});
-          }
-        })
+      read.then(function(results){
+        resultsRead = results;
+        return model.count(querySearchAux);
+      })
+      .then(function(count){
+        return res.ok({data:resultsRead, total:count});
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
       });
+    }
 
-    }else{
+    else{
       return res.ok({data:[], total: 0});
     }
 
@@ -124,64 +129,72 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Product.update({ItemCode: id}, form).exec(function updatedProduct(e, product){
-      if(e){
-        console.log(e);
-        throw(e);
-      }
-      res.json(product);
-    });
+    Product.update({ItemCode: id}, form)
+      .then(function(product){
+        res.json(product);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   addFiles : function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
-    Product.findOne({ItemCode:form.id}).exec(function(e,product){
-      if(e){
-        //throw(e);
-        console.log(e);
-      }
-      product.addFiles(req,{
-        dir : 'products/gallery',
-        profile: 'gallery'
-      },function(e,product){
-        if(e){
-          console.log(e);
-          res.json(false);
-          //throw(e);
-        }
-        else{
-          //TODO check how to retrieve images instead of doing other query
-          Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
-            return res.json(updatedProduct.files);
-          });
-        }
-      });
-    });
+    Product.findOne({ItemCode:form.id})
+      .then(function(product){
+        product.addFiles(req,{
+          dir : 'products/gallery',
+          profile: 'gallery'
+        },function(e,product){
+          if(e){
+            console.log(e);
+            res.json(false);
+          }
+          else{
+            //TODO check how to retrieve images instead of doing other query
+            Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
+              return res.json(updatedProduct.files);
+            });
+          }
+        });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   removeFiles : function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
-    Product.findOne({ItemCode:form.ItemCode}).populate('files').exec(function(e,product){
-      product.removeFiles(req,{
-        dir : 'products/gallery',
-        profile : 'gallery',
-        files : form.removeFiles,
-        fileModel: ProductFile
-      },function(e,product){
-        if(e){
-          console.log(e);
-          res.json(false);
-        }
-        else{
-          //TODO check how to retrieve images instead of doing other query
-          Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
-            return res.json(updatedProduct.files);
-          });
-        }
+    Product.findOne({ItemCode:form.ItemCode}).populate('files')
+      .then(function(product){
+
+        product.removeFiles(req,{
+          dir : 'products/gallery',
+          profile : 'gallery',
+          files : form.removeFiles,
+          fileModel: ProductFile
+        },function(e,product){
+          if(e){
+            console.log(e);
+            res.json(false);
+          }
+          else{
+            //TODO check how to retrieve images instead of doing other query
+            Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
+              return res.json(updatedProduct.files);
+            });
+          }
+        });
+
       })
-    });
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   updateIcon: function(req,res){
@@ -227,14 +240,14 @@ module.exports = {
   getProductsbySuppCatNum: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Product.find( {SuppCatNum: id}, {select: ['ItemCode']} ).exec(function( e, prods ) {
-      if(e){
-        console.log(e);
-        res.json(false);
-      }else{
+    Product.find( {SuppCatNum: id}, {select: ['ItemCode']} )
+      .then(function(prods) {
         res.json(prods);
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   addSeenTime: function(req, res){
@@ -257,7 +270,7 @@ module.exports = {
     .catch(function(err){
       console.log(err);
       res.negotiate(err);
-    })
+    });
   },
 
-}
+};

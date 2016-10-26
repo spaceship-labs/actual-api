@@ -7,6 +7,6 @@ module.exports = {
       }else{
         return res.ok(results);
       }
-    })
+    });
   }
-}
+};

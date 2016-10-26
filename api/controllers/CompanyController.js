@@ -30,7 +30,7 @@ module.exports = {
           role: role.id,
           companyMain: company,
           projectUser: false
-        })
+        });
       })
       .then(function(sellers) {
         return res.json(sellers);
@@ -50,7 +50,7 @@ module.exports = {
           role: role.id,
           companyMain: company,
           projectUser: true
-        })
+        });
       })
       .then(function(sellers) {
         return res.json(sellers);

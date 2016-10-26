@@ -8,12 +8,14 @@ module.exports = {
     var extraParams = {
       searchFields: ['Name']
     };
-    Common.find(model, form, extraParams).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    })
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });    
   },
 
   list: function(req, res){
@@ -30,41 +32,40 @@ module.exports = {
     }else{
       reading = ProductFilter.find(query).populate('Values');
     }
-    reading.exec(function(err, filters){
-      if(err) {
-        console.log(err);
-      }else{
+    reading.then(function(filters){
         res.json(filters);
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });    
   },
 
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    ProductFilter.findOne({id:id}).populate('Values').populate('Categories').exec(function(err, filter){
-      if(err){
-        console.log(err);
-        res.json(false);
-      }else{
+    ProductFilter.findOne({id:id}).populate('Values').populate('Categories')
+      .exec(function(filter){
         res.json(filter);
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   //TODO: check why .add() doesnt work on categories.
   create: function(req, res){
     var form = req.params.all();
     //Creating filter
-    ProductFilter.create(form).exec(function(err, created){
-      if(err){
-        console.log(err);
-        res.json(false);
-      }else{
+    ProductFilter.create(form)
+      .then(function(created){
         res.json(created);
-      }
-
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
 
@@ -72,14 +73,14 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     sails.log.debug(form);
-    ProductFilter.update({id:id},form).exec(function updateDone(err, updatedFilter){
-      if(err){
-        console.log(err);
-        res.json(false);
-      }else{
+    ProductFilter.update({id:id},form)
+      .exec(function updateDone(updatedFilter){
         res.json(updatedFilter);
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
 
@@ -88,13 +89,13 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
 
-    ProductFilter.destroy({id:id}).exec(function(err){
-      if(err){
-        console.log(err);
-        res.json(false);
-      }else{
+    ProductFilter.destroy({id:id})
+      .exec(function(){
         res.json({destroyed:true})
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   }
 };
