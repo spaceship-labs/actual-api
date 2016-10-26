@@ -144,12 +144,13 @@ module.exports = {
   getContactsByClient: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
-    ClientContact.find({CardCode:CardCode}).then(function(contacts){
-      res.json(contacts);
-    }).catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    })
+    ClientContact.find({CardCode:CardCode})
+      .then(function(contacts){
+        res.json(contacts);
+      }).catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   updateContact: function(req, res){

@@ -242,11 +242,12 @@ module.exports = {
       Order.count({User: userId}),
       Order.count(queryDateRange)
     )
-      .then(function(foundAll, foundDateRange){
-        res.json({
-          all: foundAll,
-          dateRange: foundDateRange
-        });
+      .then(function(results){
+        var response = {
+          all: results[0],
+          dateRange: results[1]
+        };
+        res.json(response);
       })
       .catch(function(err){
         console.log(err);
