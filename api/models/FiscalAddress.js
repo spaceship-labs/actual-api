@@ -10,24 +10,19 @@ module.exports = {
       type:'string'
     },
     CardCode:{type:'string'},
+    Phone1: {type:'string'},
+    E_Mail:{type:'string'},
     Street:{type:'string'},
-    Block: {type:'string'},
-    ZipCode:{type:'string'},
-    City:{type:'string'},
-    County:{type:'string'},
-    State:{type:'string'},
-    LineNum:{type:'integer'},
-    AddressType:{type:'string'},
-    StreetNo:{type:'string'},
     U_NumExt:{type:'string'},
     U_NumInt:{type:'string'},
+    Block: {type:'string'},
     U_Localidad:{type:'string'},
+    City:{type:'string'},
+    State:{type:'string'},
+    ZipCode:{type:'string'},
+    AddressType:{type:'string'},
 
     //APP FIELDS
-    municipality:{type:'string'},
     rfc:{type:'string'},
-    phone:{type:'string'},
-    dialCode:{type:'string'},
-    email:{type:'string'}
   }
-}
+};

@@ -127,11 +127,15 @@ module.exports = {
     form = mapClientFields(form);
     SapService.updateClient(CardCode, form)
       .then(function(result){
+        //TODO: Uncomment
+        /* 
         result = JSON.parse(result);
         if(result && result.value && isValidCardCode(result.value)){
           return Client.update({CardCode: CardCode}, form);
         }
-        return Promise.reject('Actualización en SAP fallida')
+        return Promise.reject('Actualización en SAP fallida');
+        */
+        return Client.update({CardCode: CardCode}, form);
       })
       .then(function(updated){
         res.json(updated);
@@ -158,7 +162,6 @@ module.exports = {
     var form = req.params.all();
     var contactCode = form.CntctCode;
     var cardCode = form.CardCode;
-    form = mapContactFields(form);
     ClientContact.find({CardCode: cardCode, select:['CntctCode']})
       .then(function(contacts){
         var contactIndex = getContactIndex(contacts, contactCode);
@@ -179,7 +182,6 @@ module.exports = {
   createContact: function(req, res){
     var form = req.params.all();
     var cardCode = form.CardCode;
-    form = mapContactFields(form);
     SapService.createContact(cardCode, form)
       .then(function(result){
         result = JSON.parse(result);
@@ -246,37 +248,6 @@ function mapClientFields(fields){
   return fields;
 }
 
-function mapContactFields(fields){
-  fields.Tel1 = fields.phone || fields.Tel1;
-  fields.Cellolar = fields.mobilePhone || fields.Cellolar;
-  fields.Name = fields.Name || fields.FirstName;
-  if(fields.LastName){
-    fields.Name = fields.FirstName + ' ' + fields.LastName;
-  }
-
-  //fields.Address = fields.Address;
-  fields.Address = '';
-  var addressFields = [
-    {key:'externalNumber', label: 'No. ext.'},
-    {key:'internalNumber', label: 'No. int.'},
-    {key:'neighborhood', label: 'Colonia'},
-    {key:'municipality', label: 'Municipio'},
-    {key:'city', label: 'Ciudad'},
-    {key:'entity', label: 'Estado'},
-    {key:'zipCode', label: 'C.P.'},
-    {key:'street', label: 'Calle'},
-    {key:'street2', label: 'Entre calle'},
-    {key:'street3', label: 'Y calle'},
-    {key:'references', label:'Referencias'}
-  ];
-  for(var key in fields){
-    var af = _.findWhere(addressFields, {key:key});
-    if( af ){
-      fields.Address += af.label + ': ' + fields[key] + ', ';
-    }
-  }
-  return fields;
-}
 
 function getContactIndex(contacts, contactCode){
   var contactCodes = contacts.map(function(c){
@@ -290,7 +261,6 @@ function getContactIndex(contacts, contactCode){
 
 function createContactPromise(params){
   var cardCode = params.CardCode;
-  params = mapContactFields(params);
   return SapService.createContact(cardCode, params)
     .then(function(result){
       result = JSON.parse(result);

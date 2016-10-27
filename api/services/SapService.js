@@ -18,6 +18,11 @@ module.exports = {
 };
 
 function updateClient(cardcode, form){
+  //TODO: Remove, this only works for SAP unplugged
+  return new Promise(function(resolve, reject){
+    resolve();
+  });
+
   return new Promise(function(resolve, reject){
     form = _.omit(form, _.isUndefined);
     var path = 'Contact(\'' + cardcode + '\')';
@@ -73,6 +78,7 @@ function createClient(form){
 }
 
 function updateContact(cardCode, contactIndex, form){
+  return;
   return new Promise(function(resolve, reject){
     var path = 'PersonContact(\''+  cardCode +'\')';
     form = _.omit(form, _.isUndefined);

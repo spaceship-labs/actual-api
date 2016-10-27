@@ -29,8 +29,8 @@ module.exports = {
     /*-----/
     FIELDS APP
     /*-----*/
-    dialCode: {type:'string'},
-    phone:{type:'string'},
+    FirstName: {type:'string'},
+    LastName: {type:'string'},
     email: {
       type:'string',
       unique: true
