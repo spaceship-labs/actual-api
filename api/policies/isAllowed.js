@@ -9,7 +9,7 @@ module.exports = function (req, res, next) {
     controller: controller
   })
     .populate('owners')
-    .exec(function(err, permissions) {
+    .then(function(permissions) {
       var allowed = _.find(permissions || [], function(permission){
         var owners = permission.owners.map(function(owner){
           return owner.id;
@@ -21,5 +21,9 @@ module.exports = function (req, res, next) {
       } else {
         next();
       }
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
     });
 };
