@@ -239,14 +239,10 @@ module.exports = {
 };
 
 function mapClientFields(fields){
-  //Name
-  fields.CardName = fields.firstName || fields.CardName;
-  if(fields.firstName && fields.lastName){
-    fields.CardName = fields.firstName + ' ' + fields.lastName;
+  fields.CardName = fields.FirstName || fields.CardName;
+  if(fields.FirstName && fields.LastName){
+    fields.CardName = fields.FirstName + ' ' + fields.LastName;
   }
-  fields.Phone1 = fields.phone || fields.Phone1;
-  fields.Cellular = fields.mobilePhone || fields.Cellular;
-  fields.E_Mail = fields.email || fields.E_Mail;
   return fields;
 }
 
