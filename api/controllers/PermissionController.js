@@ -7,10 +7,14 @@
 
 module.exports = {
   find: function(req, res) {
-    Permission.find().exec(function(err, permissions) {
-      if (err) {return res.negotiate(err);}
-      return res.json(permissions);
-    });
+    Permission.find()
+	    .then(function(permissions) {
+	      return res.json(permissions);
+	    })
+	    .catch(function(err){
+	      console.log(err);
+	      res.negotiate(err);
+	    });
   }
 };
 

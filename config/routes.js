@@ -220,11 +220,6 @@ module.exports.routes = {
     action:'destroy'
   },
 
-  '/productfiltervalue/getproducts':{
-    controller: 'productfiltervalue',
-    action:'getProducts'
-  },
-
 
   '/productbrand/getall':{
     controller: 'productbrand',

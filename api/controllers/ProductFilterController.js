@@ -45,7 +45,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     ProductFilter.findOne({id:id}).populate('Values').populate('Categories')
-      .exec(function(filter){
+      .then(function(filter){
         res.json(filter);
       })
       .catch(function(err){
@@ -74,7 +74,7 @@ module.exports = {
     var id = form.id;
     sails.log.debug(form);
     ProductFilter.update({id:id},form)
-      .exec(function updateDone(updatedFilter){
+      .then(function(updatedFilter){
         res.json(updatedFilter);
       })
       .catch(function(err){
@@ -90,7 +90,7 @@ module.exports = {
     var id = form.id;
 
     ProductFilter.destroy({id:id})
-      .exec(function(){
+      .then(function(){
         res.json({destroyed:true})
       })
       .catch(function(err){
