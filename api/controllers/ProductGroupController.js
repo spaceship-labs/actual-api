@@ -163,7 +163,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         return res.negotiate(err);
-      })
+      });
   },
 
   updateIcon: function(req,res){
@@ -188,8 +188,7 @@ module.exports = {
         })
         .catch(function(err){
           res.negotiate(err);
-        })
-      //res.json(product);
+        });
     });
   },
 
@@ -223,7 +222,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
 };

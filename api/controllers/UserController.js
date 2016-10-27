@@ -15,11 +15,14 @@ module.exports = {
       searchFields: ['firstName','email'],
       populateFields: ['role', 'SlpCode']
     };
-    Common.find(model, form, extraParams).then(function(result){
-      res.ok(result);
-    },function(err){
-      res.notFound();
-    });
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   findById: function(req, res){
@@ -31,14 +34,13 @@ module.exports = {
       .populate('mainStore')
       .populate('role')
       .populate('SlpCode')
-      .exec(function(err, result){
-        if(err){
-          console.log(err);
-          res.notFound();
-        }else{
-          res.ok({data:result});
-        }
-      });
+      .then(function(result){
+        res.ok({data:result});
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   findBySlpCode: function(req, res){
@@ -47,51 +49,49 @@ module.exports = {
     User
       .findOne({SlpCode:id})
       .populate('SlpCode')
-      .exec(function(err, result){
-        if(err){
-          res.negotiate(err);
-        }else{
-          res.ok({data:result});
-        }
-      });
+      .then(function(result){
+        res.ok({data:result});
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });  
   },
 
   create: function(req, res){
     var form = req.allParams();
-    User.create(form).exec(function(err, _user){
-      console.log(err);
-      if (err) {
-        return res.negotiate(err);
-      } else {
+    User.create(form)
+      .then(function(_user){
         return res.ok({user: _user});
-      }
-    });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });     
   },
 
   update: function(req, res) {
     var form = req.params.all();
     var id = form.id;
     delete form.password;
-    //console.log(form);
-    User.update({id: id}, form, function(err, user){
-      if(err) {
-        return res.negotiate(err);
-      }
-      return res.ok({
-        user: user
+    User.update({id: id}, form)
+      .then(function(user){
+        return res.ok({
+          user: user
+        });
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
       });
-    });
   },
 
   send_password_recovery: function(req, res){
     var form  = req.params.all();
     var email = form.email || false;
     if(email && Common.validateEmail(email) ){
-      User.findOne( {email:email}, {select: ['id', 'password', 'email']} ).exec(function(err,user){
-        if(err || typeof user == 'undefined') {
-          console.log(err);
-          return res.notFound();
-        } else {
+      User.findOne( {email:email}, {select: ['id', 'password', 'email']} )
+        .then(function(user){
           var values = user.id + user.email + user.password;
           var tokenAux = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));
           var token = tokenAux;
@@ -114,9 +114,13 @@ module.exports = {
               });
             }
           );
-        }
-      });
-    }else{
+        })
+        .catch(function(err){
+          console.log(err);
+          res.negotiate(err);
+        });
+    }
+    else{
       return res.notFound();
     }
   },
@@ -133,13 +137,12 @@ module.exports = {
           User.update(
             {email: email},
             {new_password: password}
-          ).exec(function(err, user){
-            if(err || typeof user == 'undefined'){
-              console.log(err);
-              return res.ok({success:false});
-            }else{
-              return res.ok({success:true});
-            }
+          ).then(function(user){
+            return res.ok({success:true});
+          })
+          .catch(function(err){
+            console.log(err);
+            return res.ok({success:false});            
           });
         });
       }else{
@@ -158,9 +161,12 @@ module.exports = {
       .findOne({name: 'broker'})
       .populate('owner')
       .paginate({page: page, limit: limit})
-      .exec(function(err, role){
-        if (err) {return res.negotiate(err);}
+      .then(function(role){
         return res.json(role.owner);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
       });
   },
 
@@ -169,14 +175,14 @@ module.exports = {
     var email = form.email;
     User.findOne({email: email})
       .populate('Stores')
-      .exec(function(err, user) {
-        if (err) {return res.negotiate(err);}
-        sails.log.info('user');
-        sails.log.info(user);
+      .then(function(user) {
         var stores = user && user.Stores || [];
         return res.json(stores);
-      });
-
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   }
 };
 
@@ -184,13 +190,14 @@ function validateToken(token, email, cb){
   User.findOne(
     {email:email},
     {select: ['id', 'email', 'password']}
-  ).exec(function(err,user){
-    if(err){
-      console.log(err);
-    }
+  ).then(function(user){
     var values = user.id + user.email + user.password;
     var realToken = values;
     bcrypt.compare(realToken, token, cb);
-  });
+  })
+  .catch(function(err){
+    console.log(err);
+    res.negotiate(err);
+  });  
 }
 

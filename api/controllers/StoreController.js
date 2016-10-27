@@ -1,9 +1,13 @@
 module.exports = {
   find: function(req, res) {
-    Store.find().exec(function(err, stores){
-      if (err) {return res.negotiate(err);}
-      return res.json(stores);
-    });
+    Store.find()
+      .then(function(stores){
+        return res.json(stores);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });      
   },
 
   getPromosByStore: function(req, res){
@@ -16,7 +20,6 @@ module.exports = {
     };
     Store.findOne({id:id}).populate('Promotions', queryPromo)
       .then(function(company){
-        //sails.log.info(company);
         res.json(company.Promotions);
       })
       .catch(function(err){
@@ -75,10 +78,13 @@ module.exports = {
   },
 
   getAll: function(req, res) {
-    Store.find().exec(function(err, stores) {
-      if (err) {return res.negotiate(err);}
+    Store.find().then(function(stores) {
       return res.json(stores);
-    });
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });    
   },
 
   countSellers: function(req, res) {

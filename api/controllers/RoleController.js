@@ -7,9 +7,12 @@
 
 module.exports = {
   find: function(req, res) {
-    Role.find().exec(function(err, roles) {
-      if (err) {return res.negotiate(err);}
+    Role.find().then(function(roles) {
       return res.json(roles);
+    })
+    .catch(function(err){
+    	console.log(err);
+    	res.negotiate(err);
     });
   }
 };

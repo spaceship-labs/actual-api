@@ -118,12 +118,6 @@ module.exports.routes = {
     action:'addSeenTime'
   },
 
-
-  '/saleopportunity/find/:page':{
-    controller: 'saleopportunity',
-    action: 'find'
-  },
-
   '/invoice/find/:page':{
     controller: 'invoice',
     action: 'find'
@@ -420,10 +414,6 @@ module.exports.routes = {
     action:'getRecords'
   },
 
-  '/sale/find/:page':{
-    controller: 'sale',
-    action:'find'
-  },
 
   '/quotation/addrecord/:id':{
     controller:'quotation',

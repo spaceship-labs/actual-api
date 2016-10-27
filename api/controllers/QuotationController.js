@@ -50,10 +50,9 @@ module.exports = {
       .then(function(user){
         opts.currentStore = user.activeStore;
         form.Store = user.activeStore;
-        return Quotation.update({id:id}, form)
+        return Quotation.update({id:id}, form);
       })
       .then(function(){
-        //return Prices.updateQuotationTotals(id, opts);
         var calculator = Prices.Calculator();
         return calculator.updateQuotationTotals(id, opts);
       })
@@ -126,7 +125,7 @@ module.exports = {
       .then(function(createdRecordResult){
         createdRecord = createdRecordResult;
         return QuotationRecord.findOne({id:createdRecord.id})
-          .populate('User')
+          .populate('User');
       })
       .then(function(foundRecord){
         createdRecord = foundRecord;
@@ -151,7 +150,6 @@ module.exports = {
 
         }else{
           sails.log.info('not adding file');
-          //res.json(createdRecord);
         }
         return createdRecord;
       })
@@ -161,7 +159,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
 
   },
 
@@ -184,7 +182,6 @@ module.exports = {
       .then(function(created){
          var calculator = Prices.Calculator();
          return calculator.updateQuotationTotals(id, opts);
-        //return Prices.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -221,7 +218,6 @@ module.exports = {
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
           return Quotation.findOne({id: updatedQuotation[0].id}).populate('Details');
-          //return res.json(updatedQuotation[0]);
         }
         return Promise.reject('No hay cotización');
       })
@@ -242,12 +238,14 @@ module.exports = {
       selectFields: form.fields,
       populateFields: ['Client']
     };
-    Common.find(model, form, extraParams).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    });
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   find: function(req, res){
@@ -259,12 +257,14 @@ module.exports = {
       selectFields: form.fields,
       populateFields: ['Client']
     };
-    Common.find(model, form, extraParams).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    });
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   addPayment: function(req, res){
@@ -341,7 +341,6 @@ module.exports = {
         }
       })
       .catch(function(err){
-        console.log('err');
         console.log(err);
         res.negotiate(err);
       });
@@ -364,10 +363,10 @@ module.exports = {
       .then(function(totals){
         res.json(totals);
       })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
   getRecords: function(req, res){
@@ -411,7 +410,7 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      })
+      });
   },
 
 
@@ -450,7 +449,7 @@ module.exports = {
       })
       .catch(function(err){
         res.negotiate(err);
-      })
+      });
   },
 
   sendEmail: function(req, res){
@@ -564,6 +563,6 @@ function updateQuotationToLatest(quotationId, userId, options){
     .then(function(quotation){
       params.paymentGroup = quotation.paymentGroup || 1;
       var calculator = Prices.Calculator();
-      return calculator.updateQuotationTotals(quotationId, params)
+      return calculator.updateQuotationTotals(quotationId, params);
     });
 }
