@@ -18,11 +18,6 @@ module.exports = {
 };
 
 function updateClient(cardcode, form){
-  //TODO: Remove, this only works for SAP unplugged
-  return new Promise(function(resolve, reject){
-    resolve();
-  });
-
   return new Promise(function(resolve, reject){
     form = _.omit(form, _.isUndefined);
     var path = 'Contact(\'' + cardcode + '\')';
@@ -78,7 +73,6 @@ function createClient(form){
 }
 
 function updateContact(cardCode, contactIndex, form){
-  return;
   return new Promise(function(resolve, reject){
     var path = 'PersonContact(\''+  cardCode +'\')';
     form = _.omit(form, _.isUndefined);
@@ -131,16 +125,10 @@ function createContact(cardCode, form){
 
 function updateFiscalAddress(cardcode, form){
   return new Promise(function(resolve, reject){
-    var path = 'AddressContact(\'' + cardcode + '\')';
-    form = _.omit(form, _.isUndefined);
     form.Address = form.companyName;
-    var endPoint = buildUrl(baseUrl, {
-      path: path,
-      queryParams: form
-    });
-    sails.log.info('updateFiscalAddress');
-    sails.log.info(endPoint);
-    request.post( endPoint, function(err, response, body){
+    var endPoint = buildAddressContactEndpoint(form, cardcode);
+    console.log('endPoint', endPoint);
+    request.put( endPoint, function(err, response, body){
       if(err){
         return reject(err);
       }
@@ -153,14 +141,7 @@ function updateFiscalAddress(cardcode, form){
 
 function createFiscalAddress(cardcode, form){
   return new Promise(function(resolve, reject){
-    var path = 'AddressContact';
-    form = _.omit(form, _.isUndefined);
-    form.CardCode = cardcode;
-    form.Address = form.companyName;
-    var endPoint = buildUrl(baseUrl, {
-      path: path,
-      queryParams: form
-    });
+    var endPoint = buildAddressContactEndpoint(form, cardcode);
     sails.log.info('createFiscalAddress');
     sails.log.info(endPoint);
     request.post( endPoint, function(err, response, body){
@@ -384,5 +365,13 @@ function mapWhsSeries(whsName){
   }
 
   return series;
+}
+
+function buildAddressContactEndpoint(fields, cardcode){
+  var path = '/AddressContact';
+  field = _.omit(fields, _.isUndefined);
+  path += '?address=' + JSON.stringify(fields);
+  path += '&contact={"CardCode":"' + cardcode + '"}'; 
+  return baseUrl + path;
 }
 

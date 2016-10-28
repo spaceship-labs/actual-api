@@ -128,14 +128,11 @@ module.exports = {
     SapService.updateClient(CardCode, form)
       .then(function(result){
         //TODO: Uncomment
-        /* 
         result = JSON.parse(result);
         if(result && result.value && isValidCardCode(result.value)){
           return Client.update({CardCode: CardCode}, form);
         }
         return Promise.reject('Actualización en SAP fallida');
-        */
-        return Client.update({CardCode: CardCode}, form);
       })
       .then(function(updated){
         res.json(updated);
@@ -158,6 +155,28 @@ module.exports = {
       });
   },
 
+  createContact: function(req, res){
+    var form = req.params.all();
+    var cardCode = form.CardCode;
+    SapService.createContact(cardCode, form)
+      .then(function(result){
+        result = JSON.parse(result);
+        if(!result.value || !isValidCardCode(result.value)){
+          var err = result.value || 'Error al crear contacto';
+          return Promise.reject(err);
+        }
+        form.CntctCode = result.value;
+        return ClientContact.create(form);
+      })
+      .then(function(createdContact){
+        res.json(createdContact);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },  
+
   updateContact: function(req, res){
     var form = req.params.all();
     var contactCode = form.CntctCode;
@@ -179,21 +198,21 @@ module.exports = {
       });
   },
 
-  createContact: function(req, res){
+  createFiscalAddress: function(req, res){
     var form = req.params.all();
     var cardCode = form.CardCode;
-    SapService.createContact(cardCode, form)
+    SapService.createFiscalAddress(cardCode, form)
       .then(function(result){
         result = JSON.parse(result);
         if(!result.value || !isValidCardCode(result.value)){
-          var err = result.value || 'Error al crear contacto';
+          var err = result.value || 'Error al crear direccion fiscal';
           return Promise.reject(err);
         }
-        form.CntctCode = result.value;
-        return ClientContact.create(form);
+        form.AdresType = ADDRESS_TYPE;
+        return FiscalAddress.create(form);
       })
-      .then(function(createdContact){
-        res.json(createdContact);
+      .then(function(createdFiscalAddress){
+        res.json(createdFiscalAddress);
       })
       .catch(function(err){
         console.log(err);
