@@ -134,6 +134,11 @@ module.exports = {
           Site.findOne({handle:'actual-group'})
         ];
       })
+      /*
+      .spread(function(quotationDetails, site){
+        return Order.create(orderParams);
+      })
+      */
       .spread(function(quotationDetails, site){
         return SapService.createSaleOrder(
           orderParams.groupCode,
@@ -169,7 +174,9 @@ module.exports = {
       .then(function(){
         var updateFields = {
           Order: orderCreated.id,
-          status: 'to-order'
+          status: 'to-order',
+          isClosed: true,
+          isClosedReason: 'Order created'
         };
         return Quotation.update({id:quotation.id} , updateFields);
       })

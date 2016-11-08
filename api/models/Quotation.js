@@ -1,3 +1,5 @@
+var moment = require('moment');
+
 //APP COLLECTION
 module.exports = {
   migrate: 'alter',
@@ -65,6 +67,10 @@ module.exports = {
     },
     source:{
       type:'string',
+    },
+    tracing: {
+      type:'datetime',
+      defaultsTo: moment().add(5,'days').format("YYYY-MM-DD HH:mm:ss")
     }
   },
 
