@@ -56,6 +56,9 @@ module.exports = {
       type:'string',
       enum: ['paid','pending','cancelled']
     },
+    sentToSap: {
+      type:'boolean'
+    },
     Store:{
       model:'store'
       //model:'company'

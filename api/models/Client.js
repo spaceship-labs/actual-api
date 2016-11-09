@@ -39,7 +39,7 @@ module.exports = {
     bussinessLegalName: {type:'string'},
     bussinessName: {type:'string'},
     rfc:{type:'string'},
-
+    isMoral:{type:'boolean'},
     ewallet: {
       type: 'float',
       required: true,

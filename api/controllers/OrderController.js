@@ -134,11 +134,10 @@ module.exports = {
           Site.findOne({handle:'actual-group'})
         ];
       })
-      /*
       .spread(function(quotationDetails, site){
         return Order.create(orderParams);
       })
-      */
+      /*
       .spread(function(quotationDetails, site){
         return SapService.createSaleOrder(
           orderParams.groupCode,
@@ -151,6 +150,7 @@ module.exports = {
           currentStore
         );
       })
+      */
       .then(function(sapResponse){
         var sapResult = JSON.parse(sapResponse);
         if(!sapResult.value || !_.isArray(sapResult.value)){
