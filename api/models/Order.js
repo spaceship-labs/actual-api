@@ -8,8 +8,6 @@ module.exports = {
     documents:{
       type:'array'
     },
-    SlpCode: {type:'integer'},
-    CardCode: {type:'string'},
     ammountPaid: {type:'float'},
     total:{type:'float'},
     subtotal:{type:'float'},
@@ -61,53 +59,37 @@ module.exports = {
 
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
-    email:{
-      type:'string'
-    },
-    firstName:{
-      type:'string'
-    },
-    middleName:{
-      type:'string'
-    },
-    lastName:{
-      type:'string'
-    },
+
 
     //SAP FIELDS
     CntCtCode:{type:'integer'},
-    name:{
-      type:'string'
-    },
-    address: {
-      type:'string'
-    },
-    phone1:{
-      type:'string'
-    },
-    phone2:{
-      type:'string'
-    },
-    mobileSAP:{
-      type:'string'
-    },
+    SlpCode: {type:'integer'},
+    CardCode: {type:'string'},
+
+    //ADDRESS FIELDS SNAPSHOT
+    E_Mail:{type:'string'},
+    FirstName:{type:'string'},
+    LastName:{type:'string'},
+
+    CntctCode:{type:'integer'},
+    Tel1:{type:'string'},
+    Cellolar:{type:'string'},
+    address:{type:'string'},
+    U_Noexterior: {type:'string'},
+    U_Nointerior: {type:'string'},
+    U_Colonia: {type:'string'},
+    U_Mpio: {type:'string'},
+    U_Ciudad: {type:'string'},
+    U_Estado: {type:'string'},
+    U_CP: {type:'string'},
+    U_Entrecalle: {type:'string'},
+    U_Ycalle: {type:'string'},  
+    U_Notes1: {type:'string'},  
+    U_Latitud: {type:'string'},  
+    U_Longitud: {type:'string'},    
 
     //APP FIELDS
-    dialCode: {type:'string'},
-    phone:{type:'string'},
-    email:{type:'string'},
-    mobileDialCode:{type:'string'},
-    mobilePhone: {type:'string'},
-    externalNumber:{type:'string'},
-    internalNumber:{type:'string'},
-    neighborhood: {type:'string'},
-    municipality: {type:'string'},
-    city:{type:'string'},
-    entity:{type:'string'},
-    zipCode: {type:'string'},
-    street: {type:'string'},
-    street2: {type:'string'},
-    references:{type:'text'},
+
     minPaidPercentage: {
       type:'float',
       defaultsTo: 60

@@ -37,6 +37,7 @@ module.exports = {
       .populate('Payments')
       .populate('Store')
       .populate('EwalletRecords')
+      .populate('Broker')
       .then(function(order){
         res.json(order);
       })
@@ -98,6 +99,7 @@ module.exports = {
           discount: quotation.discount,
           paymentGroup: opts.paymentGroup,
           groupCode: user.activeStore.GroupCode,
+          totalProducts: quotation.totalProducts,
           Client: quotation.Client.id,
           Quotation: quotationId,
           Payments: paymentsIds,
@@ -126,6 +128,8 @@ module.exports = {
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotation.Address);
+        sails.log.info('orderParams');
+        sails.log.info(orderParams);
         currentStore = user.activeStore;
 
         return [
@@ -151,6 +155,7 @@ module.exports = {
         );
       })
       */
+      /*
       .then(function(sapResponse){
         var sapResult = JSON.parse(sapResponse);
         if(!sapResult.value || !_.isArray(sapResult.value)){
@@ -159,6 +164,7 @@ module.exports = {
         orderParams.documents = sapResult.value;
         return Order.create(orderParams);        
       })
+      */
       .then(function(created){
         orderCreated = created;
         return Order.findOne({id:created.id}).populate('Details');

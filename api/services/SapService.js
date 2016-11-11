@@ -25,10 +25,14 @@ function updateClient(cardcode, form){
       path: path,
       queryParams: form
     });
+    sails.log.info('endPoint');
+    sails.log.info(endPoint);
     request.post( endPoint, function(err, response, body){
       if(err){
         reject(err);
       }else{
+        sails.log.info('response');
+        sails.log.info(body);
         resolve(body);
       }
     });
@@ -77,7 +81,6 @@ function updateContact(cardCode, contactIndex, form){
     var path = 'PersonContact(\''+  cardCode +'\')';
     form = _.omit(form, _.isUndefined);
     form.Line = contactIndex;
-    form.Address = form.Address.substring(0,100);
     var endPoint = buildUrl(baseUrl,{
       path: path,
       queryParams: form
@@ -101,7 +104,8 @@ function createContact(cardCode, form){
   return new Promise(function(resolve, reject){
     var path = 'PersonContact';
     form = _.omit(form, _.isUndefined);
-    form.Address = form.Address.substring(0,100);
+    sails.log.info('contact form');
+    sails.log.info(form);
     form.CardCode = cardCode;
     var endPoint = buildUrl(baseUrl,{
       path: path,

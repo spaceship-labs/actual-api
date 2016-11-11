@@ -364,6 +364,11 @@ module.exports.routes = {
     action:'createContact'
   },
 
+  '/client/:CardCode/fiscaladdress/create':{
+    controller:'client',
+    action:'createFiscalAddress'
+  },
+
   '/client/update/fiscaladdress/:id/:CardCode':{
     controller:'client',
     action:'updateFiscalAddress'

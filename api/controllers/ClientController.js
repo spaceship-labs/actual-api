@@ -53,10 +53,10 @@ module.exports = {
       }
       clientFound = clientFound.toObject();
       clientFound.Contacts = contacts;
-      return FiscalAddress.find({CardCode: clientFound.CardCode, AdresType: ADDRESS_TYPE});
+      return FiscalAddress.findOne({CardCode: clientFound.CardCode, AdresType: ADDRESS_TYPE});
     })
-    .then(function(fiscalAddresses){
-      clientFound.FiscalAddresses = fiscalAddresses;
+    .then(function(fiscalAddress){
+      clientFound.FiscalAddress = fiscalAddress;
       res.json(clientFound);
     })
     .catch(function(err){
@@ -79,7 +79,7 @@ module.exports = {
     form                 = mapClientFields(form);
     form.User            = req.user.id;
     var contacts         = filterContacts(form.contacts);
-    var fiscalAddresses  = filteredAddresses(form.fiscalAddresses);
+    var fiscalAddress  = isValidFiscalAddress(form.fiscalAddress);
 
     SapService.createClient(form)
       .then(function(result){
@@ -103,12 +103,9 @@ module.exports = {
         return created;
       })
       .then(function(result){
-        if(fiscalAddresses && fiscalAddresses.length > 0){
-          fiscalAddresses = fiscalAddresses.map(function(f){
-            f.CardCode = createdContact.CardCode;
-            return f;
-          });
-          return Promise.each(fiscalAddresses, createFiscalAddressPromise);
+        if(fiscalAddress){
+          fiscalAddress.CardCode = createdContact.CardCode;
+          return createFiscalAddressPromise(fiscalAddress);
         }
         return result;
       })
@@ -125,6 +122,7 @@ module.exports = {
     var form = req.params.all();
     var CardCode = form.CardCode;
     form = mapClientFields(form);
+    delete form.FiscalAddress;
     SapService.updateClient(CardCode, form)
       .then(function(result){
         //TODO: Uncomment
@@ -327,8 +325,6 @@ function filterContacts(contacts){
   return filteredContacts;
 }
 
-function filterFiscalAddresses(addresses){
-  var filteredAddresses = (addresses || []).filter(function(fiscalAddress){
-    return !_.isUndefined(fiscalAddress.companyName);
-  });  
+function isValidFiscalAddress(fiscalAddress){
+  return !_.isUndefined(fiscalAddress.companyName);
 }
