@@ -5,6 +5,7 @@ var IVA     = 0.16;
 
 module.exports = {
   calculate: calculate,
+  isPeriodBefore: isPeriodBefore,
 };
 
 function calculate(store) {
@@ -19,6 +20,20 @@ function calculate(store) {
     var ldate = last;
   }
   return calculateStore(store, fdate, ldate);
+}
+
+function isPeriodBefore(date) {
+  var today  = moment();
+  var day = today.date();
+  var month = today.month();
+  var year = today.year();
+  if (day < 16) {
+    var current = moment([year, month]);
+  } else {
+    var current = moment([year, month, 16]);
+  }
+  var date = moment(date);
+  return date < current;
 }
 
 function calculateStore(store, dateFrom, dateTo) {

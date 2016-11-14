@@ -53,6 +53,11 @@ module.exports = {
 
   report: function(req, res) {
     var form  = req.allParams();
+    var until = form.createdAt['<'];
+    var isPeriodBefore = Commissions.isPeriodBefore(until);
+    if (!isPeriodBefore) {
+      return res.negotiate(new Error('No se pueden correr reportes de este periodo'));
+    }
     var query = {
       createdAt: form.createdAt,
     };
