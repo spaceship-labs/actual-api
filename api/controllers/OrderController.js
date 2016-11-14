@@ -226,22 +226,27 @@ module.exports = {
   getCountByUser: function(req, res){
     var form = req.params.all();
     var userId = form.userId;
-    var monthRange = Common.getMonthDateRange();
-    //Month range by default
-    var startDate = form.startDate || monthRange.start;
-    var endDate = form.endDate || monthRange.end;
-    var foundAll = 0;
+    var fortNightRange = Common.getFortnightRange();
+    
+    //Fortnight range by default
+    var startDate = form.startDate || fortNightRange.start;
+    var endDate = form.endDate || fortNightRange.end;
     var queryDateRange = {
       User: userId,
       createdAt: { '>=': startDate, '<=': endDate }
     };
+    var queryfortNightRange = {
+      User: userId,
+      createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
+    };
+
     Promise.join(
-      Order.count({User: userId}),
+      Order.count(queryfortNightRange),
       Order.count(queryDateRange)
     )
       .then(function(results){
         var response = {
-          all: results[0],
+          fortnight: results[0],
           dateRange: results[1]
         };
         res.json(response);
@@ -256,35 +261,41 @@ module.exports = {
   getTotalsByUser: function(req, res){
     var form = req.params.all();
     var userId = form.userId;
-    var getAll = !_.isUndefined(form.all) ? form.all : true;
-    var monthRange = Common.getMonthDateRange();
-    //Month range by default
-    var startDate = form.startDate || monthRange.start;
-    var endDate = form.endDate || monthRange.end;
+    var getFortnightTotals = !_.isUndefined(form.fortnight) ? form.fortnight : true;
+    var fortNightRange = Common.getFortnightRange();
+    
+    //Fortnight range by default
+    var startDate = form.startDate || fortNightRange.start;
+    var endDate = form.endDate || fortNightRange.end;
     var queryDateRange = {
       User: userId,
       createdAt: { '>=': startDate, '<=': endDate }
     };
+    var queryfortNightRange = {
+      User: userId,
+      createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
+    };
+
     var props = {
       totalDateRange: Order.find(queryDateRange).sum('total')
     };
-    if(getAll){
-      props.total = Order.find({User: userId}).sum('total');
+    if(getFortnightTotals){
+      props.totalFortnight = Order.find(queryfortNightRange).sum('total');
     }
 
     //Find all totals
     Promise.props(props)
       .then(function(result){
-        var all = 0;
+        var totalFortnight = 0;
         var totalDateRange = 0;
-        if(getAll && result.total.length > 0){
-          all = result.total[0].total;
+        if(getFortnightTotals && result.totalFortnight.length > 0){
+          totalFortnight = result.totalFortnight[0].total;
         }
         if(result.totalDateRange.length > 0){
           totalDateRange = result.totalDateRange[0].total;
         }
         res.json({
-          all: all || false,
+          fortnight: totalFortnight || false,
           dateRange: totalDateRange
         });
       })

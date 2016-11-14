@@ -157,6 +157,23 @@ module.exports = {
     return { start: startDate.toDate(), end: endDate.toDate() };
   },
 
+  getFortnightRange: function(){
+    var currentDay = moment().date();
+    var range = {};
+    if(currentDay <= 15){
+      range = {
+        start: moment().startOf('month').toDate(),
+        end: moment().date(15).endOf('day').toDate()
+      };
+    }else{
+      range = {
+        start: moment().date(16).startOf('day').toDate(),
+        end: moment().endOf('month').toDate()
+      };
+    }
+    return range;
+  },  
+
 
   formatHandle: function(str) {
 
