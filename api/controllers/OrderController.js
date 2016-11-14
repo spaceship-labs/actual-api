@@ -3,7 +3,6 @@ var Promise = require('bluebird');
 var EWALLET_POSITIVE = 'positive';
 
 module.exports = {
-
   find: function(req, res){
     var form = req.params.all();
     var client = form.client;
