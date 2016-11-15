@@ -79,7 +79,11 @@ module.exports = {
     form                 = mapClientFields(form);
     form.User            = req.user.id;
     var contacts         = filterContacts(form.contacts);
-    var fiscalAddress  = isValidFiscalAddress(form.fiscalAddress);
+    if(form.fiscalAddress && isValidFiscalAddress(form.fiscalAddress)){
+      var fiscalAddress  = _.clone(form.fiscalAddress);
+    }
+    delete form.contacts;
+    delete form.fiscalAddress;
 
     SapService.createClient(form)
       .then(function(result){
