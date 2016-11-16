@@ -7,7 +7,7 @@ module.exports = {
     var form = req.params.all();
     var model = 'productcategory';
     var extraParams = {
-      searchFields: searchFields
+      searchFields: ['Name','Handle']
     };
     Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
