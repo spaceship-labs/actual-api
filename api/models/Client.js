@@ -17,6 +17,7 @@ module.exports = {
     E_Mail:{type:'string'},
     SlpCode : {type:'integer'},
     Gender:{type:'string'},
+    LicTradNum:{type:'string'},
 
     /*
     */
