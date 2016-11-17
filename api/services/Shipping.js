@@ -57,6 +57,7 @@ function productShipping(productCode, warehouse) {
           //days = productDays;
         }
         
+        console.log('current date', new Date());
         var date = addDays(new Date(), days);
 
         return {
