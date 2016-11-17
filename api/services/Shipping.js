@@ -57,7 +57,11 @@ function productShipping(productCode, warehouse) {
           //days = productDays;
         }
         
-        console.log('current date', new Date());
+        sails.log.info('productDate', productDate);
+        sails.log.info('productDays', productDays);
+
+
+        sails.log.info('current date', new Date());
         var date = addDays(new Date(), days);
 
         return {
