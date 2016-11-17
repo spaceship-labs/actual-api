@@ -41,19 +41,24 @@ function productShipping(productCode, warehouse) {
     .spread(function(products, deliveries, season){
       if (!deliveries || !products) {return []};
       return products.map(function(product){
-        /*
-        sails.log.info('product');
-        sails.log.info(product);
-        */
+
         var delivery     = _.find(deliveries, function(delivery) {
           return delivery.FromCode == product.whsCode;
         });
+
         var productDate  = new Date(product.ShipDate);
         var productDays  = daysDiff(new Date(), productDate);
         var seasonDays   = (season && season.Days) || 7;
         var deliveryDays = (delivery && delivery.Days) || 0;
-        var days         = productDays + seasonDays + deliveryDays;
-        var date         = addDays(new Date(), days);
+        var days = productDays + seasonDays + deliveryDays;
+        
+        //Product in same store/warehouse
+        if(product.whsCode === delivery.ToCode){
+          days = productDays;
+        }
+        
+        var date = addDays(new Date(), days);
+
         return {
           available: product.OpenCreQty,
           days: days,
@@ -65,6 +70,7 @@ function productShipping(productCode, warehouse) {
       });
     });
 }
+
 
 function queryDate(query, date) {
   var date = new Date(date);

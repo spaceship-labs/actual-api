@@ -237,7 +237,8 @@ function buildSaleOrderRequestParams(
           ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
           DiscountPercent: detail.discountPercent,
           Company: detail.Product.U_Empresa,
-          Price: detail.total
+          Price: detail.total,
+          ImmediateDelivery: isImmediateDelivery(detail.shipDate)
           //unitPrice: detail.Product.Price
         };
         return product;
@@ -250,6 +251,12 @@ function buildSaleOrderRequestParams(
 
       return requestParams;
     });
+}
+
+function isImmediateDelivery(shipDate){
+  var currentDate = moment().format();
+  shipDate = moment(shipDate).format();
+  return currentDate === shipDate;
 }
 
 function mapPaymentsToSap(payments, exchangeRate){
