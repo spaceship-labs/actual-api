@@ -31,7 +31,7 @@ function productShipping(productCode, warehouse) {
         .then(function(codes) {
           products = products.map(function(p) {
             p.company = _.find(codes, function(ci) {
-              return ci.WhsCode == p.whsCode
+              return ci.WhsCode == p.whsCode;
             }).id;
             return p;
           });
@@ -39,7 +39,7 @@ function productShipping(productCode, warehouse) {
         });
     })
     .spread(function(products, deliveries, season){
-      if (!deliveries || !products) {return []};
+      if (!deliveries || !products) {return [];}
       return products.map(function(product){
 
         var delivery     = _.find(deliveries, function(delivery) {
@@ -61,7 +61,7 @@ function productShipping(productCode, warehouse) {
         sails.log.info('productDays', productDays);
 
 
-        sails.log.info('current date', new Date());
+        sails.log.info('current date', moment().toDate());
         var date = addDays(new Date(), days);
 
         return {
