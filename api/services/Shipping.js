@@ -54,7 +54,7 @@ function productShipping(productCode, warehouse) {
         
         //Product in same store/warehouse
         if(product.whsCode === delivery.ToCode){
-          //days = productDays;
+          days = productDays;
         }
         
         sails.log.info('productDate', productDate);
