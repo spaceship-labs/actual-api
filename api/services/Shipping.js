@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var _       = require('underscore');
+var moment = require('moment');
 
 module.exports = {
   product           : productShipping
@@ -68,6 +69,7 @@ function productShipping(productCode, warehouse) {
           available: product.OpenCreQty,
           days: days,
           date: date,
+          productDate: productDate,
           company: warehouse.id,
           companyFrom: product.company,
           itemCode: product.ItemCode

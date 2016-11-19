@@ -4,8 +4,77 @@ var moment = require('moment');
 //.startOf('day').format('DD-MM-YYYY');		
 
 module.exports = {
-	getDetailsStock: getDetailsStock
+	getDetailsStock: getDetailsStock,
+	substractProductsStock: substractProductsStock
 };
+
+
+//details must be populated with products and shipCompanyFrom
+function substractProductsStock(details){
+	return Promise.each(details, substractStockByDetail);
+}
+
+function substractStockByDetail(detail){
+	return Promise.join(
+		substractProductStockByDetail(detail),
+		substractDeliveryStockByDetail(detail)
+	);
+}
+
+function substractProductStockByDetail(detail){
+	var whsCode = detail.shipCompanyFrom.WhsCode;
+	var ItemCode = detail.Product.ItemCode;
+	return getStoresWithProduct(ItemCode, whsCode)
+		.then(function(stores){
+			var storesCodes = stores.map(function(s){return s.code});
+			if(detail.quantity > detail.Product.Available){
+				return new Promise.reject(new Error('Stock del producto '+ ItemCode + ' no disponible'));
+			}
+			var newAvailable = detail.Product.Available - detail.quantity;
+			var updateValues = {Available: newAvailable};
+			for(var i=0;i<storesCodes.length;i++){
+				var newCodeStock = detail.Product[storesCodes[i]] - detail.quantity;
+				updateValues[storesCodes[i]] = newCodeStock;
+			}
+			return Product.update({id:detail.Product.id}, updateValues);
+		});
+}
+
+function substractDeliveryStockByDetail(detail){
+	var whsCode = detail.shipCompanyFrom.WhsCode;
+	var ItemCode = detail.Product.ItemCode;
+
+	return DatesDelivery.findOne({
+		whsCode: detail.shipCompanyFrom.WhsCode,
+		ShipDate: detail.productDate,
+		ItemCode: ItemCode
+	})
+	.then(function(dateDelivery){
+		if(detail.quantity > dateDelivery.OpenCreQty){
+			return Promise.reject(new Error('Stock del producto ' + ItemCode + ' no disponible'));
+		}
+		var newStock = dateDelivery.OpenCreQty - detail.quantity;
+		return DatesDelivery.update({id: dateDelivery.id}, {OpenCreQty:newStock});
+	});
+}
+
+function getStoresWithProduct(ItemCode, whsCode){
+	return Delivery.find({FromCode: whsCode, Active:'Y'})
+		.then(function(deliveries){
+			var warehouses = deliveries.map(function(d){return d.ToCode});
+			return Company.find({WhsCode: warehouses}).populate('Stores');
+		})
+		.then(function(warehouses){
+			var stores = warehouses.reduce(function(arr, w){
+				arr = arr.concat(w.Stores);
+				return arr;
+			},[]);
+			stores = _.uniq(stores, function(s){
+				return s.id;
+			});
+			return stores;
+		});
+}
 
 //details must be populated with products
 function getDetailsStock(details, warehouse){

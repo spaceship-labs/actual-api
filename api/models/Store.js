@@ -18,6 +18,7 @@ module.exports = {
     logo: {
       type: 'string'
     },
+    code:{type:'string'},
     //relations
     users: {
       collection: 'user',

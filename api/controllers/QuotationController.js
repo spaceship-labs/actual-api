@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
+var moment = require('moment');
 var EWALLET_TYPE = 'ewallet';
 var EWALLET_NEGATIVE = 'negative';
 
@@ -177,6 +178,7 @@ module.exports = {
     User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
         opts.currentStore = user.activeStore;
+        form.shipDate = moment(form.shipDate).startOf('day').toDate();
         return QuotationDetail.create(form);
       })
       .then(function(created){

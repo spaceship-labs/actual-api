@@ -58,6 +58,7 @@ module.exports = {
     var orderCreated = false;
     var SlpCode = -1;
     var currentStore = false;
+
     User.findOne({id:req.user.id}).populate('SlpCode')
       .then(function(u){
         opts.currentStore = u.activeStore;
@@ -127,8 +128,10 @@ module.exports = {
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotation.Address);
+        /*
         sails.log.info('orderParams');
         sails.log.info(orderParams);
+        */
         currentStore = user.activeStore;
 
         return [
@@ -175,6 +178,14 @@ module.exports = {
         return orderFound.save();
       })
       .then(function(){
+        return OrderDetail.find({Order: orderCreated.id})
+          .populate('Product')
+          .populate('shipCompanyFrom');
+      })
+      .then(function(orderDetails){
+        return StockService.substractProductsStock(orderDetails);
+      })
+      .then(function(){
         var updateFields = {
           Order: orderCreated.id,
           status: 'to-order',
@@ -199,19 +210,14 @@ module.exports = {
         res.json(orderCreated);
 
         //STARTS EMAIL SENDING PROCESS
-        return [
-          Order
-            .findOne({id:orderCreated.id})
-            .populate('User')
-            .populate('Client')
-            .populate('Payments')
-            .populate('EwalletRecords')
-            .populate('Address'),
-          OrderDetail.find({Order: orderCreated.id})
-            .populate('Product')
-        ];
+        return Order.findOne({id:orderCreated.id})
+          .populate('User')
+          .populate('Client')
+          .populate('Payments')
+          .populate('EwalletRecords')
+          .populate('Address');
       })
-      .spread(function(order, details){
+      .then(function(order){
         Email.sendOrderConfirmation(order.id);
       })
       .then(function(emailSent){
