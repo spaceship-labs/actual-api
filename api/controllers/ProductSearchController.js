@@ -9,6 +9,7 @@ module.exports = {
     var maxPrice       = form.maxPrice;
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore || false;
+    var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var warehouses     = [];
     var productsIds    = [];
@@ -37,11 +38,13 @@ module.exports = {
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
         }          
+        var find = Product.find(query).populate('Promotions', queryPromos);
+        if(populateImgs){
+          find = find.populate('files');
+        }
         return [
           Product.count(query),
-          Product.find(query)
-            .populate('Promotions', queryPromos)
-            .paginate(paginate)
+          find.paginate(paginate)
             .sort('Price ASC')
         ];        
       })
