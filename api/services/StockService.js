@@ -35,6 +35,9 @@ function substractProductStockByDetail(detail){
 			for(var i=0;i<storesCodes.length;i++){
 				var newCodeStock = detail.Product[storesCodes[i]] - detail.quantity;
 				updateValues[storesCodes[i]] = newCodeStock;
+				if( isNaN(updateValues[storesCodes[i]]) ){
+					updateValues[storesCodes[i]] = 0;
+				}
 			}
 			return Product.update({id:detail.Product.id}, updateValues);
 		});

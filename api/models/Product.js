@@ -117,6 +117,14 @@ module.exports = {
       seenTimes: {type:'integer'},
       immediateDelivery:{type:'boolean'},
 
+      actual_studio_merida:{type:'integer'},
+      actual_studio_malecon:{type:'integer'},
+      actual_studio_playa_del_carmen:{type:'integer'},
+      actual_studio_cumbres:{type:'integer'},
+      actual_home_xcaret:{type:'integer'},
+      actual_home_merida:{type:'integer'},
+      proyectos:{type:'integer'},
+
       //RELATIONS
       files: {
         collection: 'productfile',
