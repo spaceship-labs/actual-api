@@ -460,6 +460,11 @@ module.exports.routes = {
     action: 'updateBroker'
   },
 
+  '/quotation/:id/validatestock':{
+    controller:'quotation',
+    action: 'validateStock'
+  },  
+
   '/client/update/:CardCode':{
     controller: 'client',
     action: 'update'

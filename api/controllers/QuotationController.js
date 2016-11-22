@@ -543,6 +543,19 @@ module.exports = {
       res.negotiate(err);
     });
 
+  },
+
+  validateStock: function(req, res){
+    var form = req.allParams();
+    var quotationId = form.id;
+    StockService.validateQuotationStockById(quotationId, req.user.id)
+      .then(function(isValid){
+        return res.json({isValid: isValid});
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
   }
 
 };

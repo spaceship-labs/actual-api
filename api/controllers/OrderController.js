@@ -59,7 +59,13 @@ module.exports = {
     var SlpCode = -1;
     var currentStore = false;
 
-    User.findOne({id:req.user.id}).populate('SlpCode')
+    StockService.validateQuotationStockById(quotationId, req.user.id)
+      .then(function(isValidStock){
+        if(!isValidStock){
+          return Promise.reject(new Error('Inventario no suficiente para crear la orden'));
+        }
+        return User.findOne({id:req.user.id}).populate('SlpCode');
+      })      
       .then(function(u){
         opts.currentStore = u.activeStore;
         var calculator = Prices.Calculator();
