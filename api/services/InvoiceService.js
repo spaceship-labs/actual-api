@@ -5,7 +5,7 @@ module.exports = {
   getAuthToken : function(){
 
   },
-  //Crea una factura apartir de un ID de carrito primero recuperar el registro y poblar la informacion de productos, total etc  
+  //Crea una factura apartir de un ID de carrito primero recuperar el registro y poblar la informacion de productos, total etc  a
   createFactura : function(id){
 
   }
