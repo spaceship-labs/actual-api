@@ -9,6 +9,7 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     form.Details = formatProductsIds(form.Details);
+    form.Details = tagImmediateDeliveriesDetails(form.Details);    
     var opts = {
       paymentGroup:1,
       updateDetails: true,
@@ -205,6 +206,7 @@ module.exports = {
     var id = form.id;
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
+    form.Details = tagImmediateDeliveriesDetails(form.Details);
     delete form.id;
     var opts = {
       paymentGroup:1,
@@ -516,6 +518,24 @@ module.exports = {
 
 };
 
+function tagImmediateDeliveriesDetails(details){
+  if(details && details.length > 0){
+    for(var i=0;i<details.length;i++){
+      if(isImmediateDelivery(details[i].shipDate)){
+        details[i].immediateDelivery = true;
+      }
+    }
+    return details;
+  }
+  return [];
+}
+
+
+function isImmediateDelivery(shipDate){
+  var currentDate = moment().format();
+  shipDate = moment(shipDate).format();
+  return currentDate === shipDate;
+}
 
 function formatProductsIds(details){
   var result = [];
