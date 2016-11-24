@@ -124,6 +124,7 @@ module.exports = {
       actual_home_xcaret:{type:'integer'},
       actual_home_merida:{type:'integer'},
       proyectos:{type:'integer'},
+      actual_proyect:{type:'integer'},
 
       //RELATIONS
       files: {
