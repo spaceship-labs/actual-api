@@ -465,6 +465,11 @@ module.exports.routes = {
     action: 'validateStock'
   },  
 
+  '/quotation/:id/close':{
+    controller: 'quotation',
+    action: 'closeQuotation'
+  },
+
   '/client/update/:CardCode':{
     controller: 'client',
     action: 'update'

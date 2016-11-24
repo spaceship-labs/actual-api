@@ -112,6 +112,42 @@ module.exports = {
       });
   },
 
+  closeQuotation: function(req, res){
+    var form = req.params.all();
+    var id = _.clone(form.id);
+    var createdRecord = false;
+    form.dateTime = new Date();
+    form.eventType = 'Cierre';
+    form.Quotation = id;
+    delete form.id;
+    QuotationRecord.create(form)
+      .then(function(createdRecordResult){
+        createdRecord = createdRecordResult;
+        var updateParams = {
+          isClosed: true,
+          isClosedReason: form.closeReason,
+          isClosedNotes: form.extraNotes,
+          status: 'closed',
+          tracing: form.tracing
+        };   
+        sails.log.info('createdRecord', createdRecord);
+        return [
+          Quotation.update({id:id},updateParams),
+          QuotationRecord.findOne({id: createdRecord.id}).populate('User')
+        ];
+      })
+      .spread(function(updateResults, record){
+        var updatedQuotation = updateResults[0];
+        res.json({
+          quotation: updatedQuotation || false,
+          record: record
+        });
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      });
+  },
+
   addRecord: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -125,8 +161,7 @@ module.exports = {
     QuotationRecord.create(form)
       .then(function(createdRecordResult){
         createdRecord = createdRecordResult;
-        return QuotationRecord.findOne({id:createdRecord.id})
-          .populate('User');
+        return QuotationRecord.findOne({id:createdRecord.id}).populate('User');
       })
       .then(function(foundRecord){
         createdRecord = foundRecord;
