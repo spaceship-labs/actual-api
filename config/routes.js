@@ -435,11 +435,6 @@ module.exports.routes = {
     action:'removeDetailsGroup'
   },
 
-  '/quotation/addpayment/:quotationid':{
-    controller: 'quotation',
-    action:'addPayment'
-  },
-
   '/quotation/totals/:id':{
     controller: 'quotation',
     action: 'getQuotationTotals'
@@ -469,6 +464,11 @@ module.exports.routes = {
     controller: 'quotation',
     action: 'closeQuotation'
   },
+
+  '/payment/add/:quotationid':{
+    controller: 'payment',
+    action:'add'
+  },  
 
   '/client/update/:CardCode':{
     controller: 'client',
