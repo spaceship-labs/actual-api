@@ -71,6 +71,7 @@ module.exports = {
   },
 
   findById: function(req, res){
+    console.log('findById');
     var form = req.params.all();
     var id = form.id;
     var baseQuotation = false;

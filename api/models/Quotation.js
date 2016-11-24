@@ -39,7 +39,6 @@ module.exports = {
     },
     Store:{
       model:'store'
-      //model:'company'
     },
     Manager:{
       model:'user'
@@ -57,8 +56,7 @@ module.exports = {
     paymentGroup:{type:'integer'},
     minPaidPercentage: {
       type:'float',
-      defaultsTo: 60
-      //defaultsTo: 100
+      defaultsTo: 100
     },
     //TODO: Check status types
     status:{
