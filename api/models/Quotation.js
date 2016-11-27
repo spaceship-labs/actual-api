@@ -68,7 +68,7 @@ module.exports = {
     },
     tracing: {
       type:'datetime',
-      defaultsTo: moment().add(5,'days')
+      defaultsTo: moment().add(5,'days').toDate()
     }
   },
 
