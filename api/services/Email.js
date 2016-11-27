@@ -102,7 +102,7 @@ function orderEmail(orderId) {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
           code:  detail.Product.ItemCode,
-          color: detail.Product.DetailedColor,
+          color: (detail.Product.DetailedColor || '').split(' ')[0],
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
           warranty: detail.Product.U_garantia.toLowerCase(),
@@ -266,8 +266,8 @@ function quotation(quotationId) {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
           code:  detail.Product.ItemCode,
-          color: detail.Product.DetailedColor,
-          material: 'add_material',
+          color: (detail.Product.DetailedColor || '').split(' ')[0],
+          material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
           warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
@@ -457,7 +457,10 @@ function materials(product) {
         })
         .map(function(f) {
           return f.Name;
-        })
-        .join(',');
+        });
+    })
+    .then(function(filters){
+      if (filters.length === 0) return;
+      return filters[0].split(' ')[0];
     });
 }
