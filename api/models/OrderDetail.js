@@ -11,6 +11,7 @@ module.exports = {
     paymentGroup: 'integer',
     unitPrice: 'float',
     ewallet: 'float',
+    immediateDelivery: 'boolean',
     Promotion:{
       model:'Promotion'
     },
