@@ -5,7 +5,6 @@ var IVA     = 0.16;
 
 module.exports = {
   calculate: calculate,
-  isPeriodBefore: isPeriodBefore,
 };
 
 function calculate(store) {
@@ -22,6 +21,41 @@ function calculate(store) {
   return calculateStore(store, fdate, ldate);
 }
 
+function calculateStore(store, dateFrom, dateTo) {
+  Promise
+    .all([findManagers(store), findSellers(store, dateFrom, dateTo)])
+    .spread(function(managers, sellers) {
+      return [
+        calculateManagers(managers),
+        calculateSellers(sellers),
+      ];
+    })
+}
+
+function findManagers(store) {
+  Role
+    .findOne({ name: 'store manager' })
+    .then(function(role) {
+      return User.find({ role: role.id });
+    })
+    .then(function(users) {
+      return users.map(function(u) { return u.id });
+    });
+}
+
+function findSellers (store, dateFrom, dateTo) {
+  var query = queryDate({Store: store}, dateFrom, dateTo);
+  return Payment
+    .find(query)
+    .sort('createdAt ASC')
+    .then(function(payments) {
+      var users = payments.map(function(p) { return p.User; });
+      return _.uniq(users);
+    });
+}
+
+
+/*
 function isPeriodBefore(date) {
   var today  = moment();
   var day = today.date();
@@ -222,3 +256,4 @@ function addDays(date, days) {
   date.setDate(date.getDate() + days);
   return date;
 }
+*/
