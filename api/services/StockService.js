@@ -115,12 +115,15 @@ function isValidStock(detailsStock){
 //details must be populated with products
 function getDetailsStock(details, warehouse){
 	var promises = [];
-	var productsItemCodes = details.map(function(detail){
-		return detail.Product.ItemCode;
+	var products = details.map(function(detail){
+		return detail.Product;
 	});
-	productsItemCodes = _.uniq(productsItemCodes);
-	for(var i=0;i<productsItemCodes.length; i++){
-		promises.push( Shipping.product(productsItemCodes[i], warehouse) );
+	products = _.uniq(products, function(product){
+		return product.ItemCode;
+	});
+	
+	for(var i=0;i<products.length; i++){
+		promises.push( Shipping.product(products[i], warehouse) );
 	}
 	return Promise.all(promises)
 		.then(function(results){

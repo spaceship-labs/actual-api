@@ -42,10 +42,13 @@ function _onPassportAuth(req, res, error, user, info){
       ];
     })
     .spread(function(log, user){
+      return User.findOne({id: user.id}).populate('role');
+    })
+    .then(function(user){
       return res.ok({
         token: CipherService.createToken(user),
         user: user
-      });
+      });      
     })
     .catch(function(err) {
       return res.negotiate(err);
