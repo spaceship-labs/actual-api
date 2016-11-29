@@ -18,16 +18,11 @@ module.exports.saveFiles = function(req,opts,cb){
   maxBytes = 22020096;//max 21mb.
 
   if(req._fileparser.upstreams.length && $files.length > 0){
-  //if(req.file('file')._files[0] && $files.length > 0){
-    //sails.log.info('entro');
     if(req._fileparser.form.bytesExpected>=maxBytes){
       //cb(new Error('exceeds maxBytes')); //throw en controllers
       cb(false,[]);
     }
     var fFiles = [];
-    //async.map($files, function(file, async_cb) {
-      //console.log('file');
-      //console.log(file);
     var uploadOptions = {
       saveAs:makeFileName,
       dirname:dirSave,
@@ -57,7 +52,6 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
-          sails.log.info('entro al upload');
           console.log(e);
           return cb(e,files);
         }
@@ -76,7 +70,6 @@ module.exports.saveFiles = function(req,opts,cb){
         cb(e,fFiles);
       });
   }else{
-    //sails.log.info('no entro');
     return cb(true,false);
   }
 }
@@ -96,8 +89,6 @@ module.exports.makeCrops = function(req,opts,cb){
   opts.dirSave = opts.dirSave || __dirname+'/../../assets/uploads/'+opts.dir+'/';
   opts.dirPublic = __dirname+'/../../.tmp/public/uploads/'+opts.dir+'/';
   async.mapSeries(sizes,function(size,callback){
-        //console.log(size);
-        //console.log(opts);
         Files.makeCrop(size,opts,callback);
   },cb);
 }
@@ -128,7 +119,6 @@ module.exports.makeCrop = function(size,opts,cb){
 }
 //Deletes a File and Crops if profile is specified;
 module.exports.removeFile = function(opts,cb){
-  //console.log(opts);
   var adapter = getAdapterConfig();
   var dirSave = adapter?'/uploads/'+opts.dir+'/' : __dirname+'/../../assets/uploads/'+opts.dir+'/';
   var sizes = opts.profile ? sails.config.images[opts.profile] : [];
@@ -183,7 +173,6 @@ module.exports.getContainerLink = function(next){
     if(adapter){
         adapter.getContainerLink(function(err, link){
             module.exports.containerCloudLink = link || '';
-            //console.log('LINK',module.exports.containerCloudLink )
             if(next) return next(err, module.exports.containerCloudLink);
         });
     }else{

@@ -159,28 +159,21 @@ function createFiscalAddress(cardcode, form){
   });
 }
 
-
-function createSaleOrder(
-  groupCode,
-  cardCode, 
-  slpCode,
-  cntctCode, 
-  quotationDetails, //Populated with products
-  payments,
-  exchangeRate,
-  currentStore
-){
+/*
+  @param params object properties
+    quotationId,
+    groupCode,
+    cardCode, 
+    slpCode,
+    cntctCode, 
+    quotationDetails, //Populated with products
+    payments,
+    exchangeRate,
+    currentStore
+*/
+function createSaleOrder(params){
   return new Promise(function(resolve, reject){
-    buildSaleOrderRequestParams(
-      groupCode,
-      cardCode, 
-      slpCode,
-      cntctCode, 
-      quotationDetails,
-      payments,
-      exchangeRate,
-      currentStore
-    ).then(function(requestParams){
+    buildSaleOrderRequestParams(params).then(function(requestParams){
       var endPoint = baseUrl + requestParams;
       sails.log.info('endPoint');
       sails.log.info(endPoint);
@@ -198,29 +191,21 @@ function createSaleOrder(
   });
 }
 
-function buildSaleOrderRequestParams(
-  groupCode,
-  cardCode, 
-  slpCode,
-  cntctCode, 
-  quotationDetails, //Populated with products
-  payments,
-  exchangeRate,
-  currentStore
-){
+function buildSaleOrderRequestParams(params){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
   var saleOrderRequest = {
-    GroupCode: groupCode,
-    ContactPersonCode: cntctCode,
+    QuotationId: params.quotationId,
+    GroupCode: params.groupCode,
+    ContactPersonCode: params.cntctCode,
     Currency: 'MXP',
-    ShipDate: moment(getFarthestShipDate(quotationDetails))
+    ShipDate: moment(getFarthestShipDate(params.quotationDetails))
       .format(SAP_DATE_FORMAT),
-    SalesPersonCode: slpCode || -1,
-    CardCode: cardCode,
-    DescuentoPDocumento: calculateUsedEwalletByPayments(payments),
+    SalesPersonCode: params.slpCode || -1,
+    CardCode: params.cardCode,
+    DescuentoPDocumento: calculateUsedEwalletByPayments(params.payments),
     WhsCode: "02",
-    Group: currentStore.group
+    Group: params.currentStore.group
   };
 
   if(saleOrderRequest.SalesPersonCode === []){
@@ -229,7 +214,7 @@ function buildSaleOrderRequestParams(
 
   return getAllWarehouses()
     .then(function(warehouses){
-      products = quotationDetails.map(function(detail){
+      products = params.quotationDetails.map(function(detail){
         var product = {
           ItemCode: detail.Product.ItemCode,
           OpenCreQty: detail.quantity,
@@ -244,10 +229,10 @@ function buildSaleOrderRequestParams(
         return product;
       });
 
-      saleOrderRequest.WhsCode = getWhsCodeById(currentStore.Warehouse, warehouses);
+      saleOrderRequest.WhsCode = getWhsCodeById(params.currentStore.Warehouse, warehouses);
       requestParams += JSON.stringify(saleOrderRequest);
       requestParams += '&products=' + JSON.stringify(products);
-      requestParams += '&payments=' + JSON.stringify(mapPaymentsToSap(payments, exchangeRate));
+      requestParams += '&payments=' + JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate));
 
       return requestParams;
     });

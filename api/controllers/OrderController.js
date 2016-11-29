@@ -152,16 +152,17 @@ module.exports = {
       })
       */
       .spread(function(quotationDetails, site){
-        return SapService.createSaleOrder(
-          orderParams.groupCode,
-          orderParams.CardCode,
-          SlpCode,
-          orderParams.CntctCode,
-          quotationDetails,
-          quotation.Payments,
-          site.exchangeRate,
-          currentStore
-        );
+        return SapService.createSaleOrder({
+          quotationId:      quotationId,
+          groupCode:        orderParams.groupCode,
+          cardCode:         orderParams.CardCode,
+          slpCode:          SlpCode,
+          cntctCode:        orderParams.CntctCode,
+          payments:         quotation.Payments,
+          exchangeRate:     site.exchangeRate,
+          currentStore:     currentStore,
+          quotationDetails: quotationDetails
+        });
       })
       .then(function(sapResponse){
         var sapResult = JSON.parse(sapResponse);

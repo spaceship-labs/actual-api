@@ -21,11 +21,8 @@ module.exports = {
   },
 
   afterCreate: function(newVal, cb){
-    sails.log.info('actualizando Quotation: ' + newVal.Quotation);
     return Quotation.update({id: newVal.Quotation}, {tracing: newVal.dateTime})
       .then(function(updated){
-        sails.log.info('updated');
-        sails.log.info(updated);
         cb();
       })
       .catch(function(err){
