@@ -21,11 +21,10 @@ module.exports = {
         }
         return acum;
       },[]);
+      usedSellersIds = usedSellersIds.filter(function(id){
+        return id!==NOT_SELLER_ID;
+      });
 
-      var notSellerIndex = usedSellersIds.indexOf(NOT_SELLER_ID);
-      if( notSellerIndex > -1 ){
-        usedSellersIds.splice(notSellerIndex, 1);
-      }
       return Seller.find({id:{'!': usedSellersIds}});
     })
     .then(function(unselectedSellers){
