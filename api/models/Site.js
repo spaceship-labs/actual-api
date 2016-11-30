@@ -7,4 +7,4 @@ module.exports = {
     deliveryText: {type:'text'},
     exchangeRate: {type:'float'}
   }
-}
+};

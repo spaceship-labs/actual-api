@@ -64,9 +64,6 @@ module.exports = {
         if(!isValidStock){
           return Promise.reject(new Error('Inventario no suficiente para crear la orden'));
         }
-        return User.findOne({id:req.user.id}).populate('SlpCode');
-      })      
-      .then(function(u){
         opts.currentStore = u.activeStore;
         var calculator = Prices.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
@@ -90,11 +87,11 @@ module.exports = {
         }
         return User.findOne({id:quotation.User.id})
           .populate('activeStore')
-          .populate('SlpCode');
+          .populate('Seller');
       })
       .then(function(user){
-        if(user.SlpCode && user.SlpCode.length > 0){
-          SlpCode = user.SlpCode[0].id;
+        if(user.Seller){
+          SlpCode = user.Seller.SlpCode;
         }
         var paymentsIds = quotation.Payments.map(function(p){return p.id;});
         orderParams = {
@@ -146,11 +143,6 @@ module.exports = {
           Site.findOne({handle:'actual-group'})
         ];
       })
-      /*
-      .spread(function(quotationDetails, site){
-        return Order.create(orderParams);
-      })
-      */
       .spread(function(quotationDetails, site){
         return SapService.createSaleOrder({
           quotationId:      quotationId,

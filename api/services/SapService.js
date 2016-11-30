@@ -44,12 +44,12 @@ function createClient(form){
     var path = 'Contact';
     form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
     form.LicTradNum = form.LicTradNum || 'XXAX010101000';
-    User.findOne({id:form.User}).populate('SlpCode')
+    User.findOne({id:form.User}).populate('Seller')
       .then(function(user){
         //Assigns seller code from SAP
         form.SlpCode = -1;
-        if(user.SlpCode && user.SlpCode.length > 0){
-          form.SlpCode = user.SlpCode[0].id || -1;
+        if(user.Seller){
+          form.SlpCode = user.Seller.SlpCode || -1;
         }
         return getSeriesNum(user.activeStore);
       })
@@ -248,6 +248,7 @@ function mapPaymentsToSap(payments, exchangeRate){
   return payments.map(function(payment){
     var paymentSap = {
       TypePay: payment.type,
+      PaymentAppId: payment.id,
       amount: payment.ammount
     };
     if(payment.currency === 'usd'){
