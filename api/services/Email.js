@@ -220,8 +220,10 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   /**/
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
-    personalization.addTo(to2);
-    personalization.addTo(to3);
+    var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
+    if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
+    if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
+    if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
   /**/
   mail.setFrom(from);
   mail.addContent(content);
@@ -334,8 +336,10 @@ function sendQuotation(client, user, quotation, products, store) {
   /**/
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
-    personalization.addTo(to2);
-    personalization.addTo(to3);
+    var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
+    if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
+    if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
+    if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
   /**/
   personalization.addTo(to);
   personalization.setSubject(subject);
