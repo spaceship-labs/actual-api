@@ -97,7 +97,7 @@ function orderEmail(orderId) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
-        date = date.format('d/MMM/YYYY');
+        date = date.format('DD/MMM/YYYY');
         return {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
@@ -118,7 +118,7 @@ function orderEmail(orderId) {
         var date    = moment(payment.createdAt);
         moment.locale('es');
         date.locale(false);
-        date = date.format('d/MMM/YYYY');
+        date = date.format('DD/MMM/YYYY');
         return {
           method: paymentMethod(payment),
           date: date,
@@ -261,7 +261,7 @@ function quotation(quotationId) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
-        date = date.format('d/MMM/YYYY');
+        date = date.format('DD/MMM/YYYY');
         return {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
