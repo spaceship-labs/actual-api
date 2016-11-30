@@ -113,6 +113,14 @@ module.exports = {
       DepthUnitMsr:{type:'string'},
 
       freeSale: {type:'boolean'},
+      freeSaleStock: {
+        type:'integer',
+        defaultsTo: 0
+      },
+      freeSaleDeliveryDays: {
+        type:'integer',
+        defaultsTo: 0
+      },
       slowMovement:{type:'boolean'},
       seenTimes: {type:'integer'},
       immediateDelivery:{type:'boolean'},

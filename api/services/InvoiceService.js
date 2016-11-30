@@ -6,9 +6,8 @@ var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
 
 module.exports = {
-  create: create
+  create: create,
 }
-
 
 function create(orderId) {
   return Order
@@ -132,3 +131,4 @@ function createItems(items) {
     });
   });
 }
+

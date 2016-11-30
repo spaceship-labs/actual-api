@@ -153,6 +153,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var createdRecord = false;
+    var addedFile = false;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -168,21 +169,29 @@ module.exports = {
         createdRecord = foundRecord;
         //if(req.file('file')._files[0]){
         if(req._fileparser.upstreams.length){
-          sails.log.info('adding file');
 
-          createdRecord.addFiles(req,{
+          var options = {
             dir : 'records/gallery',
-            profile: 'gallery'
-            },function(e,record){
-              if(e){
-                console.log(e);
-                return Promise.reject(e);
-              }else{
-                //TODO check how to retrieve images instead of doing other query
-                return QuotationRecord.findOne({id:createdRecord.id})
-                  .populate('User')
-                  .populate('files')
-              }
+            profile: 'gallery'            
+          };
+
+          return new Promise(function(resolve, reject){
+            createdRecord.addFiles(req,options,
+              function(e,record){
+                if(e){
+                  console.log(e);
+                  reject(e);
+                }else{
+                  console.log('se agrego el archivo');
+                  //TODO check how to retrieve images instead of doing other query
+                  resolve(
+                    QuotationRecord
+                    .findOne({id:createdRecord.id})
+                    .populate('User')
+                    .populate('files')
+                  );
+                }
+            });
           });
 
         }else{

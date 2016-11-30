@@ -13,7 +13,7 @@ module.exports = {
     var model = 'user';
     var extraParams = {
       searchFields: ['firstName','email'],
-      populateFields: ['role', 'SlpCode']
+      populateFields: ['role', 'Seller']
     };
     Common.find(model, form, extraParams)
       .then(function(result){
@@ -33,7 +33,7 @@ module.exports = {
       .populate('Stores')
       .populate('mainStore')
       .populate('role')
-      .populate('SlpCode')
+      .populate('Seller')
       .then(function(result){
         res.ok({data:result});
       })
@@ -43,6 +43,7 @@ module.exports = {
       });      
   },
 
+  /*
   findBySlpCode: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -57,6 +58,7 @@ module.exports = {
         res.negotiate(err);
       });  
   },
+  */
 
   create: function(req, res){
     var form = req.allParams();

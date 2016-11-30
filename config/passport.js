@@ -25,7 +25,7 @@ function _onLocalStrategyAuth(email, password, next){
   User.findOne({email: email})
     .populate('role')
     .populate('Stores')
-    .populate('SlpCode')
+    .populate('Seller')
     .exec(function(error, user){
       if (error) return next(error, false, {});
       if (!user) return next(null, false,{

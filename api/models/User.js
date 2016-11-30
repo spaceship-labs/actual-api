@@ -24,9 +24,8 @@ module.exports = {
         lastLogin : {
           type: 'datetime'
         },
-        SlpCode: {
-          collection: 'Seller',
-          via: 'User'
+        Seller: {
+          model: 'Seller',
         },
         Quotations:{
           collection: 'Quotation',
@@ -112,9 +111,6 @@ module.exports = {
         toJSON: function () {
           var obj = this.toObject();
           obj.name = obj.firstName + ' ' + obj.lastName;
-          if (obj.SlpCode && isArray(obj.SlpCode) && obj.SlpCode.length > 0) {
-            obj.SlpCode = obj.SlpCode[0];
-          }
           delete obj.password;
           delete obj.socialProfiles;
           return obj;
@@ -133,18 +129,20 @@ module.exports = {
         next();
     },
     beforeDestroy: function(criteria, next){
-      User.find(criteria).populate('SlpCode')
+      User.find(criteria).populate('Seller')
         .then(function(users) {
           return Promise.all(
             users.map(function(user){
-              return Seller.update(user.SlpCode.id, {User: null});
+              return Seller.update(user.Seller.id, {User: null});
             })
           );
         })
         .then(function(users){
           next();
         });
-    }
+    },
+
+
 };
 
 function isArray(o) {

@@ -10,9 +10,14 @@ module.exports = {
     var form = req.allParams();
     var productCode = form.productCode;
     var storeId = form.storeId;
+    var store = false;
     Store.findOne({id:storeId}).populate('Warehouse')
-      .then(function(store){
-        return Shipping.product(productCode, store.Warehouse);
+      .then(function(storeResult){
+        store = storeResult;
+        return Product.findOne({ItemCode: productCode});
+      })
+      .then(function(product){
+        return Shipping.product(product, store.Warehouse);        
       })
       .then(function(shipping) {
         return res.json(shipping);

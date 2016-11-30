@@ -19,7 +19,7 @@ module.exports = function (req, res, next) {
       if (!allowed) {
         return res.unauthorized('user is not authorized');
       } else {
-        next();
+        return next();
       }
     })
     .catch(function(err){

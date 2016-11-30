@@ -1,13 +1,15 @@
 var Promise = require('bluebird');
 var _       = require('underscore');
 var moment = require('moment');
+var CEDIS_QROO_CODE = '01';
+var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
 
 module.exports = {
-  product           : productShipping
+  product: productShipping
 };
 
-function productShipping(productCode, warehouse) {
-  return Delivery.find({ToCode: warehouse.WhsCode, Active:'Y'})
+function productShipping(product, storeWarehouse, options) {
+  return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
     .then(function(deliveries) {
       var seasonQuery = queryDate({}, new Date());
       var companies = deliveries.map(function(delivery) {
@@ -15,7 +17,7 @@ function productShipping(productCode, warehouse) {
       });
       return [
         DatesDelivery.find({
-          ItemCode: productCode,
+          ItemCode: product.ItemCode,
           whsCode: companies,
           OpenCreQty: {
             '>': 0
@@ -25,52 +27,81 @@ function productShipping(productCode, warehouse) {
         Season.findOne(seasonQuery)
       ];
     })
-    .spread(function(products, deliveries, season) {
-      var codes = products.map(function(p){return p.whsCode});
+    .spread(function(stockItems, deliveries, season) {
+      var codes = stockItems.map(function(p){return p.whsCode});
       return Company
         .find({WhsCode: codes})
         .then(function(codes) {
-          products = products.map(function(p) {
-            p.company = _.find(codes, function(ci) {
-              return ci.WhsCode == p.whsCode;
+          stockItems = stockItems.map(function(stockItem) {
+            //stockItem.company is storeWarehouse id
+            stockItem.warehouseId = _.find(codes, function(ci) {
+              return ci.WhsCode == stockItem.whsCode;
             }).id;
-            return p;
+            return stockItem;
           });
-          return [products, deliveries, season];
+          return [stockItems, deliveries, season];
         });
     })
-    .spread(function(products, deliveries, season){
-      if (!deliveries || !products) {return [];}
-      return products.map(function(product){
-
-        var delivery     = _.find(deliveries, function(delivery) {
-          return delivery.FromCode == product.whsCode;
+    .spread(function(stockItems, deliveries, season){
+      if(deliveries.length > 0 && stockItems.length > 0){
+        return stockItems.map(function(stockItem){
+          return buildShippingItem(
+            stockItem, 
+            deliveries, 
+            season, 
+            storeWarehouse.id
+          );
         });
-
-        var productDate  = new Date(product.ShipDate);
-        var productDays  = daysDiff(new Date(), productDate);
-        var seasonDays   = (season && season.Days) || 7;
-        var deliveryDays = (delivery && delivery.Days) || 0;
-        var days = productDays + seasonDays + deliveryDays;
-        
-        //Product in same store/warehouse
-        if(product.whsCode === delivery.ToCode){
-          days = productDays;
-        }
-        
-        var date = addDays(new Date(), days);
-
-        return {
-          available: product.OpenCreQty,
-          days: days,
-          date: date,
-          productDate: productDate,
-          company: warehouse.id,
-          companyFrom: product.company,
-          itemCode: product.ItemCode
+      }
+      else if( productHasFreesale(product) && deliveries){
+        var freeSaleStockItem = {
+          whsCode: CEDIS_QROO_CODE,
+          OpenCreQty: product.freeSaleStock,
+          ItemCode: product.ItemCode,
+          warehouseId: CEDISQ_QROO_ID,
+          ShipDate: moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate()
         };
-      });
+
+        return [
+          buildShippingItem(freeSaleStockItem, deliveries, season, storeWarehouse.id)
+        ];
+      }
+
+      return [];
     });
+}
+
+function productHasFreesale(product){
+  return product.freeSale && product.freeSaleStock && product.freeSaleDeliveryDays;
+}
+
+function buildShippingItem(stockItem, deliveries, season, storeWarehouseId){
+  var delivery = _.find(deliveries, function(delivery) {
+    return delivery.FromCode == stockItem.whsCode;
+  });
+
+  var productDate  = new Date(stockItem.ShipDate);
+  var productDays  = daysDiff(new Date(), productDate);
+  var seasonDays   = (season && season.Days) || 7;
+  var deliveryDays = (delivery && delivery.Days) || 0;
+  var days = productDays + seasonDays + deliveryDays;
+  
+  //Product in same store/warehouse
+  if(stockItem.whsCode === delivery.ToCode){
+    days = productDays;
+  }
+  
+  var date = addDays(new Date(), days);
+
+  return {
+    available: stockItem.OpenCreQty,
+    days: days,
+    date: date,
+    productDate: productDate,
+    company: storeWarehouseId,
+    companyFrom: stockItem.warehouseId,
+    itemCode: stockItem.ItemCode
+  };
 }
 
 
