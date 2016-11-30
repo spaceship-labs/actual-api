@@ -64,9 +64,12 @@ module.exports = {
         if(!isValidStock){
           return Promise.reject(new Error('Inventario no suficiente para crear la orden'));
         }
-        opts.currentStore = u.activeStore;
+        return User.findOne({id: req.user.id});
+      })
+      .then(function(currentUser){
+        opts.currentStore = currentUser.activeStore;
         var calculator = Prices.Calculator();
-        return calculator.updateQuotationTotals(quotationId, opts);
+        return calculator.updateQuotationTotals(quotationId, opts);        
       })
       .then(function(updatedQuotation){
         return Quotation.findOne({id: quotationId})
@@ -158,6 +161,10 @@ module.exports = {
       })
       .then(function(sapResponse){
         var sapResult = JSON.parse(sapResponse);
+        if(sapResult.value){
+          sapResult.value = JSON.parse(sapResult.value);
+        }
+        sails.log.info('sapResult', sapResult);
         if(!sapResult.value || !_.isArray(sapResult.value)){
           return Promise.reject('Error en la respuesta de SAP');
         }
