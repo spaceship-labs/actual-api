@@ -99,6 +99,8 @@ function validateQuotationStockById(quotationId, userId){
     return StockService.getDetailsStock(details, warehouse);    
   })
   .then(function(detailsStock){
+  	//console.log('detailsStock', detailsStock);
+  	//console.log('isValidStock', isValidStock(detailsStock));
   	return isValidStock(detailsStock);
   });  
 }

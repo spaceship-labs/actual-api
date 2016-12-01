@@ -222,6 +222,7 @@ function Calculator(){
           paymentGroup: opts.paymentGroup,
           total: total
         });
+        var isFreeSale = isFreeSaleProduct(p);
         var detailTotals = {
           id: detail.id,
           unitPrice: unitPrice,
@@ -234,6 +235,7 @@ function Calculator(){
           quantity: quantity,
           discount: discount,
           ewallet: ewallet,
+          isFreeSale: isFreeSale,
           PromotionPackageApplied: null
         };
 
@@ -245,6 +247,13 @@ function Calculator(){
         }
         return detailTotals;
       });
+  }
+
+  function isFreeSaleProduct(product){
+    if(product){
+      return product.freeSale && product.freeSaleStock > 0;
+    }
+    return false;
   }
 
   //@params product Object from model Product
