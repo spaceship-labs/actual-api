@@ -20,7 +20,7 @@ module.exports = {
     City:{type:'string'},
     State:{type:'string'},
     ZipCode:{type:'string'},
-    AddressType:{type:'string'},
+    AdresType:{type:'string'},
 
     //APP FIELDS
     rfc:{type:'string'},

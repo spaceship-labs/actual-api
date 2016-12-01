@@ -1,10 +1,15 @@
 var baseUrl = 'http://sapnueve.homedns.org:8080';
-var request = require('request');
+var request = require('request-promise');
 var Promise = require('bluebird');
 var buildUrl = require('build-url');
 var _ = require('underscore');
 var moment = require('moment');
 var SAP_DATE_FORMAT = 'YYYY-MM-DD';
+
+var reqOptions = {
+  method: 'POST',
+  json: true
+};
 
 module.exports = {
   createClient        : createClient,
@@ -18,145 +23,87 @@ module.exports = {
 };
 
 function updateClient(cardcode, form){
-  return new Promise(function(resolve, reject){
-    form = _.omit(form, _.isUndefined);
-    var path = 'Contact(\'' + cardcode + '\')';
-    var endPoint = buildUrl(baseUrl, {
-      path: path,
-      queryParams: form
-    });
-    sails.log.info('endPoint');
-    sails.log.info(endPoint);
-    request.post( endPoint, function(err, response, body){
-      if(err){
-        reject(err);
-      }else{
-        sails.log.info('response');
-        sails.log.info(body);
-        resolve(body);
-      }
-    });
+  form = _.omit(form, _.isUndefined);
+  var path = 'Contact(\'' + cardcode + '\')';
+  var endPoint = buildUrl(baseUrl, {
+    path: path,
+    queryParams: form
   });
+  sails.log.info('updateClient');
+  sails.log.info(endPoint);
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
 }
 
 function createClient(form){
-  return new Promise(function(resolve, reject){
-    var path = 'Contact';
-    form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
-    form.LicTradNum = form.LicTradNum || 'XXAX010101000';
-    User.findOne({id:form.User}).populate('Seller')
-      .then(function(user){
-        //Assigns seller code from SAP
-        form.SlpCode = -1;
-        if(user.Seller){
-          form.SlpCode = user.Seller.SlpCode || -1;
-        }
-        return getSeriesNum(user.activeStore);
-      })
-      .then(function(series){
-        //Assigns series number depending on activeStore
-        form.Series = series;
-        form = _.omit(form, _.isUndefined);
-        var endPoint = buildUrl(baseUrl, {
-          path: path,
-          queryParams: form
-        });
-        sails.log.info('endPoint');
-        sails.log.info(endPoint);
-        request.post( endPoint, function(err, response, body){
-          if(err){
-            reject(err);
-          }else{
-            sails.log.info('body');
-            sails.log.info(body);
-            resolve(body);
-          }
-        });
+  var path = 'Contact';
+  form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
+  form.LicTradNum = form.LicTradNum || 'XXAX010101000';
+  return User.findOne({id:form.User}).populate('Seller')
+    .then(function(user){
+      form.SlpCode = -1;//Assigns seller code from SAP
+      if(user.Seller){
+        form.SlpCode = user.Seller.SlpCode || -1;
+      }
+      return getSeriesNum(user.activeStore);
+    })
+    .then(function(seriesNum){
+      form.Series = seriesNum; //Assigns seriesNum number depending on activeStore
+      form = _.omit(form, _.isUndefined);
+      var endPoint = buildUrl(baseUrl, {
+        path: path,
+        queryParams: form
       });
-  });
+      sails.log.info('createClient');
+      sails.log.info(endPoint);
+      reqOptions.uri = endPoint;
+      return request(reqOptions);
+    });  
 }
 
 function updateContact(cardCode, contactIndex, form){
-  return new Promise(function(resolve, reject){
-    var path = 'PersonContact(\''+  cardCode +'\')';
-    form = _.omit(form, _.isUndefined);
-    form.Line = contactIndex;
-    var endPoint = buildUrl(baseUrl,{
-      path: path,
-      queryParams: form
-    });
-    sails.log.info('updateContact');
-    sails.log.info(endPoint);
-    request.post( endPoint, function(err, response, body){
-      if(err){
-        sails.log.info('err');
-        sails.log.info(err);
-        return reject(err);
-      }
-      sails.log.info('body');
-      sails.log.info(body);
-      resolve(body);
-    });
+  var path = 'PersonContact(\''+  cardCode +'\')';
+  form = _.omit(form, _.isUndefined);
+  form.Line = contactIndex;
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+    queryParams: form
   });
+  sails.log.info('updateContact');
+  sails.log.info(endPoint);
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
 }
 
 function createContact(cardCode, form){
-  return new Promise(function(resolve, reject){
-    var path = 'PersonContact';
-    form = _.omit(form, _.isUndefined);
-    sails.log.info('contact form');
-    sails.log.info(form);
-    form.CardCode = cardCode;
-    var endPoint = buildUrl(baseUrl,{
-      path: path,
-      queryParams: form
-    });
-    sails.log.info('createContact');
-    sails.log.info(endPoint);
-    request.post( endPoint, function(err, response, body){
-      if(err){
-        sails.log.info('err');
-        sails.log.info(err);
-        return reject(err);
-      }
-      sails.log.info('body');
-      sails.log.info(body);
-      resolve(body);
-    });
+  var path = 'PersonContact';
+  form = _.omit(form, _.isUndefined);
+  form.CardCode = cardCode;
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+    queryParams: form
   });
+  sails.log.info('createContact');
+  sails.log.info(endPoint);
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
 }
 
 
 function updateFiscalAddress(cardcode, form){
-  return new Promise(function(resolve, reject){
-    form.Address = form.companyName;
-    var endPoint = buildAddressContactEndpoint(form, cardcode);
-    console.log('endPoint', endPoint);
-    request.put( endPoint, function(err, response, body){
-      if(err){
-        return reject(err);
-      }
-      sails.log.info('body');
-      sails.log.info(body);
-      resolve(body);
-    });
-  });
+  form.Address = form.companyName;
+  var endPoint = buildAddressContactEndpoint(form, cardcode);
+  console.log('updateFiscalAddress', endPoint);
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
 }
 
 function createFiscalAddress(cardcode, form){
-  return new Promise(function(resolve, reject){
-    var endPoint = buildAddressContactEndpoint(form, cardcode);
-    sails.log.info('createFiscalAddress');
-    sails.log.info(endPoint);
-    request.post( endPoint, function(err, response, body){
-      if(err){
-        return reject(err);
-      }
-      sails.log.info('body');
-      sails.log.info(body);
-      resolve(body);
-    });
-  });
+  var endPoint = buildAddressContactEndpoint(form, cardcode);
+  sails.log.info('createFiscalAddress');
+  sails.log.info(endPoint);
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
 }
 
 /*
@@ -172,23 +119,14 @@ function createFiscalAddress(cardcode, form){
     currentStore
 */
 function createSaleOrder(params){
-  return new Promise(function(resolve, reject){
-    buildSaleOrderRequestParams(params).then(function(requestParams){
+  return buildSaleOrderRequestParams(params)
+    .then(function(requestParams){
       var endPoint = baseUrl + requestParams;
-      sails.log.info('endPoint');
+      sails.log.info('createSaleOrder');
       sails.log.info(endPoint);
-      request.post( endPoint, function(err, response, body){
-        if(err){
-          sails.log.info('err');
-          sails.log.info(err);
-          return reject(err);
-        }
-        sails.log.info('body');
-        sails.log.info(body);
-        resolve(body);
-      });
+      reqOptions.uri = endPoint;
+      return request(reqOptions);
     });
-  });
 }
 
 function buildSaleOrderRequestParams(params){
