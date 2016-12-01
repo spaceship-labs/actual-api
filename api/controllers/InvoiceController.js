@@ -1,15 +1,55 @@
+/**
+ * InvoiceController
+ *
+ * @description :: Server-side logic for managing invoices
+ * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
+ */
+
 module.exports = {
-  find: function(req, res){
-    var form = req.params.all();
-    var model = 'invoice';
-    var extraParams = {
-      searchFields: ['Dscription','ItemCode','ShipToCode']
-    };
-    Common.find(model, form, extraParams).then(function(result){
-      res.ok(result);
-    },function(err){
-      console.log(err);
-      res.notFound();
-    });
+  create: function(req, res) {
+    var form = req.allParams();
+    var order = form.order;
+    Invoice
+      .findOne({ order: order })
+      .then(function(exists) {
+        if (exists) throw new Error('invoice already exists');
+        return  InvoiceService.create(order)
+      })
+      .then(function(invoice) {
+        return Invoice.create({ id: invoice.id, order: order });
+      })
+      .then(function(invoice) {
+        return res.json(invoice);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  },
+
+  find: function(req, res) {
+    var form = req.allParams();
+    var order = form.order;
+    Invoice
+      .find({ order: order })
+      .then(function(order) {
+        return res.json(order);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
+  },
+
+  send: function(req, res) {
+    var form = req.allParams();
+    var order = form.order;
+    InvoiceService
+      .send(order)
+      .then(function(res) {
+        return res.json(res);
+      })
+      .catch(function(err) {
+        return res.negotiate(err);
+      });
   }
 };
+
