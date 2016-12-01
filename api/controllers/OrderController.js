@@ -159,12 +159,11 @@ module.exports = {
           quotationDetails: quotationDetails
         });
       })
-      .then(function(sapResponse){
-        var sapResult = JSON.parse(sapResponse);
+      .then(function(sapResult){
         if(sapResult.value){
           sapResult.value = JSON.parse(sapResult.value);
         }
-        sails.log.info('sapResult', sapResult);
+        sails.log.info('sapResult createOrder', sapResult);
         if(!sapResult.value || !_.isArray(sapResult.value)){
           return Promise.reject('Error en la respuesta de SAP');
         }

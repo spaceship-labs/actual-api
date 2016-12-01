@@ -87,7 +87,7 @@ module.exports = {
 
     SapService.createClient(form)
       .then(function(result){
-        result = JSON.parse(result);
+        sails.log.info('result createClient', result);
         if( !result.value || !isValidCardCode(result.value)  ) {
           var err = result.value || 'Error al crear socio de negocio';
           return Promise.reject(err);
@@ -129,8 +129,7 @@ module.exports = {
     delete form.FiscalAddress;
     SapService.updateClient(CardCode, form)
       .then(function(result){
-        //TODO: Uncomment
-        result = JSON.parse(result);
+        sails.log.info('update client result', result);
         if(result && result.value && isValidCardCode(result.value)){
           return Client.update({CardCode: CardCode}, form);
         }
@@ -162,7 +161,7 @@ module.exports = {
     var cardCode = form.CardCode;
     SapService.createContact(cardCode, form)
       .then(function(result){
-        result = JSON.parse(result);
+        sails.log.info('createContact result', result);
         if(!result.value || !isValidCardCode(result.value)){
           var err = result.value || 'Error al crear contacto';
           return Promise.reject(err);
@@ -189,6 +188,7 @@ module.exports = {
         return SapService.updateContact(cardCode ,contactIndex, form);
       })
       .then(function(updatedSap){
+        sails.log.info('result updateContact', updatedSap);
         return ClientContact.update({CntctCode: contactCode}, form);
       })
       .then(function(updatedApp){
@@ -205,7 +205,7 @@ module.exports = {
     var cardCode = form.CardCode;
     SapService.createFiscalAddress(cardCode, form)
       .then(function(result){
-        result = JSON.parse(result);
+        sails.log.info('result createFiscalAddress');
         if(!result.value || !isValidCardCode(result.value)){
           var err = result.value || 'Error al crear direccion fiscal';
           return Promise.reject(err);
@@ -229,11 +229,12 @@ module.exports = {
     delete form.AdresType;
     SapService.updateFiscalAddress(CardCode, form)
       .then(function(result){
-        result = JSON.parse(result);
+        sails.log.info('result updateFiscalAddress', result);
         if(!result.value){
           var err = result.value || 'Error al actualizar direccion fiscal';
           return Promise.reject(err);
         }
+        form.AdresType = ADDRESS_TYPE;
         return FiscalAddress.update({CardCode:CardCode}, form);
       })
       .then(function(updated){
@@ -284,7 +285,7 @@ function createContactPromise(params){
   var cardCode = params.CardCode;
   return SapService.createContact(cardCode, params)
     .then(function(result){
-      result = JSON.parse(result);
+      sails.log.info('result createdContact promise', result);
       if(!result.value){
         return {err: result};
       }
@@ -297,6 +298,7 @@ function createContactPromise(params){
     .catch(function(err){
       console.log('err createContactPromise');
       console.log(err);
+      return Promise.reject(err);
     });
 }
 
@@ -305,6 +307,7 @@ function createFiscalAddressPromise(params){
   params.AdresType = ADDRESS_TYPE;
   return SapService.createFiscalAddress(cardCode,params)
     .then(function(result){
+      sails.log.info('result createFiscalAddress', result);
       return FiscalAddress.create(params);
     })
     .then(function(createdInApp){
