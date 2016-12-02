@@ -4,9 +4,12 @@ var request = require('request-promise');
 var ALEGRAUSER = process.env.ALEGRAUSER;
 var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
+var alegraIVAID = 2;
+var alegraACCOUNTID = 1;
 
 module.exports = {
   create: create,
+  send: send,
 }
 
 function create(orderId) {
@@ -24,21 +27,53 @@ function create(orderId) {
         payments,
         OrderDetail.find(details).populate('Product'),
         FiscalAddress.findOne({ CardCode: client.CardCode }),
+        client,
       ];
     })
-    .spread(function(order, payments, details, address) {
+    .spread(function(order, payments, details, address, client) {
       return [
         order,
-        prepareClient(address),
+        preparePayments(payments),
+        prepareClient(client, address),
         prepareItems(details)
       ];
     })
-    .spread(function(order, client, items) {
-      return prepareInvoice(order, client, items);
+    .spread(function(order, payments, client, items) {
+      return prepareInvoice(order, payments, client, items);
     });
 }
 
-function prepareInvoice(order, client, items) {
+function send(orderID) {
+  return Order
+    .findOne(orderID)
+    .populate('Client')
+    .then(function(order) {
+      return [
+        Invoice.findOne({ order: orderID }),
+        FiscalAddress.findOne({ CardCode: order.Client.CardCode }),
+      ];
+    })
+    .spread(function(invoice, address) {
+      //var email = address.E_Mail;
+      var emails = ['tugorez@gmail.com'];
+      var id = invoice.id;
+      return { id: id, emails: emails };
+    })
+    .then(function(data) {
+      var options = {
+        method: 'POST',
+        uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
+        body: data,
+        headers: {
+          Authorization: 'Basic ' + token,
+        },
+        json: true,
+      };
+      return request(options);
+    });
+}
+
+function prepareInvoice(order, payments, client, items) {
   var date = moment(order.createdAt)
     .format('YYYY-MM-DD');
   var dueDate = moment(order.createdAt)
@@ -49,8 +84,11 @@ function prepareInvoice(order, client, items) {
     dueDate: dueDate,
     client: client,
     items: items,
-    status: 'draft',
+    payments: payments,
     paymentMethod: 'cash',
+    stamp: {
+      generateStamp: true,
+    }
   };
   return createInvoice(data);
 }
@@ -68,10 +106,10 @@ function createInvoice(data) {
   return request(options);
 }
 
-function prepareClient(address) {
-  var client = {
+function prepareClient(client, address) {
+  var data = {
     name: address.companyName,
-    identification: address.rfc,
+    identification: client.LicTradNum,
     email: address.E_Mail,
     address: {
       street: address.Street,
@@ -85,7 +123,7 @@ function prepareClient(address) {
       zipCode: address.ZipCode,
     }
   };
-  return createClient(client);
+  return createClient(data);
 }
 
 function createClient(client) {
@@ -103,13 +141,15 @@ function createClient(client) {
 
 function prepareItems(details) {
   var items = details.map(function(detail) {
+    var discount = detail.discountPercent ? detail.discountPercent : 0;
+    discount = Math.abs(discount);
     return {
       id: detail.id,
       name: detail.Product.ItemName,
-      price: detail.unitPrice,
+      price: detail.unitPrice / 1.16,
+      discount: discount,
+      tax: [ {id: alegraIVAID} ],
       quantity: detail.quantity,
-      discount: detail.discountPercent,
-      total: detail.total / 1.16,
     };
   });
   return Promise.all(createItems(items));
@@ -129,6 +169,21 @@ function createItems(items) {
     return request(options).then(function(ic) {
       return _.assign({}, item, { id: ic.id});
     });
+  });
+}
+
+function preparePayments(payments) {
+  return payments.map(function(payment) {
+    var date = moment(payment.createdAt)
+      .format('YYYY-MM-DD');
+    return {
+      date: date,
+      account: { id: alegraACCOUNTID },
+      amount: payment.ammount,
+      bankAccount: { id: 1 },
+      type: 'in',
+      paymentMethod: 'cash',
+    };
   });
 }
 

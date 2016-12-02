@@ -83,10 +83,10 @@ module.exports = {
     U_Estado: {type:'string'},
     U_CP: {type:'string'},
     U_Entrecalle: {type:'string'},
-    U_Ycalle: {type:'string'},  
-    U_Notes1: {type:'string'},  
-    U_Latitud: {type:'string'},  
-    U_Longitud: {type:'string'},    
+    U_Ycalle: {type:'string'},
+    U_Notes1: {type:'string'},
+    U_Latitud: {type:'string'},
+    U_Longitud: {type:'string'},
 
     //APP FIELDS
 
@@ -95,7 +95,10 @@ module.exports = {
       defaultsTo: 60
       //defaultsTo: 100
     },
-
+    invoice: {
+      //factura sat
+      model: 'invoice',
+    }
   },
 
   beforeCreate: function(val,cb){
