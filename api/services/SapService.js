@@ -304,9 +304,14 @@ function mapWhsSeries(whsName){
 
 function buildAddressContactEndpoint(fields, cardcode){
   var path = '/AddressContact';
+  var contact = {
+    CardCode: cardcode,
+    U_Correos: fields.U_Correos,
+    FederalTaxID: fields.FederalTaxID
+  };
   field = _.omit(fields, _.isUndefined);
   path += '?address=' + JSON.stringify(fields);
-  path += '&contact={"CardCode":"' + cardcode + '"}'; 
+  path += '&contact='+ JSON.stringify(contact);
   return baseUrl + path;
 }
 
