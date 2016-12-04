@@ -33,7 +33,12 @@ module.exports = {
         for(var i=0;i<searchFields.length;i++){
           var field = searchFields[i];
           var obj = {};
-          obj[field] = {contains:term};
+          var keywords = term.split(' ');
+          var orClauses = keywords.map(function(keyword){
+            return  {contains:keywords};
+          });
+          obj[field] = {$or: orClauses};
+          //obj[field] = {contains:term};
           query.or.push(obj);
         }
       }

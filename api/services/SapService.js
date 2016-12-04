@@ -5,6 +5,7 @@ var buildUrl = require('build-url');
 var _ = require('underscore');
 var moment = require('moment');
 var SAP_DATE_FORMAT = 'YYYY-MM-DD';
+var CLIENT_CARD_TYPE = 1;//1.Client, 2.Proveedor, 3.Lead
 
 var reqOptions = {
   method: 'POST',
@@ -37,7 +38,7 @@ function updateClient(cardcode, form){
 
 function createClient(form){
   var path = 'Contact';
-  form.CardType = 1; //1.Client, 2.Proveedor, 3.Lead
+  form.CardType = CLIENT_CARD_TYPE;
   form.LicTradNum = form.LicTradNum || 'XXAX010101000';
   return User.findOne({id:form.User}).populate('Seller')
     .then(function(user){
@@ -304,9 +305,14 @@ function mapWhsSeries(whsName){
 
 function buildAddressContactEndpoint(fields, cardcode){
   var path = '/AddressContact';
+  var contact = {
+    CardCode: cardcode,
+    U_Correos: fields.U_Correos,
+    FederalTaxID: fields.FederalTaxID
+  };
   field = _.omit(fields, _.isUndefined);
   path += '?address=' + JSON.stringify(fields);
-  path += '&contact={"CardCode":"' + cardcode + '"}'; 
+  path += '&contact='+ JSON.stringify(contact);
   return baseUrl + path;
 }
 

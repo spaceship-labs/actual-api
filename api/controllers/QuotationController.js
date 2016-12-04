@@ -358,14 +358,23 @@ module.exports = {
     var form = req.params.all();
     var userId = form.userId;
     var fortNightRange = Common.getFortnightRange();
-    
+      
     //Fortnight range by default
-    var startDate = form.startDate || fortNightRange.start;
+    if(_.isUndefined(form.startDate)){
+      form.startDate = fortNightRange.start;
+    }
+
+    var startDate = form.startDate;
     var endDate = form.endDate || fortNightRange.end;
     var queryDateRange = {
       User: userId,
       createdAt: { '>=': startDate, '<=': endDate }
     };
+
+    if(!startDate){
+      delete queryDateRange.createdAt['>='];
+    }
+
     var queryfortNightRange = {
       User: userId,
       createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
@@ -394,14 +403,23 @@ module.exports = {
     var getAll = !_.isUndefined(form.all) ? form.all : true;
     var getFortnightTotals = !_.isUndefined(form.fortnight) ? form.fortnight : true;
     var fortNightRange = Common.getFortnightRange();
-    
+
     //Fortnight range by default
-    var startDate = form.startDate || fortNightRange.start;
+    if(_.isUndefined(form.startDate)){
+      form.startDate = fortNightRange.start;
+    }
+
+    var startDate = form.startDate;
     var endDate = form.endDate || fortNightRange.end;
     var queryDateRange = {
       User: userId,
       createdAt: { '>=': startDate, '<=': endDate }
     };
+
+    if(!startDate){
+      delete queryDateRange.createdAt['>='];
+    }
+
     var queryfortNightRange = {
       User: userId,
       createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
