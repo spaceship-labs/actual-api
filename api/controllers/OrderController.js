@@ -114,6 +114,7 @@ module.exports = {
           Broker: quotation.Broker,
           Address: _.clone(quotation.Address.id) || false,
           CardCode: quotation.Address.CardCode,
+          CntctCode: quotation.Address.CntctCode,
           SlpCode: SlpCode,
           Store: opts.currentStore,
           Manager: quotation.Manager
