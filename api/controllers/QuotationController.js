@@ -131,7 +131,7 @@ module.exports = {
           status: 'closed',
           tracing: form.tracing
         };   
-        sails.log.info('createdRecord', createdRecord);
+        //sails.log.info('createdRecord', createdRecord);
         return [
           Quotation.update({id:id},updateParams),
           QuotationRecord.findOne({id: createdRecord.id}).populate('User')
@@ -591,7 +591,9 @@ function updateQuotationToLatest(quotationId, userId, options){
       });
     })
     .then(function(quotation){
-      sails.log.info('quotation', quotation);
+      if(!quotation){
+        return Promise.reject(new Error('Cotización no encontrada'));
+      }
       params.paymentGroup = quotation.paymentGroup || 1;
       var calculator = Prices.Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
