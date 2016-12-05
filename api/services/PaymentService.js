@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var numeral = require('numeral');
 
 module.exports = {
   getPaymentGroups: getPaymentGroups,
@@ -79,7 +80,7 @@ function getPaymentGroups(quotation, seller) {
         var cash = [{
           name: '1 pago de contado',
           cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
-          total: res[0].total,
+          total: numeral(res[0].total).format('0,0.00'),
         }];
         res = res.slice(1);
         var methods  = res.reduce(function(acum, current) {
@@ -89,7 +90,7 @@ function getPaymentGroups(quotation, seller) {
           return {
             name: mi.name,
             cards: mi.cards.join(','),
-            total: mi.total,
+            total: numeral(mi.total).format('0,0.00'),
           };
         });
         return cash.concat(methods);
