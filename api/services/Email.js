@@ -256,9 +256,11 @@ function quotation(quotationId) {
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetail.find(details).populate('Product');
-      return [client, user,  quotation, details, store];
+      var payments = PaymentService.getPaymentGroups(quotation.id, user.id);
+      var transfers = TransferService.transfers(store.group);
+      return [client, user,  quotation, details, payments, transfers, store];
     })
-    .spread(function(client, user, quotation, details, store) {
+    .spread(function(client, user, quotation, details, payments, transfers, store) {
       var products = details.map(function(detail) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
@@ -278,9 +280,9 @@ function quotation(quotationId) {
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
-      return [client, user, quotation, products, store];
+      return [client, user, quotation, products, payments, transfers, store];
     })
-    .spread(function(client, user, quotation, products, store) {
+    .spread(function(client, user, quotation, products, payments, transfers, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
@@ -290,12 +292,12 @@ function quotation(quotationId) {
           mats.forEach(function(m, i) {
             products[i].material = m;
           });
-          return sendQuotation(client, user, quotation, products, store);
+          return sendQuotation(client, user, quotation, products, payments, transfers, store);
         });
     });
 }
 
-function sendQuotation(client, user, quotation, products, store) {
+function sendQuotation(client, user, quotation, products, payments, transfers, store) {
   var emailBody = quotationTemplate({
     client: {
       name: client.CardName,
@@ -319,6 +321,8 @@ function sendQuotation(client, user, quotation, products, store) {
       image: store.logo
     },
     products: products,
+    payments: payments,
+    transfers: transfers,
     ewallet: {
       balance: numeral(client.ewallet).format('0,0.00')
     }
