@@ -69,7 +69,7 @@ module.exports = {
       .then(function(currentUser){
         opts.currentStore = currentUser.activeStore;
         var calculator = Prices.Calculator();
-        return calculator.updateQuotationTotals(quotationId, opts);        
+        return calculator.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
         return Quotation.findOne({id: quotationId})
@@ -169,7 +169,7 @@ module.exports = {
           return Promise.reject('Error en la respuesta de SAP');
         }
         orderParams.documents = sapResult.value;
-        return Order.create(orderParams);        
+        return Order.create(orderParams);
       })
       .then(function(created){
         orderCreated = created;
@@ -224,9 +224,12 @@ module.exports = {
           .populate('Address');
       })
       .then(function(order){
-        Email.sendOrderConfirmation(order.id);
+        return [
+          Email.sendOrderConfirmation(order.id),
+          Email.sendFreesale(order.id),
+        ];
       })
-      .then(function(emailSent){
+      .spread(function(orderSent, freesaleSent){
         sails.log.info('Email de orden enviado');
       })
       .catch(function(err){
@@ -239,7 +242,7 @@ module.exports = {
     var form = req.params.all();
     var userId = form.userId;
     var fortNightRange = Common.getFortnightRange();
-    
+
     //Fortnight range by default
     var startDate = form.startDate || fortNightRange.start;
     var endDate = form.endDate || fortNightRange.end;
@@ -275,7 +278,7 @@ module.exports = {
     var userId = form.userId;
     var getFortnightTotals = !_.isUndefined(form.fortnight) ? form.fortnight : true;
     var fortNightRange = Common.getFortnightRange();
-    
+
     //Fortnight range by default
     var startDate = form.startDate || fortNightRange.start;
     var endDate = form.endDate || fortNightRange.end;
