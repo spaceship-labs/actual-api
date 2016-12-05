@@ -1,4 +1,5 @@
 var baseURL               = process.env.baseURL;
+var baseURLFRONT          = process.env.baseURLFRONT;
 var key                   = process.env.SENDGRIDAPIKEY;
 var Promise               = require('bluebird');
 var moment                = require('moment');
@@ -11,13 +12,16 @@ var helper                = require('sendgrid').mail;
 var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password.html').toString();
 var orderTemplate         = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
 var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/quotation.html').toString();
+var freesaleTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/freesale.html').toString();
 passwordTemplate          = ejs.compile(passwordTemplate);
 orderTemplate             = ejs.compile(orderTemplate);
 quotationTemplate         = ejs.compile(quotationTemplate);
+freesaleTemplate          = ejs.compile(freesaleTemplate);
 
 module.exports = {
   sendPasswordRecovery: password,
   sendOrderConfirmation: orderEmail,
+  sendFreesale: freesaleEmail,
   sendQuotation: quotation
 };
 
@@ -358,6 +362,121 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
     sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(quotation);
+      } else {
+        reject(response);
+      }
+    });
+  });
+}
+
+function freesaleEmail(orderId) {
+  return Order
+    .findOne(orderId)
+    .populate('Store')
+    .populate('Details')
+    .then(function(order) {
+      var user     = User.findOne({email: 'tugorez@gmail.com'});
+      var store    = order.Store;
+      var details  = order.Details.map(function(detail) { return detail.id; });
+      details      = OrderDetail.find(details).populate('Product');
+      return [user,  order, details, store];
+    })
+    .spread(function(user, order, details, store) {
+      var products = details
+        .filter(function(detail) {
+          return detail.isFreeSale;
+        })
+        .map(function(detail) {
+          var date  = moment(detail.shipDate);
+          moment.locale('es');
+          date.locale(false);
+          date = date.format('DD/MMM/YYYY');
+          return {
+            id: detail.Product.id,
+            name:  detail.Product.ItemName,
+            code:  detail.Product.ItemCode,
+            color: (detail.Product.DetailedColor || '').split(' ')[0],
+            material: '',
+            ewallet: detail.ewallet && detail.ewallet.toFixed(2),
+            warranty: detail.Product.U_garantia.toLowerCase(),
+            qty: detail.quantity,
+            ship: date,
+            price: numeral(detail.total).format('0,0.00'),
+            image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+          };
+        });
+      return [user, order, products, store];
+    })
+    .spread(function (user, order, products, store) {
+      var mats = products.map(function(p) {
+        return materials(p.id);
+      });
+      return Promise
+        .all(mats)
+        .then(function(mats) {
+          mats.forEach(function(m, i) {
+            products[i].material = m;
+          });
+          return sendFreesale(user, order, products, store);
+        });
+    });
+}
+
+function sendFreesale(user, order, products, store) {
+  console.log('orden ', order.folio, ' tiene ', products.length, ' articulos con freesale');
+  if (!(products.length > 0)) return order;
+  var emailBody = freesaleTemplate({
+    user: {
+      name: user.firstName + ' ' + user.lastName,
+      email: user.email,
+      phone: user.phone
+    },
+    order: {
+      id: order.id,
+      folio: order.folio,
+      subtotal: numeral(order.subtotal).format('0,0.00'),
+      discount: numeral(order.discount).format('0,0.00'),
+      total: numeral(order.total).format('0,0.00'),
+      paid: numeral(order.total).format('0,0.00'),
+      pending: numeral(0).format('0,0.00'),
+    },
+    company: {
+      url: baseURL,
+      urlFront: baseURLFRONT,
+      image: store.logo
+    },
+    products: products,
+  });
+  // mail stuff
+  var request          = sendgrid.emptyRequest();
+  var requestBody      = undefined;
+  var mail             = new helper.Mail();
+  var personalization  = new helper.Personalization();
+  var from             = new helper.Email('no-reply@actualg.com', 'no-reply');
+  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var subject          = 'Confirmación de compra';
+  var content          = new helper.Content("text/html", emailBody);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  /**/
+    var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
+    var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
+    var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
+    if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
+    if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
+    if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
+  /**/
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST'
+  request.path = '/v3/mail/send'
+  request.body = requestBody
+  return new Promise(function(resolve, reject){
+    sendgrid.API(request, function (response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve(order);
       } else {
         reject(response);
       }
