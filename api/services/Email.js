@@ -432,6 +432,7 @@ function sendFreesale(user, order, products, store) {
       phone: user.phone
     },
     order: {
+      id: order.id,
       folio: order.folio,
       subtotal: numeral(order.subtotal).format('0,0.00'),
       discount: numeral(order.discount).format('0,0.00'),
