@@ -25,6 +25,11 @@ function substractStockByDetail(detail){
 function substractProductStockByDetail(detail){
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
+
+	if(detail.Product.freeSale){
+		return new Promise.resolve();
+	}
+
 	return getStoresWithProduct(ItemCode, whsCode)
 		.then(function(stores){
 			var storesCodes = stores.map(function(s){return s.code});
@@ -47,6 +52,10 @@ function substractProductStockByDetail(detail){
 function substractDeliveryStockByDetail(detail){
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
+
+	if(detail.Product.freeSale){
+		return new Promise.resolve();
+	}
 
 	return DatesDelivery.findOne({
 		whsCode: detail.shipCompanyFrom.WhsCode,

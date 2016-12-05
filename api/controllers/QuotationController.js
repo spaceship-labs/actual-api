@@ -591,6 +591,7 @@ function updateQuotationToLatest(quotationId, userId, options){
       });
     })
     .then(function(quotation){
+      sails.log.info('quotation', quotation);
       params.paymentGroup = quotation.paymentGroup || 1;
       var calculator = Prices.Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
