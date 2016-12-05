@@ -1,4 +1,5 @@
 var baseURL               = process.env.baseURL;
+var baseURLFRONT          = process.env.baseURLFRONT;
 var key                   = process.env.SENDGRIDAPIKEY;
 var Promise               = require('bluebird');
 var moment                = require('moment');
@@ -440,6 +441,7 @@ function sendFreesale(user, order, products, store) {
     },
     company: {
       url: baseURL,
+      urlFront: baseURLFRONT,
       image: store.logo
     },
     products: products,
