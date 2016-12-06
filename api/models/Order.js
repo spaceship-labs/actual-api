@@ -55,7 +55,14 @@ module.exports = {
       //model:'company',
       //required: 'true'
     },
-
+    PaymentsSap:{
+      collection:'PaymentSap',
+      via:'Order'
+    },
+    OrdersSap:{
+      collection:'OrderSap',
+      via:'Order'
+    },
 
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
