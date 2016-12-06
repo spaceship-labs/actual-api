@@ -235,7 +235,22 @@ function promotionCronJobSearch(opts) {
       }
       query    = applyFilters({},filters)
       query    = applyOrFilters(query , applyOrFilters);
-      products = Product.find(query);
+
+      var freeSaleQuery = _.clone(query);
+      freeSaleQuery = _.extend(freeSaleQuery, {
+        freeSale: true,
+        freeSaleStock: {'>':0}
+      });
+      delete freeSaleQuery[activeStore.code];
+
+      var searchQuery = {
+        $or: [
+          query,
+          freeSaleQuery
+        ]
+      };
+
+      products = Product.find(searchQuery);
       return products;
     })
     .then(function(products) {

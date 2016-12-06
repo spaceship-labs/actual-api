@@ -54,6 +54,7 @@ function productShipping(product, storeWarehouse, options) {
         });
       }
       else if( productHasFreesale(product) && deliveries){
+        product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
         var freeSaleStockItem = {
           whsCode: CEDIS_QROO_CODE,
           OpenCreQty: product.freeSaleStock,

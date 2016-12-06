@@ -37,13 +37,30 @@ module.exports = {
         }
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
-        }          
-        var find = Product.find(query).populate('Promotions', queryPromos);
+        }
+
+        var freeSaleQuery = _.clone(query);
+        freeSaleQuery = _.extend(freeSaleQuery, {
+          freeSale: true,
+          freeSaleStock: {'>':0}
+        });
+        delete freeSaleQuery[activeStore.code];
+
+        var searchQuery = {
+          $or: [
+            query,
+            freeSaleQuery
+          ]
+        };
+
+        //sails.log.info('searchQuery', JSON.stringify(searchQuery));
+        var find = Product.find(searchQuery).populate('Promotions', queryPromos);
+        
         if(populateImgs){
           find = find.populate('files');
         }
         return [
-          Product.count(query),
+          Product.count(searchQuery),
           find.paginate(paginate)
             .sort('Price ASC')
         ];        
@@ -83,7 +100,7 @@ module.exports = {
         ];
       })
       .spread(function(catprods, filterprods) {
-        if (!handle || handle.length == 0) {
+        if (!handle || handle.length === 0) {
           return filterprods;
         } else if(!filtervalues || filtervalues.length == 0) {
           return catprods;
@@ -106,10 +123,26 @@ module.exports = {
         };
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
-        }        
+        } 
+
+        var freeSaleQuery = _.clone(query);
+        freeSaleQuery = _.extend(freeSaleQuery, {
+          freeSale: true,
+          freeSaleStock: {'>':0}
+        });
+        delete freeSaleQuery[activeStore.code];
+
+        var searchQuery = {
+          $or: [
+            query,
+            freeSaleQuery
+          ]
+        };
+
+
         return [
-          Product.count(query),
-          Product.find(query)
+          Product.count(searchQuery),
+          Product.find(searchQuery)
             .paginate(paginate)
             .sort('Price ASC')
             .populate('files')
@@ -203,7 +236,21 @@ module.exports = {
         }
         query    = Search.applyFilters({},filters);
         query    = Search.applyOrFilters(query,orFilters);
-        products = Product.find(query);
+        
+        var freeSaleQuery = _.clone(query);
+        freeSaleQuery = _.extend(freeSaleQuery, {
+          freeSale: true,
+          freeSaleStock: {'>':0}
+        });
+        delete freeSaleQuery[activeStore.code];
+        var searchQuery = {
+          $or: [
+            query,
+            freeSaleQuery
+          ]
+        };
+
+        products = Product.find(searchQuery);
         
         if(populatePromotions){
           products = products.populate('Promotions',queryPromos)

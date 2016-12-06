@@ -208,9 +208,9 @@ function Calculator(){
     var queryPromos = Search.getPromotionsQuery();
     return Product.findOne({id:productId})
       .populate('Promotions', queryPromos)
-      .then(function(p){
-        var mainPromo = getProductMainPromo(p, quantity);
-        var unitPrice = p.Price;
+      .then(function(product){
+        var mainPromo = getProductMainPromo(product, quantity);
+        var unitPrice = product.Price;
         var discountKey = getDiscountKey(opts.paymentGroup);
         var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
         var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
@@ -222,7 +222,7 @@ function Calculator(){
           paymentGroup: opts.paymentGroup,
           total: total
         });
-        var isFreeSale = isFreeSaleProduct(p);
+        var isFreeSale = isFreeSaleProduct(product);
         var detailTotals = {
           id: detail.id,
           unitPrice: unitPrice,
