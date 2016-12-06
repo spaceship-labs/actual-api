@@ -62,7 +62,9 @@ module.exports = {
     StockService.validateQuotationStockById(quotationId, req.user.id)
       .then(function(isValidStock){
         if(!isValidStock){
-          return Promise.reject(new Error('Inventario no suficiente para crear la orden'));
+          return Promise.reject(
+            new Error('Inventario no suficiente para crear la orden')
+          );
         }
         return User.findOne({id: req.user.id});
       })
