@@ -1,8 +1,9 @@
-var Promise = require('bluebird');
-var _ = require('underscore');
-var moment = require('moment');
-var EWALLET_TYPE = 'ewallet';
-var EWALLET_NEGATIVE = 'negative';
+var Promise           = require('bluebird');
+var _                 = require('underscore');
+var assign            = require('object-assign');
+var moment            = require('moment');
+var EWALLET_TYPE      = 'ewallet';
+var EWALLET_NEGATIVE  = 'negative';
 
 module.exports = {
 
@@ -363,17 +364,38 @@ module.exports = {
     if(_.isUndefined(form.startDate)){
       form.startDate = fortNightRange.start;
     }
+    if(_.isUndefined(form.endDate)){
+      form.endDate = fortNightRange.end;
+    }
 
     var startDate = form.startDate;
-    var endDate = form.endDate || fortNightRange.end;
+    var endDate = form.endDate;
     var queryDateRange = {
       User: userId,
-      createdAt: { '>=': startDate, '<=': endDate }
+      createdAt: {}
     };
 
-    if(!startDate){
-      delete queryDateRange.createdAt['>='];
+    if(startDate){
+      startDate = new Date(startDate); 
+      startDate.setHours(0,0,0,0);
+      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+        '>=': startDate
+      });
     }
+
+    if(endDate){
+      endDate = new Date(endDate); 
+      endDate.setHours(23,59,59,999);
+      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+        '<=': endDate
+      });
+    }
+
+    if( _.isEmpty(queryDateRange.createdAt) ){
+      delete queryDateRange.createdAt;
+    }
+
+    //sails.log.info('queryDateRange getCountByUser', queryDateRange);
 
     var queryfortNightRange = {
       User: userId,
@@ -408,17 +430,40 @@ module.exports = {
     if(_.isUndefined(form.startDate)){
       form.startDate = fortNightRange.start;
     }
+    if(_.isUndefined(form.endDate)){
+      form.endDate = fortNightRange.end;
+    }
 
     var startDate = form.startDate;
-    var endDate = form.endDate || fortNightRange.end;
+    var endDate = form.endDate;
     var queryDateRange = {
       User: userId,
-      createdAt: { '>=': startDate, '<=': endDate }
+      createdAt: {}
+      //createdAt: { '>=': startDate, '<=': endDate }
     };
 
-    if(!startDate){
-      delete queryDateRange.createdAt['>='];
+    if(startDate){
+      startDate = new Date(startDate); 
+      startDate.setHours(0,0,0,0);
+      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+        '>=': startDate
+      });
     }
+
+    if(endDate){
+      endDate = new Date(endDate); 
+      endDate.setHours(23,59,59,999);
+      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+        '<=': endDate
+      });
+    }
+
+    if( _.isEmpty(queryDateRange.createdAt) ){
+      delete queryDateRange.createdAt;
+    }
+
+    //sails.log.info('queryDateRange getTotalsByUser', queryDateRange);
+
 
     var queryfortNightRange = {
       User: userId,

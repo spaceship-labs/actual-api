@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var q = require('q');
 var moment = require('moment');
+var assign = require('object-assign');
 
 module.exports = {
   validateEmail: function(email) {
@@ -64,11 +65,28 @@ module.exports = {
     }
 
     if(dateRange){
-      var startDate = new Date(dateRange.start);
-      startDate.setHours(0,0,0,0);
-      var endDate = new Date(dateRange.end);
-      endDate.setHours(23,59,59,999);
-      query[dateRange.field] = { '>=': new Date(startDate), '<=': new Date(endDate) };
+      var startDate, endDate;
+      query[dateRange.field] = {};
+
+      if(dateRange.start){
+        startDate = new Date(dateRange.start); 
+        startDate.setHours(0,0,0,0);
+        query[dateRange.field] = assign(query[dateRange.field],{
+          '>=': new Date(startDate)
+        });
+      }
+      if(dateRange.end){
+        endDate = new Date(dateRange.end); 
+        endDate.setHours(23,59,59,999);
+        query[dateRange.field] = assign(query[dateRange.field],{
+          '<=': new Date(endDate)
+        });
+      }
+
+      if( _.isEmpty(query[dateRange.field]) ){
+        delete query[dateRange.field];
+      }
+
     }
 
     querySearchAux = _.clone(query);
@@ -108,7 +126,7 @@ module.exports = {
     }
 
     //sails.log.info(modelName);
-    //sails.log.info(query);
+    //sails.log.info('query',query);
 
     read.exec(function(err, results){
       if(err) console.log(err);
@@ -119,7 +137,7 @@ module.exports = {
         }else{
           deferred.resolve({data:results, total:count});
         }
-      })
+      });
     });
 
     return deferred.promise;
