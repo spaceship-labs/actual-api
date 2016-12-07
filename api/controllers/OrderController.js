@@ -25,6 +25,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var order;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -37,7 +38,16 @@ module.exports = {
       .populate('Store')
       .populate('EwalletRecords')
       .populate('Broker')
-      .then(function(order){
+      .populate('OrdersSap')
+      .then(function(foundOrder){
+        order = foundOrder.toObject();
+        var sapReferencesIds = order.OrdersSap.map(function(ref){
+          return ref.id;
+        });
+        return OrderSap.find(sapReferencesIds).populate('PaymentsSap');
+      })
+      .then(function(ordersSap){
+        order.OrdersSap = ordersSap;
         res.json(order);
       })
       .catch(function(err){
@@ -47,17 +57,18 @@ module.exports = {
   },
 
   createFromQuotation: function(req, res){
-    var form = req.params.all();
-    var quotationId = form.quotationId;
-    var opts = {
+    var form         = req.params.all();
+    var quotationId  = form.quotationId;
+    var opts         = {
       paymentGroup: form.paymentGroup || 1,
       updateDetails: true,
     };
+    var orderCreated = false;
+    var SlpCode      = -1;
+    var currentStore = false;
+    var sapResponse;
     var quotation;
     var orderParams;
-    var orderCreated = false;
-    var SlpCode = -1;
-    var currentStore = false;
 
     StockService.validateQuotationStockById(quotationId, req.user.id)
       .then(function(isValidStock){
@@ -124,6 +135,7 @@ module.exports = {
         };
 
         var minPaidPercentage = quotation.minPaidPercentage || 100;
+        
         if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
           return Promise.reject(
             new Error('No se ha pagado la cantidad minima de la orden')
@@ -134,13 +146,11 @@ module.exports = {
         }else{
           orderParams.status = 'paid';
         }
+        
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
         orderParams = _.extend(orderParams, quotation.Address);
-        /*
-        sails.log.info('orderParams');
-        sails.log.info(orderParams);
-        */
+        
         currentStore = user.activeStore;
 
         return [
@@ -163,14 +173,11 @@ module.exports = {
         });
       })
       .then(function(sapResult){
-        if(sapResult.value){
-          sapResult.value = JSON.parse(sapResult.value);
-        }
-        sails.log.info('sapResult createOrder', sapResult);
-        if(!sapResult.value || !_.isArray(sapResult.value)){
+        sapResponse = JSON.parse(sapResult.value);
+        if(!sapResult || !_.isArray(sapResponse)){
           return Promise.reject('Error en la respuesta de SAP');
         }
-        orderParams.documents = sapResult.value;
+        orderParams.documents = sapResponse;
         return Order.create(orderParams);
       })
       .then(function(created){
@@ -200,9 +207,12 @@ module.exports = {
           isClosed: true,
           isClosedReason: 'Order created'
         };
-        return Quotation.update({id:quotation.id} , updateFields);
+        return [
+          Quotation.update({id:quotation.id} , updateFields),
+          saveSapReferences(sapResponse, orderCreated.id)
+        ];
       })
-      .then(function(){
+      .spread(function(quotationUpdated, sapOrdersReference){
         var params = {
           details: quotation.Details,
           storeId: opts.currentStore,
@@ -323,6 +333,22 @@ module.exports = {
   }
 
 };
+
+function saveSapReferences(sapResponse, orderId){
+  var ordersSap = sapResponse.map(function(orderSap){
+    return {
+      Order: orderId,
+      document: orderSap.Order,
+      PaymentsSap: orderSap.Payments.map(function(payment){
+        return {
+          document: payment.pay,
+          Payment: payment.reference
+        };
+      })
+    };
+  });
+  return OrderSap.create(ordersSap);
+}
 
 
 //@params

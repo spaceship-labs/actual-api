@@ -5,5 +5,11 @@ module.exports = {
 		Order:{
 			model:'Order'
 		},
+		OrderSap:{
+			model:'OrderSap'
+		},
+		Payment:{
+			model: 'Payment'
+		}
 	}
 };

@@ -78,6 +78,9 @@ module.exports = {
     },
     Client:{
       model: 'Client'
+    },
+    PaymentSap:{
+      model: 'PaymentSap'
     }
   },
 

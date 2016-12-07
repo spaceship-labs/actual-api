@@ -4,6 +4,10 @@ module.exports = {
 
 		Order:{
 			model:'Order'
+		},
+		PaymentsSap:{
+			collection:'PaymentSap',
+			via:'OrderSap'
 		}
 	}
 };
