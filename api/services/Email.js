@@ -217,7 +217,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var subject          = 'Confirmación de compra #' + order.folio;
+  var subject          = 'Confirmación de compra | Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
@@ -339,7 +339,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var subject          = 'Cotización #' + quotation.folio;
+  var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
   /**/
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
@@ -455,7 +455,7 @@ function sendFreesale(user, order, products, store) {
   var from             = new helper.Email('no-reply@actualg.com', 'no-reply');
   //var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');  
-  var subject          = 'Artículos freesale | Confirmación de compra #' + order.folio;
+  var subject          = 'Artículos freesale | Confirmación de compra Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
