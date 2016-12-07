@@ -196,7 +196,7 @@ var paymentGroups = [
         type:'single-payment-terminal',
         //type:'credit-card',
         description:'VISA, MasterCard, American Express',
-        cardsImages:['images/visa.png','images/mastercard.png','images/american.png'],
+        cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
         cards:['Visa','MasterCard','American Express'],
         terminals:[
           {label:'American Express', value:'american-express'},
@@ -218,9 +218,9 @@ var paymentGroups = [
         type:'3-msi',
         msi:3,
         cardsImages:[
-          'images/amexcard.png',
-          'images/banamex.png',
-          'images/bancomer.png',
+          '/cards/amexcard.png',
+          '/cards/banamex.png',
+          '/cards/bancomer.png',
         ],
         cards: [
           'Afirme',
@@ -264,9 +264,9 @@ var paymentGroups = [
         type:'6-msi',
         msi:6,
         cardsImages:[
-          'images/amexcard.png',
-          'images/banamex.png',
-          'images/bancomer.png',
+          '/cards/amexcard.png',
+          '/cards/banamex.png',
+          '/cards/bancomer.png',
         ],
         cards:[
           'Afirme',
@@ -304,9 +304,9 @@ var paymentGroups = [
         type:'9-msi',
         msi:9,
         cardsImages:[
-          'images/amexcard.png',
-          'images/banamex.png',
-          'images/bancomer.png',
+          '/cards/amexcard.png',
+          '/cards/banamex.png',
+          '/cards/bancomer.png',
         ],
         cards:[
           'American Express',
@@ -337,9 +337,9 @@ var paymentGroups = [
         type:'12-msi',
         msi:12,
         cardsImages:[
-          'images/amexcard.png',
-          'images/banamex.png',
-          'images/bancomer.png',
+          '/cards/amexcard.png',
+          '/cards/banamex.png',
+          '/cards/bancomer.png',
         ],
         cards:[
           'American Express',
@@ -383,8 +383,8 @@ var paymentGroups = [
         type:'18-msi',
         msi:18,
         cardsImages:[
-          'images/banamex.png',
-          'images/amexcard.png'
+          '/cards/banamex.png',
+          '/cards/amexcard.png'
         ],
         cards: [
           'American Express',
