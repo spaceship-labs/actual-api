@@ -217,7 +217,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var subject          = 'Confirmación de compra';
+  var subject          = 'Confirmación de compra #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
@@ -339,7 +339,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var subject          = 'Cotización';
+  var subject          = 'Cotización #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
   /**/
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
@@ -453,8 +453,9 @@ function sendFreesale(user, order, products, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email('no-reply@actualg.com', 'no-reply');
-  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var subject          = 'Confirmación de compra';
+  //var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');  
+  var subject          = 'Artículos freesale | Confirmación de compra #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
@@ -470,9 +471,9 @@ function sendFreesale(user, order, products, store) {
   mail.addContent(content);
   mail.addPersonalization(personalization);
   requestBody = mail.toJSON();
-  request.method = 'POST'
-  request.path = '/v3/mail/send'
-  request.body = requestBody
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
   return new Promise(function(resolve, reject){
     sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
