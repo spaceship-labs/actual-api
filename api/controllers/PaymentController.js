@@ -92,7 +92,12 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  },	
+  },
+
+  getPaymentGroups: function(req, res){
+    var paymentGroups = PaymentService.getPaymentGroups();
+    res.json(paymentGroups);
+  }	
 };
 
 function formatProductsIds(details){

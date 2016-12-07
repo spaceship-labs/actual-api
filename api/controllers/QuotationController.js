@@ -586,6 +586,22 @@ module.exports = {
         console.log('err', err);
         res.negotiate(err);
       });
+  },
+
+  getQuotationPaymentOptions: function(req, res){
+    var form = req.allParams();
+    var quotationId = form.id;
+    Quotation.findOne({id:quotationId})
+      .then(function(quotation){
+        return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User);
+      })
+      .then(function(paymentOptions){
+        res.json(paymentOptions);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 
 };

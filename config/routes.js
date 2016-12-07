@@ -465,6 +465,11 @@ module.exports.routes = {
     action: 'closeQuotation'
   },
 
+  '/quotation/:id/paymentoptions':{
+    controller: 'quotation',
+    action:'getQuotationPaymentOptions'
+  },
+
   '/payment/add/:quotationid':{
     controller: 'payment',
     action:'add'
@@ -633,6 +638,11 @@ module.exports.routes = {
   '/quotation/getcurrentstock/:quotationId':{
     controller:'quotation',
     action: 'getCurrentStock'
+  },
+
+  '/paymentgroups':{
+    controller:'payment',
+    action:'getPaymentGroups'
   }
   /***************************************************************************
   *                                                                          *

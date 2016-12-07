@@ -260,7 +260,7 @@ function quotation(quotationId) {
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetail.find(details).populate('Product');
-      var payments = PaymentService.getPaymentGroups(quotation.id, user.id);
+      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, user.id);
       var transfers = TransferService.transfers(store.group);
       return [client, user,  quotation, details, payments, transfers, store];
     })

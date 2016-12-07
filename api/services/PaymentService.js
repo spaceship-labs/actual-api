@@ -1,15 +1,27 @@
 var Promise = require('bluebird');
 var numeral = require('numeral');
+var EWALLET_TYPE = 'ewallet';
+var CASH_USD_TYPE = 'cash-usd';
+var EWALLET_GROUP_INDEX = 0;
+
 
 module.exports = {
-  getPaymentGroups: getPaymentGroups,
+  getPaymentGroupsForEmail: getPaymentGroupsForEmail,
+  getMethodGroupsWithTotals: getMethodGroupsWithTotals,
+  getPaymentGroups: getPaymentGroups
 };
 
-function getPaymentGroups(quotation, seller) {
+function getMethodGroupsWithTotals(quotationId, sellerId){
   var methodsGroups = paymentGroups;
-  var discountKeys = ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'];
+  var discountKeys = [
+    'discountPg1',
+    'discountPg2',
+    'discountPg3',
+    'discountPg4',
+    'discountPg5'
+  ];
   var totalsPromises = methodsGroups.map(function(mG) {
-    var id = quotation;
+    var id = quotationId;
     var paymentGroup = mG.group || 1;
     var params = {
       update: false,
@@ -18,7 +30,7 @@ function getPaymentGroups(quotation, seller) {
     return User
       .findOne({
         select: ['activeStore'],
-        id: seller,
+        id: sellerId,
       })
       .then(function(user){
         params.currentStore = user.activeStore;
@@ -28,73 +40,90 @@ function getPaymentGroups(quotation, seller) {
   });
 
   return Promise
-      .all(totalsPromises)
-      .then(function(totalsPromises) {
-        return [
-          totalsPromises,
-          Site.findOne({handle: 'actual-group'})
-        ];
-      })
-      .spread(function(totalsPromises, site) {
-        var exchangeRate = site.exchangeRate;
-        var totalsByGroup = totalsPromises || [];
-        methodsGroups = methodsGroups.map(function(mG, index){
-          mG.total = totalsByGroup[index].total || 0;
-          mG.subtotal = totalsByGroup[index].subtotal || 0;
-          mG.discount = totalsByGroup[index].discount || 0;
-          mG.methods = mG.methods.map(function(m){
-            var discountKey = discountKeys[mG.group - 1];
-            m.discountKey = discountKey;
-            m.total = mG.total;
-            m.subtotal = mG.subtotal;
-            m.discount = mG.discount;
-            m.exchangeRate = exchangeRate;
-            return m;
-          });
-          return mG;
+    .all(totalsPromises)
+    .then(function(totalsPromises) {
+      return [
+        totalsPromises,
+        Site.findOne({handle: 'actual-group'})
+      ];
+    })
+    .spread(function(totalsPromises, site) {
+      var exchangeRate = site.exchangeRate;
+      var totalsByGroup = totalsPromises || [];
+      methodsGroups = methodsGroups.map(function(mG, index){
+        mG.total = totalsByGroup[index].total || 0;
+        mG.subtotal = totalsByGroup[index].subtotal || 0;
+        mG.discount = totalsByGroup[index].discount || 0;
+        mG.methods = mG.methods.map(function(m){
+          var discountKey = discountKeys[mG.group - 1];
+          m.discountKey = discountKey;
+          m.total = mG.total;
+          m.subtotal = mG.subtotal;
+          m.discount = mG.discount;
+          m.exchangeRate = exchangeRate;
+          if(m.type === CASH_USD_TYPE){
+            var exrStr = numeral(exchangeRate).format('0,0.00');
+            m.description = 'Tipo de cambio '+exrStr+' MXN';
+          }
+          else if(m.type === EWALLET_TYPE){
+            //var balance = vm.quotation.Client.ewallet || 0;
+            //m.description = getEwalletDescription(balance);
+          }
+
+          return m;
         });
-        return methodsGroups;
-      })
-      .then(function(methodsGroups) {
-        var currentDate = new Date();
-        var query = {
-          startDate: {'<=': currentDate},
-          endDate: {'>=': currentDate},
-        };
-        return [methodsGroups, PMPeriod.findOne(query)];
-      })
-      .spread(function(methodsGroups, validMethods) {
-        var activeKeys = [
-          'paymentGroup1',
-          'paymentGroup2',
-          'paymentGroup3',
-          'paymentGroup4',
-          'paymentGroup5'
-        ];
-        return methodsGroups.filter(function(m) {
-          var index = m.group - 1;
-          return validMethods[activeKeys[index]];
-        });
-      })
-      .then(function(res) {
-        var cash = [{
-          name: '1 pago de contado',
-          cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
-          total: numeral(res[0].total).format('0,0.00'),
-        }];
-        res = res.slice(1);
-        var methods  = res.reduce(function(acum, current) {
-          return acum.concat(current.methods);
-        }, []);
-        methods = methods.map(function(mi) {
-          return {
-            name: mi.name,
-            cards: mi.cards.join(','),
-            total: numeral(mi.total).format('0,0.00'),
-          };
-        });
-        return cash.concat(methods);
+        return mG;
       });
+      return methodsGroups;
+    })
+    .then(function(methodsGroups) {
+      var currentDate = new Date();
+      var query = {
+        startDate: {'<=': currentDate},
+        endDate: {'>=': currentDate},
+      };
+      return [methodsGroups, PMPeriod.findOne(query)];
+    })
+    .spread(function(methodsGroups, validMethods) {
+      var activeKeys = [
+        'paymentGroup1',
+        'paymentGroup2',
+        'paymentGroup3',
+        'paymentGroup4',
+        'paymentGroup5'
+      ];
+      return methodsGroups.filter(function(m) {
+        var index = m.group - 1;
+        return validMethods[activeKeys[index]];
+      });
+    });
+}
+
+function getPaymentGroupsForEmail(quotation, seller) {
+  getMethodGroupsWithTotals(quotation, seller)
+    .then(function(res) {
+      var cash = [{
+        name: '1 pago de contado',
+        cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
+        total: numeral(res[0].total).format('0,0.00'),
+      }];
+      res = res.slice(1);
+      var methods  = res.reduce(function(acum, current) {
+        return acum.concat(current.methods);
+      }, []);
+      methods = methods.map(function(mi) {
+        return {
+          name: mi.name,
+          cards: mi.cards.join(','),
+          total: numeral(mi.total).format('0,0.00'),
+        };
+      });
+      return cash.concat(methods);
+    });
+}
+
+function getPaymentGroups(){
+  return paymentGroups;
 }
 
 var paymentGroups = [
