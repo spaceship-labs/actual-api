@@ -1,12 +1,19 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
 
+var BIGTICKET_TABLE = [
+  {min:100000, max:199999.99, maxPercentage:2},
+  {min:200000, max:349999.99, maxPercentage:3},
+  {min:350000, max:499999.99, maxPercentage:4},
+  {min:500000, max:Infinity, maxPercentage:5},
+];
+
 module.exports = {
   Calculator     : Calculator,
-  updateQuotationToLatest: updateQuotationToLatest
+  updateQuotationToLatestData: updateQuotationToLatestData
 };
 
-function updateQuotationToLatest(quotationId, userId, options){
+function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
     paymentGroup:1,
     updateDetails: true,
@@ -24,9 +31,19 @@ function updateQuotationToLatest(quotationId, userId, options){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
       params.paymentGroup = quotation.paymentGroup || 1;
-      var calculator = QuotationService.Calculator();
+      var calculator = Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
     });
+}
+
+function getBigticketPercentage(total){
+  var maxPercentage = 0;
+  for(var i=0;i<BIGTICKET_TABLE.length;i++){
+    if(total >= BIGTICKET_TABLE[i].min && total <= BIGTICKET_TABLE[i].max){
+      maxPercentage = BIGTICKET_TABLE[i].maxPercentage;
+    }
+  }
+  return maxPercentage;
 }
 
 function Calculator(){
@@ -41,6 +58,8 @@ function Calculator(){
         if(opts && opts.updateParams){
           totals = _.extend(totals, opts.updateParams);
         }
+        totals.bigticketMaxPercentage = getBigticketPercentage(totals.total);
+
         return Quotation.update({id:quotationId}, totals);
       });
   }

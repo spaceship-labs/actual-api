@@ -81,7 +81,7 @@ module.exports = {
       id = parseInt(id);
     }
 
-    updateQuotationToLatest(id, userId, {update:true})
+    QuotationService.updateQuotationToLatestData(id, userId, {update:true})
       .then(function(){
         return Quotation.findOne({id: id})
           .populate('Details')
@@ -636,27 +636,4 @@ function formatProductsIds(details){
     });
   }
   return result;
-}
-
-function updateQuotationToLatest(quotationId, userId, options){
-  var params = {
-    paymentGroup:1,
-    updateDetails: true,
-  };
-  return User.findOne({select:['activeStore'], id: userId})
-    .then(function(user){
-      params.currentStore = user.activeStore;
-      return Quotation.findOne({
-        id:quotationId,
-        select:['paymentGroup']
-      });
-    })
-    .then(function(quotation){
-      if(!quotation){
-        return Promise.reject(new Error('Cotización no encontrada'));
-      }
-      params.paymentGroup = quotation.paymentGroup || 1;
-      var calculator = QuotationService.Calculator();
-      return calculator.updateQuotationTotals(quotationId, params);
-    });
 }
