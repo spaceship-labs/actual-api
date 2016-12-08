@@ -108,7 +108,7 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
 }
 
 function getPaymentGroupsForEmail(quotation, seller) {
-  getMethodGroupsWithTotals(quotation, seller)
+  return getMethodGroupsWithTotals(quotation, seller)
     .then(function(res) {
       var cash = [{
         name: '1 pago de contado',
