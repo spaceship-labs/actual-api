@@ -70,7 +70,16 @@ module.exports = {
     var quotation;
     var orderParams;
 
-    StockService.validateQuotationStockById(quotationId, req.user.id)
+    //Validating if quotation doesnt have an order assigned
+    Order.findOne({Quotation: quotationId})
+      .then(function(order){
+        if(order){
+          return Promise.reject(
+            new Error('Ya se ha creado un pedido sobre esta cotización')
+          );          
+        }
+        return StockService.validateQuotationStockById(quotationId, req.user.id);
+      })
       .then(function(isValidStock){
         if(!isValidStock){
           return Promise.reject(
