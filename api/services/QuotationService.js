@@ -8,6 +8,30 @@ var BIGTICKET_TABLE = [
   {min:500000, max:Infinity, maxPercentage:5},
 ];
 
+var DISCOUNT_KEYS = [
+  'discountPg1',
+  'discountPg2',
+  'discountPg3',
+  'discountPg4',
+  'discountPg5'
+];
+
+var EWALLET_KEYS = [
+  'ewalletPg1',
+  'ewalletPg2',
+  'ewalletPg3',
+  'ewalletPg4',
+  'ewalletPg5'
+];
+
+var EWALLET_TYPES_KEYS = [
+  'ewalletTypePg1',
+  'ewalletTypePg2',
+  'ewalletTypePg3',
+  'ewalletTypePg4',
+  'ewalletTypePg5'
+];
+
 module.exports = {
   Calculator     : Calculator,
   updateQuotationToLatestData: updateQuotationToLatestData
@@ -36,7 +60,7 @@ function updateQuotationToLatestData(quotationId, userId, options){
     });
 }
 
-function getBigticketPercentage(total){
+function getBigticketMaxPercentage(total){
   var maxPercentage = 0;
   for(var i=0;i<BIGTICKET_TABLE.length;i++){
     if(total >= BIGTICKET_TABLE[i].min && total <= BIGTICKET_TABLE[i].max){
@@ -51,24 +75,26 @@ function Calculator(){
   var storePackages   = [];
   var packagesRules   = [];
 
-  function updateQuotationTotals(quotationId, opts){
-    opts = opts || {paymentGroup:1 , updateDetails: true};
-    return getQuotationTotals(quotationId, opts)
+  function updateQuotationTotals(quotationId, options){
+    options = options || {paymentGroup:1 , updateDetails: true};
+    return getQuotationTotals(quotationId, options)
       .then(function(totals){
-        if(opts && opts.updateParams){
-          totals = _.extend(totals, opts.updateParams);
+        
+        if(options && options.updateParams){
+          totals = _.extend(totals, options.updateParams);
         }
-        totals.bigticketMaxPercentage = getBigticketPercentage(totals.total);
+        
+        totals.bigticketMaxPercentage = getBigticketMaxPercentage(totals.subtotal);
 
         return Quotation.update({id:quotationId}, totals);
       });
   }
 
-  function getQuotationTotals(quotationId, opts){
+  function getQuotationTotals(quotationId, options){
     var quotationAux = false;
-    opts = opts || {paymentGroup:1 , updateDetails: true};
+    options = options || {paymentGroup:1 , updateDetails: true};
 
-    return getPromosByStore(opts.currentStore)
+    return getPromosByStore(options.currentStore)
       .then(function(promos){
         storePromotions = promos;
         return Quotation.findOne({id:quotationId}).populate('Details');
@@ -78,7 +104,7 @@ function Calculator(){
         var packagesIds = getQuotationPackagesIds(quotation.Details);
         if(packagesIds.length > 0){
           return [
-            getPackagesByStore(opts.currentStore),
+            getPackagesByStore(options.currentStore),
             ProductGroup.find({id:packagesIds})
               .populate('PackageRules')
           ];
@@ -88,7 +114,7 @@ function Calculator(){
       .spread(function(storePackagesFound, promotionPackages){
         storePackages = storePackagesFound;
         packagesRules = getAllPackagesRules(promotionPackages, quotationAux.Details);
-        return processDetails(quotationAux.Details, opts);
+        return processQuotationDetails(quotationAux, options);
       })
       .then(function(processedDetails){
         var totals = {
@@ -96,12 +122,12 @@ function Calculator(){
           total:0,
           discount:0,
           totalProducts: 0,
-          paymentGroup: opts.paymentGroup
+          paymentGroup: options.paymentGroup
         };
         processedDetails.forEach(function(pd){
-          totals.total+= pd.total;
-          totals.subtotal += pd.subtotal;
-          totals.discount += (pd.subtotal - pd.total);
+          totals.total         += pd.total;
+          totals.subtotal      += pd.subtotal;
+          totals.discount      += (pd.subtotal - pd.total);
           totals.totalProducts += pd.quantity;
         });
         return totals;
@@ -111,7 +137,8 @@ function Calculator(){
   function getPromosByStore(storeId){
     var currentDate = new Date();
     var queryPromos = Search.getPromotionsQuery();
-    return Store.findOne({id:storeId}).populate('Promotions', queryPromos)
+    return Store.findOne({id:storeId})
+      .populate('Promotions', queryPromos)
       .then(function(store){
         return store.Promotions;
       });
@@ -190,20 +217,23 @@ function Calculator(){
     return validFlag;
   }
 
-  //@params details: Array of objects from model Detail
-  //Every detail must contain a Product object populated
-  function processDetails(details, opts){
-    opts = opts || {paymentGroup:1};
-    var processedDetails = details.map(function(d){
-      return getDetailTotals(d, opts);
+  //@param quotation: 
+  //  Populated with Array of objects from model Detail
+  //  Every detail must contain a Product object populated
+  function processQuotationDetails(quotation, options){
+    options = options || {paymentGroup:1};
+    var details  = quotation.Details || [];
+    var processedDetails = details.map(function(detail){
+      return getDetailTotals(detail, quotation, options);
     });
-    return Promise.all(processedDetails).then(function(pDetails){
-      if(opts.updateDetails){
-        return updateDetails(pDetails);
-      }else{
-        return pDetails;
-      }
-    });
+    return Promise.all(processedDetails)
+      .then(function(pDetails){
+        if(options.updateDetails){
+          return updateDetails(pDetails);
+        }else{
+          return pDetails;
+        }
+      });
   }
 
   function getUnitPriceWithDiscount(unitPrice,discountPercent){
@@ -214,18 +244,10 @@ function Calculator(){
   function getEwalletEntryByDetail(options){
     var ewalletEntry = 0;
     if(options.Promotion && !options.Promotion.PromotionPackage){
-      var ewalletKeys = [
-        'ewalletPg1',
-        'ewalletPg2',
-        'ewalletPg3',
-        'ewalletPg4',
-        'ewalletPg5'
-      ];
-      var ewalletTypesKeys = ['ewalletTypePg1','ewalletTypePg2','ewalletTypePg3','ewalletTypePg4','ewalletTypePg5'];
       var paymentGroup = options.paymentGroup || 1;
       var eKey = paymentGroup - 1;
-      var ewallet = options.Promotion[ ewalletKeys[eKey] ];
-      var ewalletType = options.Promotion[ ewalletTypesKeys[eKey] ];
+      var ewallet = options.Promotion[ EWALLET_KEYS[eKey] ];
+      var ewalletType = options.Promotion[ EWALLET_TYPES_KEYS[eKey] ];
       if(ewalletType == 'ammount'){
         ewalletEntry = options.total - ewallet;
       }else{
@@ -237,9 +259,9 @@ function Calculator(){
 
   //@params: detail Object from model Detail
   //Must contain a Product object populated
-  function getDetailTotals(detail, opts){
-    opts = opts || {};
-    paymentGroup = opts.paymentGroup || 1;
+  function getDetailTotals(detail, quotation, options){
+    options = options || {};
+    paymentGroup = options.paymentGroup || 1;
     var subTotal = 0;
     var total    = 0;
     var productId   = detail.Product;
@@ -251,7 +273,7 @@ function Calculator(){
       .then(function(product){
         var mainPromo = getProductMainPromo(product, quantity);
         var unitPrice = product.Price;
-        var discountKey = getDiscountKey(opts.paymentGroup);
+        var discountKey = getDiscountKey(options.paymentGroup);
         var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
         var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
         var subtotal = quantity * unitPrice;
@@ -259,10 +281,9 @@ function Calculator(){
         var discount = total - subtotal;
         var ewallet = getEwalletEntryByDetail({
           Promotion: mainPromo,
-          paymentGroup: opts.paymentGroup,
+          paymentGroup: options.paymentGroup,
           total: total
         });
-        var isFreeSale = isFreeSaleProduct(product);
         var detailTotals = {
           id: detail.id,
           unitPrice: unitPrice,
@@ -271,11 +292,12 @@ function Calculator(){
           discountKey: discountKey, //Payment group discountKey
           subtotal: subtotal,
           total:total,
-          paymentGroup: opts.paymentGroup,
+          paymentGroup: options.paymentGroup,
           quantity: quantity,
           discount: discount,
           ewallet: ewallet,
-          isFreeSale: isFreeSale,
+          bigticketDiscountPercentage: getQuotationBigticketPercentage(quotation),
+          isFreeSale: isFreeSaleProduct(product),
           PromotionPackageApplied: null
         };
 
@@ -287,6 +309,17 @@ function Calculator(){
         }
         return detailTotals;
       });
+  }
+
+  function getQuotationBigticketPercentage(quotation){
+    var percentage = 0;
+    if(quotation.bigticketPercentage && 
+      (quotation.bigticketPercentage < getBigticketMaxPercentage(quotation.subtotal))
+    ){
+       percentage = quotation.bigticketPercentage;
+    }
+
+    return percentage;
   }
 
   function isFreeSaleProduct(product){
@@ -380,8 +413,7 @@ function Calculator(){
   }
 
   function getDiscountKey(group){
-    var keys = ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'];
-    return keys[group-1];
+    return DISCOUNT_KEYS[group-1];
   }
 
 

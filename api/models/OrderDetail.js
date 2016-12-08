@@ -8,6 +8,11 @@ module.exports = {
     subtotal: 'float',
     total: 'float',
     discountPercent: 'float',
+    bigticketDiscount: 'float',
+    bigticketDiscountPercentage: {
+      type: 'integer',
+      enum:[0,1,2,3,4,5]
+    },    
     paymentGroup: 'integer',
     unitPrice: 'float',
     ewallet: 'float',

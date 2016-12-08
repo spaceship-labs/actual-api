@@ -7,7 +7,12 @@ module.exports = {
     discount: 'float', //total discount
     subtotal: 'float',
     total: 'float',
-    discountPercent: 'float', //by unit
+    discountPercent: 'float', //by unit (includes big ticket discount)
+    bigticketDiscount: 'float',
+    bigticketDiscountPercentage: {
+      type: 'integer',
+      enum:[0,1,2,3,4,5]
+    },
     paymentGroup: 'integer',
     unitPrice: 'float',
     unitPriceWithDiscount: 'float',
