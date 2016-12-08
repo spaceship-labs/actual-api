@@ -241,7 +241,6 @@ function promotionCronJobSearch(opts) {
         freeSale: true,
         freeSaleStock: {'>':0}
       });
-      delete freeSaleQuery[activeStore.code];
 
       var searchQuery = {
         $or: [
