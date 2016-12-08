@@ -90,7 +90,7 @@ module.exports = {
       })
       .then(function(currentUser){
         opts.currentStore = currentUser.activeStore;
-        var calculator = Prices.Calculator();
+        var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){

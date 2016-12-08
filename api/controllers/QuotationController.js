@@ -22,7 +22,7 @@ module.exports = {
         return Quotation.create(form);
       })
       .then(function(created){
-        var calculator = Prices.Calculator();
+        var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
@@ -56,7 +56,7 @@ module.exports = {
         return Quotation.update({id:id}, form);
       })
       .then(function(){
-        var calculator = Prices.Calculator();
+        var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
@@ -229,7 +229,7 @@ module.exports = {
         return QuotationDetail.create(form);
       })
       .then(function(created){
-         var calculator = Prices.Calculator();
+         var calculator = QuotationService.Calculator();
          return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
@@ -261,7 +261,7 @@ module.exports = {
         return QuotationDetail.destroy({id:detailsIds});
       })
       .then(function(){
-        var calculator = Prices.Calculator();
+        var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotation){
@@ -327,7 +327,7 @@ module.exports = {
     User.findOne({select:['activeStore'], id: req.user.id})
       .then(function(user){
         params.currentStore = user.activeStore;
-        var calculator = Prices.Calculator();
+        var calculator = QuotationService.Calculator();
         return calculator.getQuotationTotals(id, params);
       })
       .then(function(totals){
@@ -656,7 +656,7 @@ function updateQuotationToLatest(quotationId, userId, options){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
       params.paymentGroup = quotation.paymentGroup || 1;
-      var calculator = Prices.Calculator();
+      var calculator = QuotationService.Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
     });
 }

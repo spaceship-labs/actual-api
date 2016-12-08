@@ -63,7 +63,7 @@ module.exports = {
       })
       .then(function(quotation){
         payments = quotation.Payments;
-        return Prices.getExchangeRate();
+        return PaymentService.getExchangeRate();
       })
       .then(function(exchangeRate){
         var ammounts = payments.map(function(p){

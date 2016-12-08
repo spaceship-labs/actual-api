@@ -3,13 +3,22 @@ var numeral = require('numeral');
 var EWALLET_TYPE = 'ewallet';
 var CASH_USD_TYPE = 'cash-usd';
 var EWALLET_GROUP_INDEX = 0;
+var DEFAULT_EXCHANGE_RATE   = 18.78;
 
 
 module.exports = {
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
-  getPaymentGroups: getPaymentGroups
+  getPaymentGroups: getPaymentGroups,
+  getExchangeRate: getExchangeRate
 };
+
+function getExchangeRate(){
+  return Site.findOne({handle:'actual-group'})
+    .then(function(site){
+      return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
+    });
+}
 
 function getMethodGroupsWithTotals(quotationId, sellerId){
   var methodsGroups = paymentGroups;
@@ -34,7 +43,7 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
       })
       .then(function(user){
         params.currentStore = user.activeStore;
-        var calculator = Prices.Calculator();
+        var calculator = QuotationService.Calculator();
         return calculator.getQuotationTotals(id, params);
       });
   });
@@ -44,11 +53,10 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
     .then(function(totalsPromises) {
       return [
         totalsPromises,
-        Site.findOne({handle: 'actual-group'})
+        getExchangeRate()
       ];
     })
-    .spread(function(totalsPromises, site) {
-      var exchangeRate = site.exchangeRate;
+    .spread(function(totalsPromises, exchangeRate) {
       var totalsByGroup = totalsPromises || [];
       methodsGroups = methodsGroups.map(function(mG, index){
         mG.total = totalsByGroup[index].total || 0;

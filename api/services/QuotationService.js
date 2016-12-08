@@ -1,16 +1,31 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
-var DEFAULT_EXCHANGE_RATE   = 18.78;
 
 module.exports = {
-  getExchangeRate: getExchangeRate,
-  Calculator     : Calculator
+  Calculator     : Calculator,
+  updateQuotationToLatest: updateQuotationToLatest
 };
 
-function getExchangeRate(){
-  return Site.findOne({handle:'actual-group'})
-    .then(function(site){
-      return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
+function updateQuotationToLatest(quotationId, userId, options){
+  var params = {
+    paymentGroup:1,
+    updateDetails: true,
+  };
+  return User.findOne({select:['activeStore'], id: userId})
+    .then(function(user){
+      params.currentStore = user.activeStore;
+      return Quotation.findOne({
+        id:quotationId,
+        select:['paymentGroup']
+      });
+    })
+    .then(function(quotation){
+      if(!quotation){
+        return Promise.reject(new Error('Cotización no encontrada'));
+      }
+      params.paymentGroup = quotation.paymentGroup || 1;
+      var calculator = QuotationService.Calculator();
+      return calculator.updateQuotationTotals(quotationId, params);
     });
 }
 
@@ -180,7 +195,13 @@ function Calculator(){
   function getEwalletEntryByDetail(options){
     var ewalletEntry = 0;
     if(options.Promotion && !options.Promotion.PromotionPackage){
-      var ewalletKeys = ['ewalletPg1','ewalletPg2','ewalletPg3','ewalletPg4','ewalletPg5'];
+      var ewalletKeys = [
+        'ewalletPg1',
+        'ewalletPg2',
+        'ewalletPg3',
+        'ewalletPg4',
+        'ewalletPg5'
+      ];
       var ewalletTypesKeys = ['ewalletTypePg1','ewalletTypePg2','ewalletTypePg3','ewalletTypePg4','ewalletTypePg5'];
       var paymentGroup = options.paymentGroup || 1;
       var eKey = paymentGroup - 1;
