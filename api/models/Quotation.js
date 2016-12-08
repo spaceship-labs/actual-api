@@ -54,6 +54,10 @@ module.exports = {
     ammountPaid: {type:'float'},
     totalProducts: {type:'integer'},
     paymentGroup:{type:'integer'},
+    bigticketPercentage: {
+      type:'integer',
+      enum:[1,2,3,4,5]
+    },
     minPaidPercentage: {
       type:'float',
       defaultsTo: 100

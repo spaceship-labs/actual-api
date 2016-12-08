@@ -1,5 +1,5 @@
-var baseUrl = 'http://sapnueve.homedns.org:8080';
-//var baseUrl = 'http://189.149.131.100:8080';
+//var baseUrl = 'http://sapnueve.homedns.org:8080';
+var baseUrl = 'http://189.149.131.100:8080';
 var request = require('request-promise');
 var Promise = require('bluebird');
 var buildUrl = require('build-url');
