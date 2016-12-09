@@ -243,12 +243,14 @@ function Calculator(){
 
   function getEwalletEntryByDetail(options){
     var ewalletEntry = 0;
+
     if(options.Promotion && !options.Promotion.PromotionPackage){
       var paymentGroup = options.paymentGroup || 1;
-      var eKey = paymentGroup - 1;
-      var ewallet = options.Promotion[ EWALLET_KEYS[eKey] ];
-      var ewalletType = options.Promotion[ EWALLET_TYPES_KEYS[eKey] ];
-      if(ewalletType == 'ammount'){
+      var eKey         = paymentGroup - 1;
+      var ewallet      = options.Promotion[ EWALLET_KEYS[eKey] ];
+      var ewalletType  = options.Promotion[ EWALLET_TYPES_KEYS[eKey] ];
+
+      if(ewalletType === 'ammount'){
         ewalletEntry = options.total - ewallet;
       }else{
         ewalletEntry = ( options.total / 100) * ewallet;
@@ -271,34 +273,34 @@ function Calculator(){
     return Product.findOne({id:productId})
       .populate('Promotions', queryPromos)
       .then(function(product){
-        var mainPromo = getProductMainPromo(product, quantity);
-        var unitPrice = product.Price;
-        var discountKey = getDiscountKey(options.paymentGroup);
-        var discountPercent = mainPromo ? mainPromo[discountKey] : 0;
+        var mainPromo             = getProductMainPromo(product, quantity);
+        var unitPrice             = product.Price;
+        var discountKey           = getDiscountKey(options.paymentGroup);
+        var discountPercent       = mainPromo ? mainPromo[discountKey] : 0;
         var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
-        var subtotal = quantity * unitPrice;
-        var total = quantity * unitPriceWithDiscount;
-        var discount = total - subtotal;
+        var subtotal              = quantity * unitPrice;
+        var total                 = quantity * unitPriceWithDiscount;
+        var discount              = total - subtotal;
         var ewallet = getEwalletEntryByDetail({
           Promotion: mainPromo,
           paymentGroup: options.paymentGroup,
           total: total
         });
         var detailTotals = {
-          id: detail.id,
-          unitPrice: unitPrice,
-          unitPriceWithDiscount: unitPriceWithDiscount,
-          discountPercent: discountPercent,
-          discountKey: discountKey, //Payment group discountKey
-          subtotal: subtotal,
-          total:total,
-          paymentGroup: options.paymentGroup,
-          quantity: quantity,
-          discount: discount,
-          ewallet: ewallet,
-          bigticketDiscountPercentage: getQuotationBigticketPercentage(quotation),
-          isFreeSale: isFreeSaleProduct(product),
-          PromotionPackageApplied: null
+          bigticketDiscountPercentage : getQuotationBigticketPercentage(quotation),
+          discount                    : discount,
+          discountKey                 : discountKey, //Payment group discountKey
+          discountPercent             : discountPercent,
+          ewallet                     : ewallet,
+          id                          : detail.id,
+          isFreeSale                  : isFreeSaleProduct(product),
+          paymentGroup                : options.paymentGroup,
+          PromotionPackageApplied     : null,
+          quantity                    : quantity,
+          subtotal                    : subtotal,
+          total                       : total,
+          unitPrice                   : unitPrice,
+          unitPriceWithDiscount       : unitPriceWithDiscount,
         };
 
         if(mainPromo.id && !mainPromo.PromotionPackage){

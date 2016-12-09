@@ -6,6 +6,7 @@ module.exports = {
     quantity: 'integer',
     discount: 'float', //total discount
     subtotal: 'float',
+    subtotalWithPromotions: 'float', // includes discounts but not big ticket neither family and friends
     total: 'float',
     discountPercent: 'float', //by unit (includes big ticket discount)
     bigticketDiscount: 'float',
