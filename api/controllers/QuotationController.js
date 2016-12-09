@@ -370,15 +370,14 @@ module.exports = {
 
     var startDate = form.startDate;
     var endDate = form.endDate;
-    var queryDateRange = {
-      User: userId,
-      createdAt: {}
-    };
+    var dateField = form.dateField || 'createdAt';
+    var queryDateRange = {User: userId};
+    queryDateRange[dateField] = {};
 
     if(startDate){
       startDate = new Date(startDate); 
       startDate.setHours(0,0,0,0);
-      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+      queryDateRange[dateField] = assign(queryDateRange[dateField],{
         '>=': startDate
       });
     }
@@ -386,20 +385,19 @@ module.exports = {
     if(endDate){
       endDate = new Date(endDate); 
       endDate.setHours(23,59,59,999);
-      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+      queryDateRange[dateField] = assign(queryDateRange[dateField],{
         '<=': endDate
       });
     }
 
-    if( _.isEmpty(queryDateRange.createdAt) ){
-      delete queryDateRange.createdAt;
+    if( _.isEmpty(queryDateRange[dateField]) ){
+      delete queryDateRange[dateField];
     }
 
-    //sails.log.info('queryDateRange getCountByUser', queryDateRange);
-
-    var queryfortNightRange = {
-      User: userId,
-      createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
+    var queryfortNightRange = { User: userId };
+    queryfortNightRange[dateField] = {
+      '>=': fortNightRange.start,
+      '<=': fortNightRange.end
     };
 
     Promise.props({
@@ -435,17 +433,15 @@ module.exports = {
     }
 
     var startDate = form.startDate;
-    var endDate = form.endDate;
-    var queryDateRange = {
-      User: userId,
-      createdAt: {}
-      //createdAt: { '>=': startDate, '<=': endDate }
-    };
+    var endDate   = form.endDate;
+    var dateField = form.dateField || 'createdAt'; 
+    var queryDateRange = {User: userId};
+    queryDateRange[dateField] = {};
 
     if(startDate){
       startDate = new Date(startDate); 
       startDate.setHours(0,0,0,0);
-      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+      queryDateRange[dateField] = assign(queryDateRange[dateField],{
         '>=': startDate
       });
     }
@@ -453,22 +449,22 @@ module.exports = {
     if(endDate){
       endDate = new Date(endDate); 
       endDate.setHours(23,59,59,999);
-      queryDateRange.createdAt = assign(queryDateRange.createdAt,{
+      queryDateRange[dateField] = assign(queryDateRange[dateField],{
         '<=': endDate
       });
     }
 
-    if( _.isEmpty(queryDateRange.createdAt) ){
-      delete queryDateRange.createdAt;
+    if( _.isEmpty(queryDateRange[dateField]) ){
+      delete queryDateRange[dateField];
     }
 
-    //sails.log.info('queryDateRange getTotalsByUser', queryDateRange);
 
-
-    var queryfortNightRange = {
-      User: userId,
-      createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
+    var queryfortNightRange = {User: userId};
+    queryfortNightRange[dateField] = { 
+      '>=': fortNightRange.start, 
+      '<=': fortNightRange.end 
     };
+
     var props = {
       totalDateRange: Quotation.find(queryDateRange).sum('total')
     };

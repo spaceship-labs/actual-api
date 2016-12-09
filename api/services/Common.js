@@ -89,6 +89,7 @@ module.exports = {
 
     }
 
+    //sails.log.info('query', query);
     querySearchAux = _.clone(query);
 
     if(!getAll){
