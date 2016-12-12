@@ -24,15 +24,15 @@ module.exports = {
       .catch(function(err) {
         if (err.error && err.error.message) {
           err = new Error(err.error.message);
-          return res.badRequest(err);
+          return res.negotiate(err);
         }
         if (err.error && err.error.error)  {
           err = new Error(err.error.error.message);
-          return res.badRequest(err);
+          return res.negotiate(err);
         }
         if (err.error)  {
           err = new Error(err.error);
-          return res.badRequest(err);
+          return res.negotiate(err);
         }
         return res.negotiate(err);
       });
@@ -62,15 +62,15 @@ module.exports = {
       .catch(function(err) {
         if (err.error && err.error.message) {
           err = new Error(err.error.message);
-          return res.badRequest(err);
+          return res.negotiate(err);
         }
         if (err.error && err.error.error)  {
           err = new Error(err.error.error.message);
-          return res.badRequest(err);
+          return res.negotiate(err);
         }
         if (err.error)  {
           err = new Error(err.error);
-          return res.badRequest(err);
+          return res.negotiate(err);
         }
         return res.negotiate(err);
       });
