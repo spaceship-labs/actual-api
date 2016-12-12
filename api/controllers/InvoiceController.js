@@ -22,6 +22,10 @@ module.exports = {
         return res.json(invoice);
       })
       .catch(function(err) {
+        if (err.error)  {
+          err = new Error(err.error);
+          return res.badRequest(err);
+        }
         return res.negotiate(err);
       });
   },
@@ -48,6 +52,10 @@ module.exports = {
         return res.json(res);
       })
       .catch(function(err) {
+        if (err.error)  {
+          err = new Error(err.error);
+          return res.badRequest(err);
+        }
         return res.negotiate(err);
       });
   }
