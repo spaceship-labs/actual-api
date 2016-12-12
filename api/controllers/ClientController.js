@@ -1,4 +1,5 @@
-var _ = require('underscore');
+var _       = require('underscore');
+var moment  = require('moment');
 var Promise = require('bluebird');
 var ADDRESS_TYPE = 'S';
 
@@ -7,7 +8,15 @@ module.exports = {
     var form           = req.params.all();
     var model          = 'client';
     var extraParams = {
-      searchFields: ['id','CardName','CardCode','firstName','lastName','E_Mail','phone']
+      searchFields: [
+        'id',
+        'CardName',
+        'CardCode',
+        'firstName',
+        'lastName',
+        'E_Mail',
+        'phone'
+      ]
     };
     Common.find(model, form, extraParams)
       .then(function(result){
@@ -70,51 +79,83 @@ module.exports = {
     var form           = req.params.all();
     var email          = form.email;
     var actualMail     =  /@actualgroup.com$/;
-    var createdContact = false;
+    var createdClient  = false;
+    var contacts       = [];
+    var params         = {};
+
+    var fiscalAddress;
+
     if (email && email.match(actualMail)) {
       return res.badRequest({
         error: 'user could not be created with an employee\'s mail'
       });
     }
-    form                 = mapClientFields(form);
-    form.User            = req.user.id;
-    var contacts         = filterContacts(form.contacts);
-    if(form.fiscalAddress && isValidFiscalAddress(form.fiscalAddress)){
-      var fiscalAddress  = _.clone(form.fiscalAddress);
+    form               = ClientService.mapClientFields(form);
+    form.User          = req.user.id;
+    contacts           = ClientService.filterContacts(form.contacts);
+    contacts           = contacts.map(ClientService.mapContactFields);
+
+    if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
+      fiscalAddress  = _.clone(form.fiscalAddress);
     }
+   
     delete form.contacts;
     delete form.fiscalAddress;
 
-    SapService.createClient(form)
+    params = {
+      client: form,
+      fiscalAddress: fiscalAddress,
+      clientContacts: contacts
+    };
+
+    SapService.createClient(params)
       .then(function(result){
         sails.log.info('result createClient', result);
-        if( !result.value || !isValidCardCode(result.value)  ) {
+        
+        if( !result.value || !ClientService.isValidCardCode(result.value)  ) {
           var err = result.value || 'Error al crear socio de negocio';
           return Promise.reject(err);
         }
-        form.CardCode = result.value;
+        
+        form.CardCode   = result.value;
+        form.BirthDate  = moment(form.BirthDate).toDate();
+
         return Client.create(form);
       })
       .then(function(created){
-        createdContact = created;
+        createdClient = created;
+        var promises = [];
+
         if(contacts && contacts.length > 0){
           contacts = contacts.map(function(c){
-            c.CardCode = createdContact.CardCode;
+            c.CardCode  = createdClient.CardCode;
             return c;
           });
-          return Promise.each(contacts, createContactPromise);
+          promises.push(ClientContact.create(contacts));
         }
-        return created;
-      })
-      .then(function(result){
+
         if(fiscalAddress){
-          fiscalAddress.CardCode = createdContact.CardCode;
-          return createFiscalAddressPromise(fiscalAddress);
+          fiscalAddress           = ClientService.mapFiscalFields(fiscalAddress);
+          fiscalAddress.CardCode  = createdClient.CardCode;
+          promises.push(FiscalAddress.create(fiscalAddress));
         }
-        return result;
+
+        if(promises.length > 0){
+          return promises;
+        }else{
+          //Returning empty promise
+          return new Promise(function(resolve, reject){
+            resolve();
+          });
+        
+        }
+
       })
-      .then(function(result){
-        res.json(createdContact);
+      .spread(function(contactsCreated, fiscalAddressCreated){
+        sails.log.info('contactsCreated', contactsCreated);
+        sails.log.info('fiscalAddressCreated', fiscalAddressCreated);
+        
+        res.json(createdClient);
       })
       .catch(function(err){
         console.log(err);
@@ -125,12 +166,12 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
-    form = mapClientFields(form);
+    form = ClientService.mapClientFields(form);
     delete form.FiscalAddress;
     SapService.updateClient(CardCode, form)
       .then(function(result){
         sails.log.info('update client result', result);
-        if(result && result.value && isValidCardCode(result.value)){
+        if(result && result.value && ClientService.isValidCardCode(result.value)){
           return Client.update({CardCode: CardCode}, form);
         }
         return Promise.reject('Actualización en SAP fallida');
@@ -162,11 +203,12 @@ module.exports = {
     SapService.createContact(cardCode, form)
       .then(function(result){
         sails.log.info('createContact result', result);
-        if(!result.value || !isValidCardCode(result.value)){
+        if( !result.value || !_.isArray(result.value) ){
           var err = result.value || 'Error al crear contacto';
           return Promise.reject(err);
         }
-        form.CntctCode = result.value;
+        var CntctCode  = result.value[0]; 
+        form.CntctCode = CntctCode;
         return ClientContact.create(form);
       })
       .then(function(createdContact){
@@ -184,7 +226,7 @@ module.exports = {
     var cardCode = form.CardCode;
     ClientContact.find({CardCode: cardCode, select:['CntctCode']})
       .then(function(contacts){
-        var contactIndex = getContactIndex(contacts, contactCode);
+        var contactIndex = ClientService.getContactIndex(contacts, contactCode);
         return SapService.updateContact(cardCode ,contactIndex, form);
       })
       .then(function(updatedSap){
@@ -203,14 +245,15 @@ module.exports = {
   createFiscalAddress: function(req, res){
     var form = req.params.all();
     var cardCode = form.CardCode;
-    SapService.createFiscalAddress(cardCode, form)
+    var fiscalAddress = ClientService.mapFiscalFields(form);
+    SapService.createFiscalAddress(cardCode, fiscalAddress)
       .then(function(result){
         sails.log.info('result createFiscalAddress');
-        if(!result.value || !isValidCardCode(result.value)){
+        if(!result.value || !ClientService.isValidCardCode(result.value)){
           var err = result.value || 'Error al crear direccion fiscal';
           return Promise.reject(err);
         }
-        form.AdresType = ADDRESS_TYPE;
+        fiscalAddress.AdresType = ADDRESS_TYPE;
         return FiscalAddress.create(form);
       })
       .then(function(createdFiscalAddress){
@@ -226,18 +269,19 @@ module.exports = {
     var form = req.params.all();
     var CardCode = form.CardCode;
     var id = form.id;
+    var fiscalAddress = ClientService.mapFiscalFields(form);
     delete form.AdresType;
-    SapService.updateFiscalAddress(CardCode, form)
+    SapService.updateFiscalAddress(CardCode, fiscalAddress)
       .then(function(result){
         sails.log.info('result updateFiscalAddress', result);
         if(!result.value){
           var err = result.value || 'Error al actualizar direccion fiscal';
           return Promise.reject(err);
         }
-        form.AdresType = ADDRESS_TYPE;
-        return FiscalAddress.update({CardCode:CardCode}, form);
+        return FiscalAddress.update({CardCode:CardCode}, fiscalAddress);
       })
       .then(function(updated){
+        sails.log.info('updated in sails fiscalAddress', updated);
         return res.json(updated);
       })
       .catch(function(err){
@@ -262,76 +306,3 @@ module.exports = {
 
 };
 
-function mapClientFields(fields){
-  fields.CardName = fields.FirstName || fields.CardName;
-  if(fields.FirstName && fields.LastName){
-    fields.CardName = fields.FirstName + ' ' + fields.LastName;
-  }
-  return fields;
-}
-
-
-function getContactIndex(contacts, contactCode){
-  var contactCodes = contacts.map(function(c){
-    return parseInt(c.CntctCode);
-  });
-  contactCodes = contactCodes.sort(function(a,b){
-    return a - b;
-  });
-  return contactCodes.indexOf(contactCode);
-}
-
-function createContactPromise(params){
-  var cardCode = params.CardCode;
-  return SapService.createContact(cardCode, params)
-    .then(function(result){
-      sails.log.info('result createdContact promise', result);
-      if(!result.value){
-        return {err: result};
-      }
-      params.CntctCode = result.value;
-      return ClientContact.create(params);
-    })
-    .then(function(createdInApp){
-      return createdInApp;
-    })
-    .catch(function(err){
-      console.log('err createContactPromise');
-      console.log(err);
-      return Promise.reject(err);
-    });
-}
-
-function createFiscalAddressPromise(params){
-  var cardCode = params.CardCode;
-  params.AdresType = ADDRESS_TYPE;
-  return SapService.createFiscalAddress(cardCode,params)
-    .then(function(result){
-      sails.log.info('result createFiscalAddress', result);
-      return FiscalAddress.create(params);
-    })
-    .then(function(createdInApp){
-      return createdInApp;
-    })
-    .catch(function(err){
-      console.log(err);
-    });
-}
-
-function isValidCardCode(cardCode){
-  if(!cardCode){
-    return false;
-  }
-  return cardCode.length <= 15;
-}
-
-function filterContacts(contacts){
-  var filteredContacts = (contacts || []).filter(function(contact){
-    return !_.isUndefined(contact.FirstName);
-  });
-  return filteredContacts;
-}
-
-function isValidFiscalAddress(fiscalAddress){
-  return !_.isUndefined(fiscalAddress.companyName);
-}

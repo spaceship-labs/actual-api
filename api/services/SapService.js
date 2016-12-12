@@ -5,8 +5,11 @@ var Promise = require('bluebird');
 var buildUrl = require('build-url');
 var _ = require('underscore');
 var moment = require('moment');
-var SAP_DATE_FORMAT = 'YYYY-MM-DD';
-var CLIENT_CARD_TYPE = 1;//1.Client, 2.Proveedor, 3.Lead
+
+var SAP_DATE_FORMAT       = 'YYYY-MM-DD';
+var CLIENT_CARD_TYPE      = 1;//1.Client, 2.Proveedor, 3.Lead
+var CREATE_CONTACT_ACTION = 0;
+var UPDATE_CONTACT_ACTION = 1;
 
 var reqOptions = {
   method: 'POST',
@@ -14,22 +17,61 @@ var reqOptions = {
 };
 
 module.exports = {
-  createClient        : createClient,
   createContact       : createContact,
   createSaleOrder     : createSaleOrder,
   createFiscalAddress : createFiscalAddress,
-  buildSaleOrderRequestParams: buildSaleOrderRequestParams,
+  createClient        : createClient,
   updateClient        : updateClient,
   updateContact       : updateContact,
-  updateFiscalAddress : updateFiscalAddress
+  updateFiscalAddress : updateFiscalAddress,
+  buildSaleOrderRequestParams: buildSaleOrderRequestParams,
 };
+
+
+
+function createClient(params){
+  var path           = 'Contact';
+  var client         = params.client;
+  var fiscalAddress  = params.fiscalAddress;
+  var clientContacts = params.clientContacts;
+
+  client.LicTradNum  = client.LicTradNum || 'XXAX010101000';
+
+  return User.findOne({id:client.User}).populate('Seller')
+    .then(function(user){
+      client.SlpCode = -1;//Assigns seller code from SAP
+      if(user.Seller){
+        client.SlpCode = user.Seller.SlpCode || -1;
+      }
+      return getSeriesNum(user.activeStore);
+    })
+    .then(function(seriesNum){
+      client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
+      var requestParams = {
+        Client: JSON.stringify(client),
+        address: JSON.stringify(fiscalAddress),
+        person: JSON.stringify(clientContacts)
+      };   
+      var endPoint = buildUrl(baseUrl,{
+        path: path,
+        queryParams: requestParams
+      });
+      sails.log.info('endPoint', endPoint);
+      reqOptions.uri = endPoint;
+      return request(reqOptions);
+    });  
+
+}
 
 function updateClient(cardcode, form){
   form = _.omit(form, _.isUndefined);
-  var path = 'Contact(\'' + cardcode + '\')';
+  var path = 'Contact';
+  var params = {
+    Client: JSON.stringify(form)
+  };
   var endPoint = buildUrl(baseUrl, {
     path: path,
-    queryParams: form
+    queryParams: params
   });
   sails.log.info('updateClient');
   sails.log.info(endPoint);
@@ -37,53 +79,19 @@ function updateClient(cardcode, form){
   return request(reqOptions);
 }
 
-function createClient(form){
-  var path = 'Contact';
-  form.CardType = CLIENT_CARD_TYPE;
-  form.LicTradNum = form.LicTradNum || 'XXAX010101000';
-  return User.findOne({id:form.User}).populate('Seller')
-    .then(function(user){
-      form.SlpCode = -1;//Assigns seller code from SAP
-      if(user.Seller){
-        form.SlpCode = user.Seller.SlpCode || -1;
-      }
-      return getSeriesNum(user.activeStore);
-    })
-    .then(function(seriesNum){
-      form.Series = seriesNum; //Assigns seriesNum number depending on activeStore
-      form = _.omit(form, _.isUndefined);
-      var endPoint = buildUrl(baseUrl, {
-        path: path,
-        queryParams: form
-      });
-      sails.log.info('createClient');
-      sails.log.info(endPoint);
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
-    });  
-}
-
-function updateContact(cardCode, contactIndex, form){
-  var path = 'PersonContact(\''+  cardCode +'\')';
-  form = _.omit(form, _.isUndefined);
-  form.Line = contactIndex;
-  var endPoint = buildUrl(baseUrl,{
-    path: path,
-    queryParams: form
-  });
-  sails.log.info('updateContact');
-  sails.log.info(endPoint);
-  reqOptions.uri = endPoint;
-  return request(reqOptions);
-}
 
 function createContact(cardCode, form){
   var path = 'PersonContact';
   form = _.omit(form, _.isUndefined);
   form.CardCode = cardCode;
+  form.action   = CREATE_CONTACT_ACTION;
+  var params = {
+    contact: JSON.stringify({CardCode: cardCode}),    
+    person: JSON.stringify([form])
+  };
   var endPoint = buildUrl(baseUrl,{
     path: path,
-    queryParams: form
+    queryParams: params
   });
   sails.log.info('createContact');
   sails.log.info(endPoint);
@@ -92,18 +100,38 @@ function createContact(cardCode, form){
 }
 
 
-function updateFiscalAddress(cardcode, form){
-  form.Address = form.companyName;
-  var endPoint = buildAddressContactEndpoint(form, cardcode);
-  console.log('updateFiscalAddress', endPoint);
+function updateContact(cardCode, contactIndex, form){
+  var path = 'PersonContact';
+  form = _.omit(form, _.isUndefined);
+  form.Line = contactIndex;
+  form.action = UPDATE_CONTACT_ACTION;
+  var params = {
+    contact: JSON.stringify({CardCode: cardCode}),
+    person: JSON.stringify([form])
+  };
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+    queryParams: params
+  });
+  sails.log.info('updateContact');
+  sails.log.info(endPoint);
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }
+
 
 function createFiscalAddress(cardcode, form){
   var endPoint = buildAddressContactEndpoint(form, cardcode);
   sails.log.info('createFiscalAddress');
   sails.log.info(endPoint);
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
+}
+
+function updateFiscalAddress(cardcode, form){
+  form.Address = form.companyName;
+  var endPoint = buildAddressContactEndpoint(form, cardcode);
+  sails.log.info('updateFiscalAddress', endPoint);
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }

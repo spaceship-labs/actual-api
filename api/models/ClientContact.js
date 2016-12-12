@@ -5,7 +5,10 @@ module.exports = {
   attributes: {
 
     //SAP FIELDS
-    E_Mail:{type:'string'},
+    E_Mail:{
+        columnName: 'E_MailL',
+        type:'string'
+    },
     FirstName:{type:'string'},
     LastName:{type:'string'},
 
