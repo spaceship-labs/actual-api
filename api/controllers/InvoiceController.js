@@ -22,6 +22,18 @@ module.exports = {
         return res.json(invoice);
       })
       .catch(function(err) {
+        if (err.error && err.error.message) {
+          err = new Error(err.error.message);
+          return res.negotiate(err);
+        }
+        if (err.error && err.error.error)  {
+          err = new Error(err.error.error.message);
+          return res.negotiate(err);
+        }
+        if (err.error)  {
+          err = new Error(err.error);
+          return res.negotiate(err);
+        }
         return res.negotiate(err);
       });
   },
@@ -44,10 +56,22 @@ module.exports = {
     var order = form.order;
     InvoiceService
       .send(order)
-      .then(function(res) {
-        return res.json(res);
+      .then(function(order) {
+        return res.json(order);
       })
       .catch(function(err) {
+        if (err.error && err.error.message) {
+          err = new Error(err.error.message);
+          return res.negotiate(err);
+        }
+        if (err.error && err.error.error)  {
+          err = new Error(err.error.error.message);
+          return res.negotiate(err);
+        }
+        if (err.error)  {
+          err = new Error(err.error);
+          return res.negotiate(err);
+        }
         return res.negotiate(err);
       });
   }
