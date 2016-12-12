@@ -22,6 +22,10 @@ module.exports = {
         return res.json(invoice);
       })
       .catch(function(err) {
+        if (err.error && err.error.error)  {
+          err = new Error(err.error.error.message);
+          return res.badRequest(err);
+        }
         if (err.error)  {
           err = new Error(err.error);
           return res.badRequest(err);
@@ -48,10 +52,18 @@ module.exports = {
     var order = form.order;
     InvoiceService
       .send(order)
-      .then(function(res) {
-        return res.json(res);
+      .then(function(order) {
+        return res.json(order);
       })
       .catch(function(err) {
+        if (err.error && err.error.error)  {
+          err = new Error(err.error.error.message);
+          return res.badRequest(err);
+        }
+        if (err.error)  {
+          err = new Error(err.error);
+          return res.badRequest(err);
+        }
         if (err.error)  {
           err = new Error(err.error);
           return res.badRequest(err);
