@@ -22,6 +22,10 @@ module.exports = {
         return res.json(invoice);
       })
       .catch(function(err) {
+        if (err.error && err.error.message) {
+          err = new Error(err.error.message);
+          return res.badRequest(err);
+        }
         if (err.error && err.error.error)  {
           err = new Error(err.error.error.message);
           return res.badRequest(err);
@@ -56,12 +60,12 @@ module.exports = {
         return res.json(order);
       })
       .catch(function(err) {
-        if (err.error && err.error.error)  {
-          err = new Error(err.error.error.message);
+        if (err.error && err.error.message) {
+          err = new Error(err.error.message);
           return res.badRequest(err);
         }
-        if (err.error)  {
-          err = new Error(err.error);
+        if (err.error && err.error.error)  {
+          err = new Error(err.error.error.message);
           return res.badRequest(err);
         }
         if (err.error)  {
