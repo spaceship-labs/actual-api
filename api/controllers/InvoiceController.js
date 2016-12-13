@@ -24,15 +24,15 @@ module.exports = {
       .catch(function(err) {
         if (err.error && err.error.message) {
           err = new Error(err.error.message);
-          return res.negotiate(err);
+          return res.json(400, err);
         }
         if (err.error && err.error.error)  {
           err = new Error(err.error.error.message);
-          return res.negotiate(err);
+          return res.json(400, err);
         }
         if (err.error)  {
           err = new Error(err.error);
-          return res.negotiate(err);
+          return res.json(400, err);
         }
         return res.negotiate(err);
       });
@@ -47,7 +47,7 @@ module.exports = {
         return res.json(order);
       })
       .catch(function(err) {
-        return res.negotiate(err);
+        return res.json(400, err);
       });
   },
 
