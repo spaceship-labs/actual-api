@@ -356,9 +356,10 @@ module.exports = {
 
 
   getCountByUser: function(req, res){
-    var form = req.params.all();
-    var userId = form.userId;
+    var form           = req.params.all();
+    var userId         = form.userId;
     var fortNightRange = Common.getFortnightRange();
+    var isClosed       = form.isClosed;
       
     //Fortnight range by default
     if(_.isUndefined(form.startDate)){
@@ -399,6 +400,12 @@ module.exports = {
       '>=': fortNightRange.start,
       '<=': fortNightRange.end
     };
+
+    queryDateRange.isClosed       = isClosed;
+    queryfortNightRange.isClosed  = isClosed;
+
+    sails.log.info('queryDateRange', queryDateRange);
+    sails.log.info('queryfortNightRange', queryfortNightRange);
 
     Promise.props({
       foundFortnightRange: Quotation.count(queryfortNightRange),

@@ -117,8 +117,14 @@ module.exports = {
           return Promise.reject(err);
         }
         
-        form.CardCode   = result.value;
-        form.BirthDate  = moment(form.BirthDate).toDate();
+        form.CardCode     = result.CardCode;
+        form.BirthDate    = moment(form.BirthDate).toDate();
+        var contactCodes  = result.person;
+        contacts          = contacts.map(function(contact, i){
+          contact.CntctCode = contactCodes[i];
+          contact.CardCode  = form.CardCode;
+          return contact;
+        });
 
         return Client.create(form);
       })
@@ -127,10 +133,7 @@ module.exports = {
         var promises = [];
 
         if(contacts && contacts.length > 0){
-          contacts = contacts.map(function(c){
-            c.CardCode  = createdClient.CardCode;
-            return c;
-          });
+          sails.log.info('contacts', contacts);
           promises.push(ClientContact.create(contacts));
         }
 
