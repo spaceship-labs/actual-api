@@ -585,6 +585,11 @@ module.exports.routes = {
     action:'findByHandle'
   },
 
+  '/sites':{
+    controller: 'site',
+    action: 'getAll'
+  },
+
   '/sync/products':{
     controller:'sync',
     action:'syncProducts'

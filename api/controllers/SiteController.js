@@ -21,5 +21,16 @@ module.exports = {
       console.log(err);
       res.negotiate(err);
     });
+  },
+
+  getAll: function(req, res){
+    var form = req.params.all();
+    Site.find({}).then(function(sites){
+      res.json(sites);
+    })
+    .catch(function(err){
+      console.log('err',err);
+      res.negotiate(err);
+    });
   }
 };
