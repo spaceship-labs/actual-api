@@ -11,7 +11,7 @@ module.exports = {
 function productShipping(product, storeWarehouse, options) {
   return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
     .then(function(deliveries) {
-      var seasonQuery = queryDate({}, new Date());
+      //var seasonQuery = getQueryDateRange({}, new Date());
       var companies = deliveries.map(function(delivery) {
         return delivery.FromCode;
       });
@@ -24,10 +24,10 @@ function productShipping(product, storeWarehouse, options) {
           }
         }),
         deliveries,
-        Season.findOne(seasonQuery)
+        //Season.findOne(seasonQuery)
       ];
     })
-    .spread(function(stockItems, deliveries, season) {
+    .spread(function(stockItems, deliveries) {
       var codes = stockItems.map(function(p){return p.whsCode});
       return Company
         .find({WhsCode: codes})
@@ -39,19 +39,19 @@ function productShipping(product, storeWarehouse, options) {
             }).id;
             return stockItem;
           });
-          return [stockItems, deliveries, season];
+          return [stockItems, deliveries];
         });
     })
-    .spread(function(stockItems, deliveries, season){
+    .spread(function(stockItems, deliveries){
       if(deliveries.length > 0 && stockItems.length > 0){
-        return stockItems.map(function(stockItem){
+        var shippingPromises = stockItems.map(function(stockItem){
           return buildShippingItem(
             stockItem, 
             deliveries, 
-            season, 
             storeWarehouse.id
           );
         });
+        return Promise.all(shippingPromises);
       }
       else if( productHasFreesale(product) && deliveries){
         product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
@@ -63,50 +63,61 @@ function productShipping(product, storeWarehouse, options) {
           ShipDate: moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate()
         };
 
-        return [
-          buildShippingItem(freeSaleStockItem, deliveries, season, storeWarehouse.id)
-        ];
+        return Promise.all([
+          buildShippingItem(freeSaleStockItem, deliveries, storeWarehouse.id)
+        ]);
       }
 
-      return [];
+      return new Promise(function(resolve, reject){
+        resolve([]);
+      });
+    })
+    .then(function(result){
+      return result;
     });
+
 }
 
 function productHasFreesale(product){
   return product.freeSale && product.freeSaleStock && product.freeSaleDeliveryDays;
 }
 
-function buildShippingItem(stockItem, deliveries, season, storeWarehouseId){
+function buildShippingItem(stockItem, deliveries, storeWarehouseId){
   var delivery = _.find(deliveries, function(delivery) {
     return delivery.FromCode == stockItem.whsCode;
   });
 
   var productDate  = new Date(stockItem.ShipDate);
   var productDays  = daysDiff(new Date(), productDate);
-  var seasonDays   = (season && season.Days) || 7;
-  var deliveryDays = (delivery && delivery.Days) || 0;
-  var days = productDays + seasonDays + deliveryDays;
-  
-  //Product in same store/warehouse
-  if(stockItem.whsCode === delivery.ToCode){
-    days = productDays;
-  }
-  
-  var date = addDays(new Date(), days);
+  var seasonQuery  = getQueryDateRange({}, productDate);
 
-  return {
-    available: stockItem.OpenCreQty,
-    days: days,
-    date: date,
-    productDate: productDate,
-    company: storeWarehouseId,
-    companyFrom: stockItem.warehouseId,
-    itemCode: stockItem.ItemCode
-  };
+  return Season.findOne(seasonQuery)
+    .then(function(season){
+      var seasonDays   = (season && season.Days) || 7;
+      var deliveryDays = (delivery && delivery.Days) || 0;
+      var days = productDays + seasonDays + deliveryDays;
+      
+      //Product in same store/warehouse
+      if(stockItem.whsCode === delivery.ToCode){
+        days = productDays;
+      }
+      
+      var date = addDays(new Date(), days);
+
+      return {
+        available: stockItem.OpenCreQty,
+        days: days,
+        date: date,
+        productDate: productDate,
+        company: storeWarehouseId,
+        companyFrom: stockItem.warehouseId,
+        itemCode: stockItem.ItemCode
+      };      
+    });
 }
 
 
-function queryDate(query, date) {
+function getQueryDateRange(query, date) {
   var date = new Date(date);
   return _.assign(query, {
     StartDate: {

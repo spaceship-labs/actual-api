@@ -11,7 +11,7 @@ module.exports = {
     },
     CardCode:{type:'string'},
     Phone1: {type:'string'},
-    E_Mail:{type:'string'},
+    U_Correos:{type:'string'},
     Street:{type:'string'},
     U_NumExt:{type:'string'},
     U_NumInt:{type:'string'},
@@ -22,7 +22,5 @@ module.exports = {
     ZipCode:{type:'string'},
     AdresType:{type:'string'},
 
-    //APP FIELDS
-    rfc:{type:'string'},
   }
 };
