@@ -60,10 +60,10 @@ function updateQuotationToLatestData(quotationId, userId, options){
     });
 }
 
-function getBigticketMaxPercentage(total){
+function getBigticketMaxPercentage(subtotal2){
   var maxPercentage = 0;
   for(var i=0;i<BIGTICKET_TABLE.length;i++){
-    if(total >= BIGTICKET_TABLE[i].min && total <= BIGTICKET_TABLE[i].max){
+    if(subtotal2 >= BIGTICKET_TABLE[i].min && subtotal2 <= BIGTICKET_TABLE[i].max){
       maxPercentage = BIGTICKET_TABLE[i].maxPercentage;
     }
   }
@@ -117,25 +117,53 @@ function Calculator(){
         return processQuotationDetails(quotationAux, options);
       })
       .then(function(processedDetails){
-        var totals = {
-          subtotal:0,
-          total:0,
-          discount:0,
-          totalProducts: 0,
-          paymentGroup: options.paymentGroup
-        };
-        processedDetails.forEach(function(pd){
-          totals.total         += pd.total;
-          totals.subtotal      += pd.subtotal;
-          totals.discount      += (pd.subtotal - pd.total);
-          totals.totalProducts += pd.quantity;
-        });
-        totals.subtotalWithPromotions = totals.total;
-        if(quotationAux.bigticketPercentage && totals.subtotalWithPromotions){
-          sails.log.info('quotation applies for bigticketPercentage');
+        var totals = sumProcessedDetails(processedDetails, options);
+        quotationAux = _.extend(quotationAux, totals);
+
+        if(false && quotationAux.bigticketPercentage && getQuotationBigticketPercentage(quotationAux)){
+          quotationAux.lastCalculation = true;
+          sails.log.info('recalculando con bigticket');
+          return processQuotationDetails(quotationAux, options);
         }
-        return totals;
+        else{
+          sails.log.info('calculando totales normales');
+          return new Promise(function(resolve){
+            resolve(totals);
+          });
+        }
+      })
+      .then(function(result){
+        //In case result are processedDetails
+        if(_.isArray(result)){
+          var totals = sumProcessedDetails(result, options);
+          return totals;
+        }
+        //In case that result are totals
+        else{
+          return result;
+        }
       });
+  }
+
+  function sumProcessedDetails(processedDetails, options){
+    var totals = {
+      subtotal :0,
+      subtotal2:0,
+      total:0,
+      discount:0,
+      totalProducts: 0,
+      paymentGroup: options.paymentGroup
+    };
+
+    processedDetails.forEach(function(pd){
+      totals.total         += pd.total;
+      totals.subtotal      += pd.subtotal;
+      totals.subtotal2     += pd.subtotal2;
+      totals.discount      += (pd.subtotal2 - pd.total);
+      totals.totalProducts += pd.quantity;
+    });    
+    
+    return totals;
   }
 
   function getPromosByStore(storeId){
@@ -240,8 +268,8 @@ function Calculator(){
       });
   }
 
-  function getUnitPriceWithDiscount(unitPrice,discountPercent){
-    var result = unitPrice - ( ( unitPrice / 100) * discountPercent );
+  function calculateAfterDiscount(amount,discountPercentage){
+    var result = amount - ( ( amount / 100) * discountPercentage );
     return result;
   }
 
@@ -277,13 +305,23 @@ function Calculator(){
     return Product.findOne({id:productId})
       .populate('Promotions', queryPromos)
       .then(function(product){
+        var total;
         var mainPromo             = getProductMainPromo(product, quantity);
         var unitPrice             = product.Price;
         var discountKey           = getDiscountKey(options.paymentGroup);
         var discountPercent       = mainPromo ? mainPromo[discountKey] : 0;
-        var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
+        var unitPriceWithDiscount = calculateAfterDiscount(unitPrice, discountPercent);
         var subtotal              = quantity * unitPrice;
-        var total                 = quantity * unitPriceWithDiscount;
+        var subtotal2             = quantity * unitPriceWithDiscount;
+        
+        if(quotation.lastCalculation && quotation.bigticketPercentage){
+          total                   = calculateAfterDiscount(subtotal2, quotation.bigticketPercentage);
+          discountPercent         = calculateDiscountPercent(subtotal, total);
+        }else{
+          total                   = subtotal2;
+        }
+
+        //var total                 = quantity * unitPriceWithDiscount;
         var subtotalWithPromotions= total;
         var discount              = total - subtotal;
         var ewallet = getEwalletEntryByDetail({
@@ -292,7 +330,6 @@ function Calculator(){
           total: total
         });
         var detailTotals = {
-          bigticketDiscountPercentage : getQuotationBigticketPercentage(quotation),
           discount                    : discount,
           discountKey                 : discountKey, //Payment group discountKey
           discountPercent             : discountPercent,
@@ -303,10 +340,15 @@ function Calculator(){
           PromotionPackageApplied     : null,
           quantity                    : quantity,
           subtotal                    : subtotal,
+          subtotal2                   : subtotal2,
           total                       : total,
           unitPrice                   : unitPrice,
           unitPriceWithDiscount       : unitPriceWithDiscount,
         };
+
+        if(quotation.lastCalculation){
+          detailTotals.bigticketDiscountPercentage = getQuotationBigticketPercentage(quotation);
+        }
 
         if(mainPromo.id && !mainPromo.PromotionPackage){
           detailTotals.Promotion = mainPromo.id;
@@ -318,10 +360,17 @@ function Calculator(){
       });
   }
 
+  function calculateDiscountPercent(subtotal, total){
+    var discountPercent = 0;
+    discountPercent = ( ((total / subtotal) - 1) * 100 ) * -1;
+    return discountPercent;
+  }
+
   function getQuotationBigticketPercentage(quotation){
     var percentage = 0;
+    subtotal2 = quotation.subtotal2 || 0;
     if(quotation.bigticketPercentage && 
-      (quotation.bigticketPercentage < getBigticketMaxPercentage(quotation.subtotal))
+      (quotation.bigticketPercentage < getBigticketMaxPercentage(subtotal2))
     ){
        percentage = quotation.bigticketPercentage;
     }

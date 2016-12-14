@@ -50,7 +50,7 @@ module.exports = {
     folio:{type:'integer'},
     total:{type:'float'},
     subtotal: {type:'float'},
-    subtotalWithPromotions: {type:'float'}, // includes discounts but not big ticket neither family and friends
+    subtotal2: {type:'float'}, // includes discounts but not big ticket neither family and friends
     discount: {type:'float'},
     ammountPaid: {type:'float'},
     totalProducts: {type:'integer'},

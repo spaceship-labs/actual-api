@@ -404,9 +404,6 @@ module.exports = {
     queryDateRange.isClosed       = isClosed;
     queryfortNightRange.isClosed  = isClosed;
 
-    sails.log.info('queryDateRange', queryDateRange);
-    sails.log.info('queryfortNightRange', queryfortNightRange);
-
     Promise.props({
       foundFortnightRange: Quotation.count(queryfortNightRange),
       foundDateRange: Quotation.count(queryDateRange)
