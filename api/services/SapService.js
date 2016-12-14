@@ -19,7 +19,6 @@ var reqOptions = {
 module.exports = {
   createContact       : createContact,
   createSaleOrder     : createSaleOrder,
-  createFiscalAddress : createFiscalAddress,
   createClient        : createClient,
   updateClient        : updateClient,
   updateContact       : updateContact,
@@ -119,7 +118,7 @@ function updateContact(cardCode, contactIndex, form){
   return request(reqOptions);
 }
 
-
+/*
 function createFiscalAddress(cardcode, form){
   var endPoint = buildAddressContactEndpoint(form, cardcode);
   sails.log.info('createFiscalAddress');
@@ -127,6 +126,7 @@ function createFiscalAddress(cardcode, form){
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }
+*/
 
 function updateFiscalAddress(cardcode, form){
   form.Address = form.companyName;
@@ -337,7 +337,7 @@ function buildAddressContactEndpoint(fields, cardcode){
   var contact = {
     CardCode: cardcode,
     U_Correos: fields.U_Correos,
-    FederalTaxID: fields.FederalTaxID
+    LicTradNum: fields.LicTradNum
   };
   field = _.omit(fields, _.isUndefined);
   path += '?address=' + JSON.stringify(fields);

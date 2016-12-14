@@ -60,6 +60,14 @@ module.exports = {
 
 	isValidFiscalAddress: function(fiscalAddress){
 	  return !_.isUndefined(fiscalAddress.companyName);
+	},
+
+	isValidRFC: function(rfc){
+		return rfc.length === 12 || rfc.length === 13;
+	},
+
+	isValidContactCode: function(contactCode){
+		return !isNaN(contactCode);
 	}
 
 };

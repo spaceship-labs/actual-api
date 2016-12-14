@@ -120,7 +120,7 @@ function Calculator(){
         var totals = sumProcessedDetails(processedDetails, options);
         quotationAux = _.extend(quotationAux, totals);
 
-        if(false && quotationAux.bigticketPercentage && getQuotationBigticketPercentage(quotationAux)){
+        if(quotationAux.bigticketPercentage && getQuotationBigticketPercentage(quotationAux)){
           quotationAux.lastCalculation = true;
           sails.log.info('recalculando con bigticket');
           return processQuotationDetails(quotationAux, options);
@@ -306,19 +306,20 @@ function Calculator(){
       .populate('Promotions', queryPromos)
       .then(function(product){
         var total;
-        var mainPromo             = getProductMainPromo(product, quantity);
-        var unitPrice             = product.Price;
-        var discountKey           = getDiscountKey(options.paymentGroup);
-        var discountPercent       = mainPromo ? mainPromo[discountKey] : 0;
-        var unitPriceWithDiscount = calculateAfterDiscount(unitPrice, discountPercent);
-        var subtotal              = quantity * unitPrice;
-        var subtotal2             = quantity * unitPriceWithDiscount;
+        var mainPromo                 = getProductMainPromo(product, quantity);
+        var unitPrice                 = product.Price;
+        var discountKey               = getDiscountKey(options.paymentGroup);
+        var discountPercent           = mainPromo ? mainPromo[discountKey] : 0;
+        var discountPercentPromos     = discountPercent;
+        var unitPriceWithDiscount     = calculateAfterDiscount(unitPrice, discountPercent);
+        var subtotal                  = quantity * unitPrice;
+        var subtotal2                 = quantity * unitPriceWithDiscount;
         
         if(quotation.lastCalculation && quotation.bigticketPercentage){
-          total                   = calculateAfterDiscount(subtotal2, quotation.bigticketPercentage);
-          discountPercent         = calculateDiscountPercent(subtotal, total);
+          total            = calculateAfterDiscount(subtotal2, quotation.bigticketPercentage);
+          discountPercent  = calculateDiscountPercent(subtotal, total);
         }else{
-          total                   = subtotal2;
+          total            = subtotal2;
         }
 
         //var total                 = quantity * unitPriceWithDiscount;
@@ -332,6 +333,7 @@ function Calculator(){
         var detailTotals = {
           discount                    : discount,
           discountKey                 : discountKey, //Payment group discountKey
+          discountPercentPromos       : discountPercentPromos, //discount without BT or FF
           discountPercent             : discountPercent,
           ewallet                     : ewallet,
           id                          : detail.id,
@@ -370,7 +372,7 @@ function Calculator(){
     var percentage = 0;
     subtotal2 = quotation.subtotal2 || 0;
     if(quotation.bigticketPercentage && 
-      (quotation.bigticketPercentage < getBigticketMaxPercentage(subtotal2))
+      (quotation.bigticketPercentage <= getBigticketMaxPercentage(subtotal2))
     ){
        percentage = quotation.bigticketPercentage;
     }
