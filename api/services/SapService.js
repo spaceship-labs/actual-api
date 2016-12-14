@@ -32,7 +32,7 @@ module.exports = {
 function createClient(params){
   var path           = 'Contact';
   var client         = params.client;
-  var fiscalAddress  = params.fiscalAddress;
+  var fiscalAddress  = params.fiscalAddress || {};
   var clientContacts = params.clientContacts;
 
   client.LicTradNum  = client.LicTradNum || 'XXAX010101000';

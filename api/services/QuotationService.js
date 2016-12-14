@@ -130,6 +130,10 @@ function Calculator(){
           totals.discount      += (pd.subtotal - pd.total);
           totals.totalProducts += pd.quantity;
         });
+        totals.subtotalWithPromotions = totals.total;
+        if(quotationAux.bigticketPercentage && totals.subtotalWithPromotions){
+          sails.log.info('quotation applies for bigticketPercentage');
+        }
         return totals;
       });
   }
@@ -280,6 +284,7 @@ function Calculator(){
         var unitPriceWithDiscount = getUnitPriceWithDiscount(unitPrice, discountPercent);
         var subtotal              = quantity * unitPrice;
         var total                 = quantity * unitPriceWithDiscount;
+        var subtotalWithPromotions= total;
         var discount              = total - subtotal;
         var ewallet = getEwalletEntryByDetail({
           Promotion: mainPromo,
