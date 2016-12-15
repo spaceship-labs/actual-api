@@ -356,63 +356,11 @@ module.exports = {
 
 
   getCountByUser: function(req, res){
-    var form           = req.params.all();
-    var userId         = form.userId;
-    var fortNightRange = Common.getFortnightRange();
-    var isClosed       = form.isClosed;
-      
-    //Fortnight range by default
-    if(_.isUndefined(form.startDate)){
-      form.startDate = fortNightRange.start;
-    }
-    if(_.isUndefined(form.endDate)){
-      form.endDate = fortNightRange.end;
-    }
-
-    var startDate = form.startDate;
-    var endDate = form.endDate;
-    var dateField = form.dateField || 'createdAt';
-    var queryDateRange = {User: userId};
-    queryDateRange[dateField] = {};
-
-    if(startDate){
-      startDate = new Date(startDate); 
-      startDate.setHours(0,0,0,0);
-      queryDateRange[dateField] = assign(queryDateRange[dateField],{
-        '>=': startDate
-      });
-    }
-
-    if(endDate){
-      endDate = new Date(endDate); 
-      endDate.setHours(23,59,59,999);
-      queryDateRange[dateField] = assign(queryDateRange[dateField],{
-        '<=': endDate
-      });
-    }
-
-    if( _.isEmpty(queryDateRange[dateField]) ){
-      delete queryDateRange[dateField];
-    }
-
-    var queryfortNightRange = { User: userId };
-    queryfortNightRange[dateField] = {
-      '>=': fortNightRange.start,
-      '<=': fortNightRange.end
-    };
-
-    queryDateRange.isClosed       = isClosed;
-    queryfortNightRange.isClosed  = isClosed;
-
-    Promise.props({
-      foundFortnightRange: Quotation.count(queryfortNightRange),
-      foundDateRange: Quotation.count(queryDateRange)
-    })
-      .then(function(result){
-        res.json({
-          fortnight: result.foundFortnightRange,
-          dateRange: result.foundDateRange
-        });
+    var form    = req.params.all();
+    var options = form;
+    QuotationService.getCountByUser(options)
+      .then(function(count){
+        res.json(count);
       })
       .catch(function(err){
         console.log(err);
@@ -423,75 +371,13 @@ module.exports = {
 
   getTotalsByUser: function(req, res){
     var form = req.params.all();
-    var userId = form.userId;
-    var getAll = !_.isUndefined(form.all) ? form.all : true;
-    var getFortnightTotals = !_.isUndefined(form.fortnight) ? form.fortnight : true;
-    var fortNightRange = Common.getFortnightRange();
-
-    //Fortnight range by default
-    if(_.isUndefined(form.startDate)){
-      form.startDate = fortNightRange.start;
-    }
-    if(_.isUndefined(form.endDate)){
-      form.endDate = fortNightRange.end;
-    }
-
-    var startDate = form.startDate;
-    var endDate   = form.endDate;
-    var dateField = form.dateField || 'createdAt'; 
-    var queryDateRange = {User: userId};
-    queryDateRange[dateField] = {};
-
-    if(startDate){
-      startDate = new Date(startDate); 
-      startDate.setHours(0,0,0,0);
-      queryDateRange[dateField] = assign(queryDateRange[dateField],{
-        '>=': startDate
-      });
-    }
-
-    if(endDate){
-      endDate = new Date(endDate); 
-      endDate.setHours(23,59,59,999);
-      queryDateRange[dateField] = assign(queryDateRange[dateField],{
-        '<=': endDate
-      });
-    }
-
-    if( _.isEmpty(queryDateRange[dateField]) ){
-      delete queryDateRange[dateField];
-    }
-
-
-    var queryfortNightRange = {User: userId};
-    queryfortNightRange[dateField] = { 
-      '>=': fortNightRange.start, 
-      '<=': fortNightRange.end 
-    };
-
-    var props = {
-      totalDateRange: Quotation.find(queryDateRange).sum('total')
-    };
-    if(getFortnightTotals){
-      props.totalFortnight = Quotation.find(queryfortNightRange).sum('total');
-    }
-
-    Promise.props(props)
-      .then(function(result){
-        var totalFortnight = 0;
-        var totalDateRange = 0;
-        if(getAll && result.totalFortnight.length > 0){
-          totalFortnight = result.totalFortnight[0].total;
-        }
-        if(result.totalDateRange.length > 0){
-          totalDateRange = result.totalDateRange[0].total;
-        }
-        res.json({
-          fortnight: totalFortnight || false,
-          dateRange: totalDateRange
-        });
+    var options = form;
+    QuotationService.getTotalsByUser(options)
+      .then(function(totals){
+        res.json(totals);
       })
       .catch(function(err){
+        console.log(err);
         res.negotiate(err);
       });
   },

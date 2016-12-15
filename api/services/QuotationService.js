@@ -1,5 +1,7 @@
 var Promise = require('bluebird');
-var _ = require('underscore');
+var _       = require('underscore');
+var assign  = require('object-assign');
+
 
 var BIGTICKET_TABLE = [
   {min:100000, max:199999.99, maxPercentage:2},
@@ -34,7 +36,9 @@ var EWALLET_TYPES_KEYS = [
 
 module.exports = {
   Calculator     : Calculator,
-  updateQuotationToLatestData: updateQuotationToLatestData
+  updateQuotationToLatestData: updateQuotationToLatestData,
+  getCountByUser: getCountByUser,
+  getTotalsByUser: getTotalsByUser
 };
 
 function updateQuotationToLatestData(quotationId, userId, options){
@@ -68,6 +72,136 @@ function getBigticketMaxPercentage(subtotal2){
     }
   }
   return maxPercentage;
+}
+
+function getTotalsByUser(options){
+  var userId = options.userId;
+  var getAll = !_.isUndefined(options.all) ? options.all : true;  
+  var getFortnightTotals = !_.isUndefined(options.fortnight) ? options.fortnight : true;
+  var fortNightRange = Common.getFortnightRange();
+
+  //Fortnight range by default
+  if(_.isUndefined(options.startDate)){
+    options.startDate = fortNightRange.start;
+  }
+  if(_.isUndefined(options.endDate)){
+    options.endDate = fortNightRange.end;
+  }
+
+  var startDate = options.startDate;
+  var endDate   = options.endDate;
+  var dateField = options.dateField || 'createdAt'; 
+  var queryDateRange = {User: userId};
+  queryDateRange[dateField] = {};
+
+  if(startDate){
+    startDate = new Date(startDate); 
+    startDate.setHours(0,0,0,0);
+    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+      '>=': startDate
+    });
+  }
+
+  if(endDate){
+    endDate = new Date(endDate); 
+    endDate.setHours(23,59,59,999);
+    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+      '<=': endDate
+    });
+  }
+
+  if( _.isEmpty(queryDateRange[dateField]) ){
+    delete queryDateRange[dateField];
+  }
+
+  var queryfortNightRange = {User: userId};
+  queryfortNightRange[dateField] = { 
+    '>=': fortNightRange.start, 
+    '<=': fortNightRange.end 
+  };
+
+  var props = {
+    totalDateRange: Quotation.find(queryDateRange).sum('total')
+  };
+  if(getFortnightTotals){
+    props.totalFortnight = Quotation.find(queryfortNightRange).sum('total');
+  }
+
+  return Promise.props(props)
+    .then(function(result){
+      var totalFortnight = 0;
+      var totalDateRange = 0;
+      if(getAll && result.totalFortnight.length > 0){
+        totalFortnight = result.totalFortnight[0].total;
+      }
+      if(result.totalDateRange.length > 0){
+        totalDateRange = result.totalDateRange[0].total;
+      }
+      return {
+        fortnight: totalFortnight || false,
+        dateRange: totalDateRange        
+      };
+    });
+}
+
+function getCountByUser(options){
+  var userId         = options.userId;
+  var fortNightRange = Common.getFortnightRange();
+  var isClosed       = options.isClosed;
+    
+  //Fortnight range by default
+  if(_.isUndefined(options.startDate)){
+    options.startDate = fortNightRange.start;
+  }
+  if(_.isUndefined(options.endDate)){
+    options.endDate = fortNightRange.end;
+  }
+
+  var startDate = options.startDate;
+  var endDate = options.endDate;
+  var dateField = options.dateField || 'createdAt';
+  var queryDateRange = {User: userId};
+  queryDateRange[dateField] = {};
+
+  if(startDate){
+    startDate = new Date(startDate); 
+    startDate.setHours(0,0,0,0);
+    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+      '>=': startDate
+    });
+  }
+
+  if(endDate){
+    endDate = new Date(endDate); 
+    endDate.setHours(23,59,59,999);
+    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+      '<=': endDate
+    });
+  }
+
+  if( _.isEmpty(queryDateRange[dateField]) ){
+    delete queryDateRange[dateField];
+  }
+
+  var queryfortNightRange = { User: userId };
+  queryfortNightRange[dateField] = {
+    '>=': fortNightRange.start,
+    '<=': fortNightRange.end
+  };
+
+  queryDateRange.isClosed       = isClosed;
+  queryfortNightRange.isClosed  = isClosed;
+
+  return Promise.props({
+    foundFortnightRange: Quotation.count(queryfortNightRange),
+    foundDateRange: Quotation.count(queryDateRange)
+  })
+    .then(function(result){
+      return {
+        fortnight: result.foundFortnightRange,
+        dateRange: result.foundDateRange
+      };
+    });
 }
 
 function Calculator(){
