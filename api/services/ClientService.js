@@ -22,15 +22,6 @@ module.exports = {
 		return fields;
 	},
 
-	mapContactFields: function(fields){
-	  fields.E_MailL = fields.E_Mail;
-	  fields.Name = fields.FirstName;
-	  if(fields.LastName){
-	  	fields.Name += ' ' + fields.LastName;
-	  }
-	  return fields;
-	},
-
 	getContactIndex: function(contacts, contactCode){
 	  if(contacts.length === 1){
 	  	return 0;
@@ -68,10 +59,36 @@ module.exports = {
 
 	isValidContactCode: function(contactCode){
 		return !isNaN(contactCode);
-	}
+	},
+
+	areContactsRepeated: function(contacts){
+		contacts = contacts.map(mapContactFields);
+		var contactsNames = contacts.map(function(contact){
+			return contact.Name;
+		});
+		var areRepeated = contactsNames.some(function(contact, idx){ 
+		    return contactsNames.indexOf(contact) != idx; 
+		});		
+		return areRepeated;
+	},
+
+	mapContactFields: mapContactFields
 
 };
 
+function isValidContact(contact){
+	return true;
+}
+
+
+function mapContactFields(fields){
+  fields.E_MailL = fields.E_Mail;
+  fields.Name = fields.FirstName;
+  if(fields.LastName){
+  	fields.Name += ' ' + fields.LastName;
+  }
+  return fields;
+}
 
 function createContactPromise(params){
   var cardCode = params.CardCode;

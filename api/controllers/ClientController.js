@@ -95,6 +95,10 @@ module.exports = {
     contacts           = ClientService.filterContacts(form.contacts);
     contacts           = contacts.map(ClientService.mapContactFields);
 
+    if(contacts.length > 0 && ClientService.areContactsRepeated(contacts)){
+      return res.negotiate(new Error('Nombres de contactos repetidos'));
+    }
+
     if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
       fiscalAddress  = _.clone(form.fiscalAddress);
       fiscalAddress  = ClientService.mapFiscalFields(fiscalAddress);

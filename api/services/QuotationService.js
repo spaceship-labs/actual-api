@@ -84,7 +84,7 @@ function Calculator(){
           totals = _.extend(totals, options.updateParams);
         }
         
-        totals.bigticketMaxPercentage = getBigticketMaxPercentage(totals.subtotal);
+        totals.bigticketMaxPercentage = getBigticketMaxPercentage(totals.subtotal2);
 
         return Quotation.update({id:quotationId}, totals);
       });
@@ -348,8 +348,10 @@ function Calculator(){
           unitPriceWithDiscount       : unitPriceWithDiscount,
         };
 
-        if(quotation.lastCalculation){
+        if(quotation.lastCalculation && quotation.bigticketPercentage){
           detailTotals.bigticketDiscountPercentage = getQuotationBigticketPercentage(quotation);
+        }else{
+          detailTotals.bigticketDiscountPercentage = 0;
         }
 
         if(mainPromo.id && !mainPromo.PromotionPackage){
