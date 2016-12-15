@@ -257,6 +257,7 @@ module.exports = {
         return ClientContact.update({CntctCode: contactCode}, form);
       })
       .then(function(updatedApp){
+        sails.log.info('contact updatedApp', updatedApp);
         res.json(updatedApp);
       })
       .catch(function(err){
