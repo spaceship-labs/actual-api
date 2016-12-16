@@ -27,14 +27,13 @@ module.exports = {
     var dateRange = form.dateRange;
     var keywords = form.keywords;
 
-    //console.log(model);
     if(term){
       if(searchFields.length > 0){
         query.or = [];
         for(var i=0;i<searchFields.length;i++){
           var field = searchFields[i];
           var obj = {};
-          var keywords = term.split(' ');
+          //var keywords = term.split(' ');
           /*
           var orClauses = keywords.map(function(keyword){
             return  {contains:keywords};
@@ -112,8 +111,8 @@ module.exports = {
       read = model.find(query);
     }
 
-    sails.log.info('Query common: ');
-    sails.log.info(query);
+    //sails.log.info('Query common: ');
+    //sails.log.info(JSON.stringify(query));
 
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
