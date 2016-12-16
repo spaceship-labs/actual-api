@@ -112,8 +112,8 @@ module.exports = {
       read = model.find(query);
     }
 
-    //sails.log.info('Query common: ');
-    //sails.log.info(query);
+    sails.log.info('Query common: ');
+    sails.log.info(query);
 
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){
