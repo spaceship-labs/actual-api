@@ -492,6 +492,7 @@ function Calculator(){
           total                       : total,
           unitPrice                   : unitPrice,
           unitPriceWithDiscount       : unitPriceWithDiscount,
+          immediateDelivery           : isImmediateDelivery(detail.shipDate)
         };
 
         if(quotation.lastCalculation && quotation.bigticketPercentage){
@@ -509,6 +510,13 @@ function Calculator(){
         return detailTotals;
       });
   }
+
+  function isImmediateDelivery(shipDate){
+    var FORMAT = 'D/M/YYYY';
+    var currentDate = moment().format(FORMAT);
+    shipDate = moment(shipDate).format(FORMAT);
+    return currentDate === shipDate;
+  }  
 
   function calculateDiscountPercent(subtotal, total){
     var discountPercent = 0;

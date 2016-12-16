@@ -207,8 +207,8 @@ function buildSaleOrderRequestParams(params){
 }
 
 function isImmediateDelivery(shipDate){
-  var currentDate = moment().format();
-  shipDate = moment(shipDate).format();
+  var currentDate = moment().format(SAP_DATE_FORMAT);
+  shipDate = moment(shipDate).format(SAP_DATE_FORMAT);
   return currentDate === shipDate;
 }
 
