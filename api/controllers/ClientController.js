@@ -132,6 +132,8 @@ module.exports = {
           return contact;
         });
 
+        sails.log.info('contacts', contacts);
+
         return Client.create(form);
       })
       .then(function(created){
@@ -139,7 +141,7 @@ module.exports = {
         var promises = [];
 
         if(contacts && contacts.length > 0){
-          sails.log.info('contacts', contacts);
+          //sails.log.info('contacts', contacts);
           promises.push(ClientContact.create(contacts));
         }
 

@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var _       = require('underscore');
 var assign  = require('object-assign');
+var moment  = require('moment');
 
 
 var BIGTICKET_TABLE = [
@@ -75,131 +76,142 @@ function getBigticketMaxPercentage(subtotal2){
 }
 
 function getTotalsByUser(options){
-  var userId = options.userId;
-  var getAll = !_.isUndefined(options.all) ? options.all : true;  
-  var getFortnightTotals = !_.isUndefined(options.fortnight) ? options.fortnight : true;
-  var fortNightRange = Common.getFortnightRange();
+  var userId    = options.userId;
+  var todayDate = moment().endOf('day').toDate(); 
+  var isClosed  = options.isClosed;
 
-  //Fortnight range by default
-  if(_.isUndefined(options.startDate)){
-    options.startDate = fortNightRange.start;
-  }
+
   if(_.isUndefined(options.endDate)){
-    options.endDate = fortNightRange.end;
+    options.endDate = todayDate;
   }
 
   var startDate = options.startDate;
   var endDate   = options.endDate;
   var dateField = options.dateField || 'createdAt'; 
-  var queryDateRange = {User: userId};
-  queryDateRange[dateField] = {};
+  
+  var queryUntilToday = {User: userId};
+  queryUntilToday[dateField] = {
+    '<=': todayDate
+  };
+
+  var queryByDateRange = {User: userId};
+  queryByDateRange[dateField] = {};
 
   if(startDate){
-    startDate = new Date(startDate); 
-    startDate.setHours(0,0,0,0);
-    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+    startDate = moment(startDate).startOf('day').toDate(); 
+    queryUntilToday[dateField] = assign(queryUntilToday[dateField],{
+      '>=': startDate
+    });
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
       '>=': startDate
     });
   }
 
   if(endDate){
-    endDate = new Date(endDate); 
-    endDate.setHours(23,59,59,999);
-    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+    endDate = moment(endDate).endOf('day').toDate(); 
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
       '<=': endDate
     });
   }
 
-  if( _.isEmpty(queryDateRange[dateField]) ){
-    delete queryDateRange[dateField];
+  if( _.isEmpty(queryByDateRange[dateField]) ){
+    delete queryByDateRange[dateField];
   }
 
-  var queryfortNightRange = {User: userId};
-  queryfortNightRange[dateField] = { 
-    '>=': fortNightRange.start, 
-    '<=': fortNightRange.end 
-  };
+  var queryAllByDateRange = _.clone(queryByDateRange);
+
+  if(isClosed){
+    queryUntilToday.isClosed   = isClosed;
+    queryByDateRange.isClosed  = isClosed;  
+  }
 
   var props = {
-    totalDateRange: Quotation.find(queryDateRange).sum('total')
+    totalUntilToday: Quotation.find(queryUntilToday).sum('total'),
+    totalByDateRange: Quotation.find(queryByDateRange).sum('total'),
+    totalByDateRangeAll: Quotation.find(queryAllByDateRange).sum('total')
   };
-  if(getFortnightTotals){
-    props.totalFortnight = Quotation.find(queryfortNightRange).sum('total');
-  }
 
   return Promise.props(props)
     .then(function(result){
-      var totalFortnight = 0;
-      var totalDateRange = 0;
-      if(getAll && result.totalFortnight.length > 0){
-        totalFortnight = result.totalFortnight[0].total;
-      }
-      if(result.totalDateRange.length > 0){
-        totalDateRange = result.totalDateRange[0].total;
-      }
+      var resultUntilToday = result.totalUntilToday[0] || {};
+      var resultByDateRange = result.totalByDateRange[0] || {};
+      var resultAllByDateRange = result.totalByDateRangeAll[0] || {};
+
+
+      var totalUntilToday = resultUntilToday.total || 0;
+      var totalByDateRange = resultByDateRange.total || 0;
+      var totalByDateRangeAll = resultAllByDateRange.total || 0;
+      
       return {
-        fortnight: totalFortnight || false,
-        dateRange: totalDateRange        
+        untilToday: totalUntilToday,
+        byDateRange: totalByDateRange,
+        allByDateRange: totalByDateRangeAll       
       };
     });
 }
 
 function getCountByUser(options){
-  var userId         = options.userId;
-  var fortNightRange = Common.getFortnightRange();
-  var isClosed       = options.isClosed;
-    
-  //Fortnight range by default
-  if(_.isUndefined(options.startDate)){
-    options.startDate = fortNightRange.start;
-  }
+  var userId    = options.userId;
+  var todayDate = moment().endOf('day').toDate(); 
+  var isClosed  = options.isClosed;
+
   if(_.isUndefined(options.endDate)){
-    options.endDate = fortNightRange.end;
+    options.endDate = todayDate;
   }
 
   var startDate = options.startDate;
-  var endDate = options.endDate;
-  var dateField = options.dateField || 'createdAt';
-  var queryDateRange = {User: userId};
-  queryDateRange[dateField] = {};
+  var endDate   = options.endDate;
+  var dateField = options.dateField || 'createdAt'; 
+  
+  var queryUntilToday = {User: userId};
+  queryUntilToday[dateField] = {
+    '<=': todayDate
+  };
+
+  var queryByDateRange = {User: userId};
+  queryByDateRange[dateField] = {};
 
   if(startDate){
-    startDate = new Date(startDate); 
-    startDate.setHours(0,0,0,0);
-    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+    startDate = moment(startDate).startOf('day').toDate(); 
+    queryUntilToday[dateField] = assign(queryUntilToday[dateField],{
+      '>=': startDate
+    });
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
       '>=': startDate
     });
   }
 
   if(endDate){
-    endDate = new Date(endDate); 
-    endDate.setHours(23,59,59,999);
-    queryDateRange[dateField] = assign(queryDateRange[dateField],{
+    endDate = moment(endDate).endOf('day').toDate(); 
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
       '<=': endDate
     });
   }
 
-  if( _.isEmpty(queryDateRange[dateField]) ){
-    delete queryDateRange[dateField];
+  if( _.isEmpty(queryByDateRange[dateField]) ){
+    delete queryByDateRange[dateField];
   }
 
-  var queryfortNightRange = { User: userId };
-  queryfortNightRange[dateField] = {
-    '>=': fortNightRange.start,
-    '<=': fortNightRange.end
-  };
+  var queryAllByDateRange = _.clone(queryByDateRange);
 
-  queryDateRange.isClosed       = isClosed;
-  queryfortNightRange.isClosed  = isClosed;
+  if(isClosed){
+    queryUntilToday.isClosed   = isClosed;
+    queryByDateRange.isClosed  = isClosed;
+  }
+
+  //sails.log.info('queryUntilToday', queryUntilToday);
+  //sails.log.info('queryByDateRange', queryByDateRange);
 
   return Promise.props({
-    foundFortnightRange: Quotation.count(queryfortNightRange),
-    foundDateRange: Quotation.count(queryDateRange)
+    countUntilToday: Quotation.count(queryUntilToday),
+    countByDateRange: Quotation.count(queryByDateRange),
+    countAllByDateRange: Quotation.count(queryAllByDateRange)
   })
     .then(function(result){
       return {
-        fortnight: result.foundFortnightRange,
-        dateRange: result.foundDateRange
+        untilToday: result.countUntilToday,
+        byDateRange: result.countByDateRange,
+        allByDateRange: result.countAllByDateRange
       };
     });
 }
