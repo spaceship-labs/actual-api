@@ -11,6 +11,17 @@ var CLIENT_CARD_TYPE      = 1;//1.Client, 2.Proveedor, 3.Lead
 var CREATE_CONTACT_ACTION = 0;
 var UPDATE_CONTACT_ACTION = 1;
 
+var COMPANY_STUDIO_CODE   = '001';
+var COMPANY_HOME_CODE     = '002';
+var COMPANY_BOTH_CODE     = '003';
+var COMPANY_KIDS_CODE     = '004';
+
+var STUDIO_GROUP          = 'studio';
+var HOME_GROUP            = 'home';
+var KIDS_GROUP            = 'kids';
+
+
+
 var reqOptions = {
   method: 'POST',
   json: true
@@ -189,7 +200,7 @@ function buildSaleOrderRequestParams(params){
           WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
           ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
           DiscountPercent: detail.discountPercent,
-          Company: detail.Product.U_Empresa,
+          Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
           Price: detail.total,
           ImmediateDelivery: isImmediateDelivery(detail.shipDate)
           //unitPrice: detail.Product.Price
@@ -204,6 +215,21 @@ function buildSaleOrderRequestParams(params){
 
       return requestParams;
     });
+}
+
+function getCompanyCode(code, storeGroup){
+  var companyCode = code;
+  if(companyCode === COMPANY_BOTH_CODE){
+    switch (storeGroup){
+      case STUDIO_GROUP:
+        companyCode = COMPANY_STUDIO_CODE;
+        break;
+      case HOME_GROUP:
+        companyCode = COMPANY_HOME_CODE;
+        break;
+    }
+  }
+  return companyCode;
 }
 
 function isImmediateDelivery(shipDate){
