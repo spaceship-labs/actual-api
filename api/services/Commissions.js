@@ -1,14 +1,13 @@
 var Promise = require('bluebird');
 var moment  = require('moment');
 var _       = require('underscore');
-var IVA     = 0.16;
+var IVA     = 0.16; // use it as 0.16 instead of 1.16
 
 module.exports = {
   calculate: calculate,
-  isPeriodBefore: isPeriodBefore,
 };
 
-function calculate(store) {
+function calculate() {
   var date  = new Date();
   var first = setFirstDay(new Date());
   var last  = setLastDay(new Date());
@@ -19,163 +18,158 @@ function calculate(store) {
     var fdate = addDays(first, 15);
     var ldate = last;
   }
-  return calculateStore(store, fdate, ldate);
-}
-
-function isPeriodBefore(date) {
-  var today  = moment();
-  var day = today.date();
-  var month = today.month();
-  var year = today.year();
-  if (day < 16) {
-    var current = moment([year, month]);
-  } else {
-    var current = moment([year, month, 16]);
-  }
-  var date = moment(date);
-  return date < current;
-}
-
-function calculateStore(store, dateFrom, dateTo) {
-  var query = queryDate({Store: store}, dateFrom, dateTo);
-  return Payment
+  var query = queryUpdateDate({}, fdate, ldate);
+  return Quotation
     .find(query)
-    .sort('createdAt ASC')
-    .then(function(payments) {
-      var users = payments
-        .map(function(p) {
-          return p.User
-        })
-        .reduce(function(acum, current) {
-          if (acum.indexOf(current) == -1) {
-            return acum.concat(current);
-          }
-          return acum;
-        }, []);
-      return User.find(users);
-    })
-    .then(function(users) {
-      return users.map(function(user) {
-        return calculateUser(user.mainStore, user.id, dateFrom, dateTo);
+    .populate('User')
+    .populate('Store')
+    .populate('Payments')
+    .then(function(quotations) {
+      return quotations.map(function(q) {
+        q.Payments = q.Payments.filter(function(pi) {
+          var c1 = new Date(pi.createdAt);
+          var fd = new Date(fdate);
+          var ld = new Date(ldate);
+          return c1 >= fd && c1 <= ld;
+        });
+        return q;
       });
     })
-    .all();
-}
-
-function calculateUser(store, user, dateFrom, dateTo) {
-  var query = queryDate({User: user}, dateFrom, dateTo);
-  return Promise
-    .all([userRate(user, dateFrom, dateTo), Payment.find(query)])
-    .spread(function(rate, payments) {
-      return payments.map(function(payment) {
-        return Commission
-          .findOne({payment: payment.id, user: user})
-          .then(function(commission) {
-            return commission || Commission.create({payment: payment.id, user: user, store: store});
-          })
-          .then(function(commission) {
-            var ammount = (rate * payment.ammount / (1 + IVA)).toFixed(2);
-            var _rate = rate;
-            if (payment.type == 'ewallet') {
-              ammount = 0;
-              _rate = 0;
-            }
-            return Commission.update(
-              {payment: payment.id, user: user},
-              {datePayment: payment.createdAt, ammountPayment: payment.ammount, rate: _rate, ammount: ammount }
-            );
+    .then(function(quotations) {
+      var date   = setFirstDay(fdate);
+      var query  = queryGoalDate({}, date);
+      return [quotations, Goal.find(query)];
+    })
+    .spread(function(quotations, goals) {
+      var users  = getUsers(quotations);
+      var pstores = paymentsByStore(quotations);
+      var pusers  = paymentsByUser(quotations);
+      var tstores = totalsByStore(quotations);
+      var tusers  = totalsByUser(quotations);
+      var sgoals = goalsByStore(goals);
+      var commissions = Object.keys(users)
+        .map(function(uid) {
+          var user = users[uid];
+          var puser = pusers[uid];
+          var utotal = tusers[uid] || 0;
+          var stotal = tstores[user.mainStore] || 0;
+          var goal = sgoals[user.mainStore];
+          var urate = rate(utotal / (1 + IVA), stotal / (1 + IVA), goal.goal, goal.sellers);
+          var comuser = puser.map(function(p) {
+            var q = { user: uid, payment: p.id, store: user.mainStore };
+            return Commission
+              .findOrCreate(q, q)
+              .then(function(c) {
+                var rate = p.type == 'ewallet' ? 0 : urate;
+                var ammount = sumPayments([p]);
+                var ammount = (rate * ammount / (1 + IVA)).toFixed(2);
+                return Commission.update(q, {
+                  rate: rate,
+                  ammount: ammount,
+                  ammountPayment: p.ammount,
+                  datePayment: p.createdAt,
+                });
+              });
           });
-      });
-    })
-    .all();
-}
-
-
-
-function userRate(user, dateFrom, dateTo) {
-  return User
-    .findOne(user)
-    .populate('mainStore')
-    .populate('role')
-    .then(function(user) {
-      var date  = setFirstDay(dateFrom);
-      var query = queryGoalDate({store: user.mainStore.id}, date);
-      return [
-        Goal.findOne(query),
-        user.role.name,
-        userTotal(user.id, dateFrom, dateTo),
-        storeTotal(user.mainStore.id, dateFrom, dateTo)
-      ];
-    })
-    .spread(function(goal, role, utotal, stotal) {
-      console.log('the goal of this period is : ', goal);
-      var sellers     = goal.sellers;
-      var gstore1     = goal.goal / 2;
-      var gstore2     = gstore1 * 1.25;
-      var gseller1    = gstore1 / sellers;
-      var gseller2    = gstore2 / sellers;
-      var baseSeller  = 3;
-      var baseManager = 0;
-      //seller
-      if (utotal >= gseller1) {
-        baseSeller += 1;
-      }
-      if (utotal >= gseller2) {
-        baseSeller += 1;
-      }
-      if (utotal >= gseller1 && stotal >= gstore1) {
-        baseSeller += 0.5;
-      }
-      if (utotal >= gseller2 && stotal >= gstore2) {
-        baseSeller += 0.5;
-      }
-      //manager
-      if (stotal >= gstore1) {
-        baseManager += 0.5;
-      }
-      if (stotal >= gstore2) {
-        baseManager += 0.5;
-      }
-      if (role == 'seller') {
-        return baseSeller / 100;
-      }
-      if (role == 'store manager' || role == 'admin') {
-        return baseManager / 100;
-      }
-      return 0;
+          return Promise.all(comuser);
+        });
+      return Promise.all(commissions);
     });
 }
 
-function userTotal(user, dateFrom, dateTo) {
-  var query = queryDate({User: user, type: {'!': 'ewallet'}}, dateFrom, dateTo);
-  return Payment
-    .find(query)
-    .then(function(payments) {
-      return sumPayments(payments);
-    });
+function rate(utotal, stotal, goal, sellers) {
+  // las metas se guardan como mensuales, pero las comisiones son quincenales
+  goal /= 2;
+  var gstore1 = goal;
+  var gstore2  = goal * 1.25;
+  var gseller1 = goal / sellers;
+  var gseller2 = (goal * 1.25) / sellers;
+  var baseSeller = 3;
+  if (utotal >= gseller1) {
+    baseSeller += 1;
+  }
+  if (utotal >= gseller2) {
+    baseSeller += 1;
+  }
+  if (utotal >= gseller1 && stotal >= gstore1) {
+    baseSeller += 0.5;
+  }
+  if (utotal >= gseller2 && stotal >= gstore2) {
+    baseSeller += 0.5;
+  }
+  return baseSeller / 100;
 }
 
-function storeTotal(store, dateFrom, dateTo) {
-  var query = queryDate({Store: store, type: {'!': 'ewallet'}}, dateFrom, dateTo);
-  return Payment
-    .find(query)
-    .then(function(payments) {
-      return sumPayments(payments);
-    });
+function getUsers(quotations) {
+  return quotations.reduce(function(acum, q) {
+    acum[q.User.id] = q.User;
+    return acum;
+  }, {});
+}
+
+function goalsByStore(goals) {
+  return goals.reduce(function(acum, g) {
+    acum[g.store] = g;
+    return acum;
+  } , {});
+}
+
+function paymentsByStore(quotations) {
+  return quotations.reduce(function(acum, q) {
+    acum[q.Store.id] = (acum[q.Store.id] || []).concat(q.Payments);
+    return acum;
+  }, {});
+}
+
+function paymentsByUser(quotations) {
+  return quotations.reduce(function(acum, q) {
+    acum[q.User.id] = (acum[q.User.id] || []).concat(q.Payments);
+    return acum;
+  }, {});
+}
+
+function totalsByStore(quotations) {
+  return quotations.reduce(function(acum, q) {
+    acum[q.Store.id] = (acum[q.Store.id] || 0) + sumPayments(q.Payments);
+    return acum;
+  }, {});
+
+}
+
+function totalsByUser(quotations) {
+  return quotations.reduce(function(acum, q) {
+    acum[q.User.id] = (acum[q.User.id] || 0) + sumPayments(q.Payments);
+    return acum;
+  }, {});
 }
 
 function sumPayments(payments) {
   return payments.reduce(function(acum, current) {
     var ammount = 0;
+    if (current.type == 'ewallet') {
+      return ammount;
+    }
     if (current.currency == 'usd') {
       ammount = acum + (current.ammount * current.exchangeRate);
     } else {
       ammount = acum + current.ammount;
     }
-    return ammount / (1 + IVA);
+    return ammount;
   }, 0);
 }
 
+function queryUpdateDate(query, dateFrom, dateTo) {
+  var dateFrom = new Date(dateFrom);
+  var dateTo   = new Date(dateTo);
+  dateFrom.setHours(0, 0, 0, 0);
+  dateTo.setHours(0, 0, 0, 0);
+  return _.assign(query, {
+    updatedAt: {
+      '>=': dateFrom,
+      '<': addOneDay(dateTo)
+    }
+  });
+}
 
 function queryDate(query, dateFrom, dateTo) {
   var dateFrom = new Date(dateFrom);
@@ -222,3 +216,4 @@ function addDays(date, days) {
   date.setDate(date.getDate() + days);
   return date;
 }
+

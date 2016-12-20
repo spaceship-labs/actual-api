@@ -44,7 +44,7 @@ module.exports = {
         'banamex',
         'bancomer',
         'banorte',
-        'santander'        
+        'santander'
       ]
     },
     card: {type:'string'},
@@ -91,23 +91,8 @@ module.exports = {
   },
 
   afterCreate: function(val, cb) {
-    Payment
-      .findOne(val.id)
-      .populate('User')
-      .populate('Store')
-      .then(function(payment) {
-        var store  = payment.Store.id;
-        var ustore = payment.User.mainStore;
-        if (store == ustore) {
-          return [Commissions.calculate(store)];
-        } else {
-          return [
-            Commissions.calculate(store),
-            Commissions.calculate(ustore),
-          ];
-        }
-      })
-      .all()
+    Commissions
+      .calculate()
       .then(function() {
         cb();
       })
