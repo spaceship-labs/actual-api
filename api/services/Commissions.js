@@ -66,7 +66,7 @@ function calculate() {
                 return Commission.update(q, {
                   rate: rate,
                   ammount: ammount,
-                  ammountPayment: p.ammount,
+                  ammountPayment: p.currency == 'usd' ? p.ammount * p.exchangeRate : p.ammount,
                   datePayment: p.createdAt,
                 });
               });
@@ -145,16 +145,13 @@ function totalsByUser(quotations) {
 
 function sumPayments(payments) {
   return payments.reduce(function(acum, current) {
-    var ammount = 0;
     if (current.type == 'ewallet') {
-      return ammount;
+      return acum;
     }
     if (current.currency == 'usd') {
-      ammount = acum + (current.ammount * current.exchangeRate);
-    } else {
-      ammount = acum + current.ammount;
+      return acum + (current.ammount * current.exchangeRate);
     }
-    return ammount;
+    return acum + current.ammount;
   }, 0);
 }
 
