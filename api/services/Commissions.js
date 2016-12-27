@@ -5,7 +5,23 @@ var IVA     = 0.16; // use it as 0.16 instead of 1.16
 
 module.exports = {
   calculate: calculate,
+  isPeriodBefore: isPeriodBefore,
 };
+
+function isPeriodBefore(date) {
+  var today  = moment();
+  var day = today.date();
+  var month = today.month();
+  var year = today.year();
+  if (day < 16) {
+    var current = moment([year, month]);
+  } else {
+    var current = moment([year, month, 16]);
+  }
+  var date = moment(date);
+  return date < current;
+}
+
 
 function calculate() {
   var date  = new Date();
