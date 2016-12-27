@@ -84,10 +84,8 @@ function prepareInvoice(order, payments, client, items) {
     dueDate: dueDate,
     client: client,
     items: items,
+    payments: payments,
     paymentMethod: 'cash',
-    stamp: {
-      generateStamp: true,
-    }
   };
   return createInvoice(data);
 }
