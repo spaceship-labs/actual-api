@@ -43,6 +43,10 @@ module.exports = {
       model: 'user',
       required: true
     },
+    role: {
+      type: 'string',
+      enum: ['seller', 'store manager'],
+    },
     payment: {
       model: 'payment',
       required: true

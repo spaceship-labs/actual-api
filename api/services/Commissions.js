@@ -20,41 +20,55 @@ function calculate() {
   }
   var query = queryUpdateDate({}, fdate, ldate);
   return Quotation
-    .find(query)
-    .populate('User')
-    .populate('Store')
-    .populate('Payments')
-    .then(function(quotations) {
-      return quotations.map(function(q) {
-        q.Payments = q.Payments.filter(function(pi) {
-          var c1 = new Date(pi.createdAt);
-          var fd = new Date(fdate);
-          var ld = new Date(ldate);
-          return c1 >= fd && c1 <= ld;
+      .find(query)
+      .populate('User')
+      .populate('Store')
+      .populate('Payments')
+      .then(function(quotations) {
+        return quotations.map(function(q) {
+          q.Payments = q.Payments.filter(function(pi) {
+            var c1 = new Date(pi.createdAt);
+            var fd = new Date(fdate);
+            var ld = new Date(ldate);
+            return c1 >= fd && c1 <= ld;
+          });
+          return q;
         });
-        return q;
+      })
+      .then(function(quotations) {
+        var date   = setFirstDay(fdate);
+        var query  = queryGoalDate({}, date);
+        return [quotations, Goal.find(query)];
+      })
+      .spread(function(quotations, goals) {
+        return [
+          calculateManagers(quotations, goals),
+          calculateSellers(quotations, goals),
+        ];
       });
+}
+
+function calculateManagers(quotations, goals) {
+  return Role
+    .findOne({ name: 'store manager' })
+    .then(function(manager){
+      return User.find({ role: manager.id });
     })
-    .then(function(quotations) {
-      var date   = setFirstDay(fdate);
-      var query  = queryGoalDate({}, date);
-      return [quotations, Goal.find(query)];
+    .then(function(users) {
+      return formatManagers(users);
     })
-    .spread(function(quotations, goals) {
-      var users  = getUsers(quotations);
+    .then(function(users) {
       var pstores = paymentsByStore(quotations);
-      var pusers  = paymentsByUser(quotations);
       var tstores = totalsByStore(quotations);
-      var tusers  = totalsByUser(quotations);
       var sgoals = goalsByStore(goals);
       var commissions = Object.keys(users)
         .map(function(uid) {
           var user = users[uid];
-          var puser = pusers[uid];
-          var utotal = tusers[uid] || 0;
+          var puser = pstores[user.mainStore] || [];
+          var utotal = tstores[user.mainStore];
           var stotal = tstores[user.mainStore] || 0;
           var goal = sgoals[user.mainStore];
-          var urate = rate(utotal / (1 + IVA), stotal / (1 + IVA), goal.goal, goal.sellers);
+          var urate = rate(utotal / (1 + IVA), stotal / (1 + IVA), goal.goal, goal.sellers, true);
           var comuser = puser.map(function(p) {
             var q = { user: uid, payment: p.id, store: user.mainStore };
             return Commission
@@ -68,6 +82,7 @@ function calculate() {
                   ammount: ammount,
                   ammountPayment: p.currency == 'usd' ? p.ammount * p.exchangeRate : p.ammount,
                   datePayment: p.createdAt,
+                  role: 'store manager',
                 });
               });
           });
@@ -77,27 +92,88 @@ function calculate() {
     });
 }
 
-function rate(utotal, stotal, goal, sellers) {
+function calculateSellers(quotations, goals) {
+  var users  = getUsers(quotations);
+  var pstores = paymentsByStore(quotations);
+  var pusers  = paymentsByUser(quotations);
+  var tstores = totalsByStore(quotations);
+  var tusers  = totalsByUser(quotations);
+  var sgoals = goalsByStore(goals);
+  var commissions = Object.keys(users)
+    .map(function(uid) {
+      var user = users[uid];
+      var puser = pusers[uid];
+      var utotal = tusers[uid] || 0;
+      var stotal = tstores[user.mainStore] || 0;
+      var goal = sgoals[user.mainStore];
+      var urate = rate(utotal / (1 + IVA), stotal / (1 + IVA), goal.goal, goal.sellers);
+      var comuser = puser.map(function(p) {
+        var q = { user: uid, payment: p.id, store: user.mainStore };
+        return Commission
+          .findOrCreate(q, q)
+          .then(function(c) {
+            var rate = p.type == 'ewallet' ? 0 : urate;
+            var ammount = sumPayments([p]);
+            var ammount = (rate * ammount / (1 + IVA)).toFixed(2);
+            return Commission.update(q, {
+              rate: rate,
+              ammount: ammount,
+              ammountPayment: p.currency == 'usd' ? p.ammount * p.exchangeRate : p.ammount,
+              datePayment: p.createdAt,
+              role: 'seller',
+            });
+          });
+      });
+      return Promise.all(comuser);
+    });
+  return Promise.all(commissions);
+}
+
+function rate(utotal, stotal, goal, sellers, isManager) {
   // las metas se guardan como mensuales, pero las comisiones son quincenales
   goal /= 2;
+  var gstore0 = goal * 0.90;
   var gstore1 = goal;
-  var gstore2  = goal * 1.25;
+  var gstore2 = goal * 1.25;
   var gseller1 = goal / sellers;
   var gseller2 = (goal * 1.25) / sellers;
-  var baseSeller = 3;
-  if (utotal >= gseller1) {
-    baseSeller += 1;
+  if (!isManager) {
+    var baseSeller = 3;
+    if (utotal >= gseller1) {
+      baseSeller += 1;
+    }
+    if (utotal >= gseller2) {
+      baseSeller += 1;
+    }
+    if (utotal >= gseller1 && stotal >= gstore1) {
+      baseSeller += 0.5;
+    }
+    if (utotal >= gseller2 && stotal >= gstore2) {
+      baseSeller += 0.5;
+    }
+    return baseSeller / 100;
   }
-  if (utotal >= gseller2) {
-    baseSeller += 1;
+  if (isManager) {
+    var baseManager = 0;
+    if (utotal >= gstore0) {
+      baseManager += 0.5;
+    }
+    if (utotal >= gstore1) {
+      baseManager += 0.5;
+    }
+    if (utotal >= gstore2) {
+      baseManager += 1;
+    }
+    return baseManager / 100;
   }
-  if (utotal >= gseller1 && stotal >= gstore1) {
-    baseSeller += 0.5;
-  }
-  if (utotal >= gseller2 && stotal >= gstore2) {
-    baseSeller += 0.5;
-  }
-  return baseSeller / 100;
+  return 0;
+}
+
+function formatManagers(managers) {
+  return managers.reduce(function(acum, m) {
+    acum[m.id] = m;
+    return acum;
+  }, {});
 }
 
 function getUsers(quotations) {
