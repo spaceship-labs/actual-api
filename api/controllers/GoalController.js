@@ -5,6 +5,7 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 var _ = require('underscore');
+var moment = require('moment');
 
 module.exports = {
   find: function(req, res) {
@@ -12,7 +13,7 @@ module.exports = {
     var model = 'goal';
     var extraParams = {
       searchFields: ['goal', 'sellers', 'date'],
-      populateFields: ['store']      
+      populateFields: ['store']
     };
     Common.find(model, form, extraParams).then(function(result){
       res.ok(result);
@@ -70,7 +71,7 @@ module.exports = {
 
   searchByDate: function(req, res) {
     var form  = req.allParams();
-    var query = queryDate({store: form.store}, form.dateFrom, form.dateTo);
+    var query = queryGoalDate({store: form.store}, form.dateFrom);
     Goal.findOne(query).exec(function(err, c) {
       if (err) {return res.negotiate(err);}
       return res.json(c);
@@ -109,4 +110,21 @@ function addOneDay(date) {
   var date = new Date(date);
   date.setDate(date.getDate() + 1);
   return date;
+}
+
+function queryGoalDate(query, date) {
+  date = setFirstDay(date);
+  var date1 = moment(date);
+  var date2 = moment(date);
+  return _.assign(query, {
+    date: {
+      '>=': date1.add(-1, 'days').format('YYYY-MM-DD'),
+      '<': date2.add(1, 'days').format('YYYY-MM-DD'),
+    }
+  });
+}
+
+function setFirstDay(date) {
+  var date = new Date(date);
+  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
