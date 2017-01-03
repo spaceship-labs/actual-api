@@ -212,7 +212,8 @@ var paymentGroups = [
         ],
         currency: 'mxn',
         needsVerification: true,
-        min:0
+        min:0,
+        web: true
       },
     ]
   },
@@ -258,7 +259,8 @@ var paymentGroups = [
         ],
         currency: 'mxn',
         min:300,
-        needsVerification: true
+        needsVerification: true,
+        web:true
       }
     ]
   },
@@ -304,7 +306,8 @@ var paymentGroups = [
         ],
         currency: 'mxn',
         min:600,
-        needsVerification: true
+        needsVerification: true,
+        web:true
       },
       {
         label:'9',
@@ -331,7 +334,8 @@ var paymentGroups = [
         ],
         currency: 'mxn',
         min:900,
-        needsVerification: true
+        needsVerification: true,
+        web:true
       },
     ]
   },
@@ -377,7 +381,8 @@ var paymentGroups = [
         ],
         currency: 'mxn',
         min: 1200,
-        needsVerification: true
+        needsVerification: true,
+        web:true
       },
     ]
   },
@@ -404,7 +409,8 @@ var paymentGroups = [
         ],
         currency: 'mxn',
         needsVerification: true,
-        min:2000
+        min:2000,
+        web:true
       },
     ]
   },
