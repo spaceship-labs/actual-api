@@ -34,6 +34,10 @@ module.exports = {
       type: 'date',
       required: true
     },
+    originalShipDate: {
+      type: 'date',
+      required: true
+    },       
     productDate: {
       type: 'date',
       required: true
@@ -52,5 +56,6 @@ module.exports = {
     PromotionPackageApplied:{
       model:'ProductGroup'
     },
-  }
+  },
+
 };

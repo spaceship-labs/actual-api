@@ -150,7 +150,7 @@ function getDetailsStock(details, warehouse){
 function mapDetailsWithDeliveryDates(details, deliveryDates){
 	for(var i = 0; i<details.length; i++){
 		var detailDelivery = _.find(deliveryDates, function(delivery){
-			var detailShipDate = moment(details[i].shipDate).startOf('day').format('DD-MM-YYYY');
+			var detailShipDate = moment(details[i].originalShipDate).startOf('day').format('DD-MM-YYYY');
 			var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 
 			if(detailShipDate === deliveryDate && details[i].quantity <= delivery.available){				

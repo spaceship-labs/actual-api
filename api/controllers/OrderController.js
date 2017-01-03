@@ -181,12 +181,13 @@ module.exports = {
           quotationDetails: quotationDetails
         });
       })
-      .then(function(sapResult){
-        sapResponse = JSON.parse(sapResult.value);
-        if(!sapResult || !_.isArray(sapResponse)){
+      .then(function(sapResponse){
+        sails.log.info('createSaleOrder response', sapResponse);
+        sapResult = JSON.parse(sapResponse.value);
+        if( !isValidOrderCreated(sapResponse, sapResult) ){
           return Promise.reject('Error en la respuesta de SAP');
         }
-        orderParams.documents = sapResponse;
+        orderParams.documents = sapResult;
         return Order.create(orderParams);
       })
       .then(function(created){
@@ -218,7 +219,7 @@ module.exports = {
         };
         return [
           Quotation.update({id:quotation.id} , updateFields),
-          saveSapReferences(sapResponse, orderCreated.id)
+          saveSapReferences(sapResult, orderCreated.id)
         ];
       })
       .spread(function(quotationUpdated, sapOrdersReference){
@@ -343,8 +344,16 @@ module.exports = {
 
 };
 
-function saveSapReferences(sapResponse, orderId){
-  var ordersSap = sapResponse.map(function(orderSap){
+function isValidOrderCreated(sapResponse, sapResult){
+  sapResult = sapResult || {};
+  if( sapResponse && _.isArray(sapResult)  &&  _.isArray(sapResult.Payments)){
+    return true;
+  }
+  return false;
+}
+
+function saveSapReferences(sapResult, orderId){
+  var ordersSap = sapResult.map(function(orderSap){
     return {
       Order: orderId,
       document: orderSap.Order,

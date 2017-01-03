@@ -11,7 +11,6 @@ module.exports = {
 function productShipping(product, storeWarehouse, options) {
   return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
     .then(function(deliveries) {
-      //var seasonQuery = getQueryDateRange({}, new Date());
       var companies = deliveries.map(function(delivery) {
         return delivery.FromCode;
       });
@@ -24,7 +23,6 @@ function productShipping(product, storeWarehouse, options) {
           }
         }),
         deliveries,
-        //Season.findOne(seasonQuery)
       ];
     })
     .spread(function(stockItems, deliveries) {
@@ -55,12 +53,13 @@ function productShipping(product, storeWarehouse, options) {
       }
       else if( productHasFreesale(product) && deliveries){
         product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
+        var shipDate = moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate();
         var freeSaleStockItem = {
           whsCode: CEDIS_QROO_CODE,
           OpenCreQty: product.freeSaleStock,
           ItemCode: product.ItemCode,
           warehouseId: CEDISQ_QROO_ID,
-          ShipDate: moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate()
+          ShipDate: shipDate
         };
 
         return Promise.all([
