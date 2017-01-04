@@ -18,7 +18,7 @@ module.exports = {
         '6-msi',
         '9-msi',
         '12-msi',
-        '18-msi'
+        '18-msi',
       ]
     },
     folio:{type:'integer'},
@@ -34,6 +34,8 @@ module.exports = {
     exchangeRate:{type:'float'},
     verificationCode: {type:'string'},
     terminal:{type:'string'},
+    isCancelled: {type:'boolean'},
+    isCancellation: {type:'boolean'},
     isRecurring: {type:'boolean'},
     msi:{type:'float'},
     paymentType: {type:'string'},
@@ -81,7 +83,8 @@ module.exports = {
     },
     PaymentSap:{
       model: 'PaymentSap'
-    }
+    },
+
   },
 
   beforeCreate: function(val,cb){

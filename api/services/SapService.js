@@ -257,6 +257,7 @@ function mapPaymentsToSap(payments, exchangeRate){
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
     }
+
     return paymentSap;
   });
 }

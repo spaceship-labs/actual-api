@@ -475,7 +475,12 @@ module.exports.routes = {
   '/payment/add/:quotationid':{
     controller: 'payment',
     action:'add'
-  },  
+  }, 
+
+  '/payment/cancel/:quotationId/:paymentId':{
+    controller: 'payment',
+    action:'cancel'
+  },
 
   '/client/update/:CardCode':{
     controller: 'client',
