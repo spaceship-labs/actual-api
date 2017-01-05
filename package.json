@@ -59,7 +59,7 @@
   "author": "luis",
   "license": "",
   "engines": {
-    "node": "0.10.x",
-    "npm": "1.4.21"
+    "node": "5.0.0",
+    "npm": "3.10.6"
   }
 }
