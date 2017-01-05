@@ -129,15 +129,6 @@ function updateContact(cardCode, contactIndex, form){
   return request(reqOptions);
 }
 
-/*
-function createFiscalAddress(cardcode, form){
-  var endPoint = buildAddressContactEndpoint(form, cardcode);
-  sails.log.info('createFiscalAddress');
-  sails.log.info(endPoint);
-  reqOptions.uri = endPoint;
-  return request(reqOptions);
-}
-*/
 
 function updateFiscalAddress(cardcode, form){
   form.Address = form.companyName;
