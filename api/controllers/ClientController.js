@@ -165,7 +165,7 @@ module.exports = {
 
       })
       .spread(function(contactsCreated, fiscalAddressCreated){
-        sails.log.info('contactsCreated', contactsCreated);
+        sails.log.info('contactsCreated or fiscalAddressCreated', contactsCreated);
         sails.log.info('fiscalAddressCreated', fiscalAddressCreated);
         
         res.json(createdClient);

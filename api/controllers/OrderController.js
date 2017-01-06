@@ -346,8 +346,28 @@ module.exports = {
 
 function isValidOrderCreated(sapResponse, sapResult){
   sapResult = sapResult || {};
-  if( sapResponse && _.isArray(sapResult)  &&  _.isArray(sapResult.Payments)){
-    return true;
+  if( sapResponse && _.isArray(sapResult)){
+    var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
+    var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference)
+
+    if(everyOrderHasPayments && everyOrderHasFolio){
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkIfSapOrderHasReference(sapOrder){
+  return sapOrder.Order;
+}
+
+function checkIfSapOrderHasPayments(sapOrder){
+  if( _.isArray(sapOrder.Payments) ){
+    if(sapOrder.Payments.length > 0){
+      return sapOrder.Payments.every(function(payment){
+        return !isNaN(payment.pay) && payment.reference;
+      });
+    }
   }
   return false;
 }

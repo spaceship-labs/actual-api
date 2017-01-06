@@ -266,17 +266,17 @@ function Calculator(){
         var totals = sumProcessedDetails(processedDetails, options);
         quotationAux = _.extend(quotationAux, totals);
 
+        /*
         if(quotationAux.bigticketPercentage && getQuotationBigticketPercentage(quotationAux)){
           quotationAux.lastCalculation = true;
           sails.log.info('recalculando con bigticket');
           return processQuotationDetails(quotationAux, options);
         }
-        else{
-          sails.log.info('calculando totales normales');
-          return new Promise(function(resolve){
-            resolve(totals);
-          });
-        }
+        */
+        return new Promise(function(resolve){
+          resolve(totals);
+        });
+
       })
       .then(function(result){
         //In case result are processedDetails
@@ -305,7 +305,7 @@ function Calculator(){
       totals.total         += pd.total;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
-      totals.discount      += (pd.subtotal2 - pd.total);
+      totals.discount      += (pd.subtotal - pd.total);
       totals.totalProducts += pd.quantity;
     });    
     
