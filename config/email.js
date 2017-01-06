@@ -4,6 +4,6 @@ module.exports.email = {
     user: process.env.MAILGUN_USER,
     pass: process.env.MAILGUN_PASSWORD
   },
-  from: 'luis19prz@gmail.com',
+  from: 'luisperez@spaceshiplabs.com',
   testMode: false
 };
