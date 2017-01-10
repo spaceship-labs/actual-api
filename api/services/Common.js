@@ -4,6 +4,20 @@ var moment = require('moment');
 var assign = require('object-assign');
 
 module.exports = {
+  isInteger: function(n){
+    if(!isNaN(n)){
+      return Number(n) === n && n % 1 === 0;
+    }
+    return false;
+  },
+
+  isFloat: function(n){
+    if(!isNaN(n)){
+      return Number(n) === n && n % 1 !== 0;
+    }
+    return false;
+  },  
+
   validateEmail: function(email) {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
@@ -33,6 +47,7 @@ module.exports = {
         for(var i=0;i<searchFields.length;i++){
           var field = searchFields[i];
           var obj = {};
+          var exactQuery = {};
           //var keywords = term.split(' ');
           /*
           var orClauses = keywords.map(function(keyword){
@@ -40,8 +55,13 @@ module.exports = {
           });
           obj[field] = {$or: orClauses};
           */
-          obj[field] = {contains:term};
+          obj[field]        = {contains:term};
           query.or.push(obj);
+
+          if(model === 'quotation'){
+            exactQuery[field] = term;
+            query.or.push(exactQuery);
+          }
         }
       }
     }

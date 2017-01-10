@@ -314,6 +314,16 @@ module.exports = {
       delete form.term;
     }
 
+    /*
+    if(!isNaN(form.term)){
+      if(Common.isFloat(form.term)){
+        form.term = parseFloat(form.term);
+      }else{
+        form.term = parseInt(form.term);
+      }
+    }
+    */
+
     var extraParams = {
       searchFields: ['folio','id','DocEntry','CardCode','CardName'],
       selectFields: form.fields,
