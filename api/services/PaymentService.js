@@ -189,7 +189,7 @@ var paymentGroups = [
           {label:'Santander', value:'santander'}
         ],
         needsVerification: true
-      },
+      },/*
       {
         label:'Monedero electrónico',
         name:'Monedero electrónico',
@@ -197,7 +197,7 @@ var paymentGroups = [
         description:'Sujeto a verificación contable',
         currency: 'mxn',
         needsVerification: false
-      },
+      },*/
       {
         label:'1 pago con',
         name:'Una sola exhibición terminal',
