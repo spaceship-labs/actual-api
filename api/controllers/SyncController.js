@@ -6,6 +6,10 @@ module.exports = {
     }).catch(function(err){
       res.negotiate(err);
     });
+  },
+
+  fixOrders: function(req, res){
+  	Common.reassignOrdersDates();
   }
 };
 
