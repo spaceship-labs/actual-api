@@ -8,6 +8,7 @@ module.exports = {
     documents:{
       type:'array'
     },
+    immediateDelivery:{type:'float'},
     ammountPaid: {type:'float'},
     total:{type:'float'},
     subtotal:{type:'float'},
@@ -72,6 +73,7 @@ module.exports = {
     CntCtCode:{type:'integer'},
     SlpCode: {type:'integer'},
     CardCode: {type:'string'},
+    CardName: {type:'string'},
 
     //ADDRESS FIELDS SNAPSHOT
     E_Mail:{type:'string'},

@@ -129,14 +129,13 @@ module.exports = {
           groupCode: user.activeStore.GroupCode,
           totalProducts: quotation.totalProducts,
           Client: quotation.Client.id,
+          CardName: quotation.Client.CardName,
           Quotation: quotationId,
           Payments: paymentsIds,
           EwalletRecords: quotation.EwalletRecords,
           User: user.id,
           Broker: quotation.Broker,
-          Address: _.clone(quotation.Address.id) || false,
-          CardCode: quotation.Address.CardCode,
-          CntctCode: quotation.Address.CntctCode,
+          CardCode: quotation.Client.CardCode,
           SlpCode: SlpCode,
           Store: opts.currentStore,
           Manager: quotation.Manager
@@ -156,10 +155,15 @@ module.exports = {
           orderParams.status = 'paid';
         }
         
-        delete quotation.Address.id;
-        delete quotation.Address.Address; //Address field in person contact
-        orderParams = _.extend(orderParams, quotation.Address);
-        
+        if(quotation.Address){
+          orderParams.Address = _.clone(quotation.Address.id);
+          orderParams.CntctCode = _.clone(quotation.Address.CntctCode);
+
+          delete quotation.Address.id;
+          delete quotation.Address.Address; //Address field in person contact
+          orderParams = _.extend(orderParams, quotation.Address);
+        }
+
         currentStore = user.activeStore;
 
         return [
