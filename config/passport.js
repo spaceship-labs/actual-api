@@ -29,15 +29,19 @@ function _onLocalStrategyAuth(email, password, next){
     .exec(function(error, user){
       if (error) return next(error, false, {});
       if (!user) return next(null, false,{
-        code: 'E_USER_NOT_FOUND',
-        message: email + 'is not found'
+        code: 'INCORRECT_AUTHDATA',
+        message:'Incorrect auth data'
+        //code: 'E_USER_NOT_FOUND',
+        //message: email + 'is not found'
     });
 
     //TODO: replace with new cipher service type
     if( !CipherService.comparePassword(password, user) ){
       return next(null, false, {
-        code: 'E_WRONG_PASSWORD',
-        message: '!Password is wrong'
+        code: 'INCORRECT_AUTHDATA',
+        message:'Incorrect auth data'        
+        //code: 'E_WRONG_PASSWORD',
+        //message: '!Password is wrong'
       });
     }
 
