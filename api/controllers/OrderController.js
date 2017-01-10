@@ -161,7 +161,14 @@ module.exports = {
 
           delete quotation.Address.id;
           delete quotation.Address.Address; //Address field in person contact
-          orderParams = _.extend(orderParams, quotation.Address);
+          orderParams = _.omit(quotation.Address,[
+            'id',
+            'Address',
+            'createdAt',
+            'updatedAt',
+            'CntctCode',
+            'CardCode'
+          ]);
         }
 
         currentStore = user.activeStore;
