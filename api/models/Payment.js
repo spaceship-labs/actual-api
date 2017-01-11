@@ -33,6 +33,7 @@ module.exports = {
     },
     exchangeRate:{type:'float'},
     verificationCode: {type:'string'},
+    conektaId: {type:'string'},
     terminal:{type:'string'},
     isCancelled: {type:'boolean'},
     isCancellation: {type:'boolean'},
