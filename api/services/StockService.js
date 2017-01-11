@@ -149,19 +149,11 @@ function getDetailsStock(details, warehouse){
 
 function mapDetailsWithDeliveryDates(details, deliveryDates){
 	for(var i = 0; i<details.length; i++){
-		var detailDelivery = _.find(deliveryDates, function(delivery){
-			var detailShipDate = moment(details[i].originalShipDate).startOf('day').format('DD-MM-YYYY');
-			var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
-
-			if(detailShipDate === deliveryDate && details[i].quantity <= delivery.available){				
-				return true;
-			}
-			return false;
-		});
+		var detailDelivery = findValidDelivery(details[i], deliveryDates);
 
 		if(detailDelivery){
 			detailDelivery.available -= details[i].quantity;
-			details[i].delivery = detailDelivery;
+			//details[i].delivery = detailDelivery;
 			details[i].validStock = true;
 		}else{
 			details[i].validStock = false;			
@@ -169,4 +161,31 @@ function mapDetailsWithDeliveryDates(details, deliveryDates){
 	}
 
 	return details;
+}
+
+function findValidDelivery(detail,deliveryDates){
+	if(!detail.originalShipDate){
+		return false;
+	}
+
+	var detailDelivery = _.find(deliveryDates, function(delivery){
+		if(!delivery.date){
+			return false;
+		}
+
+		var detailShipDate = moment(details[i].originalShipDate).startOf('day').format('DD-MM-YYYY');
+		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
+		var isValidDelivery;
+
+		if(detailShipDate === deliveryDate && details[i].quantity <= delivery.available){				
+			isValidDelivery = true;
+		}else{
+			isValidDelivery = false;
+		}
+
+		return isValidDelivery;
+
+	});
+
+	return detailDelivery;
 }
