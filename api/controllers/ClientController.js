@@ -62,7 +62,8 @@ module.exports = {
       }
       clientFound = clientFound.toObject();
       clientFound.Contacts = contacts;
-      return FiscalAddress.findOne({CardCode: clientFound.CardCode, AdresType: ADDRESS_TYPE});
+      var query = {CardCode: clientFound.CardCode, AdresType: ADDRESS_TYPE};
+      return FiscalAddress.findOne(query);
     })
     .then(function(fiscalAddress){
       clientFound.FiscalAddress = fiscalAddress;
@@ -204,7 +205,8 @@ module.exports = {
     ClientContact.find({CardCode:CardCode})
       .then(function(contacts){
         res.json(contacts);
-      }).catch(function(err){
+      })
+      .catch(function(err){
         console.log(err);
         res.negotiate(err);
       });
@@ -216,6 +218,7 @@ module.exports = {
     form = ClientService.mapContactFields(form);    
     SapService.createContact(cardCode, form)
       .then(function(resultSap){
+        
         sails.log.info('createContact resultSap', resultSap);
         if( !resultSap.value || !_.isArray(resultSap.value) ){
           var err = resultSap.value || 'Error al crear contacto';
@@ -271,31 +274,6 @@ module.exports = {
         res.negotiate(err);
       });
   },
-
-  /*
-  createFiscalAddress: function(req, res){
-    var form = req.params.all();
-    var cardCode = form.CardCode;
-    var fiscalAddress = ClientService.mapFiscalFields(form);
-    SapService.createFiscalAddress(cardCode, fiscalAddress)
-      .then(function(result){
-        sails.log.info('result createFiscalAddress');
-        if(!result.value || !ClientService.isValidCardCode(result.value)){
-          var err = result.value || 'Error al crear direccion fiscal';
-          return Promise.reject(err);
-        }
-        fiscalAddress.AdresType = ADDRESS_TYPE;
-        return FiscalAddress.create(form);
-      })
-      .then(function(createdFiscalAddress){
-        res.json(createdFiscalAddress);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-  */
 
   updateFiscalAddress: function(req, res){
     var form = req.params.all();

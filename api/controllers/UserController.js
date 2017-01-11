@@ -43,23 +43,6 @@ module.exports = {
       });      
   },
 
-  /*
-  findBySlpCode: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    User
-      .findOne({SlpCode:id})
-      .populate('SlpCode')
-      .then(function(result){
-        res.ok({data:result});
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });  
-  },
-  */
-
   create: function(req, res){
     var form = req.allParams();
     User.create(form)

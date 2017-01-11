@@ -102,10 +102,6 @@ module.exports = {
         negativePayment.ammount = negativePayment.ammount * -1;
         negativePayment.isCancellation = true;
 
-        //sails.log.info('orginal payment', payment);
-        //sails.log.info('negativePayment', negativePayment);
-        //return res.json(true);
-
         return Payment.update({id:paymentId}, {isCancelled: true});
       })
       .then(function(paymentUpdated){
