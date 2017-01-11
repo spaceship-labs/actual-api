@@ -130,7 +130,6 @@ module.exports = {
           isClosedReason: form.closeReason,
           isClosedNotes: form.extraNotes,
           status: 'closed',
-          tracing: form.tracing
         };   
         //sails.log.info('createdRecord', createdRecord);
         return [
