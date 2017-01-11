@@ -1,9 +1,51 @@
 var _ = require('underscore');
 var q = require('q');
+var Promise = require('bluebird');
 var moment = require('moment');
 var assign = require('object-assign');
 
 module.exports = {
+  reassignOrdersDates(){
+    console.log('started find reassignOrdersDates');
+    Order.find({}).populate('Quotation')
+      .then(function(orders){
+        console.log('orders', orders.length);
+        //var ordersIds = orders.map(function(o){return o.id;});
+        return Promise.each(orders,function(order){
+          if(order.Quotation){
+            var updateParams = {
+              createdAt: order.Quotation.createdAt,
+              updatedAt: order.Quotation.updatedAt
+            };
+            console.log('updating order:' + order.id + ' with:' + updateParams.createdAt);
+            return Order.update({id:order.id}, updateParams);
+          }else{
+            return false;
+          }
+        });
+      })
+      .then(function(){
+        console.log('FINISHED reassignOrdersDates');
+      })
+      .catch(function(err){
+        console.log('err',err);
+      });
+  },
+
+  isInteger: function(n){
+    if(!isNaN(n)){
+      return Number(n) === n && n % 1 === 0;
+    }
+    return false;
+  },
+
+  isFloat: function(n){
+    if(!isNaN(n)){
+      return Number(n) === n && n % 1 !== 0;
+    }
+    return false;
+  },  
+
   validateEmail: function(email) {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
@@ -33,6 +75,7 @@ module.exports = {
         for(var i=0;i<searchFields.length;i++){
           var field = searchFields[i];
           var obj = {};
+          var exactQuery = {};
           //var keywords = term.split(' ');
           /*
           var orClauses = keywords.map(function(keyword){
@@ -40,8 +83,13 @@ module.exports = {
           });
           obj[field] = {$or: orClauses};
           */
-          obj[field] = {contains:term};
+          obj[field]        = {contains:term};
           query.or.push(obj);
+
+          if(model === 'quotation'){
+            exactQuery[field] = term;
+            query.or.push(exactQuery);
+          }
         }
       }
     }

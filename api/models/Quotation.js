@@ -43,9 +43,12 @@ module.exports = {
     Manager:{
       model:'user'
     },
+    CardName: {type:'string'},
+    CardCode:{type:'string'},
     isClosed:{type:'boolean'},
     isClosedReason:{type:'string'},
     isClosedNotes:{type:'text'},
+    immediateDelivery:{type:'boolean'},
     clientName: {type:'string'},
     folio:{type:'integer'},
     total:{type:'float'},

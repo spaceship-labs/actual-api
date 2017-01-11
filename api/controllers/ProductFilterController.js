@@ -91,7 +91,7 @@ module.exports = {
 
     ProductFilter.destroy({id:id})
       .then(function(){
-        res.json({destroyed:true})
+        res.json({destroyed:true});
       })
       .catch(function(err){
         console.log(err);

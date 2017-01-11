@@ -655,7 +655,14 @@ module.exports.routes = {
   '/paymentgroups':{
     controller:'payment',
     action:'getPaymentGroups'
+  },
+
+  /*
+  '/fixorders':{
+    controller:'sync',
+    action:'fixOrders'
   }
+  */
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

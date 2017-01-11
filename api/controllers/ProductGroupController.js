@@ -128,41 +128,19 @@ module.exports = {
 
   search: function(req, res){
     var form = req.params.all();
-    var items = form.items || 10;
-    var page = form.page || 1;
-    var term = form.term || false;
-    var query = {};
-    var querySearchAux = {};
-    var model = ProductGroup;
-    var searchFields = ['Name'];
-    var groups = false;
-    var groupsCount = false;
-    if(term){
-      if(searchFields.length > 0){
-        query.or = [];
-        for(var i=0;i<searchFields.length;i++){
-          var field = searchFields[i];
-          var obj = {};
-          obj[field] = {contains:term};
-          query.or.push(obj);
-        }
-      }
-      querySearchAux = _.clone(query);
-    }
-    query.skip = (page-1) * items;
-    query.limit = items;
-    
-    ProductGroup.find(query)
-      .then(function(results){
-        groups = results;
-        return model.count(querySearchAux)
-      })
-      .then(function(count){
-        return res.ok({data:groups, total:count});
+    var model          = 'productgroup';
+    var extraParams = {
+      searchFields: [
+        'Name'
+      ]
+    };
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
       })
       .catch(function(err){
         console.log(err);
-        return res.negotiate(err);
+        res.negotiate(err);
       });
   },
 

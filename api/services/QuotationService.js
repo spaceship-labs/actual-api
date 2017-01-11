@@ -279,6 +279,8 @@ function Calculator(){
 
       })
       .then(function(result){
+        return result;
+        /*
         //In case result are processedDetails
         if(_.isArray(result)){
           var totals = sumProcessedDetails(result, options);
@@ -288,6 +290,7 @@ function Calculator(){
         else{
           return result;
         }
+        */
       });
   }
 
@@ -298,7 +301,10 @@ function Calculator(){
       total:0,
       discount:0,
       totalProducts: 0,
-      paymentGroup: options.paymentGroup
+      paymentGroup: options.paymentGroup,
+      immediateDelivery: processedDetails.every(function(detail){
+        return detail.immediateDelivery;
+      })
     };
 
     processedDetails.forEach(function(pd){

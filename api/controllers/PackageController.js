@@ -78,7 +78,7 @@ module.exports = {
       });
   }
 
-}
+};
 
 function updatePackageRule(product){
   var q = {

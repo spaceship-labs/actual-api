@@ -42,6 +42,13 @@ module.exports = {
     /*-------------/
       ONLY APPLIES TO PACKAGES GROUPS
     /*------------*/
+    OnOffline:{type:'boolean'},
+    OnStudio:{type:'boolean'},
+    OnHome:{type:'boolean'},
+    OnKids:{type:'boolean'},
+    OnAmueble:{type:'boolean'},
+    
+    
     PackageRules: {
       collection:'PackageRule',
       via:'PromotionPackage'

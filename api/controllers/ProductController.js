@@ -36,7 +36,6 @@ module.exports = {
     //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
     var queryPromo = {
-      //select: ['discountPg1','discountPg2','discountPg3','discountPg4','discountPg5'],
       startDate: {'<=': currentDate},
       endDate: {'>=': currentDate},
     };
@@ -47,7 +46,6 @@ module.exports = {
       .populate('Sizes')
       .populate('Groups')
       .populate('Promotions', queryPromo)
-      //.populate('stock')
       .then(function(product){
         res.ok({data:product});
       })
@@ -154,9 +152,10 @@ module.exports = {
           }
           else{
             //TODO check how to retrieve images instead of doing other query
-            Product.findOne({ItemCode:form.id}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
-              return res.json(updatedProduct.files);
-            });
+            Product.findOne({ItemCode:form.id}, {select:['ItemCode']})
+              .populate('files').exec(function(e, updatedProduct){
+                return res.json(updatedProduct.files);
+              });
           }
         });
       })
@@ -184,9 +183,10 @@ module.exports = {
           }
           else{
             //TODO check how to retrieve images instead of doing other query
-            Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']}).populate('files').exec(function(e, updatedProduct){
-              return res.json(updatedProduct.files);
-            });
+            Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']})
+              .populate('files').exec(function(e, updatedProduct){
+                return res.json(updatedProduct.files);
+              });
           }
         });
 
@@ -210,13 +210,23 @@ module.exports = {
         return res.json(false);
       }else{
         //TODO check how to retrieve images instead of doing other query
-        var selectedFields = ['icon_filename','icon_name','icon_size','icon_type','icon_typebase'];
-        Product.findOne({ItemCode:form.id}, {select: selectedFields}).exec(function(e, updatedProduct){
-          return res.json(updatedProduct);
-        });
+        var selectedFields = [
+          'icon_filename',
+          'icon_name',
+          'icon_size',
+          'icon_type',
+          'icon_typebase'
+        ];
+        Product.findOne({ItemCode:form.id}, {select: selectedFields})
+          .exec(function(e, updatedProduct){
+            if(err){
+              console.log(err);
+              return res.negotiate(err);
+            }
+            return res.json(updatedProduct);
+          });
 
       }
-      //res.json(product);
     });
   },
 

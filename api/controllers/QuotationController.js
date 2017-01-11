@@ -315,7 +315,7 @@ module.exports = {
     }
 
     var extraParams = {
-      searchFields: ['folio','id','DocEntry','CardCode','CardName'],
+      searchFields: ['folio','id'],
       selectFields: form.fields,
       populateFields: ['Client']
     };
