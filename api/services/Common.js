@@ -86,7 +86,7 @@ module.exports = {
           obj[field]        = {contains:term};
           query.or.push(obj);
 
-          if(model === 'quotation'){
+          if(field === 'folio'){
             exactQuery[field] = term;
             query.or.push(exactQuery);
           }

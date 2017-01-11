@@ -8,6 +8,11 @@ module.exports = {
     var client = form.client;
     var model = 'order';
     var extraParams = {
+      searchFields: [
+        'folio',
+        'CardName',
+        'CardCode'
+      ],
       selectFields: form.fields,
       populateFields: ['Client']
     };
