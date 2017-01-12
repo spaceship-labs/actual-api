@@ -105,7 +105,7 @@ function validateQuotationStockById(quotationId, userId){
     ];
   })
   .spread(function(warehouse,details){
-    return StockService.getDetailsStock(details, warehouse);    
+    return getDetailsStock(details, warehouse);    
   })
   .then(function(detailsStock){
   	//console.log('detailsStock', detailsStock);
@@ -173,11 +173,11 @@ function findValidDelivery(detail,deliveryDates){
 			return false;
 		}
 
-		var detailShipDate = moment(details[i].originalShipDate).startOf('day').format('DD-MM-YYYY');
+		var detailShipDate = moment(detail.originalShipDate).startOf('day').format('DD-MM-YYYY');
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 		var isValidDelivery;
 
-		if(detailShipDate === deliveryDate && details[i].quantity <= delivery.available){				
+		if(detailShipDate === deliveryDate && detail.quantity <= delivery.available){				
 			isValidDelivery = true;
 		}else{
 			isValidDelivery = false;
