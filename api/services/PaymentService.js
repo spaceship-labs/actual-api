@@ -198,6 +198,16 @@ var paymentGroups = [
         currency: 'mxn',
         needsVerification: false
       },*/
+      /*
+      {
+        label:'Saldo a favor',
+        name: 'Saldo a favor',
+        type:'client-balance',
+        description:'',
+        currency:'mxn',
+        needsVerification: false
+      },
+      */
       {
         label:'1 pago con',
         name:'Una sola exhibición terminal',

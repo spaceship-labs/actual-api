@@ -381,6 +381,11 @@ module.exports.routes = {
     action:'getEwalletByClient'
   },
 
+  '/client/:id/balance':{
+    controller:'client',
+    action:'getClientBalance'
+  },
+
   '/quotation/create':{
     controller: 'quotation',
     action: 'create'

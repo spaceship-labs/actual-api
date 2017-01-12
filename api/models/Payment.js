@@ -14,6 +14,7 @@ module.exports = {
         'ewallet',
         'credit-card', //TODO remove
         'single-payment-terminal',
+        'client-balance',
         '3-msi',
         '6-msi',
         '9-msi',

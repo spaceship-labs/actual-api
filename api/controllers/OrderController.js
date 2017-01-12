@@ -166,14 +166,11 @@ module.exports = {
 
           delete quotation.Address.id;
           delete quotation.Address.Address; //Address field in person contact
-          orderParams = _.omit(quotation.Address,[
-            'id',
-            'Address',
-            'createdAt',
-            'updatedAt',
-            'CntctCode',
-            'CardCode'
-          ]);
+          delete quotation.Address.createdAt;
+          delete quotation.Address.updatedAt;
+          delete quotation.Address.CntctCode;
+          delete quotation.Address.CardCode;
+          orderParams = _.extend(orderParams,quotation.Address);
         }
 
         currentStore = user.activeStore;
@@ -364,7 +361,7 @@ function isValidOrderCreated(sapResponse, sapResult){
   sapResult = sapResult || {};
   if( sapResponse && _.isArray(sapResult)){
     var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
-    var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference)
+    var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
 
     if(everyOrderHasPayments && everyOrderHasFolio){
       return true;
@@ -374,7 +371,7 @@ function isValidOrderCreated(sapResponse, sapResult){
 }
 
 function checkIfSapOrderHasReference(sapOrder){
-  return sapOrder.Order;
+  return sapOrder.Order || sapOrder.Invoice;
 }
 
 function checkIfSapOrderHasPayments(sapOrder){

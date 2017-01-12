@@ -318,7 +318,20 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  }
+  },
+
+  getClientBalance: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    Client.findOne({id:id, select:['balance']})
+      .then(function(client){
+        res.json(client.balance);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  }  
 
 
 };

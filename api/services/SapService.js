@@ -164,6 +164,7 @@ function createSaleOrder(params){
 function buildSaleOrderRequestParams(params){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
+
   var saleOrderRequest = {
     QuotationId: params.quotationId,
     GroupCode: params.groupCode,
@@ -193,7 +194,8 @@ function buildSaleOrderRequestParams(params){
           DiscountPercent: detail.discountPercent,
           Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
           Price: detail.total,
-          ImmediateDelivery: isImmediateDelivery(detail.shipDate)
+          ImmediateDelivery: isImmediateDelivery(detail.shipDate),
+          DetailId: detail.id
           //unitPrice: detail.Product.Price
         };
         return product;
