@@ -1,6 +1,9 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
 var EWALLET_POSITIVE = 'positive';
+var INVOICE_SAP_TYPE = 'Invoice';
+var ORDER_SAP_TYPE = 'Order';
+var ERROR_SAP_TYPE = 'Error';
 
 module.exports = {
   find: function(req, res){
@@ -199,8 +202,10 @@ module.exports = {
       .then(function(sapResponse){
         sails.log.info('createSaleOrder response', sapResponse);
         sapResult = JSON.parse(sapResponse.value);
-        if( !isValidOrderCreated(sapResponse, sapResult) ){
-          return Promise.reject('Error en la respuesta de SAP');
+        var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult);
+        if( isValidSapResponse.error ){
+          var errorStr = isValidSapResponse.error || 'Error en la respuesta de SAP';
+          return Promise.reject(errorStr);
         }
         orderParams.documents = sapResult;
         return Order.create(orderParams);
@@ -250,7 +255,7 @@ module.exports = {
       })
       .then(function(){
         //RESPONSE
-        //res.json(orderCreated);
+        res.json(orderCreated);
 
         //STARTS EMAIL SENDING PROCESS
         return Order.findOne({id:orderCreated.id})
@@ -269,11 +274,11 @@ module.exports = {
       .spread(function(orderSent, freesaleSent){
         sails.log.info('Email de orden enviado');
         //RESPONSE
-        return res.json(orderCreated);        
+        //res.json(orderCreated);        
       })
       .catch(function(err){
         console.log(err);
-        return res.negotiate(err);
+        res.negotiate(err);
       });
   },
 
@@ -367,15 +372,44 @@ function isValidOrderCreated(sapResponse, sapResult){
     var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
     var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
 
-    if(everyOrderHasPayments && everyOrderHasFolio){
-      return true;
+    if(!everyOrderHasFolio){
+      return {
+        error:collectSapErrors(sapResult)
+      };
+    }
+    else if(everyOrderHasPayments && everyOrderHasFolio){
+      return {
+        error: false
+      };
     }
   }
-  return false;
+  return {
+    error: true
+  };
+}
+
+function collectSapErrors(sapResult){
+  var sapErrorsString = '';
+  if(_.isArray(sapResult) ){
+    var sapErrors =  sapResult.map(collectSapErrorsBySapOrder);
+    sapErrorsString = sapErrors.join(', ');
+  }
+  return sapErrorsString;
+}
+
+function collectSapErrorsBySapOrder(sapOrder){
+  if(sapOrder.type === ERROR_SAP_TYPE){
+    return sapOrder.result;
+  }
+  return null; 
 }
 
 function checkIfSapOrderHasReference(sapOrder){
-  return sapOrder.Order || sapOrder.Invoice;
+  return sapOrder.result && 
+    (
+      sapOrder.type === INVOICE_SAP_TYPE ||
+      sapOrder.type === ORDER_SAP_TYPE
+    );
 }
 
 function checkIfSapOrderHasPayments(sapOrder){
@@ -391,7 +425,7 @@ function checkIfSapOrderHasPayments(sapOrder){
 
 function saveSapReferences(sapResult, orderId){
   var ordersSap = sapResult.map(function(orderSap){
-    return {
+    var orderSapReference = {
       Order: orderId,
       invoiceSap: orderSap.Invoice || null,
       document: orderSap.Order,
@@ -402,6 +436,16 @@ function saveSapReferences(sapResult, orderId){
         };
       })
     };
+
+    if(orderSap.type === INVOICE_SAP_TYPE){
+      orderSapReference.invoiceSap = orderSap.result;
+    }
+    else if(orderSap.type === ORDER_SAP_TYPE){
+      orderSapReference.document = orderSap.result;
+    }
+
+
+    return orderSapReference;
   });
   return OrderSap.create(ordersSap);
 }
