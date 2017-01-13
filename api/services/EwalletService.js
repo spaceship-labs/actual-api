@@ -1,4 +1,5 @@
 var EWALLET_NEGATIVE = 'negative';
+var Promise = require('bluebird');
 
 module.exports = {
 	applyEwalletPayment: applyEwalletPayment
@@ -7,7 +8,7 @@ module.exports = {
 function applyEwalletPayment(payment, options){
 	var client = options.client;
   if (client.ewallet < payment.ammount || !client.ewallet) {
-    return Promise.reject('Fondos insuficientes');
+    return Promise.reject(new Error('Fondos insuficientes'));
   }
   var updateParams = {ewallet: client.ewallet - payment.ammount};
   
