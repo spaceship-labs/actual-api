@@ -200,6 +200,7 @@ module.exports = {
   updateIcon: function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
+    sails.log.info('subiendo archivos');
     Product.updateAvatar(req,{
       dir : 'products',
       profile: 'avatar',
@@ -219,9 +220,9 @@ module.exports = {
         ];
         Product.findOne({ItemCode:form.id}, {select: selectedFields})
           .exec(function(e, updatedProduct){
-            if(err){
-              console.log(err);
-              return res.negotiate(err);
+            if(e){
+              console.log(e);
+              return res.negotiate(e);
             }
             return res.json(updatedProduct);
           });
