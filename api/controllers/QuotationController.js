@@ -267,7 +267,7 @@ module.exports = {
         if(updatedQuotation && updatedQuotation.length > 0){
           return Quotation.findOne({id: updatedQuotation[0].id}).populate('Details');
         }
-        return Promise.reject('No hay cotización');
+        return Promise.reject(new Error('No hay cotización'));
       })
       .then(function(quotation){
         res.json(quotation);

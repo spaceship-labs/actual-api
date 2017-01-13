@@ -34,6 +34,10 @@ module.exports = {
     Product: {
       model:'Product'
     },
+    QuotationDetail:{
+      model: 'QuotationDetail'
+    },    
+
     //ship
     shipDate: {
       type: 'date',

@@ -9,6 +9,10 @@ module.exports = {
 		PaymentsSap:{
 			collection:'PaymentSap',
 			via:'OrderSap'
+		},
+		ProductSeries:{
+			collection:'ProductSerie',
+			via:'OrderSap'
 		}
 	}
 };
