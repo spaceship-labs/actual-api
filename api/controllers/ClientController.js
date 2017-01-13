@@ -323,9 +323,10 @@ module.exports = {
   getClientBalance: function(req, res){
     var form = req.allParams();
     var id = form.id;
-    Client.findOne({id:id, select:['balance']})
+    Client.findOne({id:id, select:['Balance']})
       .then(function(client){
-        res.json(client.balance);
+        var balance = client.Balance * -1;
+        res.json(balance);
       })
       .catch(function(err){
         console.log(err);

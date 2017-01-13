@@ -58,11 +58,7 @@ module.exports = {
         return Quotation.update({id:quotationId}, params);
       })
       .then(function(updatedQuotation){
-        if(updatedQuotation && updatedQuotation.length > 0){
-          res.json(updatedQuotation[0]);
-        }else{
-          res.json(null);
-        }
+        return Quotation.findOne({id:quotationId}).populate('Client');
       })
       .catch(function(err){
         console.log(err);
