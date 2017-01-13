@@ -163,6 +163,7 @@ module.exports = {
           }
         });
       })
+      /*
       .timeout(3600000)
       .cancellable()
       .catch(Promise.CancellationError, function(error) {
@@ -174,7 +175,8 @@ module.exports = {
         // ... must neatly abort the task ...
         console.log('Task timed out', error);
         res.negotiate(err);
-      })           
+      })
+      */           
       .catch(function(err){
         console.log('err',err);
         res.negotiate(err);
