@@ -1,5 +1,6 @@
 module.exports = {
 	attributes:{
+		invoiceSap: 'string',
 		document: 'string',
 
 		Order:{

@@ -389,6 +389,7 @@ function saveSapReferences(sapResult, orderId){
   var ordersSap = sapResult.map(function(orderSap){
     return {
       Order: orderId,
+      invoiceSap: orderSap.Invoice || null,
       document: orderSap.Order,
       PaymentsSap: orderSap.Payments.map(function(payment){
         return {
