@@ -35,26 +35,14 @@ module.exports = {
       })
       .then(function(quotation){
         client = quotation.Client;
-        if (form.type != EWALLET_TYPE) { return; }
-        if (client.ewallet < form.ammount || !client.ewallet) {
-          return Promise.reject('Fondos insuficientes');
-        }
         form.Client = client.id;
-        return Client.update(client.id, {ewallet: client.ewallet - form.ammount});
-      })
-      .then(function(client){
-        if(form.type == EWALLET_TYPE){
-          var ewalletRecord = {
-            Store: form.Store,
-            Quotation: quotationId,
-            User: req.userId,
-            Client: client.id,
-            type: EWALLET_NEGATIVE,
-            amount: form.ammount
-          };
-          return EwalletRecord.create(ewalletRecord);
-        }
-        return null;
+        if (form.type != EWALLET_TYPE) { return; }
+
+        return EwalletService.applyEwalletPayment(form,{
+          quotationId: quotationId,
+          userId: req.userId,
+          client: client
+        });
       })
       .then(function(result) {
         return Payment.create(form);
