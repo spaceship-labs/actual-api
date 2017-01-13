@@ -139,15 +139,18 @@ module.exports = {
 
   addFiles : function(req,res){
     process.setMaxListeners(0);
+    sails.log.info('ADDFILES');
     var form = req.params.all();
     Product.findOne({ItemCode:form.id})
       .then(function(product){
+        sails.log.info('addding files to product', product);
         product.addFiles(req,{
           dir : 'products/gallery',
           profile: 'gallery'
         },function(e,product){
+          sails.log.info('addedFiles', product)
           if(e){
-            console.log(e);
+            console.log('error: ', e);
             res.json(false);
           }
           else{
@@ -160,7 +163,7 @@ module.exports = {
         });
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err',err);
         res.negotiate(err);
       });      
   },
