@@ -151,7 +151,7 @@ module.exports = {
           sails.log.info('addedFiles', product)
           if(e){
             console.log('error: ', e);
-            res.json(false);
+            return res.json(false);
           }
           else{
             //TODO check how to retrieve images instead of doing other query
