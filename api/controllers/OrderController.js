@@ -206,6 +206,7 @@ module.exports = {
         sails.log.info('createSaleOrder response', sapResponse);
         sapResult = JSON.parse(sapResponse.value);
         var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult);
+        sails.log.info('isValidSapResponse', isValidSapResponse);
         if( isValidSapResponse.error ){
           var errorStr = isValidSapResponse.error || 'Error en la respuesta de SAP';
           return Promise.reject(errorStr);
@@ -376,6 +377,8 @@ function isValidOrderCreated(sapResponse, sapResult){
   if( sapResponse && _.isArray(sapResult)){
     var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
     var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
+
+    sails.log.info('everyOrderHasFolio', everyOrderHasFolio);
 
     if(!everyOrderHasFolio){
       return {
