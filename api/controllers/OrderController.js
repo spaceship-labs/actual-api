@@ -250,7 +250,7 @@ module.exports = {
       })
       .then(function(){
         //RESPONSE
-        res.json(orderCreated);
+        //res.json(orderCreated);
 
         //STARTS EMAIL SENDING PROCESS
         return Order.findOne({id:orderCreated.id})
@@ -268,10 +268,12 @@ module.exports = {
       })
       .spread(function(orderSent, freesaleSent){
         sails.log.info('Email de orden enviado');
+        //RESPONSE
+        return res.json(orderCreated);        
       })
       .catch(function(err){
         console.log(err);
-        res.negotiate(err);
+        return res.negotiate(err);
       });
   },
 
