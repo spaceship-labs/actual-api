@@ -29,7 +29,7 @@
 module.exports.cors = {
   allRoutes: true,
   //origin: '*',
-  origin: 'sandboxventas.miactual.com, ventas.miactual.com, demoventas.miactual.com, admin.miactual.com, sandboxadmin.miactual.com, demoadmin.miactual.com',
+  origin: 'http://sandboxventas.miactual.com, http://ventas.miactual.com, http://demoventas.miactual.com, http://admin.miactual.com, http://sandboxadmin.miactual.com, http://demoadmin.miactual.com',
   headers: 'content-type, Authorization'
 
   /***************************************************************************
