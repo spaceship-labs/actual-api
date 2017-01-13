@@ -182,6 +182,7 @@ module.exports = {
         ];
       })
       .spread(function(quotationDetails, site){
+        sails.log.info('createSaleOrder from controller');
         return SapService.createSaleOrder({
           quotationId:      quotationId,
           groupCode:        orderParams.groupCode,
