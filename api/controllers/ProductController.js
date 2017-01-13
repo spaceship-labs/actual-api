@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var Promise = require('bluebird');
 
 module.exports = {
   find: function(req, res){
@@ -151,7 +152,7 @@ module.exports = {
           sails.log.info('addedFiles', product)
           if(e){
             console.log('error: ', e);
-            return res.json(false);
+            return res.negotiate(e);
           }
           else{
             //TODO check how to retrieve images instead of doing other query
@@ -162,6 +163,18 @@ module.exports = {
           }
         });
       })
+      .timeout(3600000)
+      .cancellable()
+      .catch(Promise.CancellationError, function(error) {
+        // ... must neatly abort the task ...
+        console.log('Task cancelled', error);
+        res.negotiate(err);
+      })
+      .catch(Promise.TimeoutError, function(error) {
+        // ... must neatly abort the task ...
+        console.log('Task timed out', error);
+        res.negotiate(err);
+      })           
       .catch(function(err){
         console.log('err',err);
         res.negotiate(err);
@@ -182,7 +195,7 @@ module.exports = {
         },function(e,product){
           if(e){
             console.log(e);
-            res.json(false);
+            res.negotiate(e);
           }
           else{
             //TODO check how to retrieve images instead of doing other query
@@ -211,7 +224,7 @@ module.exports = {
     },function(e,product){
       if(e){
         console.log(e);
-        return res.json(false);
+        return res.negotiate(e);
       }else{
         //TODO check how to retrieve images instead of doing other query
         var selectedFields = [
@@ -244,7 +257,7 @@ module.exports = {
     },function(e,product){
       if(e) {
         console.log(e);
-        res.json(false);
+        res.negotiate(e);
       }else{
         res.json(product);
       }
