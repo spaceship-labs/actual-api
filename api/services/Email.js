@@ -244,7 +244,7 @@ function quotation(quotationId) {
       var user     = quotation.User;
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
-      details      = QuotationDetail.find(details).populate('Product');
+      details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, user.id);
       var transfers = TransferService.transfers(store.group);
       return [client, user,  quotation, details, payments, transfers, store];
@@ -265,7 +265,10 @@ function quotation(quotationId) {
           warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
           ship: date,
-          price: numeral(detail.total).format('0,0.00'),
+          price: numeral(detail.unitPrice).format('0,0.00'),
+          total: numeral(detail.total).format('0,0.00'),
+          discount: detail.discountPercent,
+          promo: (detail.Promotion || {}).publicName,
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
@@ -287,6 +290,9 @@ function quotation(quotationId) {
 }
 
 function sendQuotation(client, user, quotation, products, payments, transfers, store) {
+  var date = moment(quotation.updatedAt);
+  moment.locale('es');
+  date.locale(false);
   var emailBody = quotationTemplate({
     client: {
       name: client.CardName,
@@ -297,13 +303,16 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
     user: {
       name: user.firstName + ' ' + user.lastName,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
+      cel: user.mobilePhone,
     },
     quotation: {
       folio: quotation.folio,
       subtotal: numeral(quotation.subtotal).format('0,0.00'),
       discount: numeral(quotation.discount).format('0,0.00'),
       total: numeral(quotation.total).format('0,0.00'),
+      date: date.format('DD/MMM/YYYY'),
+      time: date.format('LT'),
     },
     company: {
       url: baseURL,

@@ -111,7 +111,7 @@ function getPaymentGroupsForEmail(quotation, seller) {
   return getMethodGroupsWithTotals(quotation, seller)
     .then(function(res) {
       var cash = [{
-        name: '1 pago de contado',
+        name: 'Pago único',
         cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
         total: numeral(res[0].total).format('0,0.00'),
       }];
