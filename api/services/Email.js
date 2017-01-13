@@ -28,13 +28,6 @@ module.exports = {
 function password(userName, userEmail, recoveryUrl, cb) {
   var user_name       = userName;
   var user_link       = recoveryUrl;
-  var company_name    = 'actual group';
-  var company_img     = 'http://actual.spaceshiplabs.com/assets/images/logo.png';
-  var company_address = '';
-  var company_city    = '';
-  var company_state   = '';
-  var company_ip      = '';
-  var unsubscribe     = '#';
   var request         = sendgrid.emptyRequest();
   var requestBody     = undefined;
   var mail            = new helper.Mail();
@@ -45,24 +38,16 @@ function password(userName, userEmail, recoveryUrl, cb) {
   var res             = passwordTemplate({
     user_name: user_name,
     user_link: user_link,
-    company_name: company_name,
-    company_img: company_img,
-    company_address: company_address,
-    company_city: company_city,
-    company_state: company_state,
-    company_ip: company_ip,
-
-    unsubscribe: unsubscribe
+    company: {
+      url: baseURL,
+    },
   });
   var content         = new helper.Content("text/html", res);
-
   personalization.addTo(to);
   personalization.setSubject(subject);
-
   mail.setFrom(from);
   mail.addContent(content)
   mail.addPersonalization(personalization)
-
   requestBody = mail.toJSON()
   request.method = 'POST'
   request.path = '/v3/mail/send'
@@ -454,7 +439,7 @@ function sendFreesale(user, order, products, store) {
   var personalization  = new helper.Personalization();
   var from             = new helper.Email('no-reply@actualg.com', 'no-reply');
   //var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');  
+  var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');
   var subject          = 'Artículos freesale | Confirmación de compra Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);

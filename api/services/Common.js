@@ -5,7 +5,7 @@ var moment = require('moment');
 var assign = require('object-assign');
 
 module.exports = {
-  reassignOrdersDates(){
+  reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
     Order.find({}).populate('Quotation')
       .then(function(orders){
@@ -44,7 +44,7 @@ module.exports = {
       return Number(n) === n && n % 1 !== 0;
     }
     return false;
-  },  
+  },
 
   validateEmail: function(email) {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -118,14 +118,14 @@ module.exports = {
       query[dateRange.field] = {};
 
       if(dateRange.start){
-        startDate = new Date(dateRange.start); 
+        startDate = new Date(dateRange.start);
         startDate.setHours(0,0,0,0);
         query[dateRange.field] = assign(query[dateRange.field],{
           '>=': new Date(startDate)
         });
       }
       if(dateRange.end){
-        endDate = new Date(dateRange.end); 
+        endDate = new Date(dateRange.end);
         endDate.setHours(23,59,59,999);
         query[dateRange.field] = assign(query[dateRange.field],{
           '<=': new Date(endDate)
@@ -245,7 +245,7 @@ module.exports = {
       };
     }
     return range;
-  },  
+  },
 
 
   formatHandle: function(str) {
