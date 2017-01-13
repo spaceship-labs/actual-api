@@ -139,7 +139,7 @@ module.exports = {
 
   addFiles : function(req,res){
     process.setMaxListeners(0);
-    sails.log.info('ADDFILES');
+    sails.log.info('ADDFILES', req.method);
     var form = req.params.all();
     Product.findOne({ItemCode:form.id})
       .then(function(product){
