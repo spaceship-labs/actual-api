@@ -209,7 +209,7 @@ module.exports = {
         sails.log.info('isValidSapResponse', isValidSapResponse);
         if( isValidSapResponse.error ){
           var errorStr = isValidSapResponse.error || 'Error en la respuesta de SAP';
-          return Promise.reject(errorStr);
+          return Promise.reject(new Error(errorStr));
         }
         orderParams.documents = sapResult;
         return Order.create(orderParams);
