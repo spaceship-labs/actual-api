@@ -52,7 +52,9 @@ module.exports = {
         var sapReferencesIds = order.OrdersSap.map(function(ref){
           return ref.id;
         });
-        return OrderSap.find(sapReferencesIds).populate('PaymentsSap');
+        return OrderSap.find(sapReferencesIds)
+          .populate('PaymentsSap')
+          .populate('ProductSeries');
       })
       .then(function(ordersSap){
         order.OrdersSap = ordersSap;
@@ -78,6 +80,7 @@ module.exports = {
     var sapResponse;
     var quotation;
     var orderParams;
+    var orderDetails;
 
     //Validating if quotation doesnt have an order assigned
     Order.findOne({Quotation: quotationId})
@@ -217,6 +220,7 @@ module.exports = {
       .then(function(orderFound){
         //Cloning quotation details to order details
         quotation.Details.forEach(function(d){
+          d.QuotationDetail = _.clone(d.id);
           delete d.id;
           orderFound.Details.add(d);
         });
@@ -227,7 +231,8 @@ module.exports = {
           .populate('Product')
           .populate('shipCompanyFrom');
       })
-      .then(function(orderDetails){
+      .then(function(orderDetailsFound){
+        orderDetails = orderDetailsFound;
         return StockService.substractProductsStock(orderDetails);
       })
       .then(function(){
@@ -239,7 +244,7 @@ module.exports = {
         };
         return [
           Quotation.update({id:quotation.id} , updateFields),
-          saveSapReferences(sapResult, orderCreated.id)
+          saveSapReferences(sapResult, orderCreated.id, orderDetails)
         ];
       })
       .spread(function(quotationUpdated, sapOrdersReference){
@@ -423,8 +428,11 @@ function checkIfSapOrderHasPayments(sapOrder){
   return false;
 }
 
-function saveSapReferences(sapResult, orderId){
+function saveSapReferences(sapResult, orderId, orderDetails){
+  sails.log.info('sapResult', sapResult);
   var ordersSap = sapResult.map(function(orderSap){
+    sails.log.info('orderSap', orderSap);
+
     var orderSapReference = {
       Order: orderId,
       invoiceSap: orderSap.Invoice || null,
@@ -434,7 +442,7 @@ function saveSapReferences(sapResult, orderId){
           document: payment.pay,
           Payment: payment.reference
         };
-      })
+      }),
     };
 
     if(orderSap.type === INVOICE_SAP_TYPE){
@@ -444,6 +452,15 @@ function saveSapReferences(sapResult, orderId){
       orderSapReference.document = orderSap.result;
     }
 
+    if(orderSap.series && _.isArray(orderSap.series)){
+      orderSapReference.ProductSeries = orderSap.series.map(function(serie){
+        var productSerie =  {
+          QuotationDetail: serie.DetailId,
+          OrderDetail: _.findWhere(orderDetails, {QuotationDetail: serie.DetailId}),
+          seriesNumbers: serie.Number
+        };
+      });
+    }
 
     return orderSapReference;
   });

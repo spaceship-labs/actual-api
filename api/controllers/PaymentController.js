@@ -60,6 +60,9 @@ module.exports = {
       .then(function(updatedQuotation){
         return Quotation.findOne({id:quotationId}).populate('Client');
       })
+      .then(function(populatedQuotation){
+        res.json(populatedQuotation);
+      })
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
