@@ -14,6 +14,8 @@ module.exports = {
     var totalDiscount = form.totalDiscount || 0;
     var paymentGroup  = form.group || 1;
     var client        = false;
+    var exchangeRate;
+    var quotation;
     form.Quotation    = quotationId;
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
@@ -33,7 +35,8 @@ module.exports = {
         form.User = user.id;
         return Quotation.findOne(form.Quotation).populate('Client');
       })
-      .then(function(quotation){
+      .then(function(quotationFound){
+        quotation = quotationFound;
         client = quotation.Client;
         form.Client = client.id;
         if (form.type != EWALLET_TYPE) { return; }
@@ -45,10 +48,15 @@ module.exports = {
         });
       })
       .then(function(result) {
+        return PaymentService.getExchangeRate();
+      })
+      .then(function(exchangeRateFound){
+        exchangeRate = exchangeRateFound;
+        //return calculateQuotationAmountPaid(quotationId, exchangeRate);
         return Payment.create(form);
       })
       .then(function(paymentCreated){
-        return calculateQuotationAmountPaid(quotationId);
+        return calculateQuotationAmountPaid(quotationId, exchangeRate);
       })
       .then(function(ammountPaid){
         var params = {
@@ -73,7 +81,9 @@ module.exports = {
     var form = req.allParams();
     var paymentId = form.paymentId;
     var quotationId = form.quotationId;
-    var negativePayment;  
+    var negativePayment; 
+    res.negotiate(new Error('Cancelaciones no disponibles'));
+    /* 
       Payment.findOne({id:paymentId})
       .then(function(payment){
         if(payment.isCancellation){
@@ -114,7 +124,8 @@ module.exports = {
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
-      });    
+      });
+    */    
   },
 
   getPaymentGroups: function(req, res){
@@ -123,19 +134,14 @@ module.exports = {
   }	
 };
 
-function calculateQuotationAmountPaid(quotationId){
-  return Promise.join(
-      Quotation.findOne({id: quotationId}).populate('Payments'),
-      PaymentService.getExchangeRate()
-    )
-    .then(function(results){
-      var quotation = results[0];
+function calculateQuotationAmountPaid(quotationId, exchangeRate){
+  return Quotation.findOne({id: quotationId}).populate('Payments')
+    .then(function(quotation){
       var payments  = quotation.Payments || [];
-      var exchangeRate = results[1];
 
       var ammounts = payments.map(function(p){
         if(p.type == 'cash-usd'){
-         return p.ammount * exchangeRate;
+         return calculateUSDPayment(payment, exchangeRate);
         }
         return p.ammount;
       });
@@ -145,6 +151,10 @@ function calculateQuotationAmountPaid(quotationId){
 
       return ammountPaid;
     });  
+}
+
+function calculateUSDPayment(payment, exchangeRate){
+  return payment.ammount * exchangeRate;
 }
 
 function formatProductsIds(details){

@@ -58,7 +58,7 @@ module.exports = {
     })
     .then(function(contacts){
       if(!clientFound){
-        return Promise.reject('Cliente no encontrado');
+        return Promise.reject(new Error('Cliente no encontrado'));
       }
       clientFound = clientFound.toObject();
       clientFound.Contacts = contacts;
@@ -121,7 +121,7 @@ module.exports = {
 
         if( !sapData || !ClientService.isValidCardCode(sapData.CardCode)  ) {
           var err = result.value || 'Error al crear socio de negocio';
-          return Promise.reject(err);
+          return Promise.reject(new Error(err));
         }
         
         form.CardCode     = sapData.CardCode;
@@ -188,7 +188,7 @@ module.exports = {
         if(resultSap && resultSap.value && ClientService.isValidCardCode(resultSap.value)){
           return Client.update({CardCode: CardCode}, form);
         }
-        return Promise.reject('Actualización en SAP fallida');
+        return Promise.reject(new Error('Actualización en SAP fallida'));
       })
       .then(function(updated){
         res.json(updated);
@@ -222,12 +222,12 @@ module.exports = {
         sails.log.info('createContact resultSap', resultSap);
         if( !resultSap.value || !_.isArray(resultSap.value) ){
           var err = resultSap.value || 'Error al crear contacto';
-          return Promise.reject(err);
+          return Promise.reject(new Error(err));
         }
         var CntctCode  = resultSap.value[0]; 
         if(!ClientService.isValidContactCode(CntctCode)){
           var err = resultSap.value || 'Error al crear contacto';
-          return Promise.reject(err);
+          return Promise.reject(new Error(err));
         }
 
         form.CntctCode = CntctCode;
@@ -256,12 +256,12 @@ module.exports = {
         sails.log.info('resultSap updateContact', resultSap);
         if( !resultSap.value || !_.isArray(resultSap.value) ){
           var err = resultSap.value || 'Error al actualizar contacto';
-          return Promise.reject(err);
+          return Promise.reject(new Error(err));
         }
         var CntctCode  = resultSap.value[0]; 
         if(!ClientService.isValidContactCode(CntctCode)){
           var err = resultSap.value || 'Error al actualizar contacto';
-          return Promise.reject(err);
+          return Promise.reject(new Error(err));
         }
         return ClientContact.update({CntctCode: contactCode}, form);
       })
@@ -290,7 +290,7 @@ module.exports = {
         sails.log.info('result updateFiscalAddress', result);
         if(!result.value){
           var err = result.value || 'Error al actualizar direccion fiscal';
-          return Promise.reject(err);
+          return Promise.reject(new Error(err));
         }
         return [
           FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
