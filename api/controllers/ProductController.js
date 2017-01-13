@@ -34,6 +34,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    sails.log.info('findById product : ' + id);
     //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
     var queryPromo = {
