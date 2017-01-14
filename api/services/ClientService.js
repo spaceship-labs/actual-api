@@ -64,7 +64,7 @@ module.exports = {
 			result = {error: sapData.result || true};
 		}
 		
-		if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) && _.isArray(sapData.person) ){
+		if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) && _.isArray(sapData.pers) ){
 			if(contacts.length === sapData.pers.length){
 				result = {error: false};
 			}

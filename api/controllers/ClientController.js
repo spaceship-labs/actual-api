@@ -121,8 +121,11 @@ module.exports = {
         var isValidSapResponse = ClientService.isValidSapClientCreation(sapData, contacts, fiscalAddress);
 
         if( !sapData || isValidSapResponse.error  ) {
-          var err = isValidSapResponse.error || 'Error al crear cliente en SAP';
-          sails.log.info('err', err);
+          var defualtErrMsg = 'Error al crear cliente en SAP';
+          var err = isValidSapResponse.error || defualtErrMsg;
+          if(err === true){
+            err = defualtErrMsg;
+          }
           return Promise.reject(new Error(err));
         }
         
@@ -192,7 +195,11 @@ module.exports = {
         var isValidSapResponse = ClientService.isValidSapClientUpdate(sapData);
 
         if( !sapData || isValidSapResponse.error  ) {
-          var err = isValidSapResponse.error || 'Error al actualizar datos personales en SAP';
+          var defualtErrMsg = 'Error al actualizar datos personales en SAP';
+          var err = isValidSapResponse.error || defualtErrMsg;
+          if(err === true){
+            err = defualtErrMsg;
+          }
           sails.log.info('err', err);
           return Promise.reject(new Error(err));
         }
