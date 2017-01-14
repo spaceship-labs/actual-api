@@ -52,7 +52,7 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
-          console.log('error',e);
+          console.log('error saveFiles',e);
           return cb(e,files);
         }
         files.forEach(function(file){
@@ -110,7 +110,7 @@ module.exports.makeCrop = function(size,opts,cb){
     fs.createReadStream(route).pipe(fs.createWriteStream(opts.dirPublic+size+opts.filename))
     .on('finish',function(){
       return cb && cb(null,{route:route,size:size});
-    }).on('error',function(){
+    }).on('error makeCrop',function(){
       console.log('error with the crop');
       return cb && cb(null,false);
       //return cb && cb(true);
@@ -150,7 +150,7 @@ module.exports.makeCropsStreams = function(uploadOptions, opts, cb){
         .crop(wh[0], wh[1], 0, 0)
         .stream(function(err, stdout, stderr){
             if(err){
-              console.log(err);
+              console.log('error makeCropsStreams',err);
               return next(err);
             }
             stdout.pipe(adapter.uploadStream({dirSave:opts.dirSave, name: size+opts.filename }, next));
@@ -245,7 +245,7 @@ module.exports.saveFilesSap = function(internalFiles,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
-          console.log(e);
+          console.log('error saveFilesSap',e);
           return cb(e,files);
         }
         files.forEach(function(file){

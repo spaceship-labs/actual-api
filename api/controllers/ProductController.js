@@ -152,14 +152,18 @@ module.exports = {
         },function(e,product){
           sails.log.info('addedFiles', product)
           if(e){
-            console.log('error: ', e);
+            console.log('error in addFiles: ', e);
             return res.negotiate(e);
           }
           else{
             //TODO check how to retrieve images instead of doing other query
             Product.findOne({ItemCode:form.id}, {select:['ItemCode']})
-              .populate('files').exec(function(e, updatedProduct){
-                return res.json(updatedProduct.files);
+              .populate('files')
+              .then(function(updatedProduct){
+                res.json(updatedProduct.files);
+              })
+              .catch(function(e){
+                console.log('err product findOne addFiles', e);
               });
           }
         });
@@ -178,7 +182,7 @@ module.exports = {
         res.negotiate(err);
       })
       .catch(function(err){
-        console.log('err',err);
+        console.log('err final addFiles',err);
         res.negotiate(err);
       });      
   },
