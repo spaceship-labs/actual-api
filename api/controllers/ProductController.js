@@ -143,6 +143,7 @@ module.exports = {
     process.setMaxListeners(0);
     sails.log.info('ADDFILES', req.method);
     var form = req.params.all();
+
     Product.findOne({ItemCode:form.id})
       .then(function(product){
         sails.log.info('addding files to product', product);

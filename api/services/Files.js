@@ -19,8 +19,8 @@ module.exports.saveFiles = function(req,opts,cb){
 
   if(req._fileparser.upstreams.length && $files.length > 0){
     if(req._fileparser.form.bytesExpected>=maxBytes){
-      //cb(new Error('exceeds maxBytes')); //throw en controllers
-      cb(false,[]);
+      cb(new Error('exceeds maxBytes')); //throw en controllers
+      //cb(false,[]);
     }
     var fFiles = [];
     var uploadOptions = {
@@ -52,7 +52,7 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
-          console.log(e);
+          console.log('error',e);
           return cb(e,files);
         }
         files.forEach(function(file){
@@ -70,7 +70,7 @@ module.exports.saveFiles = function(req,opts,cb){
         cb(e,fFiles);
       });
   }else{
-    return cb(true,false);
+    return cb(new Error('saveFiles error'),false);
   }
 }
 var makeFileName = function(_stream,cb){

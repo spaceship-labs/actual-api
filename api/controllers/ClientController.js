@@ -120,7 +120,8 @@ module.exports = {
         var sapData = JSON.parse(result.value);
 
         if( !sapData || !ClientService.isValidCardCode(sapData.CardCode)  ) {
-          var err = result.value || 'Error al crear socio de negocio';
+          var err = sapData.CardCode || 'Error al crear socio de negocio';
+          sails.log.info('err', err);
           return Promise.reject(new Error(err));
         }
         
@@ -185,6 +186,12 @@ module.exports = {
     SapService.updateClient(CardCode, form)
       .then(function(resultSap){
         sails.log.info('update client resultSap', resultSap);
+
+        if( !resultSap || !ClientService.isValidCardCode(resultSap.value)  ) {
+          var err = result.value || 'Error al actualizar socio de negocio';
+          return Promise.reject(new Error(err));
+        }
+
         if(resultSap && resultSap.value && ClientService.isValidCardCode(resultSap.value)){
           return Client.update({CardCode: CardCode}, form);
         }
