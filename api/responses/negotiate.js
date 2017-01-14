@@ -24,7 +24,7 @@ module.exports = function negotiate (err) {
   var statusCode = 500;
   var body = err;
   if(err instanceof Error){
-    console.log('instancia de error');
+    console.log('instancia de error', err);
     body = err.toString();
   }
 

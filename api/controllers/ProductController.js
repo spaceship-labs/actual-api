@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var Promise = require('bluebird');
 
 module.exports = {
   find: function(req, res){
@@ -139,28 +140,49 @@ module.exports = {
 
   addFiles : function(req,res){
     process.setMaxListeners(0);
+    sails.log.info('ADDFILES :' +  new Date(), req.method);
     var form = req.params.all();
+
     Product.findOne({ItemCode:form.id})
       .then(function(product){
+        sails.log.info('addding files to product', product);
         product.addFiles(req,{
           dir : 'products/gallery',
           profile: 'gallery'
         },function(e,product){
+          sails.log.info('addedFiles', product)
           if(e){
-            console.log(e);
-            res.json(false);
+            console.log('error in addFiles: ', e);
+            return res.negotiate(e);
           }
           else{
             //TODO check how to retrieve images instead of doing other query
             Product.findOne({ItemCode:form.id}, {select:['ItemCode']})
-              .populate('files').exec(function(e, updatedProduct){
-                return res.json(updatedProduct.files);
+              .populate('files')
+              .then(function(updatedProduct){
+                res.json(updatedProduct.files);
+              })
+              .catch(function(e){
+                console.log('err product findOne addFiles', e);
               });
           }
         });
       })
+      
+      .timeout(180000)
+      //.cancellable()
+      .catch(Promise.CancellationError, function(error) {
+        // ... must neatly abort the task ...
+        console.log('Task cancelled', error);
+        res.negotiate(err);
+      })
+      .catch(Promise.TimeoutError, function(error) {
+        // ... must neatly abort the task ...
+        console.log('Task timed out', error);
+        res.negotiate(err);
+      })
       .catch(function(err){
-        console.log(err);
+        console.log('err final addFiles',err);
         res.negotiate(err);
       });      
   },
@@ -179,7 +201,7 @@ module.exports = {
         },function(e,product){
           if(e){
             console.log(e);
-            res.json(false);
+            res.negotiate(e);
           }
           else{
             //TODO check how to retrieve images instead of doing other query
@@ -200,6 +222,7 @@ module.exports = {
   updateIcon: function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
+    sails.log.info('subiendo archivos');
     Product.updateAvatar(req,{
       dir : 'products',
       profile: 'avatar',
@@ -207,7 +230,7 @@ module.exports = {
     },function(e,product){
       if(e){
         console.log(e);
-        return res.json(false);
+        return res.negotiate(e);
       }else{
         //TODO check how to retrieve images instead of doing other query
         var selectedFields = [
@@ -219,9 +242,9 @@ module.exports = {
         ];
         Product.findOne({ItemCode:form.id}, {select: selectedFields})
           .exec(function(e, updatedProduct){
-            if(err){
-              console.log(err);
-              return res.negotiate(err);
+            if(e){
+              console.log(e);
+              return res.negotiate(e);
             }
             return res.json(updatedProduct);
           });
@@ -240,7 +263,7 @@ module.exports = {
     },function(e,product){
       if(e) {
         console.log(e);
-        res.json(false);
+        res.negotiate(e);
       }else{
         res.json(product);
       }

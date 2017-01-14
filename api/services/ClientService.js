@@ -2,6 +2,8 @@ var _ 			= require('underscore');
 var moment  = require('moment');
 var ADDRESS_TYPE 		= 'S';
 var CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
+var CARDCODE_TYPE = 'CardCode';
+var ERROR_TYPE = 'Error';
 
 module.exports = {
 
@@ -35,12 +37,7 @@ module.exports = {
 	  return contactCodes.indexOf(contactCode);
 	},
 
- 	isValidCardCode: function(cardCode){
-	  if(!cardCode){
-	    return false;
-	  }
-	  return cardCode.length <= 15;
-	},
+ 	isValidCardCode: isValidCardCode,
 
 	filterContacts: function(contacts){
 	  var filteredContacts = (contacts || []).filter(function(contact){
@@ -61,6 +58,47 @@ module.exports = {
 		return !isNaN(contactCode);
 	},
 
+	isValidSapClientCreation(sapData, contacts, fiscalAddress){
+		var result = {error:true};
+		if(sapData.type === ERROR_TYPE){
+			result = {error: sapData.result || true};
+		}
+		
+		if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) && _.isArray(sapData.pers) ){
+			if(contacts.length === sapData.pers.length){
+				result = {error: false};
+			}
+		}
+		
+		return result;
+	},
+
+	isValidSapClientUpdate(sapData){
+		var result = {error:true};
+		if(sapData.type === ERROR_TYPE){
+			result = {error: sapData.result || true};
+		}
+		
+		if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) ){
+			result = {error: false};
+		}
+		
+		return result;
+	},
+
+	isValidSapFiscalClientUpdate(sapData){
+		var result = {error:true};
+		if(sapData.type === ERROR_TYPE){
+			result = {error: sapData.result || true};
+		}
+		
+		if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result)  ){
+			result = {error: false};
+		}
+		
+		return result;
+	},
+
 	areContactsRepeated: function(contacts){
 		contacts = contacts.map(mapContactFields);
 		var contactsNames = contacts.map(function(contact){
@@ -75,6 +113,13 @@ module.exports = {
 	mapContactFields: mapContactFields
 
 };
+
+function isValidCardCode(cardCode){
+	  if(!cardCode){
+	    return false;
+	  }
+	  return cardCode.length <= 15;
+}
 
 function isValidContact(contact){
 	return true;

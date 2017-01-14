@@ -19,8 +19,8 @@ module.exports.saveFiles = function(req,opts,cb){
 
   if(req._fileparser.upstreams.length && $files.length > 0){
     if(req._fileparser.form.bytesExpected>=maxBytes){
-      //cb(new Error('exceeds maxBytes')); //throw en controllers
-      cb(false,[]);
+      cb(new Error('exceeds maxBytes')); //throw en controllers
+      //cb(false,[]);
     }
     var fFiles = [];
     var uploadOptions = {
@@ -52,7 +52,7 @@ module.exports.saveFiles = function(req,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
-          console.log(e);
+          console.log('error saveFiles',e);
           return cb(e,files);
         }
         files.forEach(function(file){
@@ -70,7 +70,7 @@ module.exports.saveFiles = function(req,opts,cb){
         cb(e,fFiles);
       });
   }else{
-    return cb(true,false);
+    return cb(new Error('saveFiles error'),false);
   }
 }
 var makeFileName = function(_stream,cb){
@@ -110,7 +110,7 @@ module.exports.makeCrop = function(size,opts,cb){
     fs.createReadStream(route).pipe(fs.createWriteStream(opts.dirPublic+size+opts.filename))
     .on('finish',function(){
       return cb && cb(null,{route:route,size:size});
-    }).on('error',function(){
+    }).on('error makeCrop',function(){
       console.log('error with the crop');
       return cb && cb(null,false);
       //return cb && cb(true);
@@ -150,7 +150,7 @@ module.exports.makeCropsStreams = function(uploadOptions, opts, cb){
         .crop(wh[0], wh[1], 0, 0)
         .stream(function(err, stdout, stderr){
             if(err){
-              console.log(err);
+              console.log('error makeCropsStreams',err);
               return next(err);
             }
             stdout.pipe(adapter.uploadStream({dirSave:opts.dirSave, name: size+opts.filename }, next));
@@ -245,7 +245,7 @@ module.exports.saveFilesSap = function(internalFiles,opts,cb){
       uploadOptions,
       function(e,files){
         if(e){
-          console.log(e);
+          console.log('error saveFilesSap',e);
           return cb(e,files);
         }
         files.forEach(function(file){

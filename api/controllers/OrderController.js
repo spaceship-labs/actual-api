@@ -208,7 +208,11 @@ module.exports = {
         var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult);
         sails.log.info('isValidSapResponse', isValidSapResponse);
         if( isValidSapResponse.error ){
-          var errorStr = isValidSapResponse.error || 'Error en la respuesta de SAP';
+          var defaultErrMsg = 'Error en la respuesta de SAP';
+          var errorStr = isValidSapResponse.error || defaultErrMsg;
+          if(errorStr === true){
+            errorStr = defaultErrMsg;
+          }
           return Promise.reject(new Error(errorStr));
         }
         orderParams.documents = sapResult;
@@ -375,6 +379,13 @@ module.exports = {
 function isValidOrderCreated(sapResponse, sapResult){
   sapResult = sapResult || {};
   if( sapResponse && _.isArray(sapResult)){
+
+    if(sapResult.length <= 0){
+      return {
+        error: 'No fue posible crear el pedido en SAP'
+      };
+    }
+
     var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
     var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
 
@@ -382,7 +393,7 @@ function isValidOrderCreated(sapResponse, sapResult){
 
     if(!everyOrderHasFolio){
       return {
-        error:collectSapErrors(sapResult)
+        error:collectSapErrors(sapResult) || true
       };
     }
     else if(everyOrderHasPayments && everyOrderHasFolio){
