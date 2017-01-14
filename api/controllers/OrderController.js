@@ -375,6 +375,13 @@ module.exports = {
 function isValidOrderCreated(sapResponse, sapResult){
   sapResult = sapResult || {};
   if( sapResponse && _.isArray(sapResult)){
+
+    if(sapResult.length <= 0){
+      return {
+        error: 'No fue posible crear el pedido en SAP'
+      };
+    }
+
     var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
     var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
 
