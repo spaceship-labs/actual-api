@@ -197,7 +197,7 @@ var paymentGroups = [
         description:'Sujeto a verificación contable',
         currency: 'mxn',
         needsVerification: false
-      },*/
+      },
       
       {
         label:'Saldo a favor',
@@ -207,6 +207,7 @@ var paymentGroups = [
         currency:'mxn',
         needsVerification: false
       },
+      */
       
       {
         label:'1 pago con',
