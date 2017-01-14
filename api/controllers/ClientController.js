@@ -118,14 +118,15 @@ module.exports = {
       .then(function(result){
         sails.log.info('result createClient', result);
         var sapData = JSON.parse(result.value);
+        var isValidSapResponse = ClientService.isValidSapClientCreation(sapData, contacts, fiscalAddress);
 
-        if( !sapData || !ClientService.isValidCardCode(sapData.CardCode)  ) {
-          var err = sapData.CardCode || 'Error al crear socio de negocio';
+        if( !sapData || isValidSapResponse.error  ) {
+          var err = isValidSapResponse.error || 'Error al crear cliente en SAP';
           sails.log.info('err', err);
           return Promise.reject(new Error(err));
         }
         
-        form.CardCode     = sapData.CardCode;
+        form.CardCode     = sapData.result;
         form.BirthDate    = moment(form.BirthDate).toDate();
         var contactCodes  = sapData.pers;
         contacts          = contacts.map(function(contact, i){
@@ -187,15 +188,17 @@ module.exports = {
       .then(function(resultSap){
         sails.log.info('update client resultSap', resultSap);
 
-        if( !resultSap || !ClientService.isValidCardCode(resultSap.value)  ) {
-          var err = result.value || 'Error al actualizar socio de negocio';
+        var sapData = JSON.parse(resultSap.value);
+        var isValidSapResponse = ClientService.isValidSapClientUpdate(sapData);
+
+        if( !sapData || isValidSapResponse.error  ) {
+          var err = isValidSapResponse.error || 'Error al actualizar datos personales en SAP';
+          sails.log.info('err', err);
           return Promise.reject(new Error(err));
         }
 
-        if(resultSap && resultSap.value && ClientService.isValidCardCode(resultSap.value)){
-          return Client.update({CardCode: CardCode}, form);
-        }
-        return Promise.reject(new Error('Actualización en SAP fallida'));
+        return Client.update({CardCode: CardCode}, form);
+
       })
       .then(function(updated){
         res.json(updated);

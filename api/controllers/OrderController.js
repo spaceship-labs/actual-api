@@ -389,7 +389,7 @@ function isValidOrderCreated(sapResponse, sapResult){
 
     if(!everyOrderHasFolio){
       return {
-        error:collectSapErrors(sapResult)
+        error:collectSapErrors(sapResult) || true
       };
     }
     else if(everyOrderHasPayments && everyOrderHasFolio){
