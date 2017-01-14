@@ -42,5 +42,7 @@ module.exports = function negotiate (err) {
   if (statusCode === 403) return res.forbidden(body);
   if (statusCode === 404) return res.notFound(body);
   if (statusCode >= 400 && statusCode < 500) return res.badRequest(body);
-  return res.serverError(body);
+  
+  return res.badRequest(body);
+  //return res.serverError(body);
 };
