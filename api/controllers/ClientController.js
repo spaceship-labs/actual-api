@@ -244,6 +244,7 @@ module.exports = {
         var CntctCode  = resultSap.value[0]; 
         if(!ClientService.isValidContactCode(CntctCode)){
           var err = resultSap.value || 'Error al crear contacto';
+          sails.log.info('err reject', err);
           return Promise.reject(new Error(err));
         }
 
@@ -278,6 +279,7 @@ module.exports = {
         var CntctCode  = resultSap.value[0]; 
         if(!ClientService.isValidContactCode(CntctCode)){
           var err = resultSap.value || 'Error al actualizar contacto';
+          sails.log.info('err reject', err);          
           return Promise.reject(new Error(err));
         }
         return ClientContact.update({CntctCode: contactCode}, form);
@@ -303,12 +305,22 @@ module.exports = {
       return res.negotiate(err);
     }
     SapService.updateFiscalAddress(CardCode, fiscalAddress)
-      .then(function(result){
-        sails.log.info('result updateFiscalAddress', result);
-        if(!result.value){
-          var err = result.value || 'Error al actualizar direccion fiscal';
+      .then(function(resultSap){
+        sails.log.info('updateFiscalAddress response', resultSap);
+
+        var sapData = JSON.parse(resultSap.value);
+        var isValidSapResponse = ClientService.isValidSapFiscalClientUpdate(sapData);
+
+        if( !sapData || isValidSapResponse.error  ) {
+          var defualtErrMsg = 'Error al actualizar datos fiscales en SAP';
+          var err = isValidSapResponse.error || defualtErrMsg;
+          if(err === true){
+            err = defualtErrMsg;
+          }
+          sails.log.info('err reject', err);
           return Promise.reject(new Error(err));
         }
+
         return [
           FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
           Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum})

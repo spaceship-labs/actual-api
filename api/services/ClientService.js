@@ -86,6 +86,18 @@ module.exports = {
 		return result;
 	},
 
+	isValidSapFiscalClientUpdate(sapData){
+		var result = {error:true};
+		if(sapData.type === ERROR_TYPE){
+			result = {error: sapData.result || true};
+		}
+		
+		if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result)  ){
+			result = {error: false};
+		}
+		
+		return result;
+	},
 
 	areContactsRepeated: function(contacts){
 		contacts = contacts.map(mapContactFields);
