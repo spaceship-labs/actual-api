@@ -143,131 +143,92 @@ module.exports = {
     sails.log.info('ADDFILES :' +  new Date(), req.method);
     var form = req.params.all();
 
+    var options = {
+      dir : 'products/gallery',
+      profile: 'gallery',
+    };
+
     Product.findOne({ItemCode:form.id})
       .then(function(product){
-        sails.log.info('addding files to product', product);
-        product.addFiles(req,{
-          dir : 'products/gallery',
-          profile: 'gallery'
-        },function(e,product){
-          sails.log.info('addedFiles', product)
-          if(e){
-            console.log('error in addFiles: ', e);
-            return res.negotiate(e);
-          }
-          else{
-            //TODO check how to retrieve images instead of doing other query
-            Product.findOne({ItemCode:form.id}, {select:['ItemCode']})
-              .populate('files')
-              .then(function(updatedProduct){
-                res.json(updatedProduct.files);
-              })
-              .catch(function(e){
-                console.log('err product findOne addFiles', e);
-              });
-          }
-        });
+        return product.addFiles(req, options);
       })
-      
-      .timeout(180000)
-      //.cancellable()
-      .catch(Promise.CancellationError, function(error) {
-        // ... must neatly abort the task ...
-        console.log('Task cancelled', error);
-        res.negotiate(err);
+      .then(function(updatedProduct){
+        return Product.findOne({ItemCode:form.id}).populate('files');
       })
-      .catch(Promise.TimeoutError, function(error) {
-        // ... must neatly abort the task ...
-        console.log('Task timed out', error);
-        res.negotiate(err);
+      .then(function(foundProduct){
+        res.json(foundProduct);
       })
       .catch(function(err){
-        console.log('err final addFiles',err);
+        console.log('addFiles err', err);
         res.negotiate(err);
-      });      
+      });     
   },
 
   removeFiles : function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
-    Product.findOne({ItemCode:form.ItemCode}).populate('files')
+    Product.findOne({ItemCode:form.ItemCode})
+      .populate('files')
       .then(function(product){
-
-        product.removeFiles(req,{
+        var options = {
           dir : 'products/gallery',
           profile : 'gallery',
           files : form.removeFiles,
           fileModel: ProductFile
-        },function(e,product){
-          if(e){
-            console.log(e);
-            res.negotiate(e);
-          }
-          else{
-            //TODO check how to retrieve images instead of doing other query
-            Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']})
-              .populate('files').exec(function(e, updatedProduct){
-                return res.json(updatedProduct.files);
-              });
-          }
-        });
+        };
 
+        return product.removeFiles(req,options);
+      })
+      .then(function(product){
+        return Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']})
+            .populate('files');
+      }) 
+      .then(function(updatedProduct){
+        res.json(updatedProduct.files);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err removeFiles',err);
         res.negotiate(err);
-      });      
+      });        
+   
   },
 
   updateIcon: function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
-    sails.log.info('subiendo archivos');
-    Product.updateAvatar(req,{
+    var options = {
       dir : 'products',
       profile: 'avatar',
       id : form.id,
-    },function(e,product){
-      if(e){
-        console.log(e);
-        return res.negotiate(e);
-      }else{
-        //TODO check how to retrieve images instead of doing other query
-        var selectedFields = [
-          'icon_filename',
-          'icon_name',
-          'icon_size',
-          'icon_type',
-          'icon_typebase'
-        ];
-        Product.findOne({ItemCode:form.id}, {select: selectedFields})
-          .exec(function(e, updatedProduct){
-            if(e){
-              console.log(e);
-              return res.negotiate(e);
-            }
-            return res.json(updatedProduct);
-          });
+    };
 
-      }
-    });
+    Product.updateAvatar(req,options)
+      .then(function(product){
+        res.json(product);
+      })
+      .catch(function(err){
+        console.log('updateIcon err', err);
+        res.negotiate(err);
+      });
   },
 
   removeIcon: function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
-    Product.destroyAvatar(req,{
+    var options = {
       dir : 'products',
       profile: 'avatar',
       id : form.id,
-    },function(e,product){
-      if(e) {
-        console.log(e);
-        res.negotiate(e);
-      }else{
-        res.json(product);
-      }
-    });
+    };
+
+    Product.destroyAvatar(req,options)
+      .then(function(result){
+        res.json(result);
+      })
+      .catch(function(err){
+        console.log('err removeIcon', err);
+        res.negotiate(err);
+      });
   },
 
   getProductsbySuppCatNum: function(req, res){
