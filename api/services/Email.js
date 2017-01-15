@@ -97,7 +97,10 @@ function orderEmail(orderId) {
           warranty: detail.Product.U_garantia.toLowerCase(),
           qty: detail.quantity,
           ship: date,
-          price: numeral(detail.total).format('0,0.00'),
+          price: numeral(detail.unitPrice).format('0,0.00'),
+          total: numeral(detail.total).format('0,0.00'),
+          discount: detail.discountPercent,
+          promo: (detail.Promotion || {}).publicName,
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
@@ -166,7 +169,8 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       name: client.CardName,
       address: order.address,
       phone: client.Phone1,
-      cel: client.Cellular
+      cel: client.Cellular,
+      references: '',
     },
     user: {
       name: user.firstName + ' ' + user.lastName,
