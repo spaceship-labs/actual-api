@@ -33,7 +33,7 @@ function _onLocalStrategyAuth(email, password, next){
         message:'Incorrect auth data'
         //code: 'E_USER_NOT_FOUND',
         //message: email + 'is not found'
-    });
+      });
 
     //TODO: replace with new cipher service type
     if( !CipherService.comparePassword(password, user) ){

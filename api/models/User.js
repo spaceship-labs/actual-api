@@ -24,6 +24,11 @@ module.exports = {
         lastLogin : {
           type: 'datetime'
         },
+        active:{
+          type:'boolean',
+          defaultsTo: true
+        },
+
         Seller: {
           model: 'Seller',
         },

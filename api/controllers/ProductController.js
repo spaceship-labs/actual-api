@@ -156,10 +156,12 @@ module.exports = {
         return Product.findOne({ItemCode:form.id}).populate('files');
       })
       .then(function(foundProduct){
+        sails.log.info('FINISHED ADDFILES :' +  new Date(), req.method);
         res.json(foundProduct);
       })
       .catch(function(err){
         console.log('addFiles err', err);
+        sails.log.info('FINISHED WITH ERR ADDFILES :' +  new Date(), req.method);
         res.negotiate(err);
       });     
   },
