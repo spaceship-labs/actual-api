@@ -35,20 +35,27 @@ function _onLocalStrategyAuth(email, password, next){
         //message: email + 'is not found'
       });
 
-    //TODO: replace with new cipher service type
-    if( !CipherService.comparePassword(password, user) ){
-      return next(null, false, {
-        code: 'INCORRECT_AUTHDATA',
-        message:'Incorrect auth data'        
-        //code: 'E_WRONG_PASSWORD',
-        //message: '!Password is wrong'
-      });
-    }
+      if(!user.active){
+        return next(null, false, {
+          code: 'USER_NOT_ACTIVE',          
+          message: 'USER NOT ACTIVE'
+        });        
+      }        
 
-    User.update({id : user.id},{ lastLogin : new Date() }).exec(function(err,ruser){
-        delete user.password;
-        return next(null, user, {});
-    });
+      //TODO: replace with new cipher service type
+      if( !CipherService.comparePassword(password, user) ){
+        return next(null, false, {
+          code: 'INCORRECT_AUTHDATA',
+          message:'Incorrect auth data'        
+          //code: 'E_WRONG_PASSWORD',
+          //message: '!Password is wrong'
+        });
+      }
+
+      User.update({id : user.id},{ lastLogin : new Date() }).exec(function(err,ruser){
+          delete user.password;
+          return next(null, user, {});
+      });
 
   });
 }
@@ -56,8 +63,36 @@ function _onLocalStrategyAuth(email, password, next){
 //Triggers when user authenticates via JWT strategy
 
 function _onJwtStrategyAuth(payload, next){
-  var user = payload.user;
-  return next(null, user, {});
+  var payloadUser = payload.user || {};
+  var userId = payloadUser.id || false;
+  if(!userId){
+    return next(null, false, {
+      code: 'USER_ID_UNDEFINED',
+      message: 'USER ID UNDEFINED'
+    });
+  }
+
+  return User.findOne({id: userId})
+    .then(function(userFound){
+      var user = userFound;
+
+      if(!user.active){
+        return next(null, false, {
+          code: 'USER_NOT_ACTIVE',
+          message: 'USER NOT ACTIVE'
+        });        
+      }
+
+      return next(null, user, {});
+    })
+    .catch(function(err){
+      console.log('err', err);
+      return next(err, false, {
+        message: 'USER NOT FOUND'
+      });
+    });
+  
+
 }
 
 passport.use(
