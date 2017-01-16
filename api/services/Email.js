@@ -165,10 +165,11 @@ function orderEmail(orderId) {
 }
 
 function sendOrder(client, user, order, products, payments, ewallet, store) {
+  var address = 'Número ' + order.U_Noexterior + ' Entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + ' colonia ' + order.U_Colonia + ', ' + order.U_Mpio + ', ' + order.U_Estado + ', ' + order.U_CP;
   var emailBody = orderTemplate({
     client: {
       name: client.CardName,
-      address: order.address,
+      address: address,
       phone: client.Phone1,
       cel: client.Cellular,
       references: '',
