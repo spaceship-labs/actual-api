@@ -77,7 +77,7 @@ function orderEmail(orderId) {
       var details  = order.Details.map(function(detail) { return detail.id; });
       var payments = order.Payments.map(function(payment) { return payment.id; });
       var ewallet  = order.EwalletRecords;
-      details      = OrderDetail.find(details).populate('Product');
+      details      = OrderDetail.find(details).populate('Product').populate('Promotion');
       payments     = Payment.find(payments);
       return [client, user,  order, details, payments, ewallet, store];
     })
