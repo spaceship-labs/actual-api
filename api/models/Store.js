@@ -19,7 +19,9 @@ module.exports = {
       type: 'string'
     },
     code:{type:'string'},
-    //relations
+    
+
+    //RELATIONS
     users: {
       collection: 'user',
       via: 'Stores'
