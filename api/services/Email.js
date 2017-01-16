@@ -1,5 +1,6 @@
 var baseURL               = process.env.baseURL;
 var baseURLFRONT          = process.env.baseURLFRONT;
+var surveyURL             = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
 var key                   = process.env.SENDGRIDAPIKEY;
 var Promise               = require('bluebird');
 var moment                = require('moment');
@@ -188,6 +189,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     company: {
       url: baseURL,
       image: store.logo
+      surveyURL: surveyURL,
     },
     products: products,
     payments: payments,
