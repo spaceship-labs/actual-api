@@ -473,6 +473,7 @@ function saveSapReferences(sapResult, orderId, orderDetails){
           OrderDetail: _.findWhere(orderDetails, {QuotationDetail: serie.DetailId}),
           seriesNumbers: serie.Number
         };
+        return productSerie;
       });
     }
 
