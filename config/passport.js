@@ -79,7 +79,7 @@ module.exports = {
   express:{
     customMiddleware: function(app){
       var timeout = require('connect-timeout');
-      var timeoutSeconds = 600; //36000
+      var timeoutSeconds = 36000
       app.use(timeout(timeoutSeconds+'s'));
       app.use(Files.middleware);
     }

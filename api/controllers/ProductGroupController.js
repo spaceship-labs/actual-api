@@ -146,43 +146,40 @@ module.exports = {
 
   updateIcon: function(req,res){
     var form = req.params.all();
-    ProductGroup.updateAvatar(req,{
+    var options = {
       dir : 'groups',
       profile: 'avatar',
       id : form.id,
-    },function(e,group){
-      if(e) console.log(e);
-      //TODO check how to retrieve images instead of doing other query
-      var selectedFields = [
-        'icon_filename',
-        'icon_name',
-        'icon_size',
-        'icon_type',
-        'icon_typebase'
-      ];
-      ProductGroup.findOne({id:form.id}, {select: selectedFields})
-        .then(function(updatedGroup){
-          res.json(updatedGroup);
-        })
-        .catch(function(err){
-          res.negotiate(err);
-        });
-    });
+    };
+
+    ProductGroup.updateAvatar(req,options)
+      .then(function(productGroup){
+        res.json(productGroup);
+      })
+      .catch(function(err){
+        console.log('updateIcon err', err);
+        res.negotiate(err);
+      });      
+
   },
 
   removeIcon: function(req,res){
+    process.setMaxListeners(0);
     var form = req.params.all();
-    ProductGroup.destroyAvatar(req,{
+    var options = {
       dir : 'groups',
       profile: 'avatar',
       id : form.id,
-    },function(e,group){
-      if(e) {
-        console.log(e);
-        return res.negotiate(e);
-      }
-      res.json(group);
-    });
+    };
+
+    ProductGroup.destroyAvatar(req,options)
+      .then(function(result){
+        res.json(result);
+      })
+      .catch(function(err){
+        console.log('err removeIcon', err);
+        res.negotiate(err);
+      });
   },
 
   findPackages: function(req, res){
