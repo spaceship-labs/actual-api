@@ -190,7 +190,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     company: {
       url: baseURL,
       image: store.logo,
-      surveyURL: surveyURL,
+      survey: surveyURL,
     },
     products: products,
     payments: payments,
