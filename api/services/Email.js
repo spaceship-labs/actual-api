@@ -188,7 +188,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     },
     company: {
       url: baseURL,
-      image: store.logo
+      image: store.logo,
       surveyURL: surveyURL,
     },
     products: products,
