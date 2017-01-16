@@ -33,7 +33,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
   var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
-  var to              = new helper.Email("actualg@litmustest.com", userName);
+  var to              = new helper.Email(userEmail, userName);
   var subject         = 'recuperar contraseña';
   var res             = passwordTemplate({
     user_name: user_name,
