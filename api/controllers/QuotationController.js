@@ -11,16 +11,14 @@ module.exports = {
     var form = req.params.all();
     form.Details = formatProductsIds(form.Details);
     form.Details = tagImmediateDeliveriesDetails(form.Details);    
+    form.Store = req.user.activeStore.id;
     var opts = {
       paymentGroup:1,
       updateDetails: true,
+      currentStore: req.user.activeStore.id
     };
-    User.findOne({select:['activeStore'], id: req.user.id})
-      .then(function(user){
-        opts.currentStore = user.activeStore;
-        form.Store = user.activeStore;
-        return Quotation.create(form);
-      })
+
+    Quotation.create(form)
       .then(function(created){
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(created.id, opts);
@@ -33,7 +31,7 @@ module.exports = {
         }
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err create quotation', err);
         res.negotiate(err);
       });
   },
@@ -45,16 +43,14 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
+      currentStore: req.user.activeStore.id
     };
     if(form.Details){
       form.Details = formatProductsIds(form.Details);
     }
-    User.findOne({select:['activeStore'], id: req.user.id})
-      .then(function(user){
-        opts.currentStore = user.activeStore;
-        form.Store = user.activeStore;
-        return Quotation.update({id:id}, form);
-      })
+    form.Store =  req.user.activeStore.id;
+
+    Quotation.update({id:id}, form)
       .then(function(){
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(id, opts);
@@ -80,8 +76,11 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-
-    QuotationService.updateQuotationToLatestData(id, userId, {update:true})
+    
+    QuotationService.updateQuotationToLatestData(id, userId, {
+      update:true,
+      currentStore: req.user.activeStore.id
+    })
       .then(function(){
         return Quotation.findOne({id: id})
           .populate('Details')
@@ -109,7 +108,7 @@ module.exports = {
         return res.json(quotationBase);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err findById quotation', err);
         return res.negotiate(err);
       });
   },
@@ -204,17 +203,16 @@ module.exports = {
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
     form.Details = tagImmediateDeliveriesDetails(form.Details);
+    form.shipDate = moment(form.shipDate).startOf('day').toDate();
+
     delete form.id;
     var opts = {
       paymentGroup:1,
       updateDetails: true,
+      currentStore: req.user.activeStore.id
     };
-    User.findOne({select:['activeStore'], id: req.user.id})
-      .then(function(user){
-        opts.currentStore = user.activeStore;
-        form.shipDate = moment(form.shipDate).startOf('day').toDate();
-        return QuotationDetail.create(form);
-      })
+    
+    QuotationDetail.create(form)
       .then(function(created){
          var calculator = QuotationService.Calculator();
          return calculator.updateQuotationTotals(id, opts);
@@ -227,7 +225,7 @@ module.exports = {
         }
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err addDetail quotation', err);
         res.negotiate(err);
       });
 
@@ -241,12 +239,10 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
+      currentStore: req.user.activeStore.id
     };
-    User.findOne({select:['activeStore'], id: req.user.id})
-      .then(function(user){
-        opts.currentStore = user.activeStore;
-        return QuotationDetail.destroy({id:detailsIds});
-      })
+
+    QuotationDetail.destroy({id:detailsIds})
       .then(function(){
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
@@ -331,18 +327,17 @@ module.exports = {
     var params = {
       update: false,
       paymentGroup: paymentGroup,
+      currentStore: req.user.activeStore.id
     };
-    User.findOne({select:['activeStore'], id: req.user.id})
-      .then(function(user){
-        params.currentStore = user.activeStore;
-        var calculator = QuotationService.Calculator();
-        return calculator.getQuotationTotals(id, params);
-      })
+    var calculator = QuotationService.Calculator();
+    console.log('params', params);
+
+    calculator.getQuotationTotals(id, params)
       .then(function(totals){
         res.json(totals);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err getQuotationTotals', err);
         res.negotiate(err);
       });
   },
@@ -443,29 +438,26 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.quotationId;
     var warehouse;
-    Promise.join(
-      User.findOne({id: req.user.id}).populate('activeStore'),
-      Quotation.findOne({id: quotationId}).populate('Details')
-    ).then(function(results){
-      var user = results[0];
-      var whsId = user.activeStore.Warehouse;
-      details = results[1].Details;
-      var detailsIds = details.map(function(d){ return d.id; });
-      return [
-        Company.findOne({id: whsId}),
-        QuotationDetail.find({id: detailsIds}).populate('Product')
-      ];
-    })
-    .spread(function(warehouse,details){
-      return StockService.getDetailsStock(details, warehouse);    
-    })
-    .then(function(results){
-      res.json(results);
-    })
-    .catch(function(err){
-      console.log('err', err);
-      res.negotiate(err);
-    });
+    Quotation.findOne({id: quotationId}).populate('Details')
+      .then(function(quotation){
+        var whsId = req.user.activeStore.Warehouse;
+        details = quotation.Details;
+        var detailsIds = details.map(function(d){ return d.id; });
+        return [
+          Company.findOne({id: whsId}),
+          QuotationDetail.find({id: detailsIds}).populate('Product')
+        ];
+      })
+      .spread(function(warehouse,details){
+        return StockService.getDetailsStock(details, warehouse);    
+      })
+      .then(function(results){
+        res.json(results);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
 
   },
 

@@ -46,15 +46,10 @@ function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
     paymentGroup:1,
     updateDetails: true,
+    currentStore: options.currentStore
   };
-  return User.findOne({select:['activeStore'], id: userId})
-    .then(function(user){
-      params.currentStore = user.activeStore;
-      return Quotation.findOne({
-        id:quotationId,
-        select:['paymentGroup']
-      });
-    })
+    
+  return Quotation.findOne({id:quotationId,select:['paymentGroup']})
     .then(function(quotation){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));

@@ -73,6 +73,7 @@ module.exports = {
     var opts         = {
       paymentGroup: form.paymentGroup || 1,
       updateDetails: true,
+      currentStore: req.user.activeStore.id
     };
     var orderCreated = false;
     var SlpCode      = -1;
@@ -98,10 +99,6 @@ module.exports = {
             new Error('Inventario no suficiente para crear la orden')
           );
         }
-        return User.findOne({id: req.user.id});
-      })
-      .then(function(currentUser){
-        opts.currentStore = currentUser.activeStore;
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
@@ -122,11 +119,8 @@ module.exports = {
             new Error('Ya se ha creado un pedido sobre esta cotización')
           );
         }
-        return User.findOne({id:quotation.User.id})
-          .populate('activeStore')
-          .populate('Seller');
-      })
-      .then(function(user){
+
+        var user = req.user;
         if(user.Seller){
           SlpCode = user.Seller.SlpCode;
         }

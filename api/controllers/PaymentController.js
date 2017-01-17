@@ -17,6 +17,9 @@ module.exports = {
     var exchangeRate;
     var quotation;
     form.Quotation    = quotationId;
+    form.Store = req.user.activeStore.id;
+    form.User = req.user.id;    
+
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
     }
@@ -28,11 +31,6 @@ module.exports = {
         }else{
         	sails.log.info('Inventario valido');
         }
-	    	return User.findOne({select:['activeStore'], id: req.user.id});
-	    })
-      .then(function(user){
-        form.Store = user.activeStore;
-        form.User = user.id;
         return Quotation.findOne(form.Quotation).populate('Client');
       })
       .then(function(quotationFound){
@@ -43,7 +41,7 @@ module.exports = {
 
         return EwalletService.applyEwalletPayment(form,{
           quotationId: quotationId,
-          userId: req.userId,
+          userId: req.user.id,
           client: client
         });
       })

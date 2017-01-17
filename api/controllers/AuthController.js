@@ -26,19 +26,19 @@ function _onPassportAuth(req, res, error, user, info){
     .then(function(users) {
       return users[0];
     })
-    .then(function(user) {
+    .then(function(userUpdated) {
       /*Logging stuff*/
-      var message    = user.firstName + ' ingresó al sistema';
+      var message    = userUpdated.firstName + ' ingresó al sistema';
       var action     = 'login';
       return [
-        Logger.log(user.id, message, action),
-        user
-      ];
+          Logger.log(userUpdated.id, message, action),
+          Store.findOne({id: activeStore})
+        ];
     })
-    .spread(function(log, user){
-      return User.findOne({id: user.id}).populate('role');
-    })
-    .then(function(user){
+    .spread(function(log, store){
+      if(store){
+        user.activeStore = store.id;
+      }
       return res.ok({
         token: CipherService.createToken(user),
         user: user

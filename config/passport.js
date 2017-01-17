@@ -24,7 +24,6 @@ var JWT_STRATEGY_CONFIG = {
 function _onLocalStrategyAuth(email, password, next){
   User.findOne({email: email})
     .populate('role')
-    .populate('Stores')
     .populate('Seller')
     .exec(function(error, user){
       if (error) return next(error, false, {});
@@ -73,6 +72,10 @@ function _onJwtStrategyAuth(payload, next){
   }
 
   return User.findOne({id: userId})
+    .populate('activeStore')
+    .populate('role')
+    .populate('Seller')
+    //.populate('Stores')
     .then(function(userFound){
       var user = userFound;
 
