@@ -58,7 +58,7 @@ module.exports = {
 		return !isNaN(contactCode);
 	},
 
-	isValidSapClientCreation(sapData, contacts, fiscalAddress){
+	isValidSapClientCreation: function(sapData, contacts, fiscalAddress){
 		var result = {error:true};
 		if(sapData.type === ERROR_TYPE){
 			result = {error: sapData.result || true};
@@ -73,7 +73,7 @@ module.exports = {
 		return result;
 	},
 
-	isValidSapClientUpdate(sapData){
+	isValidSapClientUpdate: function(sapData){
 		var result = {error:true};
 		if(sapData.type === ERROR_TYPE){
 			result = {error: sapData.result || true};
@@ -86,7 +86,7 @@ module.exports = {
 		return result;
 	},
 
-	isValidSapFiscalClientUpdate(sapData){
+	isValidSapFiscalClientUpdate: function(sapData){
 		var result = {error:true};
 		if(sapData.type === ERROR_TYPE){
 			result = {error: sapData.result || true};
