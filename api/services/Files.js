@@ -145,7 +145,7 @@ function makeCropsStreams(uploadOptions, opts, cb){
             return next(err);
           }
           var fileName = size + opts.filename;
-          sails.log.info('fileName individualCropStream', fileName);
+          sails.log.info('fileName individualCropStream on '+ opts.dirSave, fileName);
 
           stdout.pipe(
             adapter.uploadStream({
