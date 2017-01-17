@@ -140,7 +140,7 @@ module.exports = {
 
   addFiles : function(req,res){
     process.setMaxListeners(0);
-    sails.log.info('ADDFILES :' +  new Date(), req.method);
+    sails.log.info('ADDFILES Product :' +  new Date(), req.method);
     var form = req.params.all();
 
     var options = {

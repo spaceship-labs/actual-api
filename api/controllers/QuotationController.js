@@ -175,24 +175,12 @@ module.exports = {
             profile: 'gallery'            
           };
 
-          return new Promise(function(resolve, reject){
-            createdRecord.addFiles(req,options,
-              function(e,record){
-                if(e){
-                  console.log(e);
-                  reject(e);
-                }else{
-                  console.log('se agrego el archivo');
-                  //TODO check how to retrieve images instead of doing other query
-                  resolve(
-                    QuotationRecord
-                    .findOne({id:createdRecord.id})
-                    .populate('User')
-                    .populate('files')
-                  );
-                }
+          return createdRecord.addFiles(req, options)
+            .then(function(recordWithFiles){
+              return QuotationRecord.findOne({id:createdRecord.id})
+                .populate('User')
+                .populate('files');
             });
-          });
 
         }else{
           sails.log.info('not adding file');
