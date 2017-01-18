@@ -37,6 +37,10 @@ module.exports = {
       collection:'EwalletRecord',
       via:'Quotation'
     },
+    ClientBalanceRecords:{
+      collection:'ClientBalanceRecord',
+      via:'Quotation'
+    },
     Store:{
       model:'store'
     },

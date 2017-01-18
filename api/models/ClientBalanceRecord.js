@@ -30,6 +30,6 @@ module.exports = {
     },
     Payment:{
       model: 'Payment'
-    }
+    }    
 	}
-}
+};

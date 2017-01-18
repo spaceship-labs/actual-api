@@ -2,6 +2,7 @@ var Promise = require('bluebird');
 var _ = require('underscore');
 var moment = require('moment');
 var EWALLET_TYPE = 'ewallet';
+var CLIENT_BALANCE_TYPE = 'client-balance';
 var EWALLET_NEGATIVE = 'negative';
 var CANCELLED_STATUS = 'cancelled';
 var PAYMENT_CANCEL_TYPE = 'cancellation';
@@ -39,13 +40,14 @@ module.exports = {
         form.Client = client.id;
         if (form.type != EWALLET_TYPE) { return; }
 
-        return EwalletService.applyEwalletPayment(form,{
-          quotationId: quotationId,
-          userId: req.user.id,
-          client: client
-        });
-      })
-      .then(function(result) {
+        if(!EwalletService.isValidEwalletPayment(form, client) && form.type === EWALLET_TYPE){
+          return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
+        }
+
+        if(!ClientBalanceService.isValidClientBalancePayment(form, client) && form.type === CLIENT_BALANCE_TYPE){
+          return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
+        }
+
         return PaymentService.getExchangeRate();
       })
       .then(function(exchangeRateFound){
@@ -54,9 +56,35 @@ module.exports = {
         return Payment.create(form);
       })
       .then(function(paymentCreated){
-        return calculateQuotationAmountPaid(quotationId, exchangeRate);
+        var promises = [
+          calculateQuotationAmountPaid(quotationId, exchangeRate)
+        ];
+
+        if(form.type === EWALLET_TYPE){
+          promises.push(
+            EwalletService.applyEwalletRecord(form,{
+              quotationId: quotationId,
+              userId: req.user.id,
+              client: client,
+              paymentId: paymentCreated.id
+            })
+          );
+        }
+
+        if(form.type === CLIENT_BALANCE_TYPE){
+          promises.push(
+            ClientBalanceService.applyClientBalanceRecord(form,{
+              quotationId: quotationId,
+              userId: req.user.id,
+              client: client,
+              paymentId: paymentCreated.id              
+            })
+          );
+        }        
+
+        return promises;
       })
-      .then(function(ammountPaid){
+      .spread(function(ammountPaid){
         var params = {
           ammountPaid: ammountPaid,
           paymentGroup: paymentGroup

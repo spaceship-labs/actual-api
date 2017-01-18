@@ -139,6 +139,7 @@ module.exports = {
           Quotation: quotationId,
           Payments: paymentsIds,
           EwalletRecords: quotation.EwalletRecords,
+          ClientBalanceRecords: quotation.ClientBalanceRecords,
           User: user.id,
           Broker: quotation.Broker,
           CardCode: quotation.Client.CardCode,

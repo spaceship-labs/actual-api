@@ -18,6 +18,7 @@ module.exports = {
     SlpCode : {type:'integer'},
     Gender:{type:'string'},
     LicTradNum:{type:'string'},
+    Balance: {type:'float'},
 
     /*
     */
