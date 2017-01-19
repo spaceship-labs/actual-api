@@ -187,6 +187,9 @@ module.exports = {
     var CardCode = form.CardCode;
     form = ClientService.mapClientFields(form);
     delete form.FiscalAddress;
+    //Dont remove
+    delete form.Balance;
+
     SapService.updateClient(CardCode, form)
       .then(function(resultSap){
         sails.log.info('update client resultSap', resultSap);
@@ -354,7 +357,7 @@ module.exports = {
     var id = form.id;
     Client.findOne({id:id, select:['Balance']})
       .then(function(client){
-        var balance = client.Balance * -1;
+        var balance = client.Balance;
         res.json(balance);
       })
       .catch(function(err){

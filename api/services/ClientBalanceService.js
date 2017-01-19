@@ -17,10 +17,10 @@ function isValidClientBalancePayment(payment, client){
 
 function applyClientBalanceRecord(payment, options){
 	var client = options.client;
-  if (client.Balance > payment.ammount || !client.Balance) {
+  if (client.Balance < payment.ammount || !client.Balance) {
     return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
   }
-  var updateParams = {Balance: client.Balance + payment.ammount};
+  var updateParams = {Balance: client.Balance - payment.ammount};
 
   return Client.update({id:client.id}, updateParams)
 	  .then(function(clientUpdated){

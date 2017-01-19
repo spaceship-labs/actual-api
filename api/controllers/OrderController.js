@@ -4,6 +4,8 @@ var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
 var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
+var CLIENT_BALANCE_TYPE = 'client-balance';
+
 
 module.exports = {
   find: function(req, res){
@@ -200,7 +202,7 @@ module.exports = {
       .then(function(sapResponse){
         sails.log.info('createSaleOrder response', sapResponse);
         sapResult = JSON.parse(sapResponse.value);
-        var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult);
+        var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
         sails.log.info('isValidSapResponse', isValidSapResponse);
         if( isValidSapResponse.error ){
           var defaultErrMsg = 'Error en la respuesta de SAP';
@@ -371,7 +373,7 @@ module.exports = {
 
 };
 
-function isValidOrderCreated(sapResponse, sapResult){
+function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
   sapResult = sapResult || {};
   if( sapResponse && _.isArray(sapResult)){
 
@@ -381,10 +383,14 @@ function isValidOrderCreated(sapResponse, sapResult){
       };
     }
 
-    var everyOrderHasPayments = sapResult.every(checkIfSapOrderHasPayments);
+    var everyOrderHasPayments = sapResult.every(function(sapOrder){
+      return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
+    });
+
     var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
 
     sails.log.info('everyOrderHasFolio', everyOrderHasFolio);
+    sails.log.info('everyOrderHasPayments', everyOrderHasPayments);
 
     if(!everyOrderHasFolio){
       return {
@@ -426,14 +432,25 @@ function checkIfSapOrderHasReference(sapOrder){
     );
 }
 
-function checkIfSapOrderHasPayments(sapOrder){
+function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
   if( _.isArray(sapOrder.Payments) ){
+
+    //No payments are returned when using only client balance
+    var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
+      return p.type === CLIENT_BALANCE_TYPE;
+    });
+
+    if(everyPaymentIsClientBalance){
+      return true;
+    }
+
     if(sapOrder.Payments.length > 0){
       return sapOrder.Payments.every(function(payment){
         return !isNaN(payment.pay) && payment.reference;
       });
     }
   }
+
   return false;
 }
 

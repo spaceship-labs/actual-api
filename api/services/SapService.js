@@ -10,6 +10,8 @@ var SAP_DATE_FORMAT       = 'YYYY-MM-DD';
 var CLIENT_CARD_TYPE      = 1;//1.Client, 2.Proveedor, 3.Lead
 var CREATE_CONTACT_ACTION = 0;
 var UPDATE_CONTACT_ACTION = 1;
+var CLIENT_BALANCE_TYPE = 'client-balance';
+
 
 var COMPANY_STUDIO_CODE   = '001';
 var COMPANY_HOME_CODE     = '002';
@@ -75,6 +77,9 @@ function createClient(params){
 
 function updateClient(cardcode, form){
   form = _.omit(form, _.isUndefined);
+  //Important: DONT UPDATE BALANCE IN SAP
+  delete form.Balance;
+
   var path = 'Contact';
   var params = {
     Client: JSON.stringify(form)
@@ -232,7 +237,13 @@ function isImmediateDelivery(shipDate){
 }
 
 function mapPaymentsToSap(payments, exchangeRate){
-  return payments.map(function(payment){
+
+  payments = payments.filter(function(p){
+    return p.type != CLIENT_BALANCE_TYPE;
+  });
+
+
+  var paymentsTopSap = payments.map(function(payment){
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
@@ -253,6 +264,8 @@ function mapPaymentsToSap(payments, exchangeRate){
 
     return paymentSap;
   });
+
+  return paymentsTopSap;
 }
 
 function getWhsCodeById(whsId, warehouses){
