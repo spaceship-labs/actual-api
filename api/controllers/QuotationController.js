@@ -488,6 +488,19 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getQuotationSapLogs: function(req, res){
+    var form = req.allParams();
+    var quotationId = form.id;
+    SapOrderConnectionLog.find({Quotation:quotationId})
+      .then(function(logs){
+        res.json(logs);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 
 };

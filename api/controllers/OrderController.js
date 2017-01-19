@@ -49,6 +49,7 @@ module.exports = {
       .populate('EwalletRecords')
       .populate('Broker')
       .populate('OrdersSap')
+      .populate('SapOrderConnectionLog')
       .then(function(foundOrder){
         order = foundOrder.toObject();
         var sapReferencesIds = order.OrdersSap.map(function(ref){
@@ -84,6 +85,7 @@ module.exports = {
     var quotation;
     var orderParams;
     var orderDetails;
+    var sapLog;
 
     //Validating if quotation doesnt have an order assigned
     Order.findOne({Quotation: quotationId})
@@ -199,8 +201,20 @@ module.exports = {
           quotationDetails: quotationDetails
         });
       })
-      .then(function(sapResponse){
+      .then(function(sapResponseAux){
+        sapResponse = sapResponseAux;
         sails.log.info('createSaleOrder response', sapResponse);
+        var log = {
+          content: JSON.stringify(sapResponse),
+          User   : req.user.id,
+          Store  : opts.currentStore,
+          Quotation: quotationId
+        };
+        return SapOrderConnectionLog.create(log);
+      })  
+      .then(function(sapLogCreated){
+        sapLog = sapLogCreated;
+
         sapResult = JSON.parse(sapResponse.value);
         var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
         sails.log.info('isValidSapResponse', isValidSapResponse);
@@ -213,6 +227,8 @@ module.exports = {
           return Promise.reject(new Error(errorStr));
         }
         orderParams.documents = sapResult;
+        orderParams.SapOrderConnectionLog = sapLog.id;
+
         return Order.create(orderParams);
       })
       .then(function(created){

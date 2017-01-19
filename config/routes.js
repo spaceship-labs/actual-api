@@ -481,6 +481,11 @@ module.exports.routes = {
     action:'getQuotationPaymentOptions'
   },
 
+  '/quotation/:id/saporderconnectionlogs':{
+    controller:'quotation',
+    action:'getQuotationSapLogs'
+  },
+
   '/payment/add/:quotationid':{
     controller: 'payment',
     action:'add'

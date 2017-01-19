@@ -47,6 +47,11 @@ module.exports = {
     Manager:{
       model:'user'
     },
+    SapOrderConnectionLogs: {
+      collection: 'SapOrderConnectionLog',
+      via: 'Quotation'
+    },
+
     CardName: {type:'string'},
     CardCode:{type:'string'},
     isClosed:{type:'boolean'},

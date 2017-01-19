@@ -68,6 +68,9 @@ module.exports = {
       collection:'OrderSap',
       via:'Order'
     },
+    SapOrderConnectionLog:{
+      model: 'SapOrderConnectionLog'
+    },
 
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
