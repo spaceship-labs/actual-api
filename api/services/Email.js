@@ -173,6 +173,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       phone: client.Phone1,
       cel: client.Cellular,
       references: '',
+      balance: client.Balance,
     },
     user: {
       name: user.firstName + ' ' + user.lastName,
@@ -517,6 +518,9 @@ function paymentMethod(payment) {
     case 'cheque':
       payment_name = 'Cheque';
       break;
+    case 'client-balance':
+      payment_name = 'Saldo a favor';
+      break;
     default:
       payment_name = '';
       break;
@@ -555,6 +559,9 @@ function paymentType(payment) {
       break;
     case 'cheque':
       payment_name = 'Contado';
+      break;
+    case 'client-balance':
+      payment_name = 'Saldo a favor cliente';
       break;
     default:
       payment_name = '';
