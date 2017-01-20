@@ -32,9 +32,11 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
+  /*
   'OPTIONS /*': function (req, res) {
     res.send(200);
   },
+  */
 
   '/': {
     controller: 'auth',

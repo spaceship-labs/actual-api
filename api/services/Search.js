@@ -1,5 +1,6 @@
 var assign   = require('object-assign');
 var _        = require('underscore');
+var Promise  = require('bluebird');
 
 module.exports = {
   applyFilters            : applyFilters,
@@ -16,7 +17,42 @@ module.exports = {
   queryIdsProducts        : queryIdsProducts,
   queryPrice              : queryPrice,
   queryTerms              : queryTerms,
+  populateProductsIdsToPromotions: populateProductsIdsToPromotions,
+  relatePromotionsToProducts: relatePromotionsToProducts  
 };
+
+//Promotions array of promotion object with property productsIds
+function relatePromotionsToProducts(promotions, products){
+  for(var i = 0; i<products.length;i++){
+    for(var j=0; j<promotions.length; j++){
+
+      products[i].Promotions = products[i].Promotions || [];
+
+      var validPromotion = promotions[j].productsIds.indexOf(products[i].id); 
+      if(validPromotion >= 0){
+        products[i].Promotions = products[i].Promotions.concat( promotions[j] );
+      }
+
+    }
+  }
+
+  return products;
+}
+
+function populateProductsIdsToPromotions(promotions){
+  return Promise.each(promotions, populateProductsIdsToPromotion);
+}
+
+function populateProductsIdsToPromotion(promotion){
+  return Product_Promotion.find({promotion: promotion.id})
+    .then(function(productPromotionRelations){
+      var productsIds = productPromotionRelations.map(function(pp){
+        return pp.product;
+      });
+      promotion.productsIds = productsIds;
+      return promotion.productsIds;
+    });
+}
 
 function queryIdsProducts(query, idProducts) {
   return assign(query, {

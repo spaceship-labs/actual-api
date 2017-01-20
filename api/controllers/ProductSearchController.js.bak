@@ -1,8 +1,6 @@
 var _  = require('underscore');
-var Promise = require('bluebird');
 
 module.exports = {
-  
   searchByFilters: function(req, res){
     var form           = req.params.all();
     var terms          = [].concat(form.keywords || []);
@@ -15,8 +13,6 @@ module.exports = {
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var warehouses     = [];
     var productsIds    = [];
-    var promotions     = [];
-    var activeStore;
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -26,28 +22,16 @@ module.exports = {
     query            = Search.queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
     
+    Search.getProductsByFilterValue(filtervalues)
 
-    Promise.join(
-      Store.findOne({id:activeStoreId}).populate('Promotions', queryPromos),
-      Search.getProductsByFilterValue(filtervalues)
-    )
-
-      .then(function(result) {
-        activeStore = result[0];
-        promotions  = activeStore.Promotions;
-        productsIds = result[1];
-
+      .then(function(productsIdsResult) {
+        productsIds = productsIdsResult;
         if(filterByStore && activeStoreId){
-          return[ 
-            Store.findOne({id:activeStoreId}),
-            Search.populateProductsIdsToPromotions(promotions)
-          ];
+          return Store.findOne({id:activeStoreId});
         }
         return false;
       })  
-      .spread(function(activeStore, populatedPromotions) {
-        promotions = populatedPromotions;
-
+      .then(function(activeStore) {
         if (filtervalues.length > 0) {
           query = Search.queryIdsProducts(query, productsIds);
         }
@@ -70,7 +54,7 @@ module.exports = {
         };
 
         //sails.log.info('searchQuery', JSON.stringify(searchQuery));
-        var find = Product.find(searchQuery);
+        var find = Product.find(searchQuery).populate('Promotions', queryPromos);
         
         if(populateImgs){
           find = find.populate('files');
@@ -82,16 +66,12 @@ module.exports = {
         ];        
       })
       .spread(function(total, products) {
-        products = Search.relatePromotionsToProducts(promotions, products);
-        products = ProductService.mapProductsMainPromo(products);
-
         return res.json({total: total, products: products});
       })
       .catch(function(err) {
         return res.negotiate(err);
       });
   },
-
 
   searchByCategory: function(req, res) {
     var form           = req.params.all();
@@ -102,7 +82,6 @@ module.exports = {
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var query          = {};
     var productsIds    = [];
-    var promotions     = [];
     var price          = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -112,17 +91,9 @@ module.exports = {
       limit: form.limit || 10
     };
     var productsIdsAux = [];
-    var activeStore;
 
-    Promise.join(
-      Store.findOne({id:activeStoreId}).populate('Promotions', queryPromos),
-      Search.getProductsByCategory({Handle:handle})
-    )
-      .then(function(results) {
-        activeStore = results[0];
-        promotions  = activeStore.Promotions;
-        var catprods = results[1];
-
+    Search.getProductsByCategory({Handle:handle})
+      .then(function(catprods) {
         return [
           catprods, 
           Search.getProductsByFilterValue(filtervalues)
@@ -139,24 +110,17 @@ module.exports = {
       })
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
-        
         if(filterByStore && activeStoreId){
-          return [
-            Store.findOne({id:activeStoreId}),
-            Search.populateProductsIdsToPromotions(promotions)
-          ];
+          return Store.findOne({id:activeStoreId});
         }
-        
         return false;
       })      
-      .spread(function(activeStore, populatedPromotions) {
-        promotions = populatedPromotions;        
+      .then(function(activeStore) {
         query = {
           id: productsIds,
           Price: price,
           Active: 'Y'
         };
-
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
         } 
@@ -182,19 +146,16 @@ module.exports = {
             .paginate(paginate)
             .sort('Price ASC')
             .populate('files')
+            .populate('Promotions',queryPromos)
         ];
       })
       .spread(function(total, products) {
-        products = Search.relatePromotionsToProducts(promotions, products);
-        products = ProductService.mapProductsMainPromo(products);
-
         return res.json({
           products: products,
           total: total
         });
       })
       .catch(function(err) {
-        console.log(err);
         return res.negotiate(err);
       });
   },
@@ -273,8 +234,8 @@ module.exports = {
             Promise.resolve([])  //products
           ];
         }
-        query = Search.applyFilters({},filters);
-        query = Search.applyOrFilters(query,orFilters);
+        query    = Search.applyFilters({},filters);
+        query    = Search.applyOrFilters(query,orFilters);
         
         var freeSaleQuery = _.clone(query);
         freeSaleQuery = _.extend(freeSaleQuery, {
