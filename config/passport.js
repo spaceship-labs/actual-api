@@ -1,6 +1,7 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt = require('passport-jwt').ExtractJwt;
 
 var EXPIRES_IN = 60*24*60; //seconds
 var SECRET = process.env.tokenSecret || "4ukI0uIVnB3iI1yxj646fVXSE3ZVk4doZgz6fTbNg7jO41EAtl20J5F7Trtwe7OM";
@@ -15,10 +16,10 @@ var LOCAL_STRATEGY_CONFIG = {
 };
 
 var JWT_STRATEGY_CONFIG = {
+  jwtFromRequest: ExtractJwt.fromAuthHeader(),
   secretOrKey: SECRET,
   issuer: ISSUER,
-  audience: AUDIENCE,
-  passReqToCallback: false
+  audience: AUDIENCE
 };
 
 function _onLocalStrategyAuth(email, password, next){
@@ -30,8 +31,6 @@ function _onLocalStrategyAuth(email, password, next){
       if (!user) return next(null, false,{
         code: 'INCORRECT_AUTHDATA',
         message:'Incorrect auth data'
-        //code: 'E_USER_NOT_FOUND',
-        //message: email + 'is not found'
       });
 
       if(!user.active){
@@ -46,15 +45,16 @@ function _onLocalStrategyAuth(email, password, next){
         return next(null, false, {
           code: 'INCORRECT_AUTHDATA',
           message:'Incorrect auth data'        
-          //code: 'E_WRONG_PASSWORD',
-          //message: '!Password is wrong'
         });
       }
 
-      User.update({id : user.id},{ lastLogin : new Date() }).exec(function(err,ruser){
+      User.update({id : user.id},{ lastLogin : new Date() })
+        .exec(function(err,ruser){
+          if (error) return next(error, false, {});
+
           delete user.password;
           return next(null, user, {});
-      });
+        });
 
   });
 }
