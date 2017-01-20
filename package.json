@@ -8,7 +8,7 @@
     "async": "^2.1.4",
     "bcrypt": "^0.8.x",
     "bcrypt-nodejs": "0.0.3",
-    "bluebird": "^3.3.4",
+    "bluebird": "^3.4.7",
     "build-url": "^1.0.9",
     "connect-mongo": "0.8.2",
     "connect-timeout": "^1.7.0",
