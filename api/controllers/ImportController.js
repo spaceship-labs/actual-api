@@ -1,6 +1,5 @@
 var request = require('request');
 var fs = require('fs');
-var async = require('async');
 var pathService = require('path');
 var Promise = require('bluebird');
 

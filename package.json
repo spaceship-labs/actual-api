@@ -5,7 +5,7 @@
   "description": "a Sails application",
   "keywords": [],
   "dependencies": {
-    "async": "^1.5.2",
+    "async": "^2.1.4",
     "bcrypt": "^0.8.x",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.3.4",
