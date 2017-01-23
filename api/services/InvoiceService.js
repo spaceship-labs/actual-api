@@ -6,6 +6,7 @@ var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
+var RFCPUBLIC = 'XAXX010101000';
 
 module.exports = {
   create: create,
@@ -34,7 +35,7 @@ function create(orderId) {
       return [
         order,
         preparePayments(payments),
-        prepareClient(client, address),
+        prepareClient(order, client, address),
         prepareItems(details)
       ];
     })
@@ -105,23 +106,43 @@ function createInvoice(data) {
   return request(options);
 }
 
-function prepareClient(client, address) {
-  var data = {
-    name: address.companyName,
-    identification: client.LicTradNum,
-    email: address.E_Mail,
-    address: {
-      street: address.Street,
-      exteriorNumber: address.U_NumExt,
-      interiorNumber: address.U_NumInt,
-      colony: address.Block,
-      country: 'México',
-      state: address.State,
-      municipality:  address.U_Localidad,
-      localitiy: address.City,
-      zipCode: address.ZipCode,
-    }
-  };
+function prepareClient(order, client, address) {
+  var generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
+  if (!generic) {
+    var data = {
+      name: address.companyName,
+      identification: client.LicTradNum,
+      email: address.E_Mail,
+      address: {
+        street: address.Street,
+        exteriorNumber: address.U_NumExt,
+        interiorNumber: address.U_NumInt,
+        colony: address.Block,
+        country: 'México',
+        state: address.State,
+        municipality:  address.U_Localidad,
+        localitiy: address.City,
+        zipCode: address.ZipCode,
+      }
+    };
+  } else {
+    var data = {
+      name: order.CardName,
+      identification: RFCPUBLIC,
+      email: order.E_Mail,
+      address: {
+        street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
+        exteriorNumber: order.U_Noexterior,
+        interiorNumber: order.U_Nointerior,
+        colony: order.U_Colonia,
+        country: 'México',
+        state: order.U_Estado,
+        municipality:  order.U_Mpio,
+        localitiy: order.U_Ciudad,
+        zipCode: order.U_CP,
+      }
+    };
+  }
   return createClient(data);
 }
 

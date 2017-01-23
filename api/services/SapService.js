@@ -47,7 +47,7 @@ function createClient(params){
   var fiscalAddress  = params.fiscalAddress || {};
   var clientContacts = params.clientContacts || [];
 
-  client.LicTradNum  = client.LicTradNum || 'XXAX010101000';
+  client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
 
   return User.findOne({id:client.User}).populate('Seller')
     .then(function(user){
@@ -63,7 +63,7 @@ function createClient(params){
         Client: JSON.stringify(client),
         address: JSON.stringify(fiscalAddress),
         person: JSON.stringify(clientContacts)
-      };   
+      };
       var endPoint = buildUrl(baseUrl,{
         path: path,
         queryParams: requestParams
@@ -71,7 +71,7 @@ function createClient(params){
       sails.log.info('endPoint', endPoint);
       reqOptions.uri = endPoint;
       return request(reqOptions);
-    });  
+    });
 
 }
 
@@ -101,7 +101,7 @@ function createContact(cardCode, form){
   form.CardCode = cardCode;
   form.action   = CREATE_CONTACT_ACTION;
   var params = {
-    contact: JSON.stringify({CardCode: cardCode}),    
+    contact: JSON.stringify({CardCode: cardCode}),
     person: JSON.stringify([form])
   };
   var endPoint = buildUrl(baseUrl,{
@@ -147,9 +147,9 @@ function updateFiscalAddress(cardcode, form){
   @param params object properties
     quotationId,
     groupCode,
-    cardCode, 
+    cardCode,
     slpCode,
-    cntctCode, 
+    cntctCode,
     quotationDetails, //Populated with products
     payments,
     exchangeRate,
@@ -281,9 +281,9 @@ function getFarthestShipDate(quotationDetails){
   for(var i=0; i<quotationDetails.length; i++){
     if(
       (
-        farthestShipDate && 
+        farthestShipDate &&
         new Date(quotationDetails[i].shipDate) >= farthestShipDate
-      ) || 
+      ) ||
       i === 0
     ){
       farthestShipDate = quotationDetails[i].shipDate;
