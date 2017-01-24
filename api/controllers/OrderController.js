@@ -5,6 +5,7 @@ var INVOICE_SAP_TYPE = 'Invoice';
 var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
 var CLIENT_BALANCE_TYPE = 'client-balance';
+var BALANCE_SAP_TYPE = 'Balance';
 
 
 module.exports = {
@@ -262,7 +263,7 @@ module.exports = {
         };
         return [
           Quotation.update({id:quotation.id} , updateFields),
-          saveSapReferences(sapResult, orderCreated.id, orderDetails)
+          saveSapReferences(sapResult, orderCreated, orderDetails)
         ];
       })
       .spread(function(quotationUpdated, sapOrdersReference){
@@ -399,6 +400,17 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       };
     }
 
+    var clientBalance = extractBalanceFromSapResult(sapResult);
+    if(!clientBalance){
+      return {
+        error: 'Balance del cliente no definido en la respuesta'
+      };
+    }
+
+    sapResult = sapResult.filter(function(item){
+      return item.type !== BALANCE_SAP_TYPE;
+    });
+
     var everyOrderHasPayments = sapResult.every(function(sapOrder){
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
     });
@@ -470,13 +482,18 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
   return false;
 }
 
-function saveSapReferences(sapResult, orderId, orderDetails){
+function saveSapReferences(sapResult, order, orderDetails){
   sails.log.info('sapResult', sapResult);
+  
+  sapResult = sapResult.filter(function(item){
+    return item.type !== BALANCE_SAP_TYPE;
+  });
+
   var ordersSap = sapResult.map(function(orderSap){
     sails.log.info('orderSap', orderSap);
 
     var orderSapReference = {
-      Order: orderId,
+      Order: order.id,
       invoiceSap: orderSap.Invoice || null,
       document: orderSap.Order,
       PaymentsSap: orderSap.Payments.map(function(payment){
@@ -507,7 +524,22 @@ function saveSapReferences(sapResult, orderId, orderDetails){
 
     return orderSapReference;
   });
-  return OrderSap.create(ordersSap);
+  
+  var clientBalance = extractBalanceFromSapResult(sapResult);
+  var clientId = order.Client.id || order.Client;
+
+  return Promise.join(
+    OrderSap.create(ordersSap),
+    Client.update({id:clientId},{Balance: clientBalance})
+  );
+}
+
+function extractBalanceFromSapResult(sapResult){
+  var balanceItem = _.findWhere(sapResult, {type: BALANCE_SAP_TYPE});
+  if(balanceItem){
+    return balanceItem.result;
+  }
+  return false;
 }
 
 
