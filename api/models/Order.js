@@ -45,7 +45,7 @@ module.exports = {
     ClientBalanceRecords:{
       collection:'ClientBalanceRecord',
       via:'Order'
-    },    
+    },
     User:{
       model: 'User',
     },
@@ -122,4 +122,19 @@ module.exports = {
       cb();
     });
   },
+  /*
+  afterCreate: function(val, cb) {
+    InvoiceService
+      .create(val.id)
+      .then(function() {
+        return InvoiceService.send(val.id);
+      })
+      .then(function() {
+        cb();
+      })
+      .catch(function(err) {
+        cb(err);
+      });
+  }
+  */
 }
