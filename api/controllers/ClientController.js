@@ -78,7 +78,7 @@ module.exports = {
 
   create: function(req, res) {
     var form           = req.params.all();
-    var email          = form.email;
+    var email          = form.E_Mail;
     var actualMail     =  /@actualgroup.com$/;
     var createdClient  = false;
     var contacts       = [];
@@ -100,6 +100,10 @@ module.exports = {
       return res.negotiate(new Error('Nombres de contactos repetidos'));
     }
 
+    if(!email){
+      return res.negotiate(new Error('Email requerido'));
+    }
+
     if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
       fiscalAddress  = _.clone(form.fiscalAddress);
       fiscalAddress  = ClientService.mapFiscalFields(fiscalAddress);
@@ -114,7 +118,13 @@ module.exports = {
       clientContacts: contacts
     };
 
-    SapService.createClient(params)
+    Client.findOne({E_Mail:email})
+      .then(function(usedEmail){
+        if(usedEmail){
+          return Promise.reject(new Error('Email previamente utilizado'));
+        }
+        return SapService.createClient(params);
+      })
       .then(function(result){
         sails.log.info('result createClient', result);
         var sapData = JSON.parse(result.value);
@@ -185,12 +195,23 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
+    var email = form.E_Mail;
     form = ClientService.mapClientFields(form);
     delete form.FiscalAddress;
     //Dont remove
     delete form.Balance;
 
-    SapService.updateClient(CardCode, form)
+    if(!email){
+      return res.negotiate(new Error('Email requerido'));
+    }
+
+    Client.findOne({E_Mail:email, id: {'!=': form.id}})
+      .then(function(usedEmail){
+        if(usedEmail){
+          return Promise.reject(new Error('Email previamente utilizado'));
+        }
+        return SapService.updateClient(CardCode, form);
+      })
       .then(function(resultSap){
         sails.log.info('update client resultSap', resultSap);
 
