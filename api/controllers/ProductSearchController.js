@@ -22,8 +22,10 @@ module.exports = {
       limit: form.items || 10
     };
     var query        = {};
+    var priceField   = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
+
     query            = Search.queryTerms(query, terms);
-    query            = Search.queryPrice(query, minPrice, maxPrice);
+    query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query.Active     = 'Y';
     
     Search.getProductsByFilterValue(filtervalues)
@@ -54,8 +56,7 @@ module.exports = {
         //sails.log.info('searchQuery', JSON.stringify(searchQuery));
         var find = Product.find(searchQuery);
         var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
-        sails.log.info('sortValue', sortValue);
-        
+
         if(populateImgs){
           find = find.populate('files');
         }
@@ -84,16 +85,18 @@ module.exports = {
     var query          = {};
     var productsIds    = [];
     var promotions     = [];
-    var price          = {
-      '>=': form.minPrice || 0,
-      '<=': form.maxPrice || Infinity
-    };
+    var activeStore    = req.user.activeStore;
+    var priceField     = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
+    var minPrice       = form.minPrice;
+    var maxPrice       = form.maxPrice;
+
+    query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
+
     var paginate       = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
     var productsIdsAux = [];
-    var activeStore = req.user.activeStore;
 
     Search.getProductsByCategory({Handle:handle})
       .then(function(results) {
@@ -118,7 +121,6 @@ module.exports = {
         
         query = {
           id: productsIds,
-          Price: price,
           Active: 'Y'
         };
 
@@ -139,16 +141,13 @@ module.exports = {
             freeSaleQuery
           ]
         };
-        //var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
-        var sortValue = 'Price ASC';
-        sails.log.info('query', query);
-        sails.log.info('sortValue', sortValue);
+        var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
 
         return [
           Product.count(searchQuery),
           Product.find(searchQuery)
             .paginate(paginate)
-            //.sort(sortValue)
+            .sort(sortValue)
             .populate('files')
         ];
       })

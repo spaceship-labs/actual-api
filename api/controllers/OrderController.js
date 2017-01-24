@@ -189,7 +189,6 @@ module.exports = {
         ];
       })
       .spread(function(quotationDetails, site){
-        sails.log.info('createSaleOrder from controller');
         return SapService.createSaleOrder({
           quotationId:      quotationId,
           groupCode:        orderParams.groupCode,
@@ -218,7 +217,6 @@ module.exports = {
 
         sapResult = JSON.parse(sapResponse.value);
         var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
-        sails.log.info('isValidSapResponse', isValidSapResponse);
         if( isValidSapResponse.error ){
           var defaultErrMsg = 'Error en la respuesta de SAP';
           var errorStr = isValidSapResponse.error || defaultErrMsg;
@@ -401,7 +399,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
     }
 
     var clientBalance = extractBalanceFromSapResult(sapResult);
-    if(!clientBalance){
+    if(!clientBalance || isNaN(clientBalance) ){
       return {
         error: 'Balance del cliente no definido en la respuesta'
       };
@@ -484,13 +482,16 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 
 function saveSapReferences(sapResult, order, orderDetails){
   sails.log.info('sapResult', sapResult);
-  
+
+  var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));
+  var clientId = order.Client.id || order.Client;
+
+
   sapResult = sapResult.filter(function(item){
     return item.type !== BALANCE_SAP_TYPE;
   });
 
   var ordersSap = sapResult.map(function(orderSap){
-    sails.log.info('orderSap', orderSap);
 
     var orderSapReference = {
       Order: order.id,
@@ -525,9 +526,6 @@ function saveSapReferences(sapResult, order, orderDetails){
     return orderSapReference;
   });
   
-  var clientBalance = extractBalanceFromSapResult(sapResult);
-  var clientId = order.Client.id || order.Client;
-
   return Promise.join(
     OrderSap.create(ordersSap),
     Client.update({id:clientId},{Balance: clientBalance})

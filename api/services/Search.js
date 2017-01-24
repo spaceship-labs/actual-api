@@ -15,7 +15,7 @@ module.exports = {
   hashToArray             : hashToArray,
   promotionCronJobSearch  : promotionCronJobSearch,
   queryIdsProducts        : queryIdsProducts,
-  queryPrice              : queryPrice,
+  getPriceQuery           : getPriceQuery,
   queryTerms              : queryTerms,
   populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   relatePromotionsToProducts: relatePromotionsToProducts,
@@ -61,14 +61,14 @@ function queryIdsProducts(query, idProducts) {
   });
 }
 
-function queryPrice(query, minPrice, maxPrice) {
-  var price = {
+function getPriceQuery(query, priceField, minPrice, maxPrice) {
+  var priceQuery = {
     '>=': minPrice || 0,
     '<=': maxPrice || Infinity
   };
-  return assign(query, {
-    Price: price
-  });
+  var queryExtension = {};
+  queryExtension[priceField] = priceQuery;
+  return assign(query, queryExtension);
 }
 
 function applyFilters(query, filters) {

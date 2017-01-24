@@ -1,10 +1,10 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
-var ObjectId = require('mongodb').ObjectID;
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
 	mapProductsMainPromo: mapProductsMainPromo,
-  cacheProductsDiscountsInStores: cacheProductsDiscountsInStores,
+  cacheProductDiscountPrices: cacheProductDiscountPrices,
   testGetProducts: testGetProducts
 };
 
@@ -49,8 +49,8 @@ function testGetProducts(){
 }
 
 
-function cacheProductsDiscountsInStores(){
-  console.log('Start cacheProductsDiscountsInStores ' + new Date());
+function cacheProductDiscountPrices(){
+  console.log('Start cacheProductDiscountPrices ' + new Date());
   var promotionsQuery = Search.getPromotionsQuery();
   var stores = [];
   var updateCounter
@@ -67,7 +67,7 @@ function cacheProductsDiscountsInStores(){
     })
     .then(function(products){
       console.log('products ' + new Date(), products.length);
-      return Promise.each(products,function(product){
+      return Promise.map(products,function(product){
         return relateProductPromotionsWithStoresPromotions(product, stores);
       });      
     })
@@ -80,7 +80,7 @@ function cacheProductsDiscountsInStores(){
       console.log('finish updateMappedProducts ' + new Date());
     })
     .catch(function(err){
-      console.log('err on cacheProductsDiscountsInStores', err);
+      console.log('err on cacheProductDiscountPrices', err);
     });
 }
 
@@ -91,7 +91,7 @@ function updateMappedProducts(mappedProducts){
   });
 }
 function waterlineProductUpdate(product){
-  return Product.update({id:product.id}, product);
+  return nativeProductUpdate(product);
 }
 
 function nativeProductUpdate(product){
@@ -101,9 +101,9 @@ function nativeProductUpdate(product){
         console.log('err updating product',err);
         reject(err);
       }
-      var findCrieria = {_id: new ObjectId(p.id)};
+      var findCrieria = {_id: new ObjectId(product.id)};
       var updateParams = {
-        $set: _.omit(p, ['id'])
+        $set: _.omit(product, ['id'])
       };
       collection.updateOne(findCrieria, updateParams, function(errUpdate, result){
         if(errUpdate){
@@ -118,15 +118,15 @@ function nativeProductUpdate(product){
 }
 
 function relateProductPromotionsWithStoresPromotions(product, stores){
-  return Promise.each(stores, function(store){
+  return Promise.map(stores, function(store){
     return getProductDiscountPriceByStore(product, store);
   })
   .then(function(productDiscountPrices){
-
     var productObj = productDiscountPrices.reduce(function(hash, price){
       hash[price.discountPriceKey] = price.value || product.Price;
       return hash;
     },{id: product.id});
+    
     return productObj;
   });
 
@@ -146,8 +146,10 @@ function getProductDiscountPriceByStore(product, store){
     product[discountPriceKey] = product.Price;
   }
 
-  return {
+  var discountPrice = {
     discountPriceKey: discountPriceKey,
     value: product[discountPriceKey]
   };
+
+  return discountPrice;
 }

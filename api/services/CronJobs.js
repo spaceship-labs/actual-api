@@ -18,7 +18,14 @@ module.exports.init = function(){
         cacheCategoriesProducts();
       },
       time:'0 0 */1 * * *'
+    },
+    {
+      fn: function(d){
+        ProductService.cacheProductDiscountPrices();
+      },
+      time:'0 */30 * * * *'
     }
+
   ].forEach(function(v){
     new cron(v.time,v.fn, true, true);
   });
