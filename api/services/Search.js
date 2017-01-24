@@ -18,7 +18,8 @@ module.exports = {
   queryPrice              : queryPrice,
   queryTerms              : queryTerms,
   populateProductsIdsToPromotions: populateProductsIdsToPromotions,
-  relatePromotionsToProducts: relatePromotionsToProducts  
+  relatePromotionsToProducts: relatePromotionsToProducts,
+  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode  
 };
 
 //Promotions array of promotion object with property productsIds
@@ -353,4 +354,8 @@ function getMultiIntersection(arrays, options){
     arrays = arrays.filter(function(arr){return arr.length > 0});
   }
   return _.intersection.apply(null, arrays);
+}
+
+function getDiscountPriceKeyByStoreCode(storeCode){
+  return 'discountPrice_' + storeCode;
 }

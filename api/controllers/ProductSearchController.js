@@ -16,7 +16,7 @@ module.exports = {
     var warehouses     = [];
     var productsIds    = [];
     var promotions     = [];
-    var activeStore;
+    var activeStore    = req.user.activeStore;
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -26,27 +26,9 @@ module.exports = {
     query            = Search.queryPrice(query, minPrice, maxPrice);
     query.Active     = 'Y';
     
-
-    Promise.join(
-      Store.findOne({id:activeStoreId}).populate('Promotions', queryPromos),
-      Search.getProductsByFilterValue(filtervalues)
-    )
-
+    Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
-        activeStore = result[0];
-        promotions  = activeStore.Promotions;
-        productsIds = result[1];
-
-        if(filterByStore && activeStoreId){
-          return[ 
-            Store.findOne({id:activeStoreId}),
-            Search.populateProductsIdsToPromotions(promotions)
-          ];
-        }
-        return false;
-      })  
-      .spread(function(activeStore, populatedPromotions) {
-        promotions = populatedPromotions;
+        productsIds = result;
 
         if (filtervalues.length > 0) {
           query = Search.queryIdsProducts(query, productsIds);
@@ -71,20 +53,19 @@ module.exports = {
 
         //sails.log.info('searchQuery', JSON.stringify(searchQuery));
         var find = Product.find(searchQuery);
+        var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
+        sails.log.info('sortValue', sortValue);
         
         if(populateImgs){
           find = find.populate('files');
         }
+
         return [
           Product.count(searchQuery),
-          find.paginate(paginate)
-            .sort('Price ASC')
+          find.paginate(paginate).sort(sortValue)
         ];        
       })
       .spread(function(total, products) {
-        products = Search.relatePromotionsToProducts(promotions, products);
-        products = ProductService.mapProductsMainPromo(products);
-
         return res.json({total: total, products: products});
       })
       .catch(function(err) {
@@ -112,16 +93,11 @@ module.exports = {
       limit: form.limit || 10
     };
     var productsIdsAux = [];
-    var activeStore;
+    var activeStore = req.user.activeStore;
 
-    Promise.join(
-      Store.findOne({id:activeStoreId}).populate('Promotions', queryPromos),
-      Search.getProductsByCategory({Handle:handle})
-    )
+    Search.getProductsByCategory({Handle:handle})
       .then(function(results) {
-        activeStore = results[0];
-        promotions  = activeStore.Promotions;
-        var catprods = results[1];
+        var catprods = results;
 
         return [
           catprods, 
@@ -131,7 +107,7 @@ module.exports = {
       .spread(function(catprods, filterprods) {
         if (!handle || handle.length === 0) {
           return filterprods;
-        } else if(!filtervalues || filtervalues.length == 0) {
+        } else if(!filtervalues || filtervalues.length === 0) {
           return catprods;
         } else {
           return _.intersection(catprods, filterprods);
@@ -140,17 +116,6 @@ module.exports = {
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
         
-        if(filterByStore && activeStoreId){
-          return [
-            Store.findOne({id:activeStoreId}),
-            Search.populateProductsIdsToPromotions(promotions)
-          ];
-        }
-        
-        return false;
-      })      
-      .spread(function(activeStore, populatedPromotions) {
-        promotions = populatedPromotions;        
         query = {
           id: productsIds,
           Price: price,
@@ -174,19 +139,20 @@ module.exports = {
             freeSaleQuery
           ]
         };
-
+        //var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
+        var sortValue = 'Price ASC';
+        sails.log.info('query', query);
+        sails.log.info('sortValue', sortValue);
 
         return [
           Product.count(searchQuery),
           Product.find(searchQuery)
             .paginate(paginate)
-            .sort('Price ASC')
+            //.sort(sortValue)
             .populate('files')
         ];
       })
       .spread(function(total, products) {
-        products = Search.relatePromotionsToProducts(promotions, products);
-        products = ProductService.mapProductsMainPromo(products);
 
         return res.json({
           products: products,
