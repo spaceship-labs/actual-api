@@ -27,7 +27,11 @@ module.exports.init = function(){
     }
 
   ].forEach(function(v){
-    new cron(v.time,v.fn, true, true);
+    
+    if(process.env.NODE_ENV === 'production'){
+      new cron(v.time,v.fn, true, true);
+    }
+  
   });
 };
 

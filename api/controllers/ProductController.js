@@ -269,4 +269,23 @@ module.exports = {
     });
   },
 
+  syncProduct: function(req, res){
+    var form = req.params.all();
+    var ItemCode = form.ItemCode;
+    Product.findOne({ItemCode: ItemCode})
+      .then(function(productInMongo){
+        if(productInMongo){
+          return res.json('Producto ya disponible');
+        }
+        return SapService.syncProduct(ItemCode);
+      })
+      .then(function(result){
+        res.json(result);
+      })
+      .catch(function(err){
+        console.log('err syncProduct', err);
+        res.negotiate(err);
+      });
+  }
+
 };

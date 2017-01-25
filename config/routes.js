@@ -124,6 +124,13 @@ module.exports.routes = {
     action:'addSeenTime'
   },
 
+  /*
+  '/product/sync/:ItemCode':{
+    controller:'product',
+    action:'syncProduct'
+  },
+  */
+
   '/invoice/find/:page':{
     controller: 'invoice',
     action: 'find'
