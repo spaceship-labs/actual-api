@@ -165,11 +165,11 @@ function calculateQuotationAmountPaid(quotationId, exchangeRate){
     .then(function(quotation){
       var payments  = quotation.Payments || [];
 
-      var ammounts = payments.map(function(p){
-        if(p.type == 'cash-usd'){
+      var ammounts = payments.map(function(payment){
+        if(payment.type == 'cash-usd'){
          return calculateUSDPayment(payment, exchangeRate);
         }
-        return p.ammount;
+        return payment.ammount;
       });
       var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
         return paymentA + paymentB;
