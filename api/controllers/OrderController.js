@@ -125,6 +125,12 @@ module.exports = {
           );
         }
 
+        if(!quotation.Details || quotation.Details.length === 0){
+          return Promise.reject(
+            new Error('No hay productos en esta cotización')
+          );
+        }
+
         var user = req.user;
         if(user.Seller){
           SlpCode = user.Seller.SlpCode;
