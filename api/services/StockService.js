@@ -6,9 +6,19 @@ var moment = require('moment');
 module.exports = {
 	getDetailsStock: getDetailsStock,
 	substractProductsStock: substractProductsStock,
-	validateQuotationStockById: validateQuotationStockById
+	validateQuotationStockById: validateQuotationStockById,
+	isFreeSaleProduct: isFreeSaleProduct
 };
 
+
+function isFreeSaleProduct(product){
+  if(product){
+    if(product.freeSale && product.freeSaleStock > 0 && product.freeSaleDeliveryDays){
+    	return true;
+    }
+  }
+  return false;
+}
 
 //details must be populated with products and shipCompanyFrom
 function substractProductsStock(details){
@@ -26,8 +36,10 @@ function substractProductStockByDetail(detail){
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
 
-	if(detail.Product.freeSale){
-		return new Promise.resolve();
+	if( isFreeSaleProduct(detail.Product) ){
+		var newFreeSaleStock = detail.Product.freeSaleStock - detail.quantity;
+		return Product.update({id:detail.Product.id}, {freeSaleStock: newFreeSaleStock});
+		//return new Promise.resolve();
 	}
 
 	return getStoresWithProduct(ItemCode, whsCode)
@@ -53,7 +65,7 @@ function substractDeliveryStockByDetail(detail){
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
 
-	if(detail.Product.freeSale){
+	if( isFreeSaleProduct(detail.Product) ){
 		return new Promise.resolve();
 	}
 

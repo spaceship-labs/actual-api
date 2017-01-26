@@ -51,7 +51,7 @@ function productShipping(product, storeWarehouse, options) {
         });
         return Promise.all(shippingPromises);
       }
-      else if( productHasFreesale(product) && deliveries){
+      else if( StockService.isFreeSaleProduct(product) && deliveries){
         product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
         var shipDate = moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate();
         var freeSaleStockItem = {
@@ -75,10 +75,6 @@ function productShipping(product, storeWarehouse, options) {
       return result;
     });
 
-}
-
-function productHasFreesale(product){
-  return product.freeSale && product.freeSaleStock && product.freeSaleDeliveryDays;
 }
 
 function buildShippingItem(stockItem, deliveries, storeWarehouseId){

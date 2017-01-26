@@ -484,7 +484,7 @@ function Calculator(){
           discountPercent             : discountPercent,
           ewallet                     : ewallet,
           id                          : detail.id,
-          isFreeSale                  : isFreeSaleProduct(product),
+          isFreeSale                  : StockService.isFreeSaleProduct(product),
           paymentGroup                : options.paymentGroup,
           PromotionPackageApplied     : null,
           quantity                    : quantity,
@@ -537,12 +537,6 @@ function Calculator(){
     return percentage;
   }
 
-  function isFreeSaleProduct(product){
-    if(product){
-      return product.freeSale && product.freeSaleStock > 0;
-    }
-    return false;
-  }
 
   //@params product Object from model Product
   //Populated with promotions
