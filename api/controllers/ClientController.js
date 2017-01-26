@@ -259,20 +259,20 @@ module.exports = {
     form = ClientService.mapContactFields(form);    
     SapService.createContact(cardCode, form)
       .then(function(resultSap){
-        
-        sails.log.info('createContact resultSap', resultSap);
-        if( !resultSap.value || !_.isArray(resultSap.value) ){
-          var err = resultSap.value || 'Error al crear contacto';
-          return Promise.reject(new Error(err));
-        }
-        var CntctCode  = resultSap.value[0]; 
-        if(!ClientService.isValidContactCode(CntctCode)){
-          var err = resultSap.value || 'Error al crear contacto';
-          sails.log.info('err reject', err);
-          return Promise.reject(new Error(err));
-        }
+        sails.log.info('response createContact', resultSap);
+        var sapData = JSON.parse(resultSap.value);
+        var isValidSapResponse = ClientService.isValidSapContactCreation(sapData);
 
-        form.CntctCode = CntctCode;
+        if( !sapData || isValidSapResponse.error  ) {
+          var defualtErrMsg = 'Error al crear contacto en SAP';
+          var err = isValidSapResponse.error || defualtErrMsg;
+          if(err === true){
+            err = defualtErrMsg;
+          }
+          return Promise.reject(new Error(err));
+        } 
+        var CntctCode  = sapData[0].result;       
+        form.CntctCode = parseInt(CntctCode);
         return ClientContact.create(form);
       })
       .then(function(createdContact){
@@ -295,17 +295,20 @@ module.exports = {
         return SapService.updateContact(cardCode ,contactIndex, form);
       })
       .then(function(resultSap){
-        sails.log.info('resultSap updateContact', resultSap);
-        if( !resultSap.value || !_.isArray(resultSap.value) ){
-          var err = resultSap.value || 'Error al actualizar contacto';
+        sails.log.info('updateContact response', resultSap);
+
+        var sapData = JSON.parse(resultSap.value);
+        var isValidSapResponse = ClientService.isValidSapContactUpdate(sapData);
+
+        if( !sapData || isValidSapResponse.error  ) {
+          var defualtErrMsg = 'Error al crear contacto en SAP';
+          var err = isValidSapResponse.error || defualtErrMsg;
+          if(err === true){
+            err = defualtErrMsg;
+          }
           return Promise.reject(new Error(err));
-        }
-        var CntctCode  = resultSap.value[0]; 
-        if(!ClientService.isValidContactCode(CntctCode)){
-          var err = resultSap.value || 'Error al actualizar contacto';
-          sails.log.info('err reject', err);          
-          return Promise.reject(new Error(err));
-        }
+        } 
+
         return ClientContact.update({CntctCode: contactCode}, form);
       })
       .then(function(updatedApp){
