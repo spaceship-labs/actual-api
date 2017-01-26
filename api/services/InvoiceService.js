@@ -55,7 +55,7 @@ function send(orderID) {
       ];
     })
     .spread(function(invoice, address) {
-      //var email = address.E_Mail;
+      //var emails = ['tugorez@gmail.com', 'informatica@actualg.com', address.E_Mail];
       var emails = ['tugorez@gmail.com'];
       var id = invoice.id;
       return { id: id, emails: emails };
@@ -86,6 +86,7 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     paymentMethod: 'other',
+    anotation: order.CardCode,
     stamp: {
       generateStamp: true,
     },
