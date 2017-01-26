@@ -173,7 +173,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       phone: client.Phone1,
       cel: client.Cellular,
       references: '',
-      balance: client.Balance,
+      balance: numeral(client.Balance).format('0,0.00'),
     },
     user: {
       name: user.firstName + ' ' + user.lastName,
