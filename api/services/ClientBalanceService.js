@@ -8,7 +8,6 @@ module.exports = {
 };
 
 function isValidClientBalancePayment(payment, client){
-	var client = options.client;
   if (client.Balance < payment.ammount || !client.Balance) {
   	return false;
   }

@@ -8,7 +8,6 @@ module.exports = {
 };
 
 function isValidEwalletPayment(payment, client){
-	var client = options.client;
   if (client.ewallet < payment.ammount || !client.ewallet) {
   	return false;
   }

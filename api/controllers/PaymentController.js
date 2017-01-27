@@ -39,12 +39,16 @@ module.exports = {
         client = quotation.Client;
         form.Client = client.id;
 
-        if(!EwalletService.isValidEwalletPayment(form, client) && form.type === EWALLET_TYPE){
-          return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
+        if(form.type === EWALLET_TYPE){
+          if( !EwalletService.isValidEwalletPayment(form, client) ){
+            return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
+          }
         }
 
-        if(!ClientBalanceService.isValidClientBalancePayment(form, client) && form.type === CLIENT_BALANCE_TYPE){
-          return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
+        if(form.type === CLIENT_BALANCE_TYPE){
+          if(!ClientBalanceService.isValidClientBalancePayment(form, client)){
+            return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
+          }
         }
 
         return PaymentService.getExchangeRate();
