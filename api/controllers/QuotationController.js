@@ -40,21 +40,9 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var opts = {
-      paymentGroup:1,
-      updateDetails: true,
-      currentStore: req.user.activeStore.id
-    };
-    if(form.Details){
-      form.Details = formatProductsIds(form.Details);
-    }
     form.Store =  req.user.activeStore.id;
 
     Quotation.update({id:id}, form)
-      .then(function(){
-        var calculator = QuotationService.Calculator();
-        return calculator.updateQuotationTotals(id, opts);
-      })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
           res.json(updatedQuotation[0]);
@@ -73,39 +61,36 @@ module.exports = {
     var id = form.id;
     var baseQuotation = false;
     var userId = req.user.id;
+    var getPayments = form.payments;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
     
+    var quotationQuery =  Quotation.findOne({id: id})
+      .populate('Details')
+      .populate('User')
+      .populate('Client')
+      .populate('Order');
+      //.populate('Payments');
+      //.populate('Records')
+      //.populate('Manager');
+
+    if(getPayments){
+      quotationQuery = quotationQuery.populate('Payments');
+    }
+
     QuotationService.updateQuotationToLatestData(id, userId, {
       update:true,
       currentStore: req.user.activeStore.id
     })
       .then(function(){
-        return Quotation.findOne({id: id})
-          .populate('Details')
-          .populate('Records')
-          .populate('User')
-          .populate('Client')
-          .populate('Order')
-          .populate('Payments')
-          .populate('Manager');
+        return quotationQuery;
       })
       .then(function(quotation){
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         }
-        quotation = quotation.toObject();
-        quotationBase = quotation;
-        var recordsIds = [];
-        quotation.Records.forEach(function(record){
-          recordsIds.push(record.id);
-        });
-        return QuotationRecord.find({id: recordsIds}).populate('files');
-      })
-      .then(function(records){
-        quotationBase.Records = records;
-        return res.json(quotationBase);
+        return res.json(quotation);
       })
       .catch(function(err){
         console.log('err findById quotation', err);

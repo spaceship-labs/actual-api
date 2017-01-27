@@ -22,7 +22,7 @@ module.exports.init = function(){
       fn: function(d){
         ProductService.cacheProductDiscountPrices();
       },
-      time:'0 */30 * * * *'
+      time:'0 0 */1 * * *'
     }
 
   ].forEach(function(v){
