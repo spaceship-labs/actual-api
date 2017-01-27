@@ -167,6 +167,7 @@ function calculateQuotationAmountPaid(quotationId, exchangeRate){
       var payments  = quotation.Payments || [];
 
       sails.log.info('payments', payments);
+      sails.log.info('exchangeRate', exchangeRate);
 
       var ammounts = payments.map(function(payment){
         if(payment.type === 'cash-usd'){
