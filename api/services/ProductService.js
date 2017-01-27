@@ -87,7 +87,7 @@ function cacheProductDiscountPrices(){
 function updateMappedProducts(mappedProducts){
   return Promise.each(mappedProducts, function(p){
     //console.log('updating product: ', p);
-    return waterlineProductUpdate(p);
+    return nativeProductUpdate(p);
   });
 }
 function waterlineProductUpdate(product){

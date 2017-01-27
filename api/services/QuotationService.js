@@ -2,6 +2,7 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 var assign  = require('object-assign');
 var moment  = require('moment');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 
 var BIGTICKET_TABLE = [
@@ -224,25 +225,47 @@ function Calculator(){
         if(options && options.updateParams){
           totals = _.extend(totals, options.updateParams);
         }
-        
-        totals.bigticketMaxPercentage = getBigticketMaxPercentage(totals.subtotal2);
 
-        return Quotation.update({id:quotationId}, totals);
+        //return Quotation.update({id:quotationId}, totals);
+        return nativeQuotationUpdate(quotationId, totals);
       });
   }
 
+  function nativeQuotationUpdate(quotationId,params){
+    return new Promise(function(resolve, reject){
+      Quotation.native(function(err, collection){
+        if(err){
+          console.log('err updating product',err);
+          reject(err);
+        }
+        var findCrieria = {_id: new ObjectId(quotationId)};
+        var updateParams = {
+          $set: _.omit(params, ['id'])
+        };
+        collection.updateOne(findCrieria, updateParams, function(errUpdate, result){
+          if(errUpdate){
+            console.log('errUpdate updating product',errUpdate);
+            reject(errUpdate);
+          }
+          resolve(result);
+        });
+      });
+    });
+  }
+
+
   function getQuotationTotals(quotationId, options){
-    var quotationAux = false;
+    var details = [];
     options = options || {paymentGroup:1 , updateDetails: true};
 
     return getPromosByStore(options.currentStore)
       .then(function(promos){
         storePromotions = promos;
-        return Quotation.findOne({id:quotationId}).populate('Details');
+        return QuotationDetail.find({Quotation: quotationId});
       })
-      .then(function(quotation){
-        quotationAux = quotation; 
-        var packagesIds = getQuotationPackagesIds(quotation.Details);
+      .then(function(detailsResult){
+        details = detailsResult; 
+        var packagesIds = getQuotationPackagesIds(details);
         if(packagesIds.length > 0){
           return [
             getPackagesByStore(options.currentStore),
@@ -254,39 +277,14 @@ function Calculator(){
       })
       .spread(function(storePackagesFound, promotionPackages){
         storePackages = storePackagesFound;
-        packagesRules = getAllPackagesRules(promotionPackages, quotationAux.Details);
-        return processQuotationDetails(quotationAux, options);
+        packagesRules = getAllPackagesRules(promotionPackages, details);
+        return processQuotationDetails(details, options);
       })
       .then(function(processedDetails){
         var totals = sumProcessedDetails(processedDetails, options);
-        quotationAux = _.extend(quotationAux, totals);
-
-        /*
-        if(quotationAux.bigticketPercentage && getQuotationBigticketPercentage(quotationAux)){
-          quotationAux.lastCalculation = true;
-          sails.log.info('recalculando con bigticket');
-          return processQuotationDetails(quotationAux, options);
-        }
-        */
-        return new Promise(function(resolve){
-          resolve(totals);
-        });
-
-      })
-      .then(function(result){
-        return result;
-        /*
-        //In case result are processedDetails
-        if(_.isArray(result)){
-          var totals = sumProcessedDetails(result, options);
-          return totals;
-        }
-        //In case that result are totals
-        else{
-          return result;
-        }
-        */
+        return totals;
       });
+
   }
 
   function sumProcessedDetails(processedDetails, options){
@@ -397,13 +395,11 @@ function Calculator(){
   }
 
   //@param quotation: 
-  //  Populated with Array of objects from model Detail
   //  Every detail must contain a Product object populated
-  function processQuotationDetails(quotation, options){
+  function processQuotationDetails(details, options){
     options = options || {paymentGroup:1};
-    var details  = quotation.Details || [];
     var processedDetails = details.map(function(detail){
-      return getDetailTotals(detail, quotation, options);
+      return getDetailTotals(detail, options);
     });
     return Promise.all(processedDetails)
       .then(function(pDetails){
@@ -440,7 +436,7 @@ function Calculator(){
 
   //@params: detail Object from model Detail
   //Must contain a Product object populated
-  function getDetailTotals(detail, quotation, options){
+  function getDetailTotals(detail, options){
     options = options || {};
     paymentGroup = options.paymentGroup || 1;
     var subTotal = 0;
@@ -461,22 +457,18 @@ function Calculator(){
         var unitPriceWithDiscount     = calculateAfterDiscount(unitPrice, discountPercent);
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
+        var total                     = quantity * unitPriceWithDiscount;
         
-        if(quotation.lastCalculation && quotation.bigticketPercentage){
-          total            = calculateAfterDiscount(subtotal2, quotation.bigticketPercentage);
-          discountPercent  = calculateDiscountPercent(subtotal, total);
-        }else{
-          total            = subtotal2;
-        }
-
         //var total                 = quantity * unitPriceWithDiscount;
-        var subtotalWithPromotions= total;
-        var discount              = total - subtotal;
+        var subtotalWithPromotions    = total;
+        var discount                  = total - subtotal;
+        
         var ewallet = getEwalletEntryByDetail({
           Promotion: mainPromo,
           paymentGroup: options.paymentGroup,
           total: total
         });
+
         var detailTotals = {
           discount                    : discount,
           discountKey                 : discountKey, //Payment group discountKey
@@ -495,12 +487,6 @@ function Calculator(){
           unitPriceWithDiscount       : unitPriceWithDiscount,
           immediateDelivery           : isImmediateDelivery(detail.shipDate)
         };
-
-        if(quotation.lastCalculation && quotation.bigticketPercentage){
-          detailTotals.bigticketDiscountPercentage = getQuotationBigticketPercentage(quotation);
-        }else{
-          detailTotals.bigticketDiscountPercentage = 0;
-        }
 
         if(mainPromo.id && !mainPromo.PromotionPackage){
           detailTotals.Promotion = mainPromo.id;

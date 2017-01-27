@@ -35,13 +35,13 @@ module.exports = {
   getCategoriesTree: function(req, res){
     Promise.join(
       ProductCategory.find({CategoryLevel:1}).populate('Childs'),
-      ProductCategory.find({CategoryLevel:2}).populate('Childs').populate('Parents'),
+      ProductCategory.find({CategoryLevel:2}).populate('Childs'),
       ProductCategory.find({CategoryLevel:3}).populate('Parents')
     ).then(function(groups){
       var categoriesLv1 = groups[0] || [];
       var categoriesLv2 = groups[1] || [];
       var categoriesLv3 = groups[2] || [];
-      var categoryTree = buildCategoryTree(categoriesLv1, categoriesLv2, categoriesLv3);
+      var categoryTree = CategoryService.buildCategoriesTree(categoriesLv1, categoriesLv2, categoriesLv3);
       res.json(categoryTree);
     })
     .catch(function(err){
@@ -163,32 +163,4 @@ module.exports = {
 
 };
 
-function buildCategoryTree(categoriesLv1, categoriesLv2, categoriesLv3){
-  var categoryTree = [];
-  categoriesLv1.forEach(function(clv1){
-    var mainCategory = _.clone(clv1);
-    mainCategory =  mainCategory.toObject();
-    mainCategory.Childs = [];
 
-    clv1.Childs.forEach(function(child){
-      var lvl2 = _.findWhere( categoriesLv2, {id: child.id });
-      if(lvl2){
-        lvl2 = lvl2.toObject();
-        mainCategory.Childs.push(lvl2);
-      }
-    });
-
-    if(mainCategory.Childs.length <= 0){
-      clv1.Childs.forEach(function(child){
-        var lvl3 = _.findWhere( categoriesLv3, {id: child.id });
-        if(lvl3){
-          lvl3 = lvl3.toObject();
-          mainCategory.Childs.push(lvl3);
-        }
-      });
-    }
-
-    categoryTree.push(mainCategory);
-  });
-  return categoryTree;  
-}

@@ -107,7 +107,7 @@ module.exports = {
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
-      .then(function(updatedQuotation){
+      .then(function(updatedQuotationResult){
         return Quotation.findOne({id: quotationId})
           .populate('Payments')
           .populate('Details')

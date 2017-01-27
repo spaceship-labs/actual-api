@@ -9,6 +9,7 @@ module.exports = {
 
   create: function(req, res){
     var form = req.params.all();
+    var createdId;
     form.Details = formatProductsIds(form.Details);
     form.Details = tagImmediateDeliveriesDetails(form.Details);    
     form.Store = req.user.activeStore.id;
@@ -20,15 +21,15 @@ module.exports = {
 
     Quotation.create(form)
       .then(function(created){
+        createdId = created.id;
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
-        if(updatedQuotation && updatedQuotation.length > 0){
-          res.json(updatedQuotation[0]);
-        }else{
-          res.json(null);
-        }
+        return Quotation.findOne({id:createdId});
+      })
+      .then(function(quotation){
+        res.json(quotation);
       })
       .catch(function(err){
         console.log('err create quotation', err);
@@ -203,11 +204,10 @@ module.exports = {
          return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
-        if(updatedQuotation && updatedQuotation.length > 0){
-          res.json(updatedQuotation[0]);
-        }else{
-          res.json(null);
-        }
+        return Quotation.findOne({id: id});
+      })
+      .then(function(quotation){
+        res.json(quotation);
       })
       .catch(function(err){
         console.log('err addDetail quotation', err);
@@ -215,7 +215,6 @@ module.exports = {
       });
 
   },
-
 
   removeDetailsGroup: function(req, res){
     var form = req.params.all();
@@ -232,11 +231,8 @@ module.exports = {
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
-      .then(function(updatedQuotation){
-        if(updatedQuotation && updatedQuotation.length > 0){
-          return Quotation.findOne({id: updatedQuotation[0].id}).populate('Details');
-        }
-        return Promise.reject(new Error('No hay cotización'));
+      .then(function(updatedQuotationResult){
+        return Quotation.findOne({id: quotationId}).populate('Details');
       })
       .then(function(quotation){
         res.json(quotation);
