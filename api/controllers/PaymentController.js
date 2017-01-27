@@ -38,7 +38,6 @@ module.exports = {
         quotation = quotationFound;
         client = quotation.Client;
         form.Client = client.id;
-        if (form.type != EWALLET_TYPE) { return; }
 
         if(!EwalletService.isValidEwalletPayment(form, client) && form.type === EWALLET_TYPE){
           return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
