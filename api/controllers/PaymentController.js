@@ -85,6 +85,7 @@ module.exports = {
         return promises;
       })
       .spread(function(ammountPaid){
+        sails.log.info('ammountPaid spread !!!!!!', ammountPaid);
         var params = {
           ammountPaid: ammountPaid,
           paymentGroup: paymentGroup
