@@ -88,7 +88,6 @@ module.exports = {
         return promises;
       })
       .spread(function(ammountPaid){
-        sails.log.info('ammountPaid spread !!!!!!', ammountPaid);
         var params = {
           ammountPaid: ammountPaid,
           paymentGroup: paymentGroup
@@ -169,9 +168,6 @@ function calculateQuotationAmountPaid(quotationId, exchangeRate){
     .then(function(quotation){
       var payments  = quotation.Payments || [];
 
-      sails.log.info('payments', payments);
-      sails.log.info('exchangeRate', exchangeRate);
-
       var ammounts = payments.map(function(payment){
         if(payment.type === 'cash-usd'){
          return calculateUSDPayment(payment, exchangeRate);
@@ -179,13 +175,9 @@ function calculateQuotationAmountPaid(quotationId, exchangeRate){
         return payment.ammount;
       });
 
-      sails.log.info('ammounts', ammounts);
-
       var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
         return paymentA + paymentB;
       });
-
-      sails.log.info('ammountPaid', ammountPaid);
 
       return ammountPaid;
     });  
