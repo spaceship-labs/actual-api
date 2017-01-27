@@ -166,12 +166,16 @@ function calculateQuotationAmountPaid(quotationId, exchangeRate){
     .then(function(quotation){
       var payments  = quotation.Payments || [];
 
+      sails.log.info('payments', payments);
+
       var ammounts = payments.map(function(payment){
         if(payment.type === 'cash-usd'){
          return calculateUSDPayment(payment, exchangeRate);
         }
         return payment.ammount;
       });
+
+      sails.log.info('ammounts', ammounts);
 
       var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
         return paymentA + paymentB;
