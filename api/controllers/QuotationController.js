@@ -76,7 +76,7 @@ module.exports = {
       //.populate('Manager');
 
     if(getPayments){
-      quotationQuery = quotationQuery.populate('Payments');
+      quotationQuery.populate('Payments');
     }
 
     QuotationService.updateQuotationToLatestData(id, userId, {

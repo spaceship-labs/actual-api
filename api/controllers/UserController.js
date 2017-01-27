@@ -28,19 +28,25 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    User.findOne({id: id})
+    var quickRead = form.quickRead;
+    
+    var userQuery =  User.findOne({id: id})
       .populate('permissions')
-      .populate('Stores')
       .populate('mainStore')
       .populate('role')
-      .populate('Seller')
-      .then(function(result){
-        res.ok({data:result});
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });      
+      .populate('Seller');
+
+    if(!quickRead){
+      userQuery.populate('Stores');
+    }
+
+    userQuery.then(function(result){
+      res.ok({data:result});
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });      
   },
 
   create: function(req, res){
