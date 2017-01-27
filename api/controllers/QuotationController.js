@@ -184,6 +184,7 @@ module.exports = {
 
 
   addDetail: function(req, res){
+    sails.log.info('adding quotation detail');
     var form = req.params.all();
     var id = form.id;
     form.Quotation = id;

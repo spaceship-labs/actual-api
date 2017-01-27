@@ -71,7 +71,7 @@ module.exports = {
   },
 
   createFromQuotation: function(req, res){
-    sails.log.warn('LLEGO A accion createFromQuotation');
+    sails.log.warn('Starting order creation');
     var form         = req.params.all();
     var quotationId  = form.quotationId;
     var opts         = {
