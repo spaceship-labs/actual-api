@@ -197,6 +197,7 @@ function createFromQuotation(form, currentUser){
       
       if(quotation.Address){
         orderParams.Address = _.clone(quotation.Address.id);
+        orderParams.address = _.clone(quotation.Address.Address);
         orderParams.CntctCode = _.clone(quotation.Address.CntctCode);
 
         delete quotation.Address.id;
