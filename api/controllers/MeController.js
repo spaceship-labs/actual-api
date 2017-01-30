@@ -11,22 +11,24 @@ module.exports = {
     var user = req.user;
     delete form.password;
     delete form.email;
-    User.update({id: user.id}, form).then(function(user){
-      res.json(user[0] || false);
-    })
-    .catch(function(err){
-      res.negotiate(err);
-    });
+    User.update({id: user.id}, form)
+      .then(function(user){
+        res.json(user[0] || false);
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      });
   },
   
   activeStore: function(req, res) {
     var user = req.user;
-    User.findOne(user.id).populate('activeStore').then(function(user){
-      res.json(user.activeStore);
-    })
-    .catch(function(err){
-      res.negotiate(err);
-    });
+    User.findOne(user.id).populate('activeStore')
+      .then(function(user){
+        res.json(user.activeStore);
+      })
+      .catch(function(err){
+        res.negotiate(err);
+      });
   },
 
   generateCashReport: function(req, res){

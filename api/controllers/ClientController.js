@@ -50,24 +50,13 @@ module.exports = {
     var id          = form.id;
     var clientFound = false;
     Client.findOne({id:id}).then(function(client){
-      if(client){
-        clientFound = client;
-        return ClientContact.find({CardCode: client.CardCode});
-      }
-      return [];
-    })
-    .then(function(contacts){
-      if(!clientFound){
+      if(!client){
         return Promise.reject(new Error('Cliente no encontrado'));
       }
-      clientFound = clientFound.toObject();
-      clientFound.Contacts = contacts;
-      var query = {CardCode: clientFound.CardCode, AdresType: ADDRESS_TYPE};
-      return FiscalAddress.findOne(query);
+      return ClientService.populateClientRelations(client);
     })
-    .then(function(fiscalAddress){
-      clientFound.FiscalAddress = fiscalAddress;
-      res.json(clientFound);
+    .then(function(populatedClient){
+      res.json(populatedClient);
     })
     .catch(function(err){
       console.log(err);
