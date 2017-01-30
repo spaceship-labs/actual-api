@@ -1,5 +1,6 @@
 var _ 			= require('underscore');
 var moment  = require('moment');
+var Promise = require('bluebird');
 var ADDRESS_TYPE 		= 'S';
 var CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
 var CARDCODE_TYPE = 'CardCode';
@@ -8,21 +9,22 @@ var ERROR_TYPE = 'Error';
 
 module.exports = {
 
-	mapClientFields: mapClientFields,
-	mapFiscalFields: mapFiscalFields,
-	getContactIndex: getContactIndex,
- 	isValidCardCode: isValidCardCode,
+	areContactsRepeated: areContactsRepeated,
 	filterContacts: filterContacts,
+	getContactIndex: getContactIndex,
+	isValidContactCode: isValidContactCode,
 	isValidFiscalAddress: isValidFiscalAddress,
 	isValidRFC: isValidRFC,
-	isValidContactCode: isValidContactCode,
 	isValidSapClientCreation: isValidSapClientCreation,
 	isValidSapClientUpdate: isValidSapClientUpdate,
-	isValidSapFiscalClientUpdate: isValidSapFiscalClientUpdate,
 	isValidSapContactCreation: isValidSapContactCreation,
 	isValidSapContactUpdate: isValidSapContactUpdate,		
-	areContactsRepeated: areContactsRepeated,
-	mapContactFields: mapContactFields
+	isValidSapFiscalClientUpdate: isValidSapFiscalClientUpdate,
+	mapClientFields: mapClientFields,
+	mapContactFields: mapContactFields,
+	mapFiscalFields: mapFiscalFields,
+	populateClientRelations: populateClientRelations,
+ 	isValidCardCode: isValidCardCode,
 
 };
 
@@ -190,39 +192,24 @@ function mapContactFields(fields){
   return fields;
 }
 
-function createContactPromise(params){
-  var cardCode = params.CardCode;
-  return SapService.createContact(cardCode, params)
-    .then(function(result){
-      sails.log.info('result createdContact promise', result);
-      if(!result.value){
-        return {err: result};
-      }
-      params.CntctCode = result.value;
-      return ClientContact.create(params);
-    })
-    .then(function(createdInApp){
-      return createdInApp;
-    })
-    .catch(function(err){
-      console.log('err createContactPromise');
-      console.log(err);
-      return Promise.reject(err);
-    });
-}
+function populateClientRelations(client){
+	var fiscalQuery = {
+		CardCode: client.CardCode, 
+		AdresType: ADDRESS_TYPE
+	};
 
-function createFiscalAddressPromise(params){
-  var cardCode = params.CardCode;
-  params.AdresType = ADDRESS_TYPE;
-  return SapService.createFiscalAddress(cardCode,params)
-    .then(function(result){
-      sails.log.info('result createFiscalAddress', result);
-      return FiscalAddress.create(params);
-    })
-    .then(function(createdInApp){
-      return createdInApp;
-    })
-    .catch(function(err){
-      console.log(err);
-    });
+	return Promise.join(
+		ClientContact.find({CardCode: client.CardCode}),
+		FiscalAddress.findOne(fiscalQuery)
+	)
+	.then(function(results){
+		var contacts = results[0];
+		var fiscalAddress = results[1];
+
+		client = client.toObject();
+		client.Contacts = contacts;
+		client.FiscalAddress = fiscalAddress;
+		return client;
+	});
+
 }

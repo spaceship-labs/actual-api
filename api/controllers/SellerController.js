@@ -22,7 +22,7 @@ module.exports = {
         return acum;
       },[]);
       usedSellersIds = usedSellersIds.filter(function(id){
-        return id!==NOT_SELLER_ID;
+        return id !== NOT_SELLER_ID;
       });
 
       return Seller.find({id:{'!': usedSellersIds}});
