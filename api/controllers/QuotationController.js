@@ -23,6 +23,10 @@ module.exports = {
       .then(function(created){
         createdId = created.id;
         var calculator = QuotationService.Calculator();
+        if(!form.Details || form.Details.length === 0){
+          opts.isEmptyQuotation = true;
+        }
+
         return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){

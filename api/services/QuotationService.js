@@ -36,6 +36,16 @@ var EWALLET_TYPES_KEYS = [
   'ewalletTypePg5'
 ];
 
+var defaultQuotationTotals = {
+    subtotal :0,
+    subtotal2:0,
+    total:0,
+    discount:0,
+    totalProducts: 0,
+    paymentGroup: 1,
+    immediateDelivery: false
+};
+
 module.exports = {
   Calculator     : Calculator,
   updateQuotationToLatestData: updateQuotationToLatestData,
@@ -47,8 +57,13 @@ function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
     paymentGroup:1,
     updateDetails: true,
-    currentStore: options.currentStore
+    currentStore: options.currentStore,
+    isEmptyQuotation: options.isEmptyQuotation
   };
+
+  if(options.isEmptyQuotation){
+    return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
+  }
     
   return Quotation.findOne({id:quotationId,select:['paymentGroup']})
     .then(function(quotation){
@@ -219,6 +234,12 @@ function Calculator(){
 
   function updateQuotationTotals(quotationId, options){
     options = options || {paymentGroup:1 , updateDetails: true};
+
+    if(options.isEmptyQuotation){
+      sails.log.info('isEmptyQuotation');
+      return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
+    }
+
     return getQuotationTotals(quotationId, options)
       .then(function(totals){
         
