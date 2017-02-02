@@ -57,6 +57,7 @@ function createClient(params){
   var client         = params.client;
   var fiscalAddress  = params.fiscalAddress || {};
   var clientContacts = params.clientContacts || [];
+  delete client.Currency;
 
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
 
@@ -88,8 +89,10 @@ function createClient(params){
 
 function updateClient(cardcode, form){
   form = _.omit(form, _.isUndefined);
+
   //Important: DONT UPDATE BALANCE IN SAP
   delete form.Balance;
+  delete form.Currency;
 
   var path = 'Contact';
   var params = {
