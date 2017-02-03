@@ -93,9 +93,11 @@ module.exports = {
       return res.negotiate(new Error('Email requerido'));
     }
 
-    if(!form.LicTradNum || !ClientService.isValidRFC(form.LicTradNum)){
-      var err = new Error('RFC no valido');
-      return res.negotiate(err);
+    if(form.LicTradNum){
+      if(!ClientService.isValidRFC(form.LicTradNum)){
+        var err = new Error('RFC no valido');
+        return res.negotiate(err);
+      }
     }
     
     if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
