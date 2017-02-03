@@ -3,8 +3,30 @@ var q = require('q');
 var Promise = require('bluebird');
 var moment = require('moment');
 var assign = require('object-assign');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
+
+  nativeFindOne: function(findCrieria, model){
+    return new Promise(function(resolve, reject){
+      
+      model.native(function(err, collection){
+        if(err){
+          console.log('err finding quotation',err);
+          reject(err);
+        }
+        collection.findOne(findCrieria, function(errFind, recordFound){
+          if(errFind){
+            console.log('err findOne',errFind);
+            reject(errFind);
+          }
+          resolve(recordFound);
+        });
+      });
+
+    });
+  },
+
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
     Order.find({}).populate('Quotation')

@@ -32,7 +32,13 @@ module.exports = {
         }else{
         	sails.log.info('Inventario valido');
         }
-        return Quotation.findOne(form.Quotation).populate('Client');
+        var findQuotation = Quotation.findOne(form.Quotation);
+
+        if(form.type === EWALLET_TYPE || form.type === CLIENT_BALANCE_TYPE){
+          findQuotation.populate('Client');
+        }
+
+        return findQuotation;
       })
       .then(function(quotationFound){
         quotation = quotationFound;
@@ -55,12 +61,12 @@ module.exports = {
       })
       .then(function(exchangeRateFound){
         exchangeRate = exchangeRateFound;
-        //return calculateQuotationAmountPaid(quotationId, exchangeRate);
+        //return PaymentService.calculateQuotationAmountPaid(quotationId, exchangeRate);
         return Payment.create(form);
       })
       .then(function(paymentCreated){
         var promises = [
-          calculateQuotationAmountPaid(quotationId, exchangeRate)
+          PaymentService.calculateQuotationAmountPaid(quotationId, exchangeRate)
         ];
 
         if(form.type === EWALLET_TYPE){
@@ -94,11 +100,9 @@ module.exports = {
         };
         return Quotation.update({id:quotationId}, params);
       })
-      .then(function(updatedQuotation){
-        return Quotation.findOne({id:quotationId}).populate('Client');
-      })
-      .then(function(populatedQuotation){
-        res.json(populatedQuotation);
+      .then(function(resultUpdate){
+        var updatedQuotation = resultUpdate[0];
+        res.json(updatedQuotation);
       })
       .catch(function(err){
         console.log(err);
@@ -135,7 +139,7 @@ module.exports = {
         return Payment.create(negativePayment);
       })
       .then(function(negativePaymentCreated){
-        return calculateQuotationAmountPaid(quotationId);
+        return PaymentService.calculateQuotationAmountPaid(quotationId);
       })
       .then(function(ammountPaid){
         var params = {
@@ -163,29 +167,6 @@ module.exports = {
   }	
 };
 
-function calculateQuotationAmountPaid(quotationId, exchangeRate){
-  return Quotation.findOne({id: quotationId}).populate('Payments')
-    .then(function(quotation){
-      var payments  = quotation.Payments || [];
-
-      var ammounts = payments.map(function(payment){
-        if(payment.type === 'cash-usd'){
-         return calculateUSDPayment(payment, exchangeRate);
-        }
-        return payment.ammount;
-      });
-
-      var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
-        return paymentA + paymentB;
-      });
-
-      return ammountPaid;
-    });  
-}
-
-function calculateUSDPayment(payment, exchangeRate){
-  return payment.ammount * exchangeRate;
-}
 
 function formatProductsIds(details){
   var result = [];
