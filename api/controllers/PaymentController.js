@@ -15,8 +15,10 @@ module.exports = {
     var totalDiscount = form.totalDiscount || 0;
     var paymentGroup  = form.group || 1;
     var client        = false;
+    var quotationPayments = [];
     var exchangeRate;
     var quotation;
+    var quotationUpdateParams;
     form.Quotation    = quotationId;
     form.Store = req.user.activeStore.id;
     form.User = req.user.id;    
@@ -27,12 +29,12 @@ module.exports = {
 
     StockService.validateQuotationStockById(quotationId, req.user.id)
       .then(function(isValidStock){
+
         if(!isValidStock){
           return Promise.reject(new Error('Inventario no suficiente'));
-        }else{
-        	sails.log.info('Inventario valido');
         }
-        var findQuotation = Quotation.findOne(form.Quotation);
+
+        var findQuotation = Quotation.findOne(form.Quotation).populate('Payments');
 
         if(form.type === EWALLET_TYPE || form.type === CLIENT_BALANCE_TYPE){
           findQuotation.populate('Client');
@@ -43,7 +45,7 @@ module.exports = {
       .then(function(quotationFound){
         quotation = quotationFound;
         client = quotation.Client;
-        form.Client = client.id;
+        form.Client = client.id || client;
 
         if(form.type === EWALLET_TYPE){
           if( !EwalletService.isValidEwalletPayment(form, client) ){
@@ -61,12 +63,14 @@ module.exports = {
       })
       .then(function(exchangeRateFound){
         exchangeRate = exchangeRateFound;
-        //return PaymentService.calculateQuotationAmountPaid(quotationId, exchangeRate);
+
         return Payment.create(form);
       })
       .then(function(paymentCreated){
+        quotationPayments = quotation.Payments.concat([paymentCreated]);
+
         var promises = [
-          PaymentService.calculateQuotationAmountPaid(quotationId, exchangeRate)
+          PaymentService.calculateQuotationAmountPaid(quotationPayments, exchangeRate)
         ];
 
         if(form.type === EWALLET_TYPE){
@@ -94,15 +98,22 @@ module.exports = {
         return promises;
       })
       .spread(function(ammountPaid){
-        var params = {
+        quotationUpdateParams = {
           ammountPaid: ammountPaid,
           paymentGroup: paymentGroup
         };
-        return Quotation.update({id:quotationId}, params);
+        return QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
+        //return Quotation.update({id:quotationId}, params);
       })
       .then(function(resultUpdate){
-        var updatedQuotation = resultUpdate[0];
-        res.json(updatedQuotation);
+        delete quotation.Payments;
+        quotation.ammountPaid = quotationUpdateParams.ammountPaid;
+        quotation.paymentGroup = quotationUpdateParams.paymentGroup;
+
+        res.json(quotation);
+
+        //var updatedQuotation = resultUpdate[0];
+        //res.json(updatedQuotation);
       })
       .catch(function(err){
         console.log(err);

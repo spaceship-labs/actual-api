@@ -48,6 +48,7 @@ var defaultQuotationTotals = {
 
 module.exports = {
   Calculator     : Calculator,
+  nativeQuotationUpdate: nativeQuotationUpdate,
   updateQuotationToLatestData: updateQuotationToLatestData,
   getCountByUser: getCountByUser,
   getTotalsByUser: getTotalsByUser

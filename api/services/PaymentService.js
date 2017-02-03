@@ -17,24 +17,21 @@ module.exports = {
   getExchangeRate: getExchangeRate
 };
 
-function calculateQuotationAmountPaid(quotationId, exchangeRate){
-  return Quotation.findOne({id: quotationId}).populate('Payments')
-    .then(function(quotation){
-      var payments  = quotation.Payments || [];
+function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
+  var payments  = quotationPayments || [];
 
-      var ammounts = payments.map(function(payment){
-        if(payment.type === 'cash-usd'){
-         return calculateUSDPayment(payment, exchangeRate);
-        }
-        return payment.ammount;
-      });
+  var ammounts = payments.map(function(payment){
+    if(payment.type === 'cash-usd'){
+     return calculateUSDPayment(payment, exchangeRate);
+    }
+    return payment.ammount;
+  });
 
-      var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
-        return paymentA + paymentB;
-      });
+  var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
+    return paymentA + paymentB;
+  });
 
-      return ammountPaid;
-    });  
+  return ammountPaid;
 }
 
 function calculateUSDPayment(payment, exchangeRate){
