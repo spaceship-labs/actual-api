@@ -161,7 +161,7 @@ module.exports = {
 
           var options = {
             dir : 'records/gallery',
-            profile: 'gallery'            
+            profile: 'record'            
           };
 
           return createdRecord.addFiles(req, options)
