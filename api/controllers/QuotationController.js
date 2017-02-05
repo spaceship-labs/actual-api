@@ -66,6 +66,7 @@ module.exports = {
     var baseQuotation = false;
     var userId = req.user.id;
     var getPayments = form.payments;
+    var forceLatestData = !_.isUndefined(form.forceLatestData) ? form.forceLatestData : true;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -83,11 +84,18 @@ module.exports = {
       quotationQuery.populate('Payments');
     }
 
-    QuotationService.updateQuotationToLatestData(id, userId, {
+    var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
       update:true,
       currentStore: req.user.activeStore.id
-    })
-      .then(function(){
+    });
+
+    if(!forceLatestData){
+      updateToLatest = new Promise(function(resolve, reject){
+        resolve();
+      });
+    }
+
+    updateToLatest.then(function(){
         return quotationQuery;
       })
       .then(function(quotation){
@@ -459,17 +467,14 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.quotationId;
     var warehouse;
-    Quotation.findOne({id: quotationId}).populate('Details')
-      .then(function(quotation){
+    var details;
+    QuotationDetail.find({Quotation: quotationId}).populate('Product')
+      .then(function(detailsFound){
+        details = detailsFound;
         var whsId = req.user.activeStore.Warehouse;
-        details = quotation.Details;
-        var detailsIds = details.map(function(d){ return d.id; });
-        return [
-          Company.findOne({id: whsId}),
-          QuotationDetail.find({id: detailsIds}).populate('Product')
-        ];
+        return Company.findOne({id: whsId});
       })
-      .spread(function(warehouse,details){
+      .then(function(warehouse){
         return StockService.getDetailsStock(details, warehouse);    
       })
       .then(function(results){

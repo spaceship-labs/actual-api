@@ -456,6 +456,7 @@ function Calculator(){
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
         var total                     = quantity * unitPriceWithDiscount;
+        var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
         
         //var total                 = quantity * unitPriceWithDiscount;
         var subtotalWithPromotions    = total;
@@ -477,6 +478,7 @@ function Calculator(){
           discountKey                 : discountKey, //Payment group discountKey
           discountPercentPromos       : discountPercentPromos, //discount without BT or FF
           discountPercent             : discountPercent,
+          discountName                : discountName,
           ewallet                     : ewallet,
           id                          : detail.id,
           isFreeSale                  : StockService.isFreeSaleProduct(product),
@@ -499,6 +501,20 @@ function Calculator(){
         }
         return detailTotals;
       });
+  }
+
+  function getPromotionOrPackageName(promotionOrPackage){
+    var promotionFound = _.findWhere(storePromotions, {id:promotionOrPackage.id});
+    if(promotionFound){
+      return promotionFound.publicName;
+    }
+
+    var packageFound = _.findWhere(storePackages, {id:promotionOrPackage.PromotionPackage});
+    if(packageFound){
+      return packageFound.Name;
+    }
+
+    return null;
   }
 
   function isImmediateDelivery(shipDate){
@@ -662,6 +678,7 @@ function nativeQuotationUpdate(quotationId,params){
         reject(err);
       }
       var findCrieria = {_id: new ObjectId(quotationId)};
+      params.updatedAt = new Date();
       var updateParams = {
         $set: _.omit(params, ['id'])
       };
