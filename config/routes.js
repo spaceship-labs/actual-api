@@ -450,6 +450,12 @@ module.exports.routes = {
     action:'addDetail'
   },
 
+  '/quotation/addmultipledetails/:id':{
+    controller:'quotation',
+    action:'addMultipleDetails'
+  },
+
+
   '/quotation/removedetailsgroup/:quotation':{
     controller:'quotation',
     action:'removeDetailsGroup'
