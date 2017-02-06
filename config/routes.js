@@ -78,6 +78,11 @@ module.exports.routes = {
     action: 'find'
   },
 
+  '/product/multiplefindbyids':{
+    controller: 'product',
+    action: 'multipleFindByIds'
+  },
+
   '/product/search':{
     controller: 'product',
     action: 'search'
