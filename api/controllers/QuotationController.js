@@ -60,13 +60,32 @@ module.exports = {
       });
   },
 
+  findByIdQuickRead: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var userId = req.user.id;
+
+    Quotation.findOne({id: id})
+      .populate('Details')
+      .then(function(quotation){
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }        
+        res.json(quotation);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  },
+
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var baseQuotation = false;
     var userId = req.user.id;
     var getPayments = form.payments;
-    var forceLatestData = !_.isUndefined(form.forceLatestData) ? form.forceLatestData : true;
+    var forceLatestData  = true;
+    //var forceLatestData = !_.isUndefined(form.forceLatestData) ? form.forceLatestData : true;
     if( !isNaN(id) ){
       id = parseInt(id);
     }

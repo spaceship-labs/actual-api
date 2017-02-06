@@ -170,13 +170,20 @@ function updateFiscalAddress(cardcode, form){
     currentStore
 */
 function createSaleOrder(params){
+  var endPoint;
   return buildSaleOrderRequestParams(params)
     .then(function(requestParams){
-      var endPoint = baseUrl + requestParams;
+      endPoint = baseUrl + requestParams;
       sails.log.info('createSaleOrder');
       sails.log.info(endPoint);
       reqOptions.uri = endPoint;
       return request(reqOptions);
+    })
+    .then(function(response){
+      return {
+        endPoint: endPoint,
+        response: response
+      };
     });
 }
 

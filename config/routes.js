@@ -414,6 +414,12 @@ module.exports.routes = {
     action:'findById'
   },
 
+  '/quotation/findbyidquickread/:id':{
+    controller: 'quotation',
+    action:'findByIdQuickRead'
+  },
+
+
   '/quotation/findbyclient/:page':{
     controller: 'quotation',
     action:'findByClient'
