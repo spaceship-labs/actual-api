@@ -88,143 +88,6 @@ function getBigticketMaxPercentage(subtotal2){
   return maxPercentage;
 }
 
-function getTotalsByUser(options){
-  var userId    = options.userId;
-  var todayDate = moment().endOf('day').toDate(); 
-  var isClosed  = options.isClosed;
-
-
-  if(_.isUndefined(options.endDate)){
-    options.endDate = todayDate;
-  }
-
-  var startDate = options.startDate;
-  var endDate   = options.endDate;
-  var dateField = options.dateField || 'createdAt'; 
-  
-  var queryUntilToday = {User: userId};
-  queryUntilToday[dateField] = {
-    '<=': todayDate
-  };
-
-  var queryByDateRange = {User: userId};
-  queryByDateRange[dateField] = {};
-
-  if(startDate){
-    startDate = moment(startDate).startOf('day').toDate(); 
-    queryUntilToday[dateField] = assign(queryUntilToday[dateField],{
-      '>=': startDate
-    });
-    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
-      '>=': startDate
-    });
-  }
-
-  if(endDate){
-    endDate = moment(endDate).endOf('day').toDate(); 
-    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
-      '<=': endDate
-    });
-  }
-
-  if( _.isEmpty(queryByDateRange[dateField]) ){
-    delete queryByDateRange[dateField];
-  }
-
-  var queryAllByDateRange = _.clone(queryByDateRange);
-
-  if(isClosed){
-    queryUntilToday.isClosed   = isClosed;
-    queryByDateRange.isClosed  = isClosed;  
-  }
-
-  var props = {
-    totalUntilToday: Quotation.find(queryUntilToday).sum('total'),
-    totalByDateRange: Quotation.find(queryByDateRange).sum('total'),
-    totalByDateRangeAll: Quotation.find(queryAllByDateRange).sum('total')
-  };
-
-  return Promise.props(props)
-    .then(function(result){
-      var resultUntilToday = result.totalUntilToday[0] || {};
-      var resultByDateRange = result.totalByDateRange[0] || {};
-      var resultAllByDateRange = result.totalByDateRangeAll[0] || {};
-
-
-      var totalUntilToday = resultUntilToday.total || 0;
-      var totalByDateRange = resultByDateRange.total || 0;
-      var totalByDateRangeAll = resultAllByDateRange.total || 0;
-      
-      return {
-        untilToday: totalUntilToday,
-        byDateRange: totalByDateRange,
-        allByDateRange: totalByDateRangeAll       
-      };
-    });
-}
-
-function getCountByUser(options){
-  var userId    = options.userId;
-  var todayDate = moment().endOf('day').toDate(); 
-  var isClosed  = options.isClosed;
-
-  if(_.isUndefined(options.endDate)){
-    options.endDate = todayDate;
-  }
-
-  var startDate = options.startDate;
-  var endDate   = options.endDate;
-  var dateField = options.dateField || 'createdAt'; 
-  
-  var queryUntilToday = {User: userId};
-  queryUntilToday[dateField] = {
-    '<=': todayDate
-  };
-
-  var queryByDateRange = {User: userId};
-  queryByDateRange[dateField] = {};
-
-  if(startDate){
-    startDate = moment(startDate).startOf('day').toDate(); 
-    queryUntilToday[dateField] = assign(queryUntilToday[dateField],{
-      '>=': startDate
-    });
-    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
-      '>=': startDate
-    });
-  }
-
-  if(endDate){
-    endDate = moment(endDate).endOf('day').toDate(); 
-    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
-      '<=': endDate
-    });
-  }
-
-  if( _.isEmpty(queryByDateRange[dateField]) ){
-    delete queryByDateRange[dateField];
-  }
-
-  var queryAllByDateRange = _.clone(queryByDateRange);
-
-  if(isClosed){
-    queryUntilToday.isClosed   = isClosed;
-    queryByDateRange.isClosed  = isClosed;
-  }
-
-  return Promise.props({
-    countUntilToday: Quotation.count(queryUntilToday),
-    countByDateRange: Quotation.count(queryByDateRange),
-    countAllByDateRange: Quotation.count(queryAllByDateRange)
-  })
-    .then(function(result){
-      return {
-        untilToday: result.countUntilToday,
-        byDateRange: result.countByDateRange,
-        allByDateRange: result.countAllByDateRange
-      };
-    });
-}
 
 function Calculator(){
   var storePromotions = [];
@@ -256,9 +119,11 @@ function Calculator(){
     return getPromosByStore(options.currentStore)
       .then(function(promos){
         storePromotions = promos;
-        return QuotationDetail.find({Quotation: quotationId});
+        return Common.nativeFind({Quotation: ObjectId(quotationId)}, QuotationDetail);
+        //return QuotationDetail.find({Quotation: quotationId});
       })
       .then(function(detailsResult){
+        //sails.log.info('detailsResult', detailsResult);
         details = detailsResult; 
         var packagesIds = getQuotationPackagesIds(details);
 
@@ -693,24 +558,140 @@ function nativeQuotationUpdate(quotationId,params){
   });
 }
 
-function nativeQuotationDetailsFind(findCriteria){
-  return new Promise(function(resolve, reject){
-    QuotationDetail.native(function(err, collection){
-      if(err){
-        console.log('err updating quotation',err);
-        reject(err);
-      }
-      collection.find(findCriteria).toArray(function(effFind, details){
-        if(effFind){
-          console.log('effFind updating product',effFind);
-          reject(effFind);
-        }
-        details = details.map(function(d){
-          d.id = d._id;
-          return d;
-        });
-        resolve(details);
-      });
+function getTotalsByUser(options){
+  var userId    = options.userId;
+  var todayDate = moment().endOf('day').toDate(); 
+  var isClosed  = options.isClosed;
+
+
+  if(_.isUndefined(options.endDate)){
+    options.endDate = todayDate;
+  }
+
+  var startDate = options.startDate;
+  var endDate   = options.endDate;
+  var dateField = options.dateField || 'createdAt'; 
+  
+  var queryUntilToday = {User: userId};
+  queryUntilToday[dateField] = {
+    '<=': todayDate
+  };
+
+  var queryByDateRange = {User: userId};
+  queryByDateRange[dateField] = {};
+
+  if(startDate){
+    startDate = moment(startDate).startOf('day').toDate(); 
+    queryUntilToday[dateField] = assign(queryUntilToday[dateField],{
+      '>=': startDate
     });
-  });
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
+      '>=': startDate
+    });
+  }
+
+  if(endDate){
+    endDate = moment(endDate).endOf('day').toDate(); 
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
+      '<=': endDate
+    });
+  }
+
+  if( _.isEmpty(queryByDateRange[dateField]) ){
+    delete queryByDateRange[dateField];
+  }
+
+  var queryAllByDateRange = _.clone(queryByDateRange);
+
+  if(isClosed){
+    queryUntilToday.isClosed   = isClosed;
+    queryByDateRange.isClosed  = isClosed;  
+  }
+
+  var props = {
+    totalUntilToday: Quotation.find(queryUntilToday).sum('total'),
+    totalByDateRange: Quotation.find(queryByDateRange).sum('total'),
+    totalByDateRangeAll: Quotation.find(queryAllByDateRange).sum('total')
+  };
+
+  return Promise.props(props)
+    .then(function(result){
+      var resultUntilToday = result.totalUntilToday[0] || {};
+      var resultByDateRange = result.totalByDateRange[0] || {};
+      var resultAllByDateRange = result.totalByDateRangeAll[0] || {};
+
+
+      var totalUntilToday = resultUntilToday.total || 0;
+      var totalByDateRange = resultByDateRange.total || 0;
+      var totalByDateRangeAll = resultAllByDateRange.total || 0;
+      
+      return {
+        untilToday: totalUntilToday,
+        byDateRange: totalByDateRange,
+        allByDateRange: totalByDateRangeAll       
+      };
+    });
+}
+
+function getCountByUser(options){
+  var userId    = options.userId;
+  var todayDate = moment().endOf('day').toDate(); 
+  var isClosed  = options.isClosed;
+
+  if(_.isUndefined(options.endDate)){
+    options.endDate = todayDate;
+  }
+
+  var startDate = options.startDate;
+  var endDate   = options.endDate;
+  var dateField = options.dateField || 'createdAt'; 
+  
+  var queryUntilToday = {User: userId};
+  queryUntilToday[dateField] = {
+    '<=': todayDate
+  };
+
+  var queryByDateRange = {User: userId};
+  queryByDateRange[dateField] = {};
+
+  if(startDate){
+    startDate = moment(startDate).startOf('day').toDate(); 
+    queryUntilToday[dateField] = assign(queryUntilToday[dateField],{
+      '>=': startDate
+    });
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
+      '>=': startDate
+    });
+  }
+
+  if(endDate){
+    endDate = moment(endDate).endOf('day').toDate(); 
+    queryByDateRange[dateField] = assign(queryByDateRange[dateField],{
+      '<=': endDate
+    });
+  }
+
+  if( _.isEmpty(queryByDateRange[dateField]) ){
+    delete queryByDateRange[dateField];
+  }
+
+  var queryAllByDateRange = _.clone(queryByDateRange);
+
+  if(isClosed){
+    queryUntilToday.isClosed   = isClosed;
+    queryByDateRange.isClosed  = isClosed;
+  }
+
+  return Promise.props({
+    countUntilToday: Quotation.count(queryUntilToday),
+    countByDateRange: Quotation.count(queryByDateRange),
+    countAllByDateRange: Quotation.count(queryAllByDateRange)
+  })
+    .then(function(result){
+      return {
+        untilToday: result.countUntilToday,
+        byDateRange: result.countByDateRange,
+        allByDateRange: result.countAllByDateRange
+      };
+    });
 }

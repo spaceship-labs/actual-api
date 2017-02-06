@@ -27,6 +27,39 @@ module.exports = {
     });
   },
 
+  nativeFind: function(findCriteria, model){
+    return new Promise(function(resolve, reject){
+      model.native(function(err, collection){
+        if(err){
+          console.log('err updating quotation',err);
+          reject(err);
+        }
+        collection.find(findCriteria).toArray(function(effFind, records){
+          if(effFind){
+            console.log('effFind updating product',effFind);
+            reject(effFind);
+          }
+          records = records.map(function(r){
+            r.id = r._id;
+            for(var key in r){
+              if( r[key] instanceof ObjectId){
+                r[key] = r[key].toString();
+              }
+
+              /*
+              if( r[key] instanceof Date ){
+                r[key] = r[key].toLocaleString()
+              }
+              */
+            }
+            return r;
+          });
+          resolve(records);
+        });
+      });
+    });
+  },  
+
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
     Order.find({}).populate('Quotation')
