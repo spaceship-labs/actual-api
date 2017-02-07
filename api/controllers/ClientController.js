@@ -298,7 +298,7 @@ module.exports = {
         var isValidSapResponse = ClientService.isValidSapContactUpdate(sapData);
 
         if( !sapData || isValidSapResponse.error  ) {
-          var defualtErrMsg = 'Error al crear contacto en SAP';
+          var defualtErrMsg = 'Error al actualizar contacto en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
           if(err === true){
             err = defualtErrMsg;

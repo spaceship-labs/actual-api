@@ -232,7 +232,7 @@ function createFromQuotation(form, currentUser){
     })
     .then(function(sapResponseAux){
       sapResponse = sapResponseAux.response;
-      var sapEndpoint = sapResponseAux.endPoint;
+      var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
       sails.log.info('createSaleOrder response', sapResponse);
       var log = {
         content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
