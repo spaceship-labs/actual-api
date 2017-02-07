@@ -38,7 +38,14 @@ function _onLocalStrategyAuth(email, password, next){
           code: 'USER_NOT_ACTIVE',          
           message: 'USER NOT ACTIVE'
         });        
-      }        
+      }    
+
+      if(user.webUser){
+        return next(null, false, {
+          code: 'WEB_USER_NOT_AUTHORIZED',          
+          message: 'WEB USER NOT AUTHORIZED'
+        });        
+      }              
 
       //TODO: replace with new cipher service type
       if( !CipherService.comparePassword(password, user) ){
@@ -85,6 +92,13 @@ function _onJwtStrategyAuth(payload, next){
           message: 'USER NOT ACTIVE'
         });        
       }
+
+      if(user.webUser){
+        return next(null, false, {
+          code: 'WEB_USER_NOT_AUTHORIZED',          
+          message: 'WEB USER NOT AUTHORIZED'
+        });        
+      }      
 
       return next(null, user, {});
     })
