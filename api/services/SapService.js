@@ -41,8 +41,10 @@ module.exports = {
 };
 
 function syncProduct(itemCode){
-  var path;
-  var requestParams;
+  var path = 'Syncswsws';
+  var requestParams = {
+    ItemCode: itemCode
+  };
   var endPoint = buildUrl(baseUrl,{
     path: path,
     queryParams: requestParams

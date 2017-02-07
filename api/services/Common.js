@@ -12,7 +12,7 @@ module.exports = {
       
       model.native(function(err, collection){
         if(err){
-          console.log('err finding quotation',err);
+          console.log('err finding one',err);
           reject(err);
         }
         collection.findOne(findCrieria, function(errFind, recordFound){

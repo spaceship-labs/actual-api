@@ -114,6 +114,11 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  '/product/syncproductbyitemcode/:id':{
+    controller: 'sync',
+    action: 'syncProductByItemCode'
+  },
+
   '/product/update/:id':{
     controller: 'product',
     action: 'update'
@@ -636,11 +641,6 @@ module.exports.routes = {
   '/sites':{
     controller: 'site',
     action: 'getAll'
-  },
-
-  '/sync/products':{
-    controller:'sync',
-    action:'syncProducts'
   },
 
   '/store/find':{
