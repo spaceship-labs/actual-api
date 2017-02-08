@@ -20,6 +20,10 @@ module.exports = {
             console.log('err findOne',errFind);
             reject(errFind);
           }
+          if(recordFound){
+            recordFound.id = recordFound._id;
+          }
+
           resolve(recordFound);
         });
       });

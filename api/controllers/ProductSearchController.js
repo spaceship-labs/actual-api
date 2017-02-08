@@ -125,7 +125,8 @@ module.exports = {
         };
 
         if(filterByStore && activeStore.code){
-          query[activeStore.code] = {'>':0};
+          query['Available'] = {'>':0};
+          //query[activeStore.code] = {'>':0};
         } 
 
         var freeSaleQuery = _.clone(query);

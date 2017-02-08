@@ -10,24 +10,6 @@ module.exports = {
       });      
   },
 
-  getPromosByStore: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var currentDate = new Date();
-    var queryPromo = {
-      startDate: {'<=': currentDate},
-      endDate: {'>=': currentDate},
-    };
-    Store.findOne({id:id}).populate('Promotions', queryPromo)
-      .then(function(company){
-        res.json(company.Promotions);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
   getPackagesByStore: function(req, res){
     var form        = req.params.all();
     var id          = form.id;

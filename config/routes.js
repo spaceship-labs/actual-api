@@ -134,6 +134,11 @@ module.exports.routes = {
     action:'addSeenTime'
   },
 
+  '/product/mainpromo/:id':{
+    controller:'product',
+    action: 'getProductMainPromo'
+  },
+
   /*
   '/product/sync/:ItemCode':{
     controller:'product',
@@ -646,11 +651,6 @@ module.exports.routes = {
   '/store/find':{
     controller:'store',
     action:'find'
-  },
-
-  '/store/:id/promotions':{
-    controller:'store',
-    action:'getPromosByStore'
   },
 
   '/store/:id/packages':{

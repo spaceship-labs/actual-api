@@ -54,11 +54,5 @@ module.exports = {
       enum:['ammount','percent']
     },
 
-    //Relations
-    Stores:{
-      collection:'store',
-      via:'Promotions'
-    },
-
   }
 };
