@@ -30,12 +30,6 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     Promotion.findOne({id:id})
-      .populate('FilterValues')
-      .populate('CustomBrands')
-      .populate('Groups')
-      .populate('Stores')
-      .populate('Categories')
-      .populate('Products')
       .then(function(promo){
         res.json(promo);
       })
@@ -54,5 +48,4 @@ module.exports = {
         res.negotiate(err);
       });
   }
-
-}
+};

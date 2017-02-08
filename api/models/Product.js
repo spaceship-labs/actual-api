@@ -176,10 +176,6 @@ module.exports = {
         collection:'QuotationDetail',
         via:'Product'
       },
-      Promotions:{
-        collection: 'Promotion',
-        via:'Products'
-      },
       PackageRules:{
         collection:'PackageRule',
         via:'Product'

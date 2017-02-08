@@ -24,10 +24,6 @@ module.exports = {
     Products:{
       collection: 'Product',
       via: 'Categories'
-    },
-    Promotions:{
-      collection:'Promotion',
-      via:'Categories'
     }
 	}
 }

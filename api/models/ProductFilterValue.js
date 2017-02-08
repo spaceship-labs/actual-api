@@ -20,9 +20,5 @@ module.exports = {
       collection:'product',
       via: 'FilterValues'
     },
-    Promotions:{
-      collection:'promotion',
-      via:'FilterValues'
-    }
 	}
-}
+};
