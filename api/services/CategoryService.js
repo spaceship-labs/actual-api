@@ -68,6 +68,8 @@ function getAllStoresCodes(){
       var storesCodes = stores.map(function(s){
         return s.code;
       });    
+      storesCodes = _.uniq(storesCodes);
+
       return storesCodes;
     });
 }
