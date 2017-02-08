@@ -2,7 +2,6 @@ var cron = require('cron').CronJob;
 var Promise = require('bluebird');
 
 module.exports.init = function(){
-  console.log('initing cronJobs');
   var cronJobs = [
     {
       fn: function(d){
@@ -20,6 +19,7 @@ module.exports.init = function(){
   ].forEach(function(v){
     
     if(process.env.NODE_ENV === 'production'){
+      console.log('initing cronJobs');
       new cron(v.time,v.fn, true, true);
     }
   
