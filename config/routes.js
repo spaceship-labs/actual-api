@@ -114,7 +114,7 @@ module.exports.routes = {
     action: 'findById'
   },
 
-  '/product/syncproductbyitemcode/:id':{
+  '/sync/syncproductbyitemcode/:itemcode':{
     controller: 'sync',
     action: 'syncProductByItemCode'
   },

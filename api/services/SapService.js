@@ -36,23 +36,8 @@ module.exports = {
   updateClient        : updateClient,
   updateContact       : updateContact,
   updateFiscalAddress : updateFiscalAddress,
-  syncProduct         : syncProduct,
   buildSaleOrderRequestParams: buildSaleOrderRequestParams,
 };
-
-function syncProduct(itemCode){
-  var path = 'Syncswsws';
-  var requestParams = {
-    ItemCode: itemCode
-  };
-  var endPoint = buildUrl(baseUrl,{
-    path: path,
-    queryParams: requestParams
-  });  
-  sails.log.info('endPoint syncProduct', endPoint);
-  reqOptions.uri = endPoint;
-  return request(reqOptions);  
-}
 
 function createClient(params){
   var path           = 'Contact';

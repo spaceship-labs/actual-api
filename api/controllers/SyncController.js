@@ -6,19 +6,21 @@ module.exports = {
     var form = req.allParams();
     var itemCode = form.itemcode;
 
-    Common.nativeFindOne({ItemCode: itemCode})
-      .then(function(exists){
-        if(exists){
-          return Promise.reject(new Error('Este producto ya existe'));
-        }
-        return SapService.syncProduct(itemCode);
+    SyncService.syncProductByItemCode(itemCode)
+      .then(function(result){
+        sails.log.info('result', result);
+        resultSync = JSON.parse(result.value);
+        sails.log.info('resultSync', resultSync);
+        return Common.nativeFindOne({ItemCode: itemCode}, Product);
       })
-      .then(function(response){
-        res.json(response);
-      }).catch(function(err){
+      .then(function(product){
+        res.json(product);
+      })
+      .catch(function(err){
         console.log('err', err);
         res.negotiate(err);
       });
+
   },
 
   fixOrders: function(req, res){

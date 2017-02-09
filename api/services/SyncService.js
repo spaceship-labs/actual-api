@@ -1,17 +1,44 @@
-var baseUrl = 'http://sapnueve.homedns.org:8080/';
-var request = require('request');
+var baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
+//var baseUrl = 'http://189.149.131.100:8080';
+var request = require('request-promise');
 var Promise = require('bluebird');
+var buildUrl = require('build-url');
+var _ = require('underscore');
+var moment = require('moment');
 var BROKER_ROLE_ID = "57915b6d81e8947014bec270";
 var ACTUAL_HOME_ID = '57bf590089c75aed0825c3f2';
 var fs = require('fs');
 
+var reqOptions = {
+  method: 'POST',
+  json: true
+};
+
 module.exports = {
   syncProducts: syncProducts,
+  syncProductByItemCode: syncProductByItemCode,
   importBrokersToUsers: importBrokersToUsers,
   ProductImageUploader: ProductImageUploader
 };
 
+function syncProductByItemCode(itemCode){
+  var path = 'Product';
+  var requestParams = {
+    ItemCode: itemCode
+  };
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+    queryParams: requestParams
+  });  
+
+  sails.log.info('endPoint syncProduct', endPoint);
+  reqOptions.method = 'PUT';
+  reqOptions.uri = endPoint;
+  return request(reqOptions);  
+}
+
 function syncProducts(){
+  /*
   return new Promise(function(resolve, reject){
     request.get(baseUrl + 'Product', function(err, response, body){
       if(err){
@@ -22,7 +49,7 @@ function syncProducts(){
         resolve(response);
       }
     });
-  });
+  });*/
 }
 
 function importBrokersToUsers(){

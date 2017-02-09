@@ -14,7 +14,7 @@ module.exports = {
     Store.findOne({id:storeId}).populate('Warehouse')
       .then(function(storeResult){
         store = storeResult;
-        return Product.findOne({ItemCode: productCode});
+        return Common.nativeFindOne({ItemCode: productCode}, Product);
       })
       .then(function(product){
         return Shipping.product(product, store.Warehouse);        
