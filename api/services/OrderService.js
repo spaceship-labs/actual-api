@@ -320,13 +320,6 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       };
     }
 
-    var clientBalance = extractBalanceFromSapResult(sapResult);
-    if(!clientBalance || isNaN(clientBalance) ){
-      return {
-        error: 'Balance del cliente no definido en la respuesta'
-      };
-    }
-
     sapResult = sapResult.filter(function(item){
       return item.type !== BALANCE_SAP_TYPE;
     });
@@ -350,6 +343,14 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
         error: false
       };
     }
+
+    var clientBalance = extractBalanceFromSapResult(sapResult);
+    if(!clientBalance || isNaN(clientBalance) ){
+      return {
+        error: 'Balance del cliente no definido en la respuesta'
+      };
+    }
+    
   }
   return {
     error: true
