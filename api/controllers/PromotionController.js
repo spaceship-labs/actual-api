@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 module.exports = {
   create: function(req,res){
     var form = req.params.all();
@@ -47,5 +49,61 @@ module.exports = {
       .catch(function(err){
         res.negotiate(err);
       });
+  },
+
+  searchPromotionProducts: function(req, res){
+    var form = req.allParams();
+    var sas = form.sas;
+    sails.log.info('sas', sas);
+    var queryProducts = {
+      Active: 'Y',
+      $or: sas.map(function(sa){
+        return {
+          EmpresaName: sa
+        };
+      })
+    };
+    Product.find(queryProducts)
+      .then(function(products){
+        res.json(products);
+      })  
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });      
+  },
+
+  getPromotionProducts: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+
+    Promotion.findOne({id:id})
+      .then(function(promotion){
+        if(!promotion){
+          return Promise.reject(new Error('Promoción no he encontrada'));
+        }
+        var sas = promotion.sas;
+        var queryProducts = {
+          Active: 'Y',
+          $or: sas.map(function(sa){
+            return {
+              EmpresaName: sa
+            };
+          })
+        };
+
+        sails.log.info('queryProducts', queryProducts);
+
+        return Product.find(queryProducts);
+      })
+      .then(function(products){
+        res.json(products);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+
   }
+
 };
