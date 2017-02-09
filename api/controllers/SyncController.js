@@ -10,7 +10,10 @@ module.exports = {
       .then(function(result){
         sails.log.info('result', result);
         resultSync = JSON.parse(result.value);
-        sails.log.info('resultSync', resultSync);
+        if(resultSync.type === 'Error' || resultSync.result !== itemCode){
+          return Promise.reject(new Error(resultSync.result));
+        }
+
         return Common.nativeFindOne({ItemCode: itemCode}, Product);
       })
       .then(function(product){
