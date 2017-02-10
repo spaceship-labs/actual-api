@@ -546,6 +546,19 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getQuotationPayments: function(req, res){
+    var form = req.allParams();
+    var quotationId = form.id;
+    Payment.find({Quotation: quotationId})
+      .then(function(payments){
+        res.json(payments);
+      })
+      .catch(function(err){
+        console.log('err',err)
+        res.negotiate(err);
+      });
   }
 
 };
