@@ -11,7 +11,7 @@ var RFCPUBLIC = 'XAXX010101000';
 module.exports = {
   create: create,
   send: send,
-}
+};
 
 function create(orderId) {
   return Order

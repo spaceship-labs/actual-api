@@ -73,11 +73,13 @@ module.exports = {
   createFromQuotation: function(req, res){
     sails.log.warn('LLEGO A accion createFromQuotation');
     var form = req.params.all();
+    var order;
 
     OrderService.createFromQuotation(form, req.user)
       .then(function(orderCreated){
         //RESPONSE
         res.json(orderCreated);
+        order = orderCreated;
 
         //STARTS EMAIL SENDING PROCESS
         return Order.findOne({id:orderCreated.id})
@@ -91,12 +93,15 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
+          InvoiceService.create(order.id)
         ];
       })
-      .spread(function(orderSent, freesaleSent){
+      .spread(function(orderSent, freesaleSent, alegraInvoice){
         sails.log.info('Email de orden enviado');
-        //RESPONSE
-        //res.json(orderCreated);        
+        return Invoice.create({ id: alegraInvoice.id, order: order });
+      })
+      .then(function(invoice){
+        console.log('generated invoice', invoice);
       })
       .catch(function(err){
         console.log(err);
