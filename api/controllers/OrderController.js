@@ -74,11 +74,13 @@ module.exports = {
     sails.log.warn('LLEGO A accion createFromQuotation');
     var form = req.params.all();
     var order;
+    var responseSent = false;
 
     OrderService.createFromQuotation(form, req.user)
       .then(function(orderCreated){
         //RESPONSE
         res.json(orderCreated);
+        responseSent = true;
         order = orderCreated;
 
         //STARTS EMAIL SENDING PROCESS
@@ -105,7 +107,9 @@ module.exports = {
       })
       .catch(function(err){
         console.log(err);
-        res.negotiate(err);
+        if(!responseSent){
+          res.negotiate(err);
+        }
       });
   },
 
