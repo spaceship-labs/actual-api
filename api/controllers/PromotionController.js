@@ -53,16 +53,16 @@ module.exports = {
 
   searchPromotionProducts: function(req, res){
     var form = req.allParams();
-    var sas = form.sas;
-    sails.log.info('sas', sas);
+    var sa = form.sa;
+    var discount = form.discount;
     var queryProducts = {
       Active: 'Y',
-      $or: sas.map(function(sa){
-        return {
-          EmpresaName: sa
-        };
-      })
+      U_Empresa: sa,
+      Discount: discount
     };
+
+    sails.log.info('queryProducts', queryProducts);
+
     Product.find(queryProducts)
       .then(function(products){
         res.json(products);
@@ -82,14 +82,13 @@ module.exports = {
         if(!promotion){
           return Promise.reject(new Error('Promoción no he encontrada'));
         }
-        var sas = promotion.sas;
+
+        var sa = form.sa;
+        var discount = form.discount;
         var queryProducts = {
           Active: 'Y',
-          $or: sas.map(function(sa){
-            return {
-              EmpresaName: sa
-            };
-          })
+          U_Empresa: sa,
+          Discount: discount
         };
 
         sails.log.info('queryProducts', queryProducts);

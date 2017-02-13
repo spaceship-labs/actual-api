@@ -34,9 +34,9 @@ function getProductMainPromo(productId){
 function getProductActivePromotions(product, activePromotions){
   activePromotions = activePromotions.filter(function(promotion){
     var isValid = false;
-    if(promotion.sas){
-      var productSA = product.EmpresaName || product.nameSA;
-      if(promotion.sas.indexOf(productSA) > -1 && product.Discount === promotion.discountPg1){
+    if(promotion.sa){
+      var productSA = product.U_Empresa;
+      if(promotion.sa === productSA && product.Discount === promotion.discountPg1){
         isValid = true;
       } 
     }

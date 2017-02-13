@@ -46,7 +46,7 @@ module.exports = {
       type:'string',
       enum: ['ammount','percentage']
     },
-    sas: {type:'array'}, //Sociedades
+    sa: {type:'string'}, //Sociedad
     hasPriority:{type:'boolean'},
     hasLM:{type:'boolean'},
     pushMoneyUnit:{type:'float'},

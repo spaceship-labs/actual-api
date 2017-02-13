@@ -9,12 +9,6 @@ module.exports.init = function(){
       },
       time:'0 0 */1 * * *'
     },
-    {
-      fn: function(d){
-        ProductService.cacheProductDiscountPrices();
-      },
-      time:'0 0 */1 * * *'
-    }
 
   ].forEach(function(v){
     
