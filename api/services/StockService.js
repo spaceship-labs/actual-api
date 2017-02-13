@@ -46,7 +46,7 @@ function substractProductStockByDetail(detail){
 		.then(function(stores){
 			var storesCodes = stores.map(function(s){return s.code});
 			if(detail.quantity > detail.Product.Available){
-				return new Promise.reject(new Error('Stock del producto '+ ItemCode + ' no disponible'));
+				return new Promise.reject(new Error('Stock del producto '+ ItemCode + ' no disponible (ERROR: PS)'));
 			}
 			var newAvailable = detail.Product.Available - detail.quantity;
 			var updateValues = {Available: newAvailable};
@@ -76,7 +76,7 @@ function substractDeliveryStockByDetail(detail){
 	})
 	.then(function(dateDelivery){
 		if(detail.quantity > dateDelivery.OpenCreQty){
-			return Promise.reject(new Error('Stock del producto ' + ItemCode + ' no disponible'));
+			return Promise.reject(new Error('Stock del producto ' + ItemCode + ' no disponible (ERROR: DS)'));
 		}
 		var newStock = dateDelivery.OpenCreQty - detail.quantity;
 		return DatesDelivery.update({id: dateDelivery.id}, {OpenCreQty:newStock});
