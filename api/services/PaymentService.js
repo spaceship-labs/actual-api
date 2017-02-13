@@ -54,22 +54,28 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
     'discountPg4',
     'discountPg5'
   ];
-  var totalsPromises = methodsGroups.map(function(mG) {
-    var id = quotationId;
-    var paymentGroup = mG.group || 1;
-    var params = {
-      update: false,
-      paymentGroup: mG.group,
-      activeStore: req.user.activeStore.id
-    };
 
-    var calculator = QuotationService.Calculator();
-    return calculator.getQuotationTotals(id, params);
+  return User
+    .findOne({
+      select: ['activeStore'],
+      id: sellerId,
+    })
+    .then(function(user){
+      
+      var totalsPromises = methodsGroups.map(function(mG) {
+        var id = quotationId;
+        var paymentGroup = mG.group || 1;
+        var params = {
+          update: false,
+          paymentGroup: mG.group,
+        };
+        params.currentStore = user.activeStore;
+        var calculator = QuotationService.Calculator();
+        return calculator.getQuotationTotals(id, params);        
+      });
 
-  });
-
-  return Promise
-    .all(totalsPromises)
+      return Promise.all(totalsPromises);
+    })
     .then(function(totalsPromises) {
       return [
         totalsPromises,
