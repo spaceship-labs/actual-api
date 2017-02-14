@@ -608,11 +608,6 @@ module.exports.routes = {
     action:'update'
   },
 
-  '/promotion/:id/products':{
-    controller: 'promotion',
-    action: 'getPromotionProducts'
-  },
-
   '/promotion/searchproducts':{
     controller: 'promotion',
     action: 'searchPromotionProducts'

@@ -1,10 +1,15 @@
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 var Promise = require('bluebird');
+var _ = require('underscore');
+var STUDIO_CODE = '001';
+var AMBAS_CODE = '003';
 
 module.exports ={
 	getProductMainPromo: getProductMainPromo,
   getProductActivePromotions: getProductActivePromotions,
-  getPromotionWithHighestDiscount: getPromotionWithHighestDiscount
+  getPromotionWithHighestDiscount: getPromotionWithHighestDiscount,
+  STUDIO_CODE: STUDIO_CODE,
+  AMBAS_CODE: AMBAS_CODE
 };
 
 function getProductMainPromo(productId){
@@ -36,7 +41,11 @@ function getProductActivePromotions(product, activePromotions){
     var isValid = false;
     if(promotion.sa){
       var productSA = product.U_Empresa;
-      if(promotion.sa === productSA && product.Discount === promotion.discountPg1){
+      if(productSA === AMBAS_CODE){
+        promotion.sa = STUDIO_CODE;
+      }
+
+      if(promotion.sa === productSA){
         isValid = true;
       } 
     }
@@ -44,7 +53,32 @@ function getProductActivePromotions(product, activePromotions){
     return isValid;
   });
 
+  activePromotions = mapRelatedPromotions(activePromotions, product);
+
   return activePromotions;
+}
+
+function mapRelatedPromotions(promotions, product){
+  return promotions.map(function(promotion){
+    var auxPromotion = {
+      discountPg1: product.Discount,
+      discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
+      discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product), 
+      discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product), 
+      discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product) 
+    };
+
+    promotion = _.extend(promotion, auxPromotion);
+    return promotion;
+  });
+}
+
+function getRelatedPromotionGroupDiscount(group, promotion, product){
+  var originalMainDiscount = promotion.discountPg1;
+  var originalDiscount = promotion['discountPg' + group];
+  var difference = originalMainDiscount - originalDiscount;
+  var groupDiscount = product.Discount - difference;
+  return groupDiscount;
 }
 
 function getPromotionWithHighestDiscount(promotions){
@@ -52,6 +86,7 @@ function getPromotionWithHighestDiscount(promotions){
 		return false;
 	}
 
+  var highestDiscountPromo;
   var indexMaxPromo = 0;
   var maxDiscount = 0;
   promotions = promotions || [];
@@ -61,5 +96,6 @@ function getPromotionWithHighestDiscount(promotions){
       indexMaxPromo = index;
     }
   });	
-  return promotions[indexMaxPromo];
+  highestDiscountPromo = promotions[indexMaxPromo];
+  return highestDiscountPromo;
 }

@@ -41,6 +41,10 @@ module.exports = {
       collection:'Order',
       via:'Store'
     },
+    PromotionPackages:{
+      collection:'ProductGroup',
+      via:'Stores'
+    }
   }
 };
 

@@ -55,15 +55,23 @@ module.exports = {
     var form = req.allParams();
     var sa = form.sa;
     var discount = form.discount;
+
+    var saQuery = {sa:sa};
     var queryProducts = {
       Active: 'Y',
       U_Empresa: sa,
-      Discount: discount
+      //Discount: discount
     };
 
-    sails.log.info('queryProducts', queryProducts);
+    if(sa === PromotionService.STUDIO_CODE){
+      delete queryProducts.U_Empresa;
+      queryProducts.or = [
+        {U_Empresa: PromotionService.STUDIO_CODE},
+        {U_Empresa: PromotionService.AMBAS_CODE},
+      ];
+    }
 
-    Product.find(queryProducts)
+    Product.find(queryProducts).sort('Discount ASC')
       .then(function(products){
         res.json(products);
       })  
@@ -72,37 +80,5 @@ module.exports = {
         res.negotiate(err);
       });      
   },
-
-  getPromotionProducts: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-
-    Promotion.findOne({id:id})
-      .then(function(promotion){
-        if(!promotion){
-          return Promise.reject(new Error('Promoción no he encontrada'));
-        }
-
-        var sa = form.sa;
-        var discount = form.discount;
-        var queryProducts = {
-          Active: 'Y',
-          U_Empresa: sa,
-          Discount: discount
-        };
-
-        sails.log.info('queryProducts', queryProducts);
-
-        return Product.find(queryProducts);
-      })
-      .then(function(products){
-        res.json(products);
-      })
-      .catch(function(err){
-        console.log('err', err);
-        res.negotiate(err);
-      });
-
-  }
 
 };
