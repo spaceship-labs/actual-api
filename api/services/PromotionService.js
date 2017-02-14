@@ -37,12 +37,12 @@ function getProductMainPromo(productId){
 
 
 function getProductActivePromotions(product, activePromotions){
-  activePromotions = activePromotions.filter(function(promotion){
+  var productActivePromotions = activePromotions.filter(function(promotion){
     var isValid = false;
     if(promotion.sa){
       var productSA = product.U_Empresa;
       if(productSA === AMBAS_CODE){
-        promotion.sa = STUDIO_CODE;
+        productSA = STUDIO_CODE;
       }
 
       if(promotion.sa === productSA){
@@ -53,13 +53,26 @@ function getProductActivePromotions(product, activePromotions){
     return isValid;
   });
 
-  activePromotions = mapRelatedPromotions(activePromotions, product);
+  productActivePromotions = filterByHighestRegisteredPromotion(productActivePromotions);
+  productActivePromotions = mapRelatedPromotions(productActivePromotions, product);
 
-  return activePromotions;
+  return productActivePromotions;
+}
+
+function filterByHighestRegisteredPromotion(productActivePromotions){
+  if(productActivePromotions.length === 0){
+    return [];
+  }
+  var highestDiscountPromo = getPromotionWithHighestDiscount(productActivePromotions);
+  var highestDiscount = highestDiscountPromo.discountPg1;
+
+  return productActivePromotions.filter(function(promotion){
+    return promotion.discountPg1 === highestDiscount;
+  });
 }
 
 function mapRelatedPromotions(promotions, product){
-  return promotions.map(function(promotion){
+  var mappedPromotions = promotions.map(function(promotion){
     var auxPromotion = {
       discountPg1: product.Discount,
       discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
@@ -71,13 +84,16 @@ function mapRelatedPromotions(promotions, product){
     promotion = _.extend(promotion, auxPromotion);
     return promotion;
   });
+
+  return mappedPromotions;
 }
 
 function getRelatedPromotionGroupDiscount(group, promotion, product){
-  var originalMainDiscount = promotion.discountPg1;
-  var originalDiscount = promotion['discountPg' + group];
-  var difference = originalMainDiscount - originalDiscount;
+  var originalCashDiscount = promotion.discountPg1;
+  var originalGroupDiscount = promotion['discountPg' + group];
+  var difference = originalCashDiscount - originalGroupDiscount;
   var groupDiscount = product.Discount - difference;
+
   return groupDiscount;
 }
 
