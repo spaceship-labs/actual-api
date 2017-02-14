@@ -46,42 +46,14 @@ module.exports = {
       type:'string',
       enum: ['ammount','percentage']
     },
-    productSearchTerm: {type:'string'},
-    OnStudio:{type:'boolean'},
-    OnHome:{type:'boolean'},
-    OnKids:{type:'boolean'},
-    OnAmueble:{type:'boolean'},
-    sas: {type:'array'}, //Sociedades
-    excludedProducts: {type:'array'},
+    sa: {type:'string'}, //Sociedad
+    hasPriority:{type:'boolean'},
     hasLM:{type:'boolean'},
     pushMoneyUnit:{type:'float'},
     pushMoneyUnitType:{
       type:'string',
       enum:['ammount','percent']
     },
-    Categories:{
-      collection:'ProductCategory',
-      via:'Promotions'
-    },
-    FilterValues:{
-      collection:'ProductFilterValue',
-      via:'Promotions'
-    },
-    CustomBrands:{
-      collection:'CustomBrand',
-      via:'Promotions'
-    },
-    Groups:{
-      collection:'ProductGroup',
-      via:'Promotions'
-    },
-    Products:{
-      collection:'Product',
-      via:'Promotions'
-    },
-    Stores:{
-      collection:'store',
-      via:'Promotions'
-    }
+
   }
 };

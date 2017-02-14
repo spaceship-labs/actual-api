@@ -55,7 +55,7 @@ module.exports = {
 
         //sails.log.info('searchQuery', JSON.stringify(searchQuery));
         var find = Product.find(searchQuery);
-        var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
+        var sortValue = 'DiscountPrice ASC';
 
         if(populateImgs){
           //find = find.populate('files');
@@ -141,7 +141,8 @@ module.exports = {
             freeSaleQuery
           ]
         };
-        var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
+
+        var sortValue = 'DiscountPrice ASC';
 
         return [
           Product.count(searchQuery),
@@ -256,9 +257,6 @@ module.exports = {
 
         products = Product.find(searchQuery);
         
-        if(populatePromotions){
-          products = products.populate('Promotions',queryPromos)
-        }
         if(populateImgs){
           //products.populate('files')
         }

@@ -53,7 +53,7 @@ function cacheProductDiscountPrices(){
   console.log('Start cacheProductDiscountPrices ' + new Date());
   var promotionsQuery = Search.getPromotionsQuery();
   var stores = [];
-  var updateCounter
+  var updateCounter;
 
   Store.find({}).populate('Promotions', promotionsQuery)
     .then(function(storesResult){

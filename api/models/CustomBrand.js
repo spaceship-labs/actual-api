@@ -9,9 +9,5 @@ module.exports = {
       collection:'product',
       via:'CustomBrand'
     },
-    Promotions:{
-      collection:'promotion',
-      via:'CustomBrands'
-    }
   }
-}
+};

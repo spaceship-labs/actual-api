@@ -36,17 +36,12 @@ module.exports = {
     var id = form.id;
     //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
-    var queryPromo = {
-      startDate: {'<=': currentDate},
-      endDate: {'>=': currentDate},
-    };
     Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
       .populate('Sizes')
       .populate('Groups')
-      .populate('Promotions', queryPromo)
       .then(function(product){
         res.ok({data:product});
       })
@@ -291,4 +286,16 @@ module.exports = {
     });
   },
 
+  getProductMainPromo: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    PromotionService.getProductMainPromo(id)
+      .then(function(mainPromo){
+        res.json(mainPromo);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  }
 };

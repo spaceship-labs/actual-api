@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 module.exports = {
   create: function(req,res){
     var form = req.params.all();
@@ -30,12 +32,6 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     Promotion.findOne({id:id})
-      .populate('FilterValues')
-      .populate('CustomBrands')
-      .populate('Groups')
-      .populate('Stores')
-      .populate('Categories')
-      .populate('Products')
       .then(function(promo){
         res.json(promo);
       })
@@ -53,6 +49,36 @@ module.exports = {
       .catch(function(err){
         res.negotiate(err);
       });
-  }
+  },
 
-}
+  searchPromotionProducts: function(req, res){
+    var form = req.allParams();
+    var sa = form.sa;
+    var discount = form.discount;
+
+    var saQuery = {sa:sa};
+    var queryProducts = {
+      Active: 'Y',
+      U_Empresa: sa,
+      //Discount: discount
+    };
+
+    if(sa === PromotionService.STUDIO_CODE){
+      delete queryProducts.U_Empresa;
+      queryProducts.or = [
+        {U_Empresa: PromotionService.STUDIO_CODE},
+        {U_Empresa: PromotionService.AMBAS_CODE},
+      ];
+    }
+
+    Product.find(queryProducts).sort('Discount ASC')
+      .then(function(products){
+        res.json(products);
+      })  
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });      
+  },
+
+};

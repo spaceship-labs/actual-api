@@ -33,12 +33,6 @@ module.exports = {
       via: 'Groups'
     },
 
-    //Relation promotion search
-    Promotions:{
-      collection: 'Promotion',
-      via:'Groups'
-    },
-
     /*-------------/
       ONLY APPLIES TO PACKAGES GROUPS
     /*------------*/
@@ -58,6 +52,5 @@ module.exports = {
       //collection:'Company',
       via:'PromotionPackages'
     }
-
   }
-}
+};

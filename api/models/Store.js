@@ -29,10 +29,6 @@ module.exports = {
     Warehouse:{
       model:'Company'
     },
-    Promotions:{
-      collection: 'promotion',
-      via: 'Stores'
-    },
     Payments: {
       collection:'Payment',
       via:'Store'
