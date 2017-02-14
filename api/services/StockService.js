@@ -1,6 +1,8 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
 var moment = require('moment');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+
 //.startOf('day').format('DD-MM-YYYY');		
 
 module.exports = {
@@ -72,15 +74,32 @@ function substractDeliveryStockByDetail(detail){
 	return DatesDelivery.findOne({
 		whsCode: detail.shipCompanyFrom.WhsCode,
 		ShipDate: detail.productDate,
-		ItemCode: ItemCode
+		ItemCode: ItemCode,
+		ImmediateDelivery: detail.immediateDelivery
 	})
 	.then(function(dateDelivery){
 		if(detail.quantity > dateDelivery.OpenCreQty){
 			return Promise.reject(new Error('Stock del producto ' + ItemCode + ' no disponible (ERROR: DS)'));
 		}
-		var newStock = dateDelivery.OpenCreQty - detail.quantity;
-		return DatesDelivery.update({id: dateDelivery.id}, {OpenCreQty:newStock});
+
+		var query = {
+			whsCode: detail.shipCompanyFrom.WhsCode,
+			ItemCode: ItemCode,
+		};
+		return substractQuantityToDeliveryDates(query, detail.quantity);
 	});
+}
+
+function substractQuantityToDeliveryDates(deliveryQuery, quantity){
+	return DatesDelivery.find(deliveryQuery)
+		.then(function(dateDeliveries){
+			return Promise.each(dateDeliveries, function(dateDelivery){
+				var newStock = dateDelivery.OpenCreQty - quantity;
+				var query = {_id: ObjectId(dateDelivery.id)};
+				var updateParams = {OpenCreQty: newStock};
+				return Common.nativeUpdateOne(query, updateParams, DatesDelivery);
+			});
+		});
 }
 
 function getStoresWithProduct(ItemCode, whsCode){
@@ -167,7 +186,7 @@ function mapDetailsWithDeliveryDates(details, deliveryDates){
 
 
 		if(detailDelivery && details[i].Product.Available > 0){
-			detailDelivery.available -= details[i].quantity;
+			//detailDelivery.available -= details[i].quantity;
 			//details[i].delivery = detailDelivery;
 			details[i].validStock = true;
 		}else{
@@ -192,7 +211,10 @@ function findValidDelivery(detail,deliveryDates){
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 		var isValidDelivery;
 
-		if(detailShipDate === deliveryDate && detail.quantity <= delivery.available){				
+		if( detailShipDate === deliveryDate && 
+			  detail.quantity <= delivery.available &&
+			  detail.immediateDelivery == delivery.ImmediateDelivery
+			){				
 			isValidDelivery = true;
 		}else{
 			isValidDelivery = false;
