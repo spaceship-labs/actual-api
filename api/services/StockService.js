@@ -123,10 +123,9 @@ function getStoresWithProduct(ItemCode, whsCode){
 function validateQuotationStockById(quotationId, activeStore){
   var warehouse;
   return Quotation.findOne({id: quotationId}).populate('Details')
-	  .then(function(results){
-	    var user = results[0];
+	  .then(function(quotation){
 	    var whsId = activeStore.Warehouse;
-	    details = results[1].Details;
+	    details = quotation.Details;
 	    var detailsIds = details.map(function(d){ return d.id; });
 	    return [
 	      Company.findOne({id: whsId}),
