@@ -12,7 +12,7 @@ module.exports ={
   AMBAS_CODE: AMBAS_CODE
 };
 
-function getProductMainPromo(productId){
+function getProductMainPromo(productId, quotationId){
   var currentDate = new Date();	
 	var promotionsQuery = {
     startDate: {'$lte': currentDate},
@@ -30,13 +30,13 @@ function getProductMainPromo(productId){
         return Promise.reject(new Error('Producto no encontrado'));
       }
 
-			var promotions = getProductActivePromotions(product, activePromotions);
+			var promotions = getProductActivePromotions(product, activePromotions, quotationId);
 			return getPromotionWithHighestDiscount(promotions);
 		});
 }
 
 
-function getProductActivePromotions(product, activePromotions){
+function getProductActivePromotions(product, activePromotions, quotationId){
   var productActivePromotions = activePromotions.filter(function(promotion){
     var isValid = false;
     if(promotion.sa){
@@ -54,7 +54,7 @@ function getProductActivePromotions(product, activePromotions){
   });
 
   productActivePromotions = filterByHighestRegisteredPromotion(productActivePromotions);
-  productActivePromotions = mapRelatedPromotions(productActivePromotions, product);
+  productActivePromotions = mapRelatedPromotions(productActivePromotions, product, quotationId);
 
   return productActivePromotions;
 }
@@ -71,7 +71,7 @@ function filterByHighestRegisteredPromotion(productActivePromotions){
   });
 }
 
-function mapRelatedPromotions(promotions, product){
+function mapRelatedPromotions(promotions, product, quotationId){
   var mappedPromotions = promotions.map(function(promotion){
     var auxPromotion = {
       discountPg1: product.Discount,
@@ -86,6 +86,43 @@ function mapRelatedPromotions(promotions, product){
   });
 
   return mappedPromotions;
+}
+
+function mapClientDiscountWithPromotions(promotions,quotationId){
+  var clientFound = true;
+
+  return Quotation.findOne({id: quotationId}).populate('Client')
+    .then(function(quotation){
+      if(quotation && quotation.Client){
+        var client = quotation.Client;
+        var currentDate = new Date();
+        var clientDiscountsQuery = {
+          CardCode: client.CardCode,
+          startDate: {'<=': currentDate},
+          endDate: {'>=': currentDate},          
+        };
+        return ClientDiscounts.findOne(clientDiscountsQuery);
+      }else{
+        clientFound = false;
+        return promotions;
+      }
+    })
+    .then(function(result){
+      var clientDiscount;
+      if(clientFound){
+        clientDiscount = result;
+        if(clientDiscount.isAdditional){
+          promotions = mapClientAdditionalDiscounts(promotions, clientDiscount.Discount);
+        }
+      }
+      return promotions;
+    });
+}
+
+function mapClientAdditionalDiscounts(promotions, additionalDiscount){
+  return promotions.map(function(promotion){
+    promotion.discountPg1 = promotion.discountPg1 + additionalDiscount;
+  });
 }
 
 function getRelatedPromotionGroupDiscount(group, promotion, product){
