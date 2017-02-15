@@ -116,7 +116,7 @@ function createFromQuotation(form, currentUser){
           new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
         );
       }
-      return StockService.validateQuotationStockById(quotationId, currentUser.id);
+      return StockService.validateQuotationStockById(quotationId, currentUser.activeStore);
     })
     .then(function(isValidStock){
       if(!isValidStock){

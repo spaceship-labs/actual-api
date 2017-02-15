@@ -15,9 +15,10 @@ function cacheCategoriesProducts(){
   };
   var productsQuery = {
     Price: price,
-    Active: 'Y'
+    Active: 'Y',
+    Available: {'>':0}
   };
-  //sails.log.info('cache categories stock start : ' + new Date());
+
   return getAllStoresCodes().then(function(codes){
       storesCodes = codes;
       return ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
@@ -26,13 +27,13 @@ function cacheCategoriesProducts(){
       return Promise.each(categories, updateCategory);
     })
     .then(function(){
-      //sails.log.info('cache categories stock end: ' + new Date());
+      sails.log.info('cache categories stock end: ' + new Date());
       return true;
     })
     .catch(function(err){
       console.log(err);
       return err;
-    })
+    });
 }
 
 function updateCategory(category){

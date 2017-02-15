@@ -19,7 +19,6 @@ module.exports.bootstrap = function(cb) {
   CronJobs.init();
   Files.getContainerLink();
 
-
   sails.config.timezone = {label:'America/Cancun', offset:-6};
   //moment.tz.setDefault(sails.config.timezone.label);
   cb();

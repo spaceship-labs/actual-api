@@ -2,6 +2,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
+var Promise = require('bluebird');
 
 var EXPIRES_IN = 60*24*60; //seconds
 var SECRET = process.env.tokenSecret || "4ukI0uIVnB3iI1yxj646fVXSE3ZVk4doZgz6fTbNg7jO41EAtl20J5F7Trtwe7OM";
@@ -67,10 +68,11 @@ function _onLocalStrategyAuth(email, password, next){
 }
 
 //Triggers when user authenticates via JWT strategy
-
 function _onJwtStrategyAuth(payload, next){
   var payloadUser = payload.user || {};
   var userId = payloadUser.id || false;
+  var activeStoreId = payloadUser.activeStore || false;
+
   if(!userId){
     return next(null, false, {
       code: 'USER_ID_UNDEFINED',
@@ -78,13 +80,24 @@ function _onJwtStrategyAuth(payload, next){
     });
   }
 
-  return User.findOne({id: userId})
-    .populate('activeStore')
-    .populate('role')
-    .populate('Seller')
-    //.populate('Stores')
-    .then(function(userFound){
-      var user = userFound;
+  var promises = [
+    User.findOne({id:userId})
+      .populate('role')
+      .populate('Seller'),
+  ];
+
+  if(activeStoreId){
+    promises.push( Store.findOne({id: activeStoreId}) );
+  }
+
+  return Promise.all(promises)
+    .then(function(results){
+      var user = results[0];
+      var activeStore = results[1];
+
+      if(activeStore){
+        user.activeStore = activeStore;
+      }
 
       if(!user.active){
         return next(null, false, {

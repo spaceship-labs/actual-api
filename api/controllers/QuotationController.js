@@ -509,7 +509,7 @@ module.exports = {
   validateStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    StockService.validateQuotationStockById(quotationId, req.user.id)
+    StockService.validateQuotationStockById(quotationId, req.user.activeStore)
       .then(function(isValid){
         return res.json({isValid: isValid});
       })

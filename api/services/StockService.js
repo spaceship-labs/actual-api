@@ -120,29 +120,27 @@ function getStoresWithProduct(ItemCode, whsCode){
 		});
 }
 
-function validateQuotationStockById(quotationId, userId){
+function validateQuotationStockById(quotationId, activeStore){
   var warehouse;
-  return Promise.join(
-    User.findOne({id: userId}).populate('activeStore'),
-    Quotation.findOne({id: quotationId}).populate('Details')
-  ).then(function(results){
-    var user = results[0];
-    var whsId = user.activeStore.Warehouse;
-    details = results[1].Details;
-    var detailsIds = details.map(function(d){ return d.id; });
-    return [
-      Company.findOne({id: whsId}),
-      QuotationDetail.find({id: detailsIds}).populate('Product')
-    ];
-  })
-  .spread(function(warehouse,details){
-    return getDetailsStock(details, warehouse);    
-  })
-  .then(function(detailsStock){
-  	//console.log('detailsStock', detailsStock);
-  	//console.log('isValidStock', isValidStock(detailsStock));
-  	return isValidStock(detailsStock);
-  });  
+  return Quotation.findOne({id: quotationId}).populate('Details')
+	  .then(function(results){
+	    var user = results[0];
+	    var whsId = activeStore.Warehouse;
+	    details = results[1].Details;
+	    var detailsIds = details.map(function(d){ return d.id; });
+	    return [
+	      Company.findOne({id: whsId}),
+	      QuotationDetail.find({id: detailsIds}).populate('Product')
+	    ];
+	  })
+	  .spread(function(warehouse,details){
+	    return getDetailsStock(details, warehouse);    
+	  })
+	  .then(function(detailsStock){
+	  	//console.log('detailsStock', detailsStock);
+	  	//console.log('isValidStock', isValidStock(detailsStock));
+	  	return isValidStock(detailsStock);
+	  });  
 }
 
 function isValidStock(detailsStock){

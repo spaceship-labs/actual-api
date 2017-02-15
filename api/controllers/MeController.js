@@ -21,14 +21,15 @@ module.exports = {
   },
   
   activeStore: function(req, res) {
-    var user = req.user;
-    User.findOne(user.id).populate('activeStore')
-      .then(function(user){
-        res.json(user.activeStore);
+    var activeStoreId = req.user.activeStore.id || req.headers.activestoreid;
+    Store.findOne({id:activeStoreId})
+      .then(function(store){
+        res.json(store);
       })
-      .catch(function(err){
+      .catch(function(err){{
+        console.log(err);
         res.negotiate(err);
-      });
+      }});
   },
 
   generateCashReport: function(req, res){
