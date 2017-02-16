@@ -316,8 +316,6 @@ function Calculator(){
         return getProductMainPromo(product, quantity, quotationId);
       })
       .then(function(mainPromo){
-        //sails.log.info('getProductMainPromo', mainPromo);
-        
         var total;
         var unitPrice                 = product.Price;
         var discountKey               = getDiscountKey(options.paymentGroup);
@@ -430,7 +428,8 @@ function Calculator(){
     return PromotionService.getProductActivePromotions(product, activePromotions, quotationId)
       .then(function(productActivePromotions){
         promotions = productActivePromotions;
-    
+        //sails.log.info('productActivePromotions', productActivePromotions);
+
         //Taking package rule as a promotion
         if(packageRule){
 

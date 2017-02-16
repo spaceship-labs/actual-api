@@ -53,7 +53,7 @@ function getExchangeRate(){
     });
 }
 
-function getMethodGroupsWithTotals(quotationId, sellerId){
+function getMethodGroupsWithTotals(quotationId, activeStore){
   var methodsGroups = paymentGroups;
   var discountKeys = [
     'discountPg1',
@@ -62,28 +62,21 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
     'discountPg4',
     'discountPg5'
   ];
-
-  return User
-    .findOne({
-      select: ['activeStore'],
-      id: sellerId,
-    })
-    .then(function(user){
       
-      var totalsPromises = methodsGroups.map(function(mG) {
-        var id = quotationId;
-        var paymentGroup = mG.group || 1;
-        var params = {
-          update: false,
-          paymentGroup: mG.group,
-        };
-        params.currentStore = user.activeStore;
-        var calculator = QuotationService.Calculator();
-        return calculator.getQuotationTotals(id, params);        
-      });
+  var totalsPromises = methodsGroups.map(function(mG) {
+    var id = quotationId;
+    var paymentGroup = mG.group || 1;
+    var params = {
+      update: false,
+      paymentGroup: mG.group,
+    };
+    params.currentStore = activeStore.id;
+    sails.log.info('params', params);
+    var calculator = QuotationService.Calculator();
+    return calculator.getQuotationTotals(id, params);        
+  });
 
-      return Promise.all(totalsPromises);
-    })
+  return Promise.all(totalsPromises)
     .then(function(totalsPromises) {
 
       return [
@@ -199,8 +192,8 @@ function filterMethodsGroupsForDiscountClients(methodsGroups){
   return methodsGroups;
 }
 
-function getPaymentGroupsForEmail(quotation, seller) {
-  return getMethodGroupsWithTotals(quotation, seller)
+function getPaymentGroupsForEmail(quotation, activeStore) {
+  return getMethodGroupsWithTotals(quotation, activeStore)
     .then(function(res) {
       var cash = [{
         name: 'Pago único',

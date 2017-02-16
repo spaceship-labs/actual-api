@@ -524,7 +524,7 @@ module.exports = {
     var quotationId = form.id;
     Quotation.findOne({id:quotationId})
       .then(function(quotation){
-        return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User);
+        return PaymentService.getMethodGroupsWithTotals(quotationId, req.user.activeStore);
       })
       .then(function(paymentOptions){
         res.json(paymentOptions);
