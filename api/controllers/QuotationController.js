@@ -436,8 +436,9 @@ module.exports = {
   sendEmail: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var activeStore = req.user.activeStore;
     Email
-      .sendQuotation(id)
+      .sendQuotation(id, activeStore)
       .then(function(quotation) {
         return res.json(quotation);
       })
