@@ -25,7 +25,6 @@ module.exports = {
 	mapFiscalFields: mapFiscalFields,
 	populateClientRelations: populateClientRelations,
  	isValidCardCode: isValidCardCode,
-
 };
 
 

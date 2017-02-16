@@ -67,6 +67,7 @@ module.exports = {
     ammountPaid: {type:'float'},
     totalProducts: {type:'integer'},
     paymentGroup:{type:'integer'},
+    appliesClientDiscount: {type:'boolean'},
     bigticketMaxPercentage:{
       type:'integer',
       enum:[0,1,2,3,4,5]

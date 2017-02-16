@@ -1,9 +1,12 @@
 var Promise = require('bluebird');
 var numeral = require('numeral');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+var _ = require('underscore');
 
 var EWALLET_TYPE = 'ewallet';
 var CASH_USD_TYPE = 'cash-usd';
+var CLIENT_BALANCE_TYPE = 'client-balance';
+var CLIENT_CREDIT_TYPE = 'client-credit';
 var EWALLET_GROUP_INDEX = 0;
 var DEFAULT_EXCHANGE_RATE   = 18.78;
 
@@ -14,7 +17,12 @@ module.exports = {
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
   getPaymentGroups: getPaymentGroups,
-  getExchangeRate: getExchangeRate
+  getExchangeRate: getExchangeRate,
+  EWALLET_TYPE: EWALLET_TYPE,
+  CASH_USD_TYPE: CASH_USD_TYPE,
+  EWALLET_GROUP_INDEX: EWALLET_GROUP_INDEX,
+  CLIENT_BALANCE_TYPE: CLIENT_BALANCE_TYPE,
+  CLIENT_CREDIT_TYPE: CLIENT_CREDIT_TYPE
 };
 
 function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
@@ -77,13 +85,25 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
       return Promise.all(totalsPromises);
     })
     .then(function(totalsPromises) {
+
       return [
         totalsPromises,
-        getExchangeRate()
+        getExchangeRate(),
+        checkIfClientHasCredit(quotationId)
       ];
     })
-    .spread(function(totalsPromises, exchangeRate) {
+    .spread(function(totalsPromises, exchangeRate, hasCredit) {
       var totalsByGroup = totalsPromises || [];
+
+      if( isADiscountClient(totalsByGroup) || hasCredit){
+        totalsByGroup = filterPaymentTotalsForDiscountClients(totalsByGroup);
+        methodsGroups = filterMethodsGroupsForDiscountClients(methodsGroups);
+      }
+
+      if(hasCredit){
+        methodsGroups = addCreditMethod(methodsGroups);
+      }
+
       methodsGroups = methodsGroups.map(function(mG, index){
         mG.total = totalsByGroup[index].total || 0;
         mG.subtotal = totalsByGroup[index].subtotal || 0;
@@ -133,6 +153,52 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
     });
 }
 
+function isADiscountClient(paymentTotals){
+  return _.some(paymentTotals, function(paymentTotal){
+    return paymentTotal.appliesClientDiscount;
+  });
+}
+
+function checkIfClientHasCredit(quotationId){
+  return Quotation.findOne({id: quotationId}).populate('Client')
+    .then(function(quotation){
+      if(!quotation || !quotation.Client){
+        return false;
+      }
+      //quotation.Client.hasCredit = true;
+      return quotation.Client.hasCredit;
+    });
+}
+
+function filterPaymentTotalsForDiscountClients(paymentTotals){
+  return paymentTotals.filter(function(paymentTotal){
+    return paymentTotal.paymentGroup === 1;
+  });
+}
+
+function filterMethodsGroupsForDiscountClients(methodsGroups){
+  var validMethodsTypes = [
+    'cash',
+    'cash-usd',
+    'transfer'
+  ];
+
+  methodsGroups = methodsGroups.filter(function(mg){
+    return mg.group === 1;
+  });
+
+  methodsGroups = methodsGroups.map(function(mg){
+    var auxMg = _.clone(mg);
+    auxMg.methods = auxMg.methods.filter(function(method){
+      return validMethodsTypes.indexOf(method.type) > -1;
+    });
+
+    return auxMg;
+  });
+
+  return methodsGroups;
+}
+
 function getPaymentGroupsForEmail(quotation, seller) {
   return getMethodGroupsWithTotals(quotation, seller)
     .then(function(res) {
@@ -159,6 +225,24 @@ function getPaymentGroupsForEmail(quotation, seller) {
 function getPaymentGroups(){
   return paymentGroups;
 }
+
+function addCreditMethod(methodsGroups){
+  return methodsGroups.map(function(mg){
+    if(mg.group === 1){
+      mg.methods.unshift(creditMethod);
+    }
+    return mg;
+  });
+}
+
+var creditMethod = {
+  label:'Credito',
+  name: 'Credito',
+  type: 'client-credit',
+  description: '',
+  currency: 'mxn',
+  needsVerification: false
+};
 
 var paymentGroups = [
   {

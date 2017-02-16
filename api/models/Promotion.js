@@ -8,7 +8,6 @@ module.exports = {
     code:{type:'string',unique:true},
     handle:{type:'string'},
     type:{type:'string'},
-    itemCode: {type:'array'},
     startDate:{type:'datetime'},
     endDate:{type:'datetime'},
     discountPg1:{type:'float'},

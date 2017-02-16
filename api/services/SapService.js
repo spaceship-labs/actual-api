@@ -10,7 +10,6 @@ var SAP_DATE_FORMAT       = 'YYYY-MM-DD';
 var CLIENT_CARD_TYPE      = 1;//1.Client, 2.Proveedor, 3.Lead
 var CREATE_CONTACT_ACTION = 0;
 var UPDATE_CONTACT_ACTION = 1;
-var CLIENT_BALANCE_TYPE = 'client-balance';
 
 
 var COMPANY_STUDIO_CODE   = '001';
@@ -249,7 +248,7 @@ function isImmediateDelivery(shipDate){
 function mapPaymentsToSap(payments, exchangeRate){
 
   payments = payments.filter(function(p){
-    return p.type != CLIENT_BALANCE_TYPE;
+    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && p.type !== PaymentService.CLIENT_CREDIT_TYPE;
   });
 
 

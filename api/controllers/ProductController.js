@@ -289,7 +289,8 @@ module.exports = {
   getProductMainPromo: function(req, res){
     var form = req.allParams();
     var id = form.id;
-    PromotionService.getProductMainPromo(id)
+    var activeQuotationId = form.activeQuotationId;
+    PromotionService.getProductMainPromo(id, activeQuotationId)
       .then(function(mainPromo){
         res.json(mainPromo);
       })
