@@ -177,12 +177,13 @@ function getDetailsStock(details, warehouse){
 
 function mapDetailsWithDeliveryDates(details, deliveryDates){
 	for(var i = 0; i<details.length; i++){
+		//sails.log.info('deliveryDates', deliveryDates);
 		var detailDelivery = findValidDelivery(details[i], deliveryDates);
 		//sails.log.info('detailDelivery', detailDelivery);
 		//sails.log.info('details[i]', details[i]);
 
 
-		if(detailDelivery && details[i].Product.Available > 0){
+		if(detailDelivery && (details[i].Product.Available > 0 || details[i].isFreeSale) ){
 			//detailDelivery.available -= details[i].quantity;
 			//details[i].delivery = detailDelivery;
 			details[i].validStock = true;
@@ -208,10 +209,11 @@ function findValidDelivery(detail,deliveryDates){
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 		var isValidDelivery;
 
+
 		if( detailShipDate === deliveryDate && 
 			  detail.quantity <= delivery.available &&
-			  detail.immediateDelivery == delivery.ImmediateDelivery
-			){				
+			  detail.immediateDelivery === delivery.ImmediateDelivery
+			){	
 			isValidDelivery = true;
 		}else{
 			isValidDelivery = false;
