@@ -5,7 +5,6 @@ var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
 var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
-var CLIENT_BALANCE_TYPE = 'client-balance';
 var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
@@ -321,7 +320,6 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
     }
 
     var sapResultAux = _.clone(sapResult);
-
     sapResult = sapResult.filter(function(item){
       return item.type !== BALANCE_SAP_TYPE;
     });
@@ -386,12 +384,14 @@ function checkIfSapOrderHasReference(sapOrder){
 function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
   if( _.isArray(sapOrder.Payments) ){
 
-    //No payments are returned when using only client balance
-    var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
-      return p.type === CLIENT_BALANCE_TYPE;
-    });
+    //No payments are returned when using only client balance or credit
+    console.log('everyPaymentIsClientBalanceOrCredit(paymentsToCreate)', everyPaymentIsClientBalanceOrCredit(paymentsToCreate));
+    
+    /*paymentsToCreate = paymentsToCreate.filter(function(){
 
-    if(everyPaymentIsClientBalance){
+    })*/
+
+    if(everyPaymentIsClientBalanceOrCredit(paymentsToCreate)){
       return true;
     }
 
@@ -404,6 +404,14 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 
   return false;
 }
+
+function everyPaymentIsClientBalanceOrCredit(paymentsToCreate){
+  var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
+    return p.type === PaymentService.CLIENT_BALANCE_TYPE || p.type === PaymentService.CLIENT_CREDIT_TYPE;
+  });  
+  return everyPaymentIsClientBalance;
+}
+
 
 function saveSapReferences(sapResult, order, orderDetails){
   var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));

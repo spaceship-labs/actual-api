@@ -15,6 +15,7 @@ module.exports = {
     discount:{type:'float'},
     currency:{type:'string'},
     paymentGroup:{type:'integer'},
+    appliesClientDiscount: {type:'boolean'},
     WhsCode:{type:'string'},
     status:{
       type:'string',

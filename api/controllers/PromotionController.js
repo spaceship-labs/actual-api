@@ -68,6 +68,7 @@ module.exports = {
       queryProducts.or = [
         {U_Empresa: PromotionService.STUDIO_CODE},
         {U_Empresa: PromotionService.AMBAS_CODE},
+        {U_Empresa: null}
       ];
     }
 
