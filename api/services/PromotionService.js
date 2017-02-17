@@ -132,7 +132,7 @@ function mapClientDiscountWithPromotions(promotions, product, quotationId){
         if(clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT){
           promotions = mapClientAdditionalDiscounts(promotions, clientDiscount);
         }
-        else if(clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT){
+        else if(clientDiscount.U_FijoMovil === CLIENT_FIXED_DISCOUNT){
           promotions = mapClientFixedDiscounts(promotions, clientDiscount);
         }
 
