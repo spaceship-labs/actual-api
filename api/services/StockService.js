@@ -182,7 +182,7 @@ function mapDetailsWithDeliveryDates(details, deliveryDates){
 		//sails.log.info('details[i]', details[i]);
 
 
-		if(detailDelivery && details[i].Product.Available > 0){
+		if(detailDelivery && (details[i].Product.Available > 0 || details[i].isFreeSale) ){
 			//detailDelivery.available -= details[i].quantity;
 			//details[i].delivery = detailDelivery;
 			details[i].validStock = true;
