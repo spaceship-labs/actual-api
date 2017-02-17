@@ -84,15 +84,15 @@ function getMethodGroupsWithTotals(quotationId, activeStore){
         checkIfClientHasCredit(quotationId)
       ];
     })
-    .spread(function(totalsPromises, exchangeRate, hasCredit) {
+    .spread(function(totalsPromises, exchangeRate, clientHasCredit) {
       var totalsByGroup = totalsPromises || [];
 
-      if( isADiscountClient(totalsByGroup) || hasCredit){
+      if( isADiscountClient(totalsByGroup) || clientHasCredit){
         totalsByGroup = filterPaymentTotalsForDiscountClients(totalsByGroup);
         methodsGroups = filterMethodsGroupsForDiscountClients(methodsGroups);
       }
 
-      if(hasCredit){
+      if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
       }
 
@@ -155,10 +155,17 @@ function checkIfClientHasCredit(quotationId){
   return Quotation.findOne({id: quotationId}).populate('Client')
     .then(function(quotation){
       if(!quotation || !quotation.Client){
-        return false;
+        return new Promise(function(resolve, reject){
+          resolve(false);
+        });
       }
-      //quotation.Client.hasCredit = true;
-      return quotation.Client.hasCredit;
+
+      var currentDate = new Date();
+      var creditQuery = {
+        Name: quotation.Client.CardCode,
+        U_Vigencia: {'>=': currentDate}
+      };
+      return ClientCredit.findOne(creditQuery);
     });
 }
 
