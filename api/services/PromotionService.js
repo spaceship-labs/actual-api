@@ -73,22 +73,22 @@ function filterByHighestRegisteredPromotion(productActivePromotions){
 }
 
 function mapRelatedPromotions(promotions, product, quotationId){
-  if(!product.Discount){
-    promotions = [];
+  var mappedPromotions = [];
+
+  if(product.Discount){
+    mappedPromotions = promotions.map(function(promotion){
+      var auxPromotion = {
+        discountPg1: product.Discount,
+        discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
+        discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product), 
+        discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product), 
+        discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product) 
+      };
+
+      promotion = _.extend(promotion, auxPromotion);
+      return promotion;
+    });
   }
-
-  var mappedPromotions = promotions.map(function(promotion){
-    var auxPromotion = {
-      discountPg1: product.Discount,
-      discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
-      discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product), 
-      discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product), 
-      discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product) 
-    };
-
-    promotion = _.extend(promotion, auxPromotion);
-    return promotion;
-  });
 
   /*
   return new Promise(function(resolve, reject){
@@ -136,12 +136,20 @@ function mapClientDiscountWithPromotions(promotions, product, quotationId){
           promotions = mapClientFixedDiscounts(promotions, clientDiscount);
         }
 
-        if(  (!promotions || promotions.length === 0) &&
-            clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT
-         ){
-          promotions = [
-            buildClientFixedDiscount(clientDiscount)
-          ];
+        if(  (!promotions || promotions.length === 0) ){
+  
+          if(clientDiscount.U_FijoMovil === CLIENT_FIXED_DISCOUNT){
+            promotions = [
+              buildClientFixedDiscount(clientDiscount)
+            ];
+          }
+          else if( clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT ){
+            promotions = [
+              buildClientAdditionalDiscount({
+                discountPg1: 0
+              }, clientDiscount)
+            ];
+          }
         }
       }
 
@@ -171,34 +179,38 @@ function buildClientFixedDiscount(clientDiscount){
     discountPg5: 0,
     name: defaultName,
     publicName: defaultName,
-    handle: 'descuento-cliente-especial-' + fixedDiscount + '-porciento',
+    handle: 'descuento-cliente-'+clientDiscount.U_ScoreCard+'-' + fixedDiscount + '-porciento',
     clientDiscountReference: clientDiscountReference
   };
+}
+
+function buildClientAdditionalDiscount(promotion, clientDiscount){
+  var auxPromotion = {};
+  var defaultName = 'Descuento cliente '+ clientDiscount.U_ScoreCard +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
+  var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_ScoreCard;
+  clientDiscountReference += '-originalDiscount-' + promotion.discountPg1;
+  clientDiscountReference += '-code-' + clientDiscount.Code;
+
+  auxPromotion.discountPg1 = promotion.discountPg1 + additionalDiscount;
+  auxPromotion.discountPg2 = 0,
+  auxPromotion.discountPg3 = 0,
+  auxPromotion.discountPg4 = 0,
+  auxPromotion.discountPg5 = 0,
+  auxPromotion.name = defaultName,
+  auxPromotion.publicName = defaultName,
+  auxPromotion.handle = 'descuento-cliente-'+ clientDiscount.U_ScoreCard +'-' + auxPromotion.discountPg1 + 'mas' + additionalDiscount + '-porciento-adicional';    
+  auxPromotion.clientDiscountReference = clientDiscountReference;
+  auxPromotion = _.extend(_.clone(promotion), auxPromotion);
+
+  return auxPromotion;
+
 }
 
 function mapClientAdditionalDiscounts(promotions, clientDiscount){
   var additionalDiscount = clientDiscount.U_Porcentaje;
 
   return promotions.map(function(promotion){
-
-    var auxPromotion = {};
-    var defaultName = 'Descuento cliente '+ clientDiscount.U_ScoreCard +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
-    var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_ScoreCard;
-    clientDiscountReference += '-originalDiscount-' + promotion.discountPg1;
-    clientDiscountReference += '-code-' + clientDiscount.Code;
-
-    auxPromotion.discountPg1 = promotion.discountPg1 + additionalDiscount;
-    auxPromotion.discountPg2 = 0,
-    auxPromotion.discountPg3 = 0,
-    auxPromotion.discountPg4 = 0,
-    auxPromotion.discountPg5 = 0,
-    auxPromotion.name = defaultName,
-    auxPromotion.publicName = defaultName,
-    auxPromotion.handle = 'descuento-cliente-'+ clientDiscount.U_ScoreCard +'-' + auxPromotion.discountPg1 + 'mas' + additionalDiscount + '-porciento-adicional';    
-    auxPromotion.clientDiscountReference = clientDiscountReference;
-    auxPromotion = _.extend(_.clone(promotion), auxPromotion);
-
-    return auxPromotion;
+    return buildClientAdditionalDiscount(promotion, clientDiscount);
   });
 }
 
