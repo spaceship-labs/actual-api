@@ -185,6 +185,7 @@ function buildClientFixedDiscount(clientDiscount){
 }
 
 function buildClientAdditionalDiscount(promotion, clientDiscount){
+  var additionalDiscount = clientDiscount.U_Porcentaje;
   var auxPromotion = {};
   var defaultName = 'Descuento cliente '+ clientDiscount.U_ScoreCard +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
   var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_ScoreCard;
@@ -207,8 +208,6 @@ function buildClientAdditionalDiscount(promotion, clientDiscount){
 }
 
 function mapClientAdditionalDiscounts(promotions, clientDiscount){
-  var additionalDiscount = clientDiscount.U_Porcentaje;
-
   return promotions.map(function(promotion){
     return buildClientAdditionalDiscount(promotion, clientDiscount);
   });
