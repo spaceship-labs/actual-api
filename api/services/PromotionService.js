@@ -73,6 +73,10 @@ function filterByHighestRegisteredPromotion(productActivePromotions){
 }
 
 function mapRelatedPromotions(promotions, product, quotationId){
+  if(!product.Discount){
+    promotions = [];
+  }
+
   var mappedPromotions = promotions.map(function(promotion){
     var auxPromotion = {
       discountPg1: product.Discount,

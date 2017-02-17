@@ -71,7 +71,6 @@ function getMethodGroupsWithTotals(quotationId, activeStore){
       paymentGroup: mG.group,
     };
     params.currentStore = activeStore.id;
-    sails.log.info('params', params);
     var calculator = QuotationService.Calculator();
     return calculator.getQuotationTotals(id, params);        
   });
