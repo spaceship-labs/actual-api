@@ -11,6 +11,7 @@ module.exports = {
     discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
     discountPercent: 'float', //by unit (includes big ticket or FF discount)
     discountName: 'string',
+    clientDiscountReference: 'string',
     bigticketDiscountPercentage: {
       type: 'integer',
       enum:[0,1,2,3,4,5]

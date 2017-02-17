@@ -66,8 +66,9 @@ function updateQuotationToLatestData(quotationId, userId, options){
     return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
   }
     
-  //return Quotation.findOne({id:quotationId,select:['paymentGroup']})
-  return nativeQuotationFindOne(quotationId)
+  var findCrieria = {_id: new ObjectId(quotationId)};       
+
+  return Common.nativeFindOne(findCrieria, Quotation)
     .then(function(quotation){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
@@ -159,6 +160,9 @@ function Calculator(){
       paymentGroup: options.paymentGroup,
       immediateDelivery: processedDetails.every(function(detail){
         return detail.immediateDelivery;
+      }),
+      appliesClientDiscount: _.some(processedDetails,function(detail){
+        return detail.clientDiscountReference;
       })
     };
 
@@ -181,15 +185,6 @@ function Calculator(){
       });
   }
 
-  function getPromosByStore(storeId){
-    var currentDate = new Date();
-    var queryPromos = Search.getPromotionsQuery();
-    return Store.findOne({id:storeId})
-      .populate('Promotions', queryPromos)
-      .then(function(store){
-        return store.Promotions;
-      });
-  }
 
   function getQuotationPackagesIds(details){
     var packages = [];
@@ -309,16 +304,19 @@ function Calculator(){
   function getDetailTotals(detail, options){
     options = options || {};
     paymentGroup = options.paymentGroup || 1;
-    var subTotal = 0;
-    var total    = 0;
     var productId   = detail.Product;
     var quantity    = detail.quantity;
     var currentDate = new Date();
+    var quotationId = detail.Quotation;
+    var product;
     
     return Product.findOne({id:productId})
-      .then(function(product){
+      .then(function(productResult){
+        product = productResult;
+        return getProductMainPromo(product, quantity, quotationId);
+      })
+      .then(function(mainPromo){
         var total;
-        var mainPromo                 = getProductMainPromo(product, quantity);
         var unitPrice                 = product.Price;
         var discountKey               = getDiscountKey(options.paymentGroup);
         var discountPercent           = mainPromo ? mainPromo[discountKey] : 0;
@@ -328,7 +326,7 @@ function Calculator(){
         var subtotal2                 = quantity * unitPriceWithDiscount;
         var total                     = quantity * unitPriceWithDiscount;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
-        
+
         //var total                 = quantity * unitPriceWithDiscount;
         var subtotalWithPromotions    = total;
         var discount                  = total - subtotal;
@@ -364,12 +362,17 @@ function Calculator(){
           immediateDelivery           : isImmediateDelivery(detail.shipDate)
         };
 
-        if(mainPromo.id && !mainPromo.PromotionPackage){
+        if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){
           detailTotals.Promotion = mainPromo.id;
         }
+
         else if(mainPromo.PromotionPackage){
           mainPromo.discountApplied = true;
           detailTotals.PromotionPackageApplied = mainPromo.PromotionPackage;
+        }
+        
+        else if(mainPromo.clientDiscountReference){
+          detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
         }
 
         return detailTotals;
@@ -379,7 +382,8 @@ function Calculator(){
   function getPromotionOrPackageName(promotionOrPackage){
     var promotionFound = _.findWhere(activePromotions, {id:promotionOrPackage.id});
     if(promotionFound){
-      return promotionFound.publicName;
+      return promotionOrPackage.publicName;
+      //return promotionFound.publicName;
     }
 
     var packageFound = _.findWhere(storePackages, {id:promotionOrPackage.PromotionPackage});
@@ -418,36 +422,29 @@ function Calculator(){
 
   //@params product Object from model Product
   //Populated with promotions
-  function getProductMainPromo(product, quantity){
-    var packageRule = getDetailPackageRule(product.id, quantity)
-    promotions = PromotionService.getProductActivePromotions(product, activePromotions);
-    //Taking package rule as a promotion
-    if(packageRule){
-      promotions = promotions.concat([packageRule]);
-    }
-    return PromotionService.getPromotionWithHighestDiscount(promotions);
+  function getProductMainPromo(product, quantity, quotationId){
+    var packageRule = getDetailPackageRule(product.id, quantity);
+    var promotions = [];
+    return PromotionService.getProductActivePromotions(product, activePromotions, quotationId)
+      .then(function(productActivePromotions){
+        promotions = productActivePromotions;
+        //sails.log.info('productActivePromotions', productActivePromotions);
+
+        //Taking package rule as a promotion
+        if(packageRule){
+
+          //Remove client promotions if there is a package rule 
+          promotions = PromotionService.removeSpecialClientPromotions(promotions);
+
+          promotions = promotions.concat([packageRule]);
+
+        }
+        return PromotionService.getPromotionWithHighestDiscount(promotions);
+      });
   }
 
   function isPackageDiscountApplied(){
     return _.findWhere(packagesRules, {discountApplied:true});
-  }
-
-  function getProductActivePromotions(product, activePromotions){
-    activePromotions = activePromotions.filter(function(promotion){
-      var isValid = false;
-      if(promotion.sas){
-        var productSA = product.EmpresaName || product.nameSA;
-        if(promotion.sas.indexOf(productSA) > -1 ){
-          isValid = true;
-        } 
-      }
-
-      return isValid;
-    });
-
-    sails.log.info('activePromotions', activePromotions);
-
-    return activePromotions;
   }
 
   function getDetailPackageRule(productId, quantity){
@@ -507,28 +504,6 @@ function Calculator(){
     getQuotationTotals: getQuotationTotals,
     updateQuotationTotals: updateQuotationTotals
   };
-}
-
-
-function nativeQuotationFindOne(quotationId){
-  return new Promise(function(resolve, reject){
-    
-    Quotation.native(function(err, collection){
-      if(err){
-        console.log('err finding quotation',err);
-        reject(err);
-      }
-      var findCrieria = {_id: new ObjectId(quotationId)};
-      collection.findOne(findCrieria, function(errFind, quotationFound){
-        if(errFind){
-          console.log('err findOne',errFind);
-          reject(errFind);
-        }
-        resolve(quotationFound);
-      });
-    });
-
-  });
 }
 
 function nativeQuotationUpdate(quotationId,params){

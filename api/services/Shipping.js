@@ -112,7 +112,7 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
         company: storeWarehouseId,
         companyFrom: stockItem.warehouseId,
         itemCode: stockItem.ItemCode,
-        ImmediateDelivery: stockItem.ImmediateDelivery
+        ImmediateDelivery: stockItem.ImmediateDelivery || false
       };      
     });
 }

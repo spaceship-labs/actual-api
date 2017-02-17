@@ -436,8 +436,9 @@ module.exports = {
   sendEmail: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var activeStore = req.user.activeStore;
     Email
-      .sendQuotation(id)
+      .sendQuotation(id, activeStore)
       .then(function(quotation) {
         return res.json(quotation);
       })
@@ -524,7 +525,7 @@ module.exports = {
     var quotationId = form.id;
     Quotation.findOne({id:quotationId})
       .then(function(quotation){
-        return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User);
+        return PaymentService.getMethodGroupsWithTotals(quotationId, req.user.activeStore);
       })
       .then(function(paymentOptions){
         res.json(paymentOptions);
