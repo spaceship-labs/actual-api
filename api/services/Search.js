@@ -130,6 +130,7 @@ function queryTerms(query, terms) {
   ];
   var filter = searchFields.reduce(function(acum, sf){
     var and = terms.reduce(function(acum, term){
+      term = term.trim();
       var fname = {};
       fname[sf] = {contains: term};
       return acum.concat(fname);

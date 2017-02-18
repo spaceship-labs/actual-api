@@ -22,7 +22,7 @@ module.exports = {
       limit: form.items || 10
     };
     var query        = {};
-    var priceField   = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
+    var priceField   = 'DiscountPrice';
 
     query            = Search.queryTerms(query, terms);
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
@@ -53,7 +53,6 @@ module.exports = {
           ]
         };
 
-        //sails.log.info('searchQuery', JSON.stringify(searchQuery));
         var find = Product.find(searchQuery);
         var sortValue = 'DiscountPrice ASC';
 
@@ -86,7 +85,7 @@ module.exports = {
     var productsIds    = [];
     var promotions     = [];
     var activeStore    = req.user.activeStore;
-    var priceField     = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
+    var priceField     = 'DiscountPrice';
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
 
