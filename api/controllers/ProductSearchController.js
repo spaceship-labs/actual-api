@@ -118,10 +118,10 @@ module.exports = {
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
         
-        query = {
+        query = _.extend(query,{
           id: productsIds,
           Active: 'Y'
-        };
+        });
 
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
