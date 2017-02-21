@@ -25,9 +25,6 @@ module.exports = {
       model:'Quotation',
       unique:true
     },
-    Sale: {
-      model:'Sale'
-    },
     Client:{
       model: 'Client'
     },
