@@ -23,6 +23,7 @@ module.exports = {
 function saveFiles(req,opts,cb){
   var directoryToSaveIn = __dirname+'/../../assets/uploads/'+opts.dir+'/';
   var $files = req.file && req.file('file')._files || [];
+  var bytesLimitRackspace = 820096;
   var maxBytes = 22020096;//max 21mb. //Before 52428800
 
   return new Promise(function(resolve, reject){
@@ -68,20 +69,47 @@ function saveFiles(req,opts,cb){
         }
       }
 
-      req.file('file').upload(
-        uploadOptions,
-        function(e,files){
-          if(e){
-            console.log('error saveFiles',e);
-            reject(e);
-          }
-          var uploadedFiles = mapUploadedFiles(files);
-          if(uploadedFiles.length === 0){
-            reject('Error al subir imagenes');
-          }
-          sails.log.info('uploadedFiles', uploadedFiles);
-          resolve(uploadedFiles);
-        });      
+      //TODO abstract in function
+      //In order to prevent rackspace 404, only upload crop images
+      if(req._fileparser.form.bytesExpected >= bytesLimitRackspace && opts.profile === 'record'){
+
+        req.file('file').upload({maxBytes: maxBytes}, function(err, files){
+          var fileStream  = fs.createReadStream(files[0].fd);
+          opts.srcData = fileStream;
+          opts.filename = generateFileNameSync($files[0].stream);
+          files = files.map(function(file){
+            var sizes = sails.config.images[opts.profile];
+            var largestSize = sizes[sizes.length - 1] || '';
+            file.fd = largestSize + opts.filename;
+            return file;
+          });
+
+          makeCropsStreams(uploadOptions, opts, function(e, result){
+            if(e){
+              console.log('error only crop files',e);
+              reject(e);
+            }          
+            var uploadedFiles = mapUploadedFiles(files);
+            resolve(uploadedFiles);
+          });
+        });
+
+      }else{
+        req.file('file').upload(
+          uploadOptions,
+          function(e,files){
+            if(e){
+              console.log('error saveFiles',e);
+              reject(e);
+            }
+            var uploadedFiles = mapUploadedFiles(files);
+            if(uploadedFiles.length === 0){
+              reject('Error al subir imagenes');
+            }
+            sails.log.info('uploadedFiles', uploadedFiles);
+            resolve(uploadedFiles);
+          });
+      }
 
     }
     else{
@@ -122,6 +150,19 @@ function generateFileName(_stream,callback){
     fileName += '.'+extension;
   }
   callback(error,fileName);
+}
+
+function generateFileNameSync(_stream){
+  var error = null;
+  var extension = _stream.filename.split('.');
+  var fileName = new Date().getTime().toString()+Math.floor(Math.random()*10000000).toString();
+
+  if(extension.length){
+    extension = extension[extension.length-1];
+    fileName += '.'+extension;
+  }
+
+  return fileName;
 }
 
 // crop streams rackspace.
