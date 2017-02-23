@@ -10,6 +10,7 @@ module.exports = {
     },
     immediateDelivery:{type:'float'},
     ammountPaid: {type:'float'},
+    ammountPaidPg1: {type:'float'},
     total:{type:'float'},
     subtotal:{type:'float'},
     discount:{type:'float'},

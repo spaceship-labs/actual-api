@@ -127,6 +127,8 @@ function createFromQuotation(form, currentUser){
       return calculator.updateQuotationTotals(quotationId, opts);
     })
     .then(function(updatedQuotationResult){
+      //return Promise.reject('Manual break');
+
       return Quotation.findOne({id: quotationId})
         .populate('Payments')
         .populate('Details')

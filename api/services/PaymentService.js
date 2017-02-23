@@ -13,6 +13,7 @@ var DEFAULT_EXCHANGE_RATE   = 18.78;
 
 module.exports = {
   calculateQuotationAmountPaid: calculateQuotationAmountPaid,
+  calculateQuotationAmountPaidGroup1: calculateQuotationAmountPaidGroup1,
   calculateUSDPayment: calculateUSDPayment,
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
@@ -39,7 +40,28 @@ function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
     return paymentA + paymentB;
   });
 
-  return ammountPaid;
+  return ammountPaid || 0;
+}
+
+function calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate){
+  var payments  = _.clone(quotationPayments) || [];
+
+  payments = payments.filter(function(payment){
+    return payment.group === 1;
+  });
+
+  var ammounts = payments.map(function(payment){
+    if(payment.type === 'cash-usd'){
+     return calculateUSDPayment(payment, exchangeRate);
+    }
+    return payment.ammount;
+  });
+
+  var ammountPaidGroup1 = ammounts.reduce(function(paymentA, paymentB){
+    return paymentA + paymentB;
+  });
+
+  return ammountPaidGroup1 || 0;
 }
 
 function calculateUSDPayment(payment, exchangeRate){
@@ -67,8 +89,9 @@ function getMethodGroupsWithTotals(quotationId, activeStore){
     var id = quotationId;
     var paymentGroup = mG.group || 1;
     var params = {
+      financingTotals: true,
       update: false,
-      paymentGroup: mG.group,
+      paymentGroup: mG.group
     };
     params.currentStore = activeStore.id;
     var calculator = QuotationService.Calculator();

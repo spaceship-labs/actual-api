@@ -61,11 +61,14 @@ module.exports = {
     clientName: {type:'string'},
     folio:{type:'integer'},
     total:{type:'float'},
+    totalPg1: {type:'float'},
     subtotal: {type:'float'},
     subtotal2: {type:'float'}, // includes discounts but not big ticket neither family and friends
     discount: {type:'float'},
     ammountPaid: {type:'float'},
+    ammountPaidPg1: {type:'float'},
     totalProducts: {type:'integer'},
+    financingCostPercentage: 'float',    
     paymentGroup:{type:'integer'},
     appliesClientDiscount: {type:'boolean'},
     bigticketMaxPercentage:{
