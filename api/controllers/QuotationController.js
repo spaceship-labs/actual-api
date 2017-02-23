@@ -525,7 +525,10 @@ module.exports = {
     var quotationId = form.id;
     Quotation.findOne({id:quotationId})
       .then(function(quotation){
-        return PaymentService.getMethodGroupsWithTotals(quotationId, req.user.activeStore);
+        var options = {
+          financingTotals: form.financingTotals || false
+        };
+        return PaymentService.getMethodGroupsWithTotals(quotationId, req.user.activeStore, options);
       })
       .then(function(paymentOptions){
         res.json(paymentOptions);

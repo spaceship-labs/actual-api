@@ -75,7 +75,8 @@ function getExchangeRate(){
     });
 }
 
-function getMethodGroupsWithTotals(quotationId, activeStore){
+function getMethodGroupsWithTotals(quotationId, activeStore, options){
+  options = options || {};
   var methodsGroups = paymentGroups;
   var discountKeys = [
     'discountPg1',
@@ -89,7 +90,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore){
     var id = quotationId;
     var paymentGroup = mG.group || 1;
     var params = {
-      financingTotals: true,
+      financingTotals: options.financingTotals,
       update: false,
       paymentGroup: mG.group
     };
