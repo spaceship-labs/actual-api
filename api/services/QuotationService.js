@@ -156,13 +156,10 @@ function Calculator(){
 
         if( ammountPaidPg1 > 0 && options.financingTotals){
 
-          var quotationRemainingPg1 = plainTotals.totalPg1 - ammountPaidPg1;
-          var quotationRemaining    = (1+ plainTotals.financingCostPercentage) * quotationRemainingPg1;
-          totals.total = ammountPaidPg1 + quotationRemaining;
+          processedDetails = mapDetailsWithFinancingCost(processedDetails, ammountPaidPg1, totals);
+          totals = sumProcessedDetails(processedDetails, options);
 
-          totals.discount = totals.total - totals.subtotal;
           if(options.updateDetails){
-            processedDetails = mapDetailsWithFinancingCost(processedDetails, ammountPaidPg1, plainTotals);
             auxPromise = updateDetails(processedDetails);
           }
 
@@ -183,6 +180,7 @@ function Calculator(){
     return details.map(function(detail){
       var proportionalPaymentPg1 = (detail.totalPg1 / quotationPlainTotals.totalPg1) * ammountPaidPg1;
       var proportionalPayment = (detail.total / quotationPlainTotals.total) * ammountPaidPg1;
+      
       var detailRemainingPg1 = detail.totalPg1 - proportionalPaymentPg1;
       var detailRemaining = (1+detail.financingCostPercentage) * detailRemainingPg1;
       
