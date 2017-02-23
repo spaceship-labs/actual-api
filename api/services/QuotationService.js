@@ -56,7 +56,7 @@ module.exports = {
 
 function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
-    paymentGroup:1,
+    paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
     currentStore: options.currentStore,
     isEmptyQuotation: options.isEmptyQuotation
@@ -73,7 +73,6 @@ function updateQuotationToLatestData(quotationId, userId, options){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
-      params.paymentGroup = quotation.paymentGroup || 1;
       var calculator = Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
     });
