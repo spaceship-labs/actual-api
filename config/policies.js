@@ -36,6 +36,18 @@ module.exports.policies = {
   MeController: {
     '*': ['isAuthenticated'],
   },
+  QuotationController:{
+    addDetail: ['isAuthenticated', 'isSellerOrAdmin'],
+    update: ['isAuthenticated', 'isSellerOrAdmin'],
+    create: ['isAuthenticated', 'isSellerOrAdmin'],
+    removeDetailsGroup: ['isAuthenticated', 'isSellerOrAdmin'],
+  },
+  PaymentController:{
+    add: ['isAuthenticated', 'isSellerOrAdmin']
+  },
+  OrderController:{
+    createFromQuotation: ['isAuthenticated', 'isSellerOrAdmin']
+  },
   ProductController:{
     find: ['isAuthenticated', 'isAllowed'],
     update: ['isAuthenticated', 'isAllowed'],
