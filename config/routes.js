@@ -673,6 +673,11 @@ module.exports.routes = {
     action:'getSellersByStore'
   },
 
+  '/store/:id/cashreport':{
+    controller: 'store',
+    action: 'generateStoreCashReport'
+  },
+
   '/common/states':{
     controller:'common',
     action:'getStates'
