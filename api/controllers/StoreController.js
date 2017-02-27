@@ -92,11 +92,9 @@ module.exports = {
 
   generateStoreCashReport: function(req, res){
     var form = req.params.all();
-    var storeId = form.id;
-    var startDate = form.startDate || new Date();
-    var endDate = form.endDate || new Date();
     var STORE_MANAGER_ROLE_NAME = 'store manager';
     var ADMIN_ROLE_NAME = 'admin';
+    form.populateOrders = true;
 
     if(req.user.role.name !== STORE_MANAGER_ROLE_NAME && 
         req.user.role.name !== ADMIN_ROLE_NAME
@@ -104,37 +102,32 @@ module.exports = {
       return res.negotiate(new Error('No autorizado'));
     }
 
-    Role.findOne({name:'seller'})
-      .then(function(sellerRole){
-        var sellerRoleId = sellerRole.id;
-        return User.find({mainStore: storeId, role: sellerRoleId});
+    StoreService.generateStoreCashReportBySellers(form)
+      .then(function(report){
+        res.json(report);
       })
-      .then(function(sellers){
-        return Promise.map(sellers,function(seller){
-          return mapPaymentsToSeller(seller, startDate, endDate, storeId);
-        });
-      })
-      .then(function(populatedSellers){
-        res.json(populatedSellers);
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },  
+
+  generatAllStoresCashReport: function(req, res){
+    var form = req.params.all();
+    var ADMIN_ROLE_NAME = 'admin';
+
+    if(req.user.role.name !== ADMIN_ROLE_NAME){
+      return res.negotiate(new Error('No autorizado'));
+    }
+
+    StoreService.generateStoresCashReport(form)
+      .then(function(report){
+        res.json(report);
       })
       .catch(function(err){
         console.log(err);
         res.negotiate(err);
       });
   }  
+
 };
-
-function mapPaymentsToSeller(seller, startDate, endDate, storeId){
-  var query = {
-    User: seller.id,
-    createdAt: { '>=': startDate, '<=': endDate },
-    Store: storeId
-  };  
-
-  return Payment.find(query).populate('Order')
-    .then(function(payments){
-      seller = seller.toObject();
-      seller.Payments = payments;
-      return seller;
-    });
-}
