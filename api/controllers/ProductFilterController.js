@@ -71,7 +71,6 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    sails.log.debug(form);
     ProductFilter.update({id:id},form)
       .then(function(updatedFilter){
         res.json(updatedFilter);
