@@ -544,8 +544,8 @@ var paymentGroups = [
         type:'18-msi',
         msi:18,
         cardsImages:[
-          '/cards/banamex.png',
-          '/cards/amexcard.png'
+          '/cards/amexcard.png',
+          '/cards/banamex.png'
         ],
         cards: [
           'American Express',
