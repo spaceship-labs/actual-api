@@ -209,7 +209,8 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(client.E_Mail, client.CardName);
+  var clientEmail      = client.E_Mail || 'luis19prz@gmail.com';
+  var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Confirmación de compra | Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
@@ -340,7 +341,8 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(client.E_Mail, client.CardName);
+  var clientEmail      = client.E_Mail || 'luis19prz@gmail.com';
+  var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
   /**/
