@@ -8,7 +8,7 @@ module.exports = {
     documents:{
       type:'array'
     },
-    immediateDelivery:{type:'float'},
+    immediateDelivery:{type:'boolean'},
     ammountPaid: {type:'float'},
     ammountPaidPg1: {type:'float'},
     total:{type:'float'},

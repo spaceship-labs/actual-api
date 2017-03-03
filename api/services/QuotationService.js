@@ -642,6 +642,10 @@ function getTotalsByUser(options){
     queryByDateRange.isClosed  = isClosed;  
   }
 
+  //sails.log.info('query untilToday', queryUntilToday);
+  //sails.log.info('queryByDateRange', queryByDateRange);
+  //sails.log.info('queryAllByDateRange', queryAllByDateRange);
+
   var props = {
     totalUntilToday: Quotation.find(queryUntilToday).sum('total'),
     totalByDateRange: Quotation.find(queryByDateRange).sum('total'),
