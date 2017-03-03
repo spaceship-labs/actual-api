@@ -19,12 +19,21 @@ module.exports = {
     var exchangeRate;
     var quotation;
     var quotationUpdateParams;
+    var ACTUAL_HOME_XCARET_CODE = 'actual_home_xcaret';
+    var PROJECTS_CODE = 'proyectos';
+    var storeCode = req.user.activeStore.code;
+
     form.Quotation    = quotationId;
     form.Store = req.user.activeStore.id;
     form.User = req.user.id;    
 
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
+    }
+
+    if(storeCode !== ACTUAL_HOME_XCARET_CODE && storeCode !== PROJECTS_CODE){
+      res.negotiate(new Error("La creación de pedidos para esta tienda esta deshabilitada"));
+      return;
     }
 
     StockService.validateQuotationStockById(quotationId, req.user.activeStore)

@@ -178,6 +178,12 @@ function createSaleOrder(params){
 function buildSaleOrderRequestParams(params){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
+  var ACTUAL_HOME_XCARET_GROUP = 8;
+  var PROJECTS_GROUP = 6;
+
+  if(params.groupCode != ACTUAL_HOME_XCARET_GROUP && params.groupCode != PROJECTS_GROUP ){
+    return Promise.reject(new Error("La creación de pedidos para esta tienda esta deshabilitada"));
+  }
 
   var saleOrderRequest = {
     QuotationId: params.quotationId,
