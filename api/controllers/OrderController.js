@@ -51,6 +51,7 @@ module.exports = {
       .populate('Broker')
       .populate('OrdersSap')
       .populate('SapOrderConnectionLog')
+      .populate('AlegraLogs')
       .then(function(foundOrder){
         order = foundOrder.toObject();
         var sapReferencesIds = order.OrdersSap.map(function(ref){
@@ -66,6 +67,20 @@ module.exports = {
       })
       .catch(function(err){
         console.log(err);
+        res.negotiate(err);
+      });
+  },
+
+  getInvoicesLogs: function(req, res){
+    var form = req.params.all();
+    var orderId = form.orderId;
+
+    AlegraLog.find({Order: orderId})
+      .then(function(logs){
+        res.json(logs);
+      })
+      .catch(function(err){
+        console.log('err' , err);
         res.negotiate(err);
       });
   },
@@ -95,21 +110,18 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
-          //InvoiceService.create(order.id)
+          InvoiceService.create(order.id)
         ];
       })
-      //.spread(function(orderSent, freesaleSent, alegraInvoice){
-      .spread(function(orderSent, freesaleSent){
+      .spread(function(orderSent, freesaleSent, alegraInvoice){
+      //.spread(function(orderSent, freesaleSent){
         console.log('Email de orden enviado: ' + order.folio);
-      })
-      /*
-        sails.log.info('Email de orden enviado');
+      
         return Invoice.create({ id: alegraInvoice.id, order: order });
       })
       .then(function(invoice){
         console.log('generated invoice', invoice);
       })
-      */
       .catch(function(err){
         console.log(err);
         if(!responseSent){

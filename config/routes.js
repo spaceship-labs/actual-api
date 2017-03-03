@@ -583,6 +583,11 @@ module.exports.routes = {
     action:'getCountByUser'
   },
 
+  '/order/invoicelogs/:orderId':{
+    controller:'order',
+    action:'getInvoicesLogs'
+  },  
+
   '/me/update':{
     controller:'me',
     action:'update'

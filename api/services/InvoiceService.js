@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var moment = require('moment');
 var request = require('request-promise');
+var Promise = require('bluebird');
 var ALEGRAUSER = process.env.ALEGRAUSER;
 var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
@@ -90,11 +91,15 @@ function prepareInvoice(order, payments, client, items) {
     stamp: {
       generateStamp: true,
     },
+    orderObject: order
   };
   return createInvoice(data);
 }
 
 function createInvoice(data) {
+  var orderObject = _.clone(data.orderObject);
+  delete data.orderObject;
+
   var options = {
     method: 'POST',
     uri: 'https://app.alegra.com/api/v1/invoices',
@@ -104,7 +109,45 @@ function createInvoice(data) {
     },
     json: true,
   };
-  return request(options);
+
+  var log = {
+    User: orderObject.User,
+    Order: orderObject.id,
+    Store: orderObject.Store,
+    requestData: JSON.stringify(data),
+    url: options.uri
+  };
+
+  var resultAlegra;
+  var requestError;
+
+  return new Promise(function(resolve, reject){
+  
+    AlegraLog.create(log)
+      .then(function(logCreated){
+        log.id = logCreated.id;
+        return request(options);
+      })
+      .then(function(result){
+        resultAlegra = result;
+        return AlegraLog.update({id:log.id}, {responseData: JSON.stringify(result)});
+      })
+      .then(function(logUpdated){
+        resolve(resultAlegra);
+      })
+      .catch(function(err){
+        requestError = err;
+        return AlegraLog.update({id:log.id}, {
+          responseData: JSON.stringify(err),
+          isError: true
+        });
+        
+      })
+      .then(function(logUpdated){
+        reject(requestError);
+      });
+  
+  });
 }
 
 function prepareClient(order, client, address) {

@@ -70,6 +70,10 @@ module.exports = {
     SapOrderConnectionLog:{
       model: 'SapOrderConnectionLog'
     },
+    AlegraLogs: {
+      collection: 'AlegraLog',
+      via: 'Order'
+    },
 
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
