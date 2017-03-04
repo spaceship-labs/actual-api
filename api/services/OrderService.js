@@ -222,7 +222,7 @@ function createFromQuotation(form, currentUser){
         orderParams = _.extend(orderParams,quotation.Address);
       }
 
-      currentStore = user.activeStore;
+      currentStore = opts.currentStore;
 
       return [
         QuotationDetail.find({Quotation: quotation.id})

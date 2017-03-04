@@ -195,7 +195,6 @@ function buildSaleOrderRequestParams(params){
     SalesPersonCode: params.slpCode || -1,
     CardCode: params.cardCode,
     DescuentoPDocumento: calculateUsedEwalletByPayments(params.payments),
-    WhsCode: "02",
     Group: params.currentStore.group
   };
 
@@ -222,6 +221,7 @@ function buildSaleOrderRequestParams(params){
       });
 
       saleOrderRequest.WhsCode = getWhsCodeById(params.currentStore.Warehouse, warehouses);
+
       requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
       requestParams += '&products=' + encodeURIComponent(JSON.stringify(products));
       requestParams += '&payments=' + encodeURIComponent(JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate)));
