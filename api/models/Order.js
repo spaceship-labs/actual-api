@@ -4,7 +4,7 @@ module.exports = {
   schema: true,
   attributes:{
     DocEntry:{type:'integer'},
-    folio:{type:'integer'},
+    folio:{type:'string'},
     documents:{
       type:'array'
     },

@@ -23,7 +23,7 @@ module.exports = {
         '18-msi',
       ]
     },
-    folio:{type:'integer'},
+    folio:{type:'string'},
     name:{type:'string'},
     ammount:{type:'float'},
     currency:{

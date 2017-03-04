@@ -59,7 +59,7 @@ module.exports = {
     isClosedNotes:{type:'text'},
     immediateDelivery:{type:'boolean'},
     clientName: {type:'string'},
-    folio:{type:'integer'},
+    folio:{type:'string'},
     total:{type:'float'},
     totalPg1: {type:'float'},
     subtotal: {type:'float'},

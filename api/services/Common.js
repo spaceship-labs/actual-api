@@ -292,7 +292,8 @@ module.exports = {
             ,{}
             ,function (err, object) {
                if(err) console.log(err);
-               val.folio = object.value.seq;
+               var zeroPadSize = 6;
+               val.folio = numLeftPad(object.value.seq, zeroPadSize);
                cb(val);
             }
         );
@@ -429,4 +430,11 @@ module.exports = {
     return str;
 
   }
+};
+
+
+function numLeftPad(num, size) {
+  var numStr = num+"";
+  while (numStr.length < size) numStr = "0" + numStr;
+  return numStr;
 }
