@@ -58,7 +58,7 @@ function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
     paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
-    currentStore: options.currentStore,
+    currentStoreId: options.currentStoreId,
     isEmptyQuotation: options.isEmptyQuotation
   };
 
@@ -134,7 +134,7 @@ function Calculator(){
 
         if(packagesIds.length > 0){
           return [
-            getPackagesByStore(options.currentStore),
+            getPackagesByStoreId(options.currentStoreId),
             ProductGroup.find({id:packagesIds})
               .populate('PackageRules')
           ];
@@ -243,7 +243,7 @@ function Calculator(){
     return _.uniq(packages);
   }
 
-  function getPackagesByStore(storeId){
+  function getPackagesByStoreId(storeId){
     var queryPromos = Search.getPromotionsQuery();
     return Store.findOne({id:storeId})
       .populate('PromotionPackages', queryPromos)

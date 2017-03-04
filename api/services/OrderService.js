@@ -103,7 +103,7 @@ function createFromQuotation(form, currentUser){
   var opts         = {
     //paymentGroup: form.paymentGroup || 1,
     updateDetails: true,
-    currentStore: currentUser.activeStore.id
+    currentStoreId: currentUser.activeStore.id
   };
   var orderCreated = false;
   var SlpCode      = -1;
@@ -190,7 +190,7 @@ function createFromQuotation(form, currentUser){
         Broker: quotation.Broker,
         CardCode: quotation.Client.CardCode,
         SlpCode: SlpCode,
-        Store: opts.currentStore,
+        Store: opts.currentStoreId,
         Manager: quotation.Manager
         //Store: user.activeStore
       };
@@ -250,7 +250,7 @@ function createFromQuotation(form, currentUser){
       var log = {
         content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
         User   : currentUser.id,
-        Store  : opts.currentStore,
+        Store  : opts.currentStoreId,
         Quotation: quotationId
       };
       return SapOrderConnectionLog.create(log);
@@ -310,7 +310,7 @@ function createFromQuotation(form, currentUser){
     .spread(function(quotationUpdated, sapOrdersReference){
       var params = {
         details: quotation.Details,
-        storeId: opts.currentStore,
+        storeId: opts.currentStoreId,
         orderId: orderCreated.id,
         quotationId: quotation.id,
         userId: quotation.User.id,

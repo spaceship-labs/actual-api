@@ -15,7 +15,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStoreId: req.user.activeStore.id
     };
 
     Quotation.create(form)
@@ -105,7 +105,7 @@ module.exports = {
 
     var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
       update:true,
-      currentStore: req.user.activeStore.id
+      currentStoreId: req.user.activeStore.id
     });
 
     if(!forceLatestData){
@@ -224,7 +224,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStoreId: req.user.activeStore.id
     };
     
     QuotationDetail.create(form)
@@ -262,7 +262,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStoreId: req.user.activeStore.id
     };
     
     QuotationDetail.create(form.Details)
@@ -290,7 +290,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStoreId: req.user.activeStore.id
     };
 
     QuotationDetail.destroy({id:detailsIds})
@@ -375,7 +375,7 @@ module.exports = {
     var params = {
       update: false,
       paymentGroup: paymentGroup,
-      currentStore: req.user.activeStore.id
+      currentStoreId: req.user.activeStore.id
     };
     var calculator = QuotationService.Calculator();
     console.log('params', params);
