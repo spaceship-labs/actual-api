@@ -209,7 +209,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var clientEmail      = client.E_Mail || 'luis19prz@gmail.com';
+  var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Confirmación de compra | Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
@@ -345,7 +345,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var clientEmail      = client.E_Mail || 'luis19prz@gmail.com';
+  var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
@@ -473,7 +473,7 @@ function sendFreesale(user, order, products, store) {
 
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
-  
+
   /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
