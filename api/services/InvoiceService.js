@@ -58,7 +58,7 @@ function send(orderID) {
     .spread(function(invoice, address) {
       var emails = [];
       
-      if(process.env.mode === 'production'){
+      if(process.env.MODE === 'production'){
         emails = [
           'tugorez@gmail.com',
           'luisperez@spaceshiplabs.com', 
