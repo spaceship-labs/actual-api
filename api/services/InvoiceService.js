@@ -56,8 +56,13 @@ function send(orderID) {
       ];
     })
     .spread(function(invoice, address) {
-      //var emails = ['tugorez@gmail.com', 'informatica@actualg.com', address.E_Mail];
-      var emails = ['tugorez@gmail.com'];
+      var emails = [
+        'tugorez@gmail.com',
+        'luis19prz@gmail.com', 
+        'informatica@actualg.com', 
+        address.E_Mail
+      ];
+      //var emails = ['tugorez@gmail.com'];
       var id = invoice.id;
       return { id: id, emails: emails };
     })

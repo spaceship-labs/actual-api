@@ -47,12 +47,12 @@ function password(userName, userEmail, recoveryUrl, cb) {
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
-  mail.addContent(content)
-  mail.addPersonalization(personalization)
-  requestBody = mail.toJSON()
-  request.method = 'POST'
-  request.path = '/v3/mail/send'
-  request.body = requestBody
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
   sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
@@ -209,19 +209,24 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var clientEmail      = client.E_Mail;
+  var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Confirmación de compra | Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
+
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  personalization.addTo(toAux);
+
   personalization.addTo(to);
   personalization.setSubject(subject);
-  /**/
+  /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
     var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
     if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  /**/
+  */
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
@@ -340,17 +345,21 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var clientEmail      = client.E_Mail;
+  var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
-  /**/
+  /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
     var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
     if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  /**/
+  */
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  personalization.addTo(toAux);
+
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
@@ -461,14 +470,18 @@ function sendFreesale(user, order, products, store) {
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
-  /**/
+
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  personalization.addTo(toAux);
+
+  /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
     var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
     if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  /**/
+  */
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
