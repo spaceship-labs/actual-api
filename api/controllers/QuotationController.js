@@ -84,8 +84,6 @@ module.exports = {
     var id = form.id;
     var userId = req.user.id;
     var getPayments = form.payments;
-    var forceLatestData  = true;
-    //var forceLatestData = !_.isUndefined(form.forceLatestData) ? form.forceLatestData : true;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -95,9 +93,6 @@ module.exports = {
       .populate('User')
       .populate('Client')
       .populate('Order');
-      //.populate('Payments');
-      //.populate('Records')
-      //.populate('Manager');
 
     if(getPayments){
       quotationQuery.populate('Payments');
@@ -108,11 +103,6 @@ module.exports = {
       currentStoreId: req.user.activeStore.id
     });
 
-    if(!forceLatestData){
-      updateToLatest = new Promise(function(resolve, reject){
-        resolve();
-      });
-    }
 
     updateToLatest.then(function(){
         return quotationQuery;
@@ -336,9 +326,7 @@ module.exports = {
     var model = 'quotation';
     var clientSearch = form.clientSearch;
     var clientSearchFields = ['CardName', 'E_Mail'];
-    var preSearch = new Promise(function(resolve, reject){
-      resolve();
-    });
+    var preSearch = Promise.resolve();
 
     if(clientSearch && form.term){
       preSearch = clientsIdSearch(form.term, clientSearchFields);
@@ -590,7 +578,7 @@ function clientsIdSearch(term, searchFields){
 function tagImmediateDeliveriesDetails(details){
   if(details && details.length > 0){
     for(var i=0;i<details.length;i++){
-      if(isImmediateDelivery(details[i].shipDate)){
+      if(Shipping.isDateImmediateDelivery(details[i].shipDate)){
         details[i].immediateDelivery = true;
       }
     }
@@ -599,12 +587,6 @@ function tagImmediateDeliveriesDetails(details){
   return [];
 }
 
-
-function isImmediateDelivery(shipDate){
-  var currentDate = moment().format();
-  shipDate = moment(shipDate).format();
-  return currentDate === shipDate;
-}
 
 function formatProductsIds(details){
   var result = [];

@@ -13,13 +13,13 @@ function _onPassportAuth(req, res, error, user, info){
   
   /*Active store*/
   var form          = req.allParams();
-  var activeStore   = form.activeStore || false;
-  var updateParams = {
+  var activeStoreId = form.activeStore || false;
+  var updateParams  = {
     lastLogin : new Date()
   };
   
-  if(activeStore){
-    updateParams.activeStore = activeStore;
+  if(activeStoreId){
+    updateParams.activeStore = activeStoreId;
   }
 
   User.update(user.id, updateParams)
@@ -32,7 +32,7 @@ function _onPassportAuth(req, res, error, user, info){
       var action     = 'login';
       return [
           Logger.log(userUpdated.id, message, action),
-          Store.findOne({id: activeStore})
+          Store.findOne({id: activeStoreId})
         ];
     })
     .spread(function(log, store){

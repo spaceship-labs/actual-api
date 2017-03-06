@@ -151,7 +151,7 @@ function Calculator(){
         var totals = sumProcessedDetails(processedDetails, options);
         var ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
         var plainTotals = _.clone(totals);
-        var auxPromise = new Promise(function(resolve,reject){resolve();});
+        var auxPromise = Promise.resolve();
 
         if( ammountPaidPg1 > 0 && options.financingTotals){
 
@@ -419,7 +419,7 @@ function Calculator(){
           financingCostPercentage     : financingCostPercentage,
           unitPrice                   : unitPrice,
           unitPriceWithDiscount       : unitPriceWithDiscount,
-          immediateDelivery           : isImmediateDelivery(detail.shipDate)
+          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate)
         };
 
         if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){

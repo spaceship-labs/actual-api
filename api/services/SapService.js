@@ -213,7 +213,7 @@ function buildSaleOrderRequestParams(params){
           DiscountPercent: detail.discountPercent,
           Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
           Price: detail.total,
-          ImmediateDelivery: isImmediateDelivery(detail.shipDate),
+          ImmediateDelivery: Shipping.isDateImmediateDelivery(detail.shipDate),
           DetailId: detail.id
           //unitPrice: detail.Product.Price
         };
@@ -245,11 +245,6 @@ function getCompanyCode(code, storeGroup){
   return companyCode;
 }
 
-function isImmediateDelivery(shipDate){
-  var currentDate = moment().format(SAP_DATE_FORMAT);
-  shipDate = moment(shipDate).format(SAP_DATE_FORMAT);
-  return currentDate === shipDate;
-}
 
 function mapPaymentsToSap(payments, exchangeRate){
 

@@ -5,7 +5,8 @@ var CEDIS_QROO_CODE = '01';
 var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
 
 module.exports = {
-  product: productShipping
+  product: productShipping,
+  isDateImmediateDelivery: isDateImmediateDelivery
 };
 
 function productShipping(product, storeWarehouse, options) {
@@ -70,9 +71,7 @@ function productShipping(product, storeWarehouse, options) {
         ]);
       }
 
-      return new Promise(function(resolve, reject){
-        resolve([]);
-      });
+      return Promise.resolve([]);
     })
     .then(function(result){
       return result;
@@ -173,3 +172,9 @@ function daysDiff(a, b) {
   return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
+function isDateImmediateDelivery(shipDate){
+  var FORMAT = 'D/M/YYYY';
+  var currentDate = moment().format(FORMAT);
+  shipDate = moment(shipDate).format(FORMAT);
+  return currentDate === shipDate;
+}

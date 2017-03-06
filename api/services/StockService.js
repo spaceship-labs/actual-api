@@ -68,7 +68,7 @@ function substractDeliveryStockByDetail(detail){
 	var ItemCode = detail.Product.ItemCode;
 
 	if( isFreeSaleProduct(detail.Product) ){
-		return new Promise.resolve();
+		return Promise.resolve();
 	}
 
 	return DatesDelivery.findOne({

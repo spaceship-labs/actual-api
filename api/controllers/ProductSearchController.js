@@ -188,7 +188,7 @@ module.exports = {
       limit: form.limit || 10
     };
     var filters = [
-      {key:'Price', value: price},
+      {key:'DiscountPrice', value: price},
       {key:'Active', value: 'Y'},
       {key:'OnStudio', value: form.OnStudio},
       {key:'OnHome', value: form.OnHome},
@@ -261,7 +261,7 @@ module.exports = {
         }
         products = products
           .paginate(paginate)
-          .sort('Price ASC');
+          .sort('DiscountPrice ASC');
 
         return [
           Product.count(query),

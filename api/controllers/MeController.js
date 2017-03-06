@@ -11,6 +11,7 @@ module.exports = {
     var user = req.user;
     delete form.password;
     delete form.email;
+    
     User.update({id: user.id}, form)
       .then(function(user){
         res.json(user[0] || false);
@@ -22,6 +23,7 @@ module.exports = {
   
   activeStore: function(req, res) {
     var activeStoreId = req.user.activeStore.id || req.headers.activestoreid;
+    
     Store.findOne({id:activeStoreId})
       .then(function(store){
         res.json(store);

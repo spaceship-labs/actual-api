@@ -1,6 +1,6 @@
-var _       = require('underscore');
-var moment  = require('moment');
-var Promise = require('bluebird');
+var _            = require('underscore');
+var moment       = require('moment');
+var Promise      = require('bluebird');
 var ADDRESS_TYPE = 'S';
 
 module.exports = {
@@ -153,7 +153,6 @@ module.exports = {
         var promises = [];
 
         if(contacts && contacts.length > 0){
-          //sails.log.info('contacts', contacts);
           promises.push(ClientContact.create(contacts));
         }
 
@@ -169,11 +168,7 @@ module.exports = {
           return promises;
         }
         else{
-          //Returning empty promise
-          return new Promise(function(resolve, reject){
-            resolve();
-          });
-        
+          return Promise.resolve();        
         }
 
       })
@@ -254,6 +249,7 @@ module.exports = {
     var form = req.params.all();
     var cardCode = form.CardCode;
     form = ClientService.mapContactFields(form);    
+    
     SapService.createContact(cardCode, form)
       .then(function(resultSap){
         sails.log.info('response createContact', resultSap);

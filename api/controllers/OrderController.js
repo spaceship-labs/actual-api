@@ -1,11 +1,11 @@
 var _ = require('underscore');
-var Promise = require('bluebird');
-var EWALLET_POSITIVE = 'positive';
-var INVOICE_SAP_TYPE = 'Invoice';
-var ORDER_SAP_TYPE = 'Order';
-var ERROR_SAP_TYPE = 'Error';
+var Promise             = require('bluebird');
+var BALANCE_SAP_TYPE    = 'Balance';
 var CLIENT_BALANCE_TYPE = 'client-balance';
-var BALANCE_SAP_TYPE = 'Balance';
+var ERROR_SAP_TYPE      = 'Error';
+var EWALLET_POSITIVE    = 'positive';
+var INVOICE_SAP_TYPE    = 'Invoice';
+var ORDER_SAP_TYPE      = 'Order';
 
 
 module.exports = {

@@ -7,17 +7,25 @@
 
 module.exports = {
   find: function(req, res) {
-    Company.find().exec(function(err, companies){
-      if (err) {return res.negotiate(err);}
-      return res.json(companies);
-    });
+    Company.find()
+      .then(function(companies){
+        res.json(companies);
+      })
+      .catch(function(err){
+        console.log('err',err);
+        res.negotiate(err);
+      });
   },
 
   getAll: function(req, res) {
-    Company.find().exec(function(err, companies) {
-      if (err) {return res.negotiate(err);}
-      return res.json(companies);
-    });
+    Company.find()
+      .then(function(companies){
+        res.json(companies);
+      })
+      .catch(function(err){
+        console.log('err',err);
+        res.negotiate(err);
+      });
   },
 
   countSellersGeneral: function(req, res) {
