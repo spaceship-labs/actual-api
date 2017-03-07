@@ -20,7 +20,7 @@ module.exports = {
     var quotation;
     var quotationUpdateParams;
     var ACTUAL_HOME_XCARET_CODE = 'actual_home_xcaret';
-    var PROJECTS_CODE = 'proyectos';
+    var PROJECTS_CODE = 'actual_proyect';
     var storeCode = req.user.activeStore.code;
 
     form.Quotation    = quotationId;
