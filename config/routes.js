@@ -598,6 +598,11 @@ module.exports.routes = {
     action:'generateCashReport'
   },
 
+  '/me/managercashreport':{
+    controller: 'me',
+    action:'generateManagerCashReport'
+  },
+
   '/promotion/create':{
     controller: 'promotion',
     action:'create'

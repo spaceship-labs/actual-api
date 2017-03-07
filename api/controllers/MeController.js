@@ -51,6 +51,28 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  }
+  },
+
+  generateManagerCashReport: function(req, res){
+    var form = req.params.all();
+    var STORE_MANAGER_ROLE_NAME = 'store manager';
+    form.populateOrders = true;
+    form.userId = req.user.id;
+
+    if(req.user.role.name !== STORE_MANAGER_ROLE_NAME ){
+      return res.negotiate(new Error('No autorizado'));
+    }
+
+    StoreService.generateMagerCashReprot(form)
+      .then(function(report){
+        res.json(report);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },  
+
+
 };
 

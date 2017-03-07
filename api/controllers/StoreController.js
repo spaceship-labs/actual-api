@@ -96,9 +96,7 @@ module.exports = {
     var ADMIN_ROLE_NAME = 'admin';
     form.populateOrders = true;
 
-    if(req.user.role.name !== STORE_MANAGER_ROLE_NAME && 
-        req.user.role.name !== ADMIN_ROLE_NAME
-      ){
+    if(req.user.role.name !== STORE_MANAGER_ROLE_NAME ){
       return res.negotiate(new Error('No autorizado'));
     }
 

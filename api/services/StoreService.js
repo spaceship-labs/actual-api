@@ -1,8 +1,10 @@
 var Promise = require('bluebird');
+var _ = require('underscore');
 
 module.exports = {
 	generateStoreCashReportBySellers: generateStoreCashReportBySellers,
-	generateStoresCashReport: generateStoresCashReport
+	generateStoresCashReport: generateStoresCashReport,
+  generateMagerCashReprot: generateMagerCashReprot
 };
 
 function generateStoresCashReport(params){
@@ -52,6 +54,28 @@ function getStoreSellers(storeId){
       return User.find({mainStore: storeId, role: sellerRoleId});
     });
 }
+
+function generateMagerCashReprot(params){
+  var userId = params.userId;
+
+  return User.findOne({id:userId}).populate('Stores')
+    .then(function(user){
+      var stores = user.Stores;
+
+      return Promise.map(stores ,function(store){
+        var storeParams = _.extend(params,{
+          id: store.id
+        });
+        return generateStoreCashReportBySellers(storeParams)
+          .then(function(sellersByStore){
+            store = store.toObject();
+            store.Sellers = sellersByStore;
+            return store;
+          });
+
+      });
+    });
+  }
 
 function generateStoreCashReportBySellers(params){
   var storeId = params.id;
