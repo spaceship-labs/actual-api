@@ -11,7 +11,7 @@ module.exports = {
   attributes: {
     Code: 'string',
     Name: 'string',
-    U_ScoreCard: 'string',
+    U_SocioNegocio: 'string',
     U_Sociedad: 'string',
     U_FijoMovil: 'string',
     U_Porcentaje: 'float',

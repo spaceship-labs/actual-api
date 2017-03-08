@@ -109,7 +109,7 @@ function mapClientDiscountWithPromotions(promotions, product, quotationId){
         var client = quotation.Client;
         var currentDate = new Date();
         var clientDiscountsQuery = {
-          U_ScoreCard: client.CardCode,
+          U_SocioNegocio: client.CardCode,
           U_VigDesde: {'<=': currentDate},
           U_VigHasta: {'>=': currentDate},    
           U_Sociedad: productSA      
@@ -167,8 +167,8 @@ function mapClientFixedDiscounts(promotions, clientDiscount){
 
 function buildClientFixedDiscount(clientDiscount){
   var fixedDiscount = clientDiscount.U_Porcentaje;
-  var defaultName = 'Descuento fijo cliente '+ clientDiscount.U_ScoreCard +' '+ fixedDiscount + '%';
-  var clientDiscountReference = 'clientFixedDiscount-' + fixedDiscount + '-' + clientDiscount.U_ScoreCard;
+  var defaultName = 'Descuento fijo cliente '+ clientDiscount.U_SocioNegocio +' '+ fixedDiscount + '%';
+  var clientDiscountReference = 'clientFixedDiscount-' + fixedDiscount + '-' + clientDiscount.U_SocioNegocio;
   clientDiscountReference += '-code-' + clientDiscount.Code;
 
   return {
@@ -179,7 +179,7 @@ function buildClientFixedDiscount(clientDiscount){
     discountPg5: 0,
     name: defaultName,
     publicName: defaultName,
-    handle: 'descuento-cliente-'+clientDiscount.U_ScoreCard+'-' + fixedDiscount + '-porciento',
+    handle: 'descuento-cliente-'+clientDiscount.U_SocioNegocio+'-' + fixedDiscount + '-porciento',
     clientDiscountReference: clientDiscountReference
   };
 }
@@ -187,8 +187,8 @@ function buildClientFixedDiscount(clientDiscount){
 function buildClientAdditionalDiscount(promotion, clientDiscount){
   var additionalDiscount = clientDiscount.U_Porcentaje;
   var auxPromotion = {};
-  var defaultName = 'Descuento cliente '+ clientDiscount.U_ScoreCard +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
-  var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_ScoreCard;
+  var defaultName = 'Descuento cliente '+ clientDiscount.U_SocioNegocio +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
+  var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_SocioNegocio;
   clientDiscountReference += '-originalDiscount-' + promotion.discountPg1;
   clientDiscountReference += '-code-' + clientDiscount.Code;
 
@@ -199,7 +199,7 @@ function buildClientAdditionalDiscount(promotion, clientDiscount){
   auxPromotion.discountPg5 = 0,
   auxPromotion.name = defaultName,
   auxPromotion.publicName = defaultName,
-  auxPromotion.handle = 'descuento-cliente-'+ clientDiscount.U_ScoreCard +'-' + auxPromotion.discountPg1 + 'mas' + additionalDiscount + '-porciento-adicional';    
+  auxPromotion.handle = 'descuento-cliente-'+ clientDiscount.U_SocioNegocio +'-' + auxPromotion.discountPg1 + 'mas' + additionalDiscount + '-porciento-adicional';    
   auxPromotion.clientDiscountReference = clientDiscountReference;
   auxPromotion = _.extend(_.clone(promotion), auxPromotion);
 
