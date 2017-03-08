@@ -15,6 +15,5 @@ module.exports = {
       required: true,
     }
   },
-  autoPK: false,
 };
 
