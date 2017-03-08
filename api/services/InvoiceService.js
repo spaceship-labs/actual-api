@@ -98,7 +98,7 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     paymentMethod: 'other',
-    anotation: order.CardCode,
+    anotation: order.folio,
     stamp: {
       generateStamp: true,
     },

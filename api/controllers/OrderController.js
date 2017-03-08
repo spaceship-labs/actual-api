@@ -117,7 +117,7 @@ module.exports = {
       //.spread(function(orderSent, freesaleSent){
         console.log('Email de orden enviado: ' + order.folio);
       
-        return Invoice.create({ id: alegraInvoice.id, order: order });
+        return Invoice.create({ alegraId: alegraInvoice.id, order: order });
       })
       .then(function(invoice){
         console.log('generated invoice', invoice);
