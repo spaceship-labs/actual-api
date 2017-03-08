@@ -28,7 +28,7 @@ function create(orderId) {
         order,
         payments,
         OrderDetail.find(details).populate('Product'),
-        FiscalAddress.findOne({ CardCode: client.CardCode }),
+        FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: 'S' }),
         client,
       ];
     })
@@ -57,12 +57,12 @@ function send(orderID) {
     })
     .spread(function(invoice, address) {
       var emails = [];
-      
+
       if(process.env.MODE === 'production'){
         emails = [
           'tugorez@gmail.com',
-          'luisperez@spaceshiplabs.com', 
-          'informatica@actualg.com', 
+          'luisperez@spaceshiplabs.com',
+          'informatica@actualg.com',
           address.E_Mail
         ];
       }else{
@@ -133,7 +133,7 @@ function createInvoice(data) {
   var requestError;
 
   return new Promise(function(resolve, reject){
-  
+
     AlegraLog.create(log)
       .then(function(logCreated){
         log.id = logCreated.id;
@@ -152,12 +152,12 @@ function createInvoice(data) {
           responseData: JSON.stringify(err),
           isError: true
         });
-        
+
       })
       .then(function(logUpdated){
         reject(requestError);
       });
-  
+
   });
 }
 
@@ -189,8 +189,8 @@ function prepareClient(order, client, address) {
       address: {
         country: 'México',
         state: order.U_Estado || 'Quintana Roo',
-        
-        //TODO; Check default Inovice data for GENERAL PUBLIC 
+
+        //TODO; Check default Inovice data for GENERAL PUBLIC
         //colony: order.U_Colonia,
         //street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
         //exteriorNumber: order.U_Noexterior,
