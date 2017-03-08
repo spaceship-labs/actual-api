@@ -69,7 +69,7 @@ function send(orderID) {
         emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
       }
 
-      var id = invoice.id;
+      var id = invoice.alegraId;
       return { id: id, emails: emails };
     })
     .then(function(data) {
