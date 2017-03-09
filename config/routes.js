@@ -450,6 +450,11 @@ module.exports.routes = {
     action:'getTotalsByuser'
   },
 
+  '/quotation/users/totals':{
+    controller: 'quotation',
+    action:'getMultipleUsersTotals'
+  },
+
   '/quotation/user/:userId/count':{
     controller: 'quotation',
     action:'getCountByUser'

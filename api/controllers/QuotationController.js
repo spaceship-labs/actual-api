@@ -421,6 +421,19 @@ module.exports = {
       });
   },
 
+  getMultipleUsersTotals: function(req, res){
+    var form = req.params.all();
+    var options = form;
+    QuotationService.getMultipleUsersTotals(options)
+      .then(function(totals){
+        res.json(totals);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
   sendEmail: function(req, res){
     var form = req.params.all();
     var id = form.id;

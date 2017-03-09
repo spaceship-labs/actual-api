@@ -20,6 +20,7 @@ var COMPANY_KIDS_CODE     = '004';
 var STUDIO_GROUP          = 'studio';
 var HOME_GROUP            = 'home';
 var KIDS_GROUP            = 'kids';
+var PROJECTS_GROUP        = 'proyectos';
 
 
 
@@ -178,10 +179,10 @@ function createSaleOrder(params){
 function buildSaleOrderRequestParams(params){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
-  var ACTUAL_HOME_XCARET_GROUP = 8;
-  var PROJECTS_GROUP = 6;
+  var ACTUAL_HOME_XCARET_GROUPCODE = 8;
+  var PROJECTS_GROUPCODE = 6;
 
-  if(params.groupCode != ACTUAL_HOME_XCARET_GROUP && params.groupCode != PROJECTS_GROUP ){
+  if(params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE && params.groupCode != PROJECTS_GROUPCODE ){
     return Promise.reject(new Error("La creación de pedidos para esta tienda esta deshabilitada"));
   }
 
@@ -240,6 +241,8 @@ function getCompanyCode(code, storeGroup){
       case HOME_GROUP:
         companyCode = COMPANY_HOME_CODE;
         break;
+      case PROJECTS_GROUP:
+        companyCode = COMPANY_HOME_CODE;
     }
   }
   return companyCode;
