@@ -13,10 +13,10 @@ module.exports = {
       .findOne({ order: order })
       .then(function(exists) {
         if (exists) throw new Error('invoice already exists');
-        return  InvoiceService.create(order)
+        return  InvoiceService.create(order);
       })
       .then(function(invoice) {
-        return Invoice.create({ id: invoice.id, order: order });
+        return Invoice.create({ alegraId: invoice.id, order: order });
       })
       .then(function(invoice) {
         return res.json(invoice);
