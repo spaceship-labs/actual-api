@@ -64,6 +64,8 @@ function send(orderID) {
           'tugorez@gmail.com',
           'luisperez@spaceshiplabs.com',
           'informatica@actualg.com',
+          'cgarcia@actualg.com',
+          'facturar@actualg.com',
           address.U_Correos
         ];
       }else{
