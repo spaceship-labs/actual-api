@@ -12,14 +12,14 @@ function generateStoresCashReport(params){
 
 	return Store.find({})
 		.then(function(stores){
-			return Promise.map(stores,function(store){
+			return Promise.mapSeries(stores,function(store){
         return getPaymentsByStore(store.id, params)
           .then(function(storePayments){
             store = store.toObject();
             store.Payments = storePayments;
             return store;
           });
-			},{concurrency:true});
+			});
 		})
 		.then(function(mappedStores){
 			return mappedStores;
@@ -62,7 +62,7 @@ function generateMagerCashReprot(params){
     .then(function(user){
       var stores = user.Stores;
 
-      return Promise.map(stores ,function(store){
+      return Promise.mapSeries(stores ,function(store){
         var storeParams = _.extend(params,{
           id: store.id
         });
@@ -73,7 +73,7 @@ function generateMagerCashReprot(params){
             return store;
           });
 
-      },{concurrency:true});
+      });
     });
   }
 
@@ -85,7 +85,7 @@ function generateStoreCashReportBySellers(params){
 
   return getStoreSellers(storeId)
     .then(function(sellers){
-      return Promise.map(sellers,function(seller){
+      return Promise.mapSeries(sellers,function(seller){
         var options = {
           seller: seller, 
           startDate: startDate, 
@@ -95,7 +95,7 @@ function generateStoreCashReportBySellers(params){
         };
 
         return getPaymentsBySeller(options);
-      },{concurrency:true});
+      });
     })
     .then(function(populatedSellers){
     	return populatedSellers;

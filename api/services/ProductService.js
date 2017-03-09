@@ -67,7 +67,7 @@ function cacheProductDiscountPrices(){
     })
     .then(function(products){
       console.log('products ' + new Date(), products.length);
-      return Promise.map(products,function(product){
+      return Promise.mapSeries(products,function(product){
         return relateProductPromotionsWithStoresPromotions(product, stores);
       });      
     })
@@ -118,7 +118,7 @@ function nativeProductUpdate(product){
 }
 
 function relateProductPromotionsWithStoresPromotions(product, stores){
-  return Promise.map(stores, function(store){
+  return Promise.mapSeries(stores, function(store){
     return getProductDiscountPriceByStore(product, store);
   })
   .then(function(productDiscountPrices){

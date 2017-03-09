@@ -310,9 +310,9 @@ function Calculator(){
   //  Every detail must contain a Product object populated
   function processQuotationDetails(details, options){
     options = options || {paymentGroup:1};
-    return Promise.map(details, function(detail){
+    return Promise.mapSeries(details, function(detail){
       return getDetailTotals(detail, options);      
-    }, {concurrency:1})
+    })
       .then(function(pDetails){
         if(options.updateDetails){
           return updateDetails(pDetails);
@@ -530,15 +530,14 @@ function Calculator(){
   }
 
   function updateDetails(details){
-    return Promise.map(details, function(d){
+    return Promise.mapSeries(details, function(d){
       return updateDetail(d).then(function(updated){
         if(updated && updated.length > 0){
           return updated[0];
         }
         return null;
       });
-    }, {concurrency:1});
-    //return Promise.all(updatedDetails);
+    });
   }
 
   function updateDetail(detail){
