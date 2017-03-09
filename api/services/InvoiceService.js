@@ -52,18 +52,19 @@ function send(orderID) {
     .then(function(order) {
       return [
         Invoice.findOne({ order: orderID }),
-        FiscalAddress.findOne({ CardCode: order.Client.CardCode }),
+        FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: 'S' }),
       ];
     })
     .spread(function(invoice, address) {
       var emails = [];
+      sails.log.info('address', address.U_Correos);
 
       if(process.env.MODE === 'production'){
         emails = [
           'tugorez@gmail.com',
           'luisperez@spaceshiplabs.com',
           'informatica@actualg.com',
-          address.E_Mail
+          address.U_Correos
         ];
       }else{
         emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
@@ -168,7 +169,7 @@ function prepareClient(order, client, address) {
     data = {
       name: address.companyName,
       identification: client.LicTradNum,
-      email: address.E_Mail,
+      email: address.U_Correos,
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
