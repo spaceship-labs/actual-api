@@ -19,7 +19,7 @@ function generateStoresCashReport(params){
             store.Payments = storePayments;
             return store;
           });
-			});
+			},{concurrency:true});
 		})
 		.then(function(mappedStores){
 			return mappedStores;
@@ -73,7 +73,7 @@ function generateMagerCashReprot(params){
             return store;
           });
 
-      });
+      },{concurrency:true});
     });
   }
 
@@ -95,7 +95,7 @@ function generateStoreCashReportBySellers(params){
         };
 
         return getPaymentsBySeller(options);
-      });
+      },{concurrency:true});
     })
     .then(function(populatedSellers){
     	return populatedSellers;
