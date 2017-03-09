@@ -591,6 +591,23 @@ function nativeQuotationUpdate(quotationId,params){
   });
 }
 
+function getMultipleUsersTotals(options){
+  var usersIds = options.usersIds;
+  return Promise.map(usersIds,function(uid){
+    var _opts = _.extend(options,{
+      userId: uid
+    });
+
+    return getTotalsByUser(_opts)
+      .then(function(totals){
+        var user = {
+          id: uid,
+          totals: totals
+        };
+      });
+  });
+}
+
 function getTotalsByUser(options){
   var userId    = options.userId;
   var todayDate = moment().endOf('day').toDate(); 
