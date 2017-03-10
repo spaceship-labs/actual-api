@@ -158,7 +158,7 @@ module.exports.models = {
 
           return Promise.each(uploadedFiles,function(file){
             //var mapCallback = req.onProgress.nextElement(uploadedFiles,async_callback);
-            sails.log.info('file uploaded', file);
+            //sails.log.info('file uploaded', file);
             objectFiles.push(file);
             opts.filename = file.filename;
             
@@ -198,7 +198,7 @@ module.exports.models = {
           });
       })
       .then(function(files){
-        sails.log.info('object.files final');
+        //sails.log.info('object.files final');
         return object.save();
       });
     },
