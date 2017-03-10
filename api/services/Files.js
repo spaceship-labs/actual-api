@@ -28,7 +28,7 @@ function saveFiles(req,opts,cb){
 
   return new Promise(function(resolve, reject){
 
-    sails.log.info('saving files', $files);
+    //sails.log.info('saving files', $files);
 
     if(req._fileparser.upstreams.length && $files.length > 0){
 
