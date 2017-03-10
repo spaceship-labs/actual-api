@@ -186,7 +186,7 @@ function makeCropsStreams(uploadOptions, opts, cb){
             return next(err);
           }
           var fileName = size + opts.filename;
-          sails.log.info('fileName individualCropStream', fileName);
+          //sails.log.info('fileName individualCropStream', fileName);
 
           stdout.pipe(
             adapter.uploadStream({
@@ -220,7 +220,7 @@ function removeFile(opts){
     });
   }
 
-  sails.log.info('files to remove', routes);
+  //sails.log.info('files to remove', routes);
 
   return new Promise(function(resolve, reject){
     if(adapter){ //if remote

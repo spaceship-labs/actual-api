@@ -170,7 +170,7 @@ module.exports.models = {
           });
         })
         .then(function(crops){
-          sails.log.info('crops created', crops);
+          //sails.log.info('crops created', crops);
           object.files.add(objectFiles);
           return object.save();
         })
