@@ -205,24 +205,9 @@ function filterPaymentTotalsForDiscountClients(paymentTotals){
 }
 
 function filterMethodsGroupsForDiscountClients(methodsGroups){
-  var validMethodsTypes = [
-    'cash',
-    'cash-usd',
-    'transfer'
-  ];
-
   methodsGroups = methodsGroups.filter(function(mg){
     return mg.group === 1;
-  });
-
-  methodsGroups = methodsGroups.map(function(mg){
-    var auxMg = _.clone(mg);
-    auxMg.methods = auxMg.methods.filter(function(method){
-      return validMethodsTypes.indexOf(method.type) > -1;
-    });
-
-    return auxMg;
-  });
+  });  
 
   return methodsGroups;
 }
