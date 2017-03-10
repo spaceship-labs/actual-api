@@ -9,7 +9,8 @@ module.exports = {
 	getDetailsStock: getDetailsStock,
 	substractProductsStock: substractProductsStock,
 	validateQuotationStockById: validateQuotationStockById,
-	isFreeSaleProduct: isFreeSaleProduct
+	isFreeSaleProduct: isFreeSaleProduct,
+	syncOrderDetailsProducts: syncOrderDetailsProducts
 };
 
 
