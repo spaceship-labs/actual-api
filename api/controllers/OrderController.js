@@ -89,6 +89,7 @@ module.exports = {
     var form = req.params.all();
     var order;
     var responseSent = false;
+    var orderDetails;
 
     OrderService.createFromQuotation(form, req.user)
       .then(function(orderCreated){
@@ -96,6 +97,7 @@ module.exports = {
         res.json(orderCreated);
         responseSent = true;
         order = orderCreated;
+        orderDetails = orderCreated.Details;
 
         //STARTS EMAIL SENDING PROCESS
         return Order.findOne({id:orderCreated.id})
@@ -109,12 +111,14 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
-          InvoiceService.create(order.id)
+          InvoiceService.create(order.id),
+          StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function(orderSent, freesaleSent, alegraInvoice){
+      .spread(function(orderSent, freesaleSent, alegraInvoice, productsSynced){
       //.spread(function(orderSent, freesaleSent){
         console.log('Email de orden enviado: ' + order.folio);
+        console.log('productsSynced', productsSynced);
       
         return Invoice.create({ alegraId: alegraInvoice.id, order: order });
       })

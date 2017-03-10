@@ -293,9 +293,8 @@ function createFromQuotation(form, currentUser){
     })
     .then(function(orderDetailsFound){
       orderDetails = orderDetailsFound;
-      return StockService.substractProductsStock(orderDetails);
-    })
-    .then(function(){
+      //return StockService.substractProductsStock(orderDetails);
+      
       var updateFields = {
         Order: orderCreated.id,
         status: 'to-order',
@@ -319,6 +318,8 @@ function createFromQuotation(form, currentUser){
       return processEwalletBalance(params);
     })	
     .then(function(){
+      orderCreated = orderCreated.toObject();
+      orderCreated.Details = orderDetails;
     	return orderCreated;
     });
 }

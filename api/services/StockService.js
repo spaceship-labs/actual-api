@@ -13,6 +13,18 @@ module.exports = {
 };
 
 
+//orderDetails must be populated with the product
+function syncOrderDetailsProducts(orderDetails){
+	var itemCodes = orderDetails.map(function(orderDetail){
+		var product = orderDetail.Product;
+		return product.ItemCode;
+	});
+	itemCodes = _.uniq(itemCodes);
+	sails.log.info('Updating :', itemCodes);
+
+	return Promise.map(itemCodes, SyncService.syncProductByItemCode);
+}
+
 function isFreeSaleProduct(product){
   if(product){
     if(product.freeSale && product.freeSaleStock > 0 && product.freeSaleDeliveryDays){
