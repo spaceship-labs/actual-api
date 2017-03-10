@@ -26,6 +26,18 @@ module.exports = {
 
   },
 
+  syncClientsDiscounts: function(req,res){
+    SyncService.syncClientsDiscounts()
+      .then(function(result){
+        sails.log.info('result', result);
+        res.ok();
+      })
+      .catch(function(err){
+        console.log('err',err);
+        res.negotiate(err);
+      });
+  },
+
   fixOrders: function(req, res){
   	//Common.reassignOrdersDates();
   }

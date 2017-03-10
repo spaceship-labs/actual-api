@@ -119,6 +119,11 @@ module.exports.routes = {
     action: 'syncProductByItemCode'
   },
 
+  '/sync/clientsdiscounts':{
+    controller: 'sync',
+    action: 'syncClientsDiscounts'
+  },
+
   '/product/update/:id':{
     controller: 'product',
     action: 'update'

@@ -16,6 +16,7 @@ var reqOptions = {
 
 module.exports = {
   syncProducts: syncProducts,
+  syncClientsDiscounts: syncClientsDiscounts,
   syncProductByItemCode: syncProductByItemCode,
   importBrokersToUsers: importBrokersToUsers,
   ProductImageUploader: ProductImageUploader
@@ -32,6 +33,18 @@ function syncProductByItemCode(itemCode){
   });  
 
   sails.log.info('endPoint syncProduct', endPoint);
+  reqOptions.method = 'PUT';
+  reqOptions.uri = endPoint;
+  return request(reqOptions);  
+}
+
+function syncClientsDiscounts(){
+  var path = 'Descsn';
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+  });  
+
+  sails.log.info('endPoint syncClientsDiscounts', endPoint);
   reqOptions.method = 'PUT';
   reqOptions.uri = endPoint;
   return request(reqOptions);  
