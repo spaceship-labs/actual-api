@@ -9,6 +9,19 @@ var ORDER_SAP_TYPE      = 'Order';
 
 
 module.exports = {
+  sendOrderEmail: function(req, res){
+    var form = req.params.all();
+    var orderId = form.id;
+    Email.sendOrderConfirmation(orderId)
+      .then(function(){
+        res.ok();
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
   find: function(req, res){
     var form = req.params.all();
     var client = form.client;
@@ -111,18 +124,14 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
-          InvoiceService.create(order.id),
+          InvoiceService.createOrderInvoice(order.id),
           StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function(orderSent, freesaleSent, alegraInvoice, productsSynced){
+      .spread(function(orderSent, freesaleSent, invoice, productsSynced){
       //.spread(function(orderSent, freesaleSent){
         console.log('Email de orden enviado: ' + order.folio);
         console.log('productsSynced', productsSynced);
-      
-        return Invoice.create({ alegraId: alegraInvoice.id, order: order });
-      })
-      .then(function(invoice){
         console.log('generated invoice', invoice);
       })
       .catch(function(err){

@@ -502,6 +502,11 @@ module.exports.routes = {
     action:'sendEmail'
   },
 
+  '/order/sendemail/:id':{
+    controller:'order',
+    action:'sendOrderEmail'
+  },
+
   '/quotation/:id/source':{
     controller:'quotation',
     action: 'updateSource'

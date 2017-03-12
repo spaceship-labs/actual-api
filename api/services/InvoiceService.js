@@ -10,11 +10,11 @@ var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
 
 module.exports = {
-  create: create,
+  createOrderInvoice: createOrderInvoice,
   send: send,
 };
 
-function create(orderId) {
+function createOrderInvoice(orderId) {
   return Order
     .findOne(orderId)
     .populate('Client')
@@ -42,6 +42,9 @@ function create(orderId) {
     })
     .spread(function(order, payments, client, items) {
       return prepareInvoice(order, payments, client, items);
+    })
+    .then(function(alegraInvoice){
+    	return Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
     });
 }
 
