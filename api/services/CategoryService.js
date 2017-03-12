@@ -27,7 +27,7 @@ function cacheCategoriesProducts(){
       return Promise.each(categories, updateCategory);
     })
     .then(function(){
-      sails.log.info('cache categories stock end: ' + new Date());
+      //sails.log.info('cache categories stock end: ' + new Date());
       return true;
     })
     .catch(function(err){
