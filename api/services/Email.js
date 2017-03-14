@@ -218,7 +218,9 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
+    sails.log.info('sending email order ', order.folio);
     personalization.addTo(to);
+    personalization.addTo(from);
   }
   personalization.setSubject(subject);
   /*
@@ -363,7 +365,9 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
+    sails.log.info('sending email quotation ', quotation.folio);
     personalization.addTo(to);
+    personalization.addTo(from);
   }
 
   personalization.setSubject(subject);
@@ -539,6 +543,9 @@ function paymentMethod(payment) {
     case 'client-balance':
       payment_name = 'Saldo a favor';
       break;
+    case 'client-credit':
+      payment_name = 'Crédito cliente';
+      break;      
     default:
       payment_name = '';
       break;
@@ -563,7 +570,7 @@ function paymentType(payment) {
       payment_name = 'Crédito ' + payment.terminal;
       break;
     case 'single-payment-terminal':
-      payment_name = 'Débito ' + payment.terminal;
+      payment_name = 'Una sola exhibición terminal ' + payment.terminal;
       break;
     case 'ewallet':
       payment_name = 'Contado';
@@ -581,6 +588,9 @@ function paymentType(payment) {
     case 'client-balance':
       payment_name = 'Saldo a favor cliente';
       break;
+    case 'client-credit':
+      payment_name = 'Crédito cliente';
+      break;        
     default:
       payment_name = '';
       break;
