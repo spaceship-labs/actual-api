@@ -26,8 +26,35 @@ module.exports = {
 
   },
 
+  syncClientByCardCode: function(req,res){
+    var form = req.allParams();
+    var cardcode = form.cardcode;
+
+    SyncService.syncClientByCardCode(cardcode)
+      .then(function(result){
+        sails.log.info('result', result);
+        res.ok();
+      })
+      .catch(function(err){
+        console.log('err',err);
+        res.negotiate(err);
+      });
+  },
+
   syncClientsDiscounts: function(req,res){
     SyncService.syncClientsDiscounts()
+      .then(function(result){
+        sails.log.info('result', result);
+        res.ok();
+      })
+      .catch(function(err){
+        console.log('err',err);
+        res.negotiate(err);
+      });
+  },
+
+  syncClientsCredit: function(req,res){
+    SyncService.syncClientsCredit()
       .then(function(result){
         sails.log.info('result', result);
         res.ok();

@@ -17,7 +17,9 @@ var reqOptions = {
 module.exports = {
   syncProducts: syncProducts,
   syncClientsDiscounts: syncClientsDiscounts,
+  syncClientsCredit: syncClientsCredit,
   syncProductByItemCode: syncProductByItemCode,
+  syncClientByCardCode: syncClientByCardCode,
   importBrokersToUsers: importBrokersToUsers,
   ProductImageUploader: ProductImageUploader
 };
@@ -38,6 +40,49 @@ function syncProductByItemCode(itemCode){
   return request(reqOptions);  
 }
 
+function syncClientByCardCode(cardcode){
+  var paths = [
+    'Contact',
+    'PersonContact',
+    'AddressContact'
+  ];
+
+  var requests = paths.map(function(path){
+    var requestParams = {
+      CardCode: cardcode
+    };
+    var endPoint = buildUrl(baseUrl,{
+      path: path,
+      queryParams: requestParams
+    }); 
+
+    sails.log.info('endPoint syncClientByCardCode', endPoint);
+
+    var auxReqOption = _.clone(reqOptions);
+    auxReqOption.method = 'PUT';
+    auxReqOption.uri = endPoint;
+    return request(auxReqOption);
+  });
+
+  return Promise.all(requests)
+    .then(function(responses){
+      sails.log.info('responses', responses);
+      var isValidResponse = responses.every(function(response){
+        if(!response){
+          return false;
+        }
+        return !isNaN(response.value);
+      });
+
+      if(!isValidResponse){
+        return Promise.reject(new Error('Hubo un error en la respuesta de SAP'));
+      }
+
+      return Promise.resolve();
+    });
+}
+
+
 function syncClientsDiscounts(){
   var path = 'Descsn';
   var endPoint = buildUrl(baseUrl,{
@@ -45,6 +90,18 @@ function syncClientsDiscounts(){
   });  
 
   sails.log.info('endPoint syncClientsDiscounts', endPoint);
+  reqOptions.method = 'PUT';
+  reqOptions.uri = endPoint;
+  return request(reqOptions);  
+}
+
+function syncClientsCredit(){
+  var path = 'SnCredito';
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+  });  
+
+  sails.log.info('endPoint syncClientsCredit', endPoint);
   reqOptions.method = 'PUT';
   reqOptions.uri = endPoint;
   return request(reqOptions);  

@@ -119,9 +119,19 @@ module.exports.routes = {
     action: 'syncProductByItemCode'
   },
 
+  '/sync/syncclientbycardcode/:cardcode':{
+    controller: 'sync',
+    action: 'syncClientByCardCode'
+  },
+
   '/sync/clientsdiscounts':{
     controller: 'sync',
     action: 'syncClientsDiscounts'
+  },
+
+  '/sync/clientscredit':{
+    controller: 'sync',
+    action: 'syncClientsCredit'
   },
 
   '/product/update/:id':{
