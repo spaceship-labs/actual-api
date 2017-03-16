@@ -19,6 +19,7 @@ module.exports = {
         return res.json(invoice);
       })
       .catch(function(err) {
+        console.log('err invoice create', err);
         if (err.error && err.error.message) {
           err = new Error(err.error.message);
           return res.json(400, err);
