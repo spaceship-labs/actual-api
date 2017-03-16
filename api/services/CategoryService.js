@@ -15,8 +15,7 @@ function cacheCategoriesProducts(){
   };
   var productsQuery = {
     Price: price,
-    Active: 'Y',
-    Available: {'>':0}
+    Active: 'Y'
   };
 
   return getAllStoresCodes().then(function(codes){
