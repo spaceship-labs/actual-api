@@ -192,7 +192,10 @@ function mapDetailsWithDeliveryDates(details, deliveryDates){
 	for(var i = 0; i<details.length; i++){
 		var detailDelivery = findValidDelivery(details[i], deliveryDates);
 
-		if(detailDelivery && (details[i].Product.Available > 0 || details[i].isFreeSale) ){
+		if(detailDelivery && 
+				(details[i].Product.Available > 0 || details[i].isFreeSale) && 
+				(details[i].Product.Active === 'Y' || details[i].isFreeSale ) 
+			){
 			details[i].validStock = true;
 		}else{
 			details[i].validStock = false;			
