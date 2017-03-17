@@ -235,14 +235,23 @@ function getPaymentGroupsForEmail(quotation, activeStore) {
     });
 }
 
-function getPaymentGroups(){
+function getPaymentGroups(options){
+  options = options || {};
+  if(options.readCreditPayments){
+    paymentGroups = addCreditMethod(paymentGroups);
+  }
+
   return paymentGroups;
 }
 
 function addCreditMethod(methodsGroups){
   return methodsGroups.map(function(mg){
     if(mg.group === 1){
-      mg.methods.unshift(creditMethod);
+      var isCreditMethodAdded = _.findWhere(mg.methods,{type:'client-credit'});
+      
+      if(!isCreditMethodAdded){
+        mg.methods.unshift(creditMethod);
+      }
     }
     return mg;
   });

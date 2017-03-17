@@ -141,7 +141,8 @@ module.exports = {
   },
 
   getPaymentGroups: function(req, res){
-    var paymentGroups = PaymentService.getPaymentGroups();
+    var form = req.allParams();
+    var paymentGroups = PaymentService.getPaymentGroups(form);
     res.json(paymentGroups);
   }	
 };
