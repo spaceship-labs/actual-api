@@ -9,6 +9,7 @@ var CLIENT_BALANCE_TYPE = 'client-balance';
 var CLIENT_CREDIT_TYPE = 'client-credit';
 var EWALLET_GROUP_INDEX = 0;
 var DEFAULT_EXCHANGE_RATE   = 18.78;
+var CURRENCY_USD = 'usd';
 
 
 module.exports = {
@@ -23,7 +24,8 @@ module.exports = {
   CASH_USD_TYPE: CASH_USD_TYPE,
   EWALLET_GROUP_INDEX: EWALLET_GROUP_INDEX,
   CLIENT_BALANCE_TYPE: CLIENT_BALANCE_TYPE,
-  CLIENT_CREDIT_TYPE: CLIENT_CREDIT_TYPE
+  CLIENT_CREDIT_TYPE: CLIENT_CREDIT_TYPE,
+  CURRENCY_USD: CURRENCY_USD
 };
 
 function calculateQuotationAmountPaid(quotationPayments, exchangeRate){

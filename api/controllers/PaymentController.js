@@ -22,6 +22,8 @@ module.exports = {
     var ACTUAL_HOME_XCARET_CODE = 'actual_home_xcaret';
     var PROJECTS_CODE = 'actual_proyect';
     var storeCode = req.user.activeStore.code;
+    var quotationTotal;
+    var previousPayments;
 
     form.Quotation    = quotationId;
     form.Store = req.user.activeStore.id;
@@ -56,6 +58,8 @@ module.exports = {
         client = quotation.Client;
         form.Client = client.id || client;
 
+        previousPayments = quotation.Payments;
+
         if(form.type === EWALLET_TYPE){
           if( !EwalletService.isValidEwalletPayment(form, client) ){
             return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
@@ -68,10 +72,30 @@ module.exports = {
           }
         }
 
-        return PaymentService.getExchangeRate();
+        return [
+          PaymentService.getExchangeRate(),
+          QuotationService.getQuotationTotals(form.Quotation ,{paymentGroup: paymentGroup}),
+        ];
       })
-      .then(function(exchangeRateFound){
+      .spread(function(exchangeRateFound, quotationTotals){
         exchangeRate = exchangeRateFound;
+        quotationTotal = quotationTotals.total;
+
+        return PaymentService.calculateQuotationAmountPaid(previousPayments, exchangeRate);
+      })
+      .then(function(previousAmountPaid){
+        var newPaymentAmount;
+        var quotationRemainingAmount = quotationTotal - previousAmountPaid;
+
+        if(form.currency === PaymentService.CURRENCY_USD){
+          newPaymentAmount = PaymentService.calculateUSDPayment(form, exchangeRate);
+        }else{
+          newPaymentAmount = form.ammount;
+        }
+
+        if(newPaymentAmount > quotationRemainingAmount){
+          return Promise.reject(new Error('No es posible pagar mas del 100% del pedido'));
+        }
 
         return Payment.create(form);
       })
