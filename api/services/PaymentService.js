@@ -31,6 +31,10 @@ module.exports = {
 function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
   var payments  = quotationPayments || [];
 
+  if(payments.length === 0){
+    return 0;
+  }
+
   var ammounts = payments.map(function(payment){
     if(payment.type === 'cash-usd'){
      return calculateUSDPayment(payment, exchangeRate);

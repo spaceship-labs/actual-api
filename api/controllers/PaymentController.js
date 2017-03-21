@@ -72,9 +72,17 @@ module.exports = {
           }
         }
 
+        var calculator = QuotationService.Calculator();
+        var calculatorParams = {
+          currentStoreId: req.user.activeStore.id,
+          paymentGroup: paymentGroup,
+          update: false,
+          financingTotals: true
+        };
+
         return [
           PaymentService.getExchangeRate(),
-          QuotationService.getQuotationTotals(form.Quotation ,{paymentGroup: paymentGroup}),
+          calculator.getQuotationTotals(form.Quotation ,calculatorParams),
         ];
       })
       .spread(function(exchangeRateFound, quotationTotals){
@@ -86,6 +94,9 @@ module.exports = {
       .then(function(previousAmountPaid){
         var newPaymentAmount;
         var quotationRemainingAmount = quotationTotal - previousAmountPaid;
+        var ROUNDING_AMOUNT = 1;
+
+        quotationRemainingAmount += ROUNDING_AMOUNT;
 
         if(form.currency === PaymentService.CURRENCY_USD){
           newPaymentAmount = PaymentService.calculateUSDPayment(form, exchangeRate);

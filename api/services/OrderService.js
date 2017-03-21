@@ -334,10 +334,17 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       };
     }
 
-    var sapResultAux = _.clone(sapResult);
+    var sapResultWithBalance = _.clone(sapResult);
     sapResult = sapResult.filter(function(item){
       return item.type !== BALANCE_SAP_TYPE;
     });
+
+    //If only balance was returned
+    if(sapResult.length === 0){
+      return {
+        error: 'Documentos no generados en SAP'
+      };
+    }
 
     var everyOrderHasPayments = sapResult.every(function(sapOrder){
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
@@ -359,7 +366,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       };
     }
 
-    var clientBalance = extractBalanceFromSapResult(sapResultAux);
+    var clientBalance = extractBalanceFromSapResult(sapResultWithBalance);
     if(!clientBalance || isNaN(clientBalance) ){
       return {
         error: 'Balance del cliente no definido en la respuesta'
