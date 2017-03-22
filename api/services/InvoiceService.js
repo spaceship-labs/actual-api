@@ -15,37 +15,61 @@ module.exports = {
 };
 
 function createOrderInvoice(orderId) {
-  return Order
-    .findOne(orderId)
-    .populate('Client')
-    .populate('Details')
-    .populate('Payments')
-    .then(function(order) {
-      var client = order.Client;
-      var details = order.Details.map(function(d) { return d.id; });
-      var payments = order.Payments;
-      return [
-        order,
-        payments,
-        OrderDetail.find(details).populate('Product'),
-        FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: 'S' }),
-        client,
-      ];
-    })
-    .spread(function(order, payments, details, address, client) {
-      return [
-        order,
-        preparePayments(payments),
-        prepareClient(order, client, address),
-        prepareItems(details)
-      ];
-    })
-    .spread(function(order, payments, client, items) {
-      return prepareInvoice(order, payments, client, items);
-    })
-    .then(function(alegraInvoice){
-    	return Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
-    });
+  return new Promise(function(resolve, reject){
+    
+    var orderFound;
+    var errInvoice;
+    
+    Order.findOne(orderId)
+      .populate('Client')
+      .populate('Details')
+      .populate('Payments')
+      .then(function(order) {
+        orderFound = order;
+        var client = order.Client;
+        var details = order.Details.map(function(d) { return d.id; });
+        var payments = order.Payments;
+        return [
+          order,
+          payments,
+          OrderDetail.find(details).populate('Product'),
+          FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: 'S' }),
+          client,
+        ];
+      })
+      .spread(function(order, payments, details, address, client) {
+        return [
+          order,
+          preparePayments(payments),
+          prepareClient(order, client, address),
+          prepareItems(details)
+        ];
+      })
+      .spread(function(order, payments, client, items) {
+        return prepareInvoice(order, payments, client, items);
+      })
+      .then(function(alegraInvoice){
+      	resolve(
+          Invoice.create({ alegraId: alegraInvoice.id, order: orderId })
+        );
+      })
+      .catch(function(err){
+        errInvoice = err;
+
+        var log = {
+          User: orderFound ? orderFound.User : null,
+          Order: orderId,
+          Store: orderFound ? orderFound.Store : null,
+          responseData: JSON.stringify(errInvoice),
+          isError: true
+        };
+
+        return AlegraLog.create(log);
+      })
+      .then(function(logCreated){
+        reject(errInvoice);        
+      });
+  });
 }
 
 function send(orderID) {
