@@ -88,12 +88,11 @@ function send(orderID) {
 
       if(process.env.MODE === 'production'){
         emails = [
-          'tugorez@gmail.com',
+          address.U_Correos,
           'luisperez@spaceshiplabs.com',
           'informatica@actualg.com',
           'cgarcia@actualg.com',
-          'facturar@actualg.com',
-          address.U_Correos
+          'facturar@actualg.com'
         ];
       }else{
         emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
