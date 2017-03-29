@@ -33,7 +33,7 @@ function createOrderInvoice(orderId) {
           order,
           payments,
           OrderDetail.find(details).populate('Product'),
-          FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: 'S' }),
+          FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
           client,
         ];
       })
@@ -79,7 +79,7 @@ function send(orderID) {
     .then(function(order) {
       return [
         Invoice.findOne({ order: orderID }),
-        FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: 'S' }),
+        FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
       ];
     })
     .spread(function(invoice, address) {

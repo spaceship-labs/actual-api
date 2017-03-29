@@ -1,7 +1,9 @@
 var _            = require('underscore');
 var moment       = require('moment');
 var Promise      = require('bluebird');
-var ADDRESS_TYPE = 'S';
+var ADDRESS_TYPE_S = 'S';
+var ADDRESS_TYPE_B = 'B';
+
 
 module.exports = {
   find: function(req, res){
@@ -160,8 +162,18 @@ module.exports = {
         if(fiscalAddress){
           fiscalAddress           = ClientService.mapFiscalFields(fiscalAddress);
           fiscalAddress.CardCode  = createdClient.CardCode;
-          fiscalAddress.AdresType = ADDRESS_TYPE;
-          promises.push(FiscalAddress.create(fiscalAddress));
+          fiscalAddress.AdresType = ADDRESS_TYPE_S;
+          
+          var fiscalAddressTypeS = _.clone(fiscalAddress);
+          var fiscalAddressTypeB = _.clone(fiscalAddress);
+          fiscalAddressTypeB.AdresType = ADDRESS_TYPE_B;
+
+          var fiscalAddresses = [
+            fiscalAddressTypeS,
+            fiscalAddressTypeB
+          ];
+
+          promises.push(FiscalAddress.create(fiscalAddresses));
         }
 
         if(promises.length > 0){
