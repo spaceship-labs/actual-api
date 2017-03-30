@@ -127,6 +127,13 @@ module.exports = {
       slowMovement:{type:'boolean'},
       seenTimes: {type:'integer'},
       immediateDelivery:{type:'boolean'},
+      deliveryType:{
+        type:'string',
+        enum:[
+          'bigticket',
+          'softline'
+        ]
+      },
 
       actual_studio_merida:{type:'integer'},
       actual_studio_malecon:{type:'integer'},
