@@ -200,7 +200,15 @@ function checkIfClientHasCredit(quotationId){
         Name: quotation.Client.CardCode,
         U_Vigencia: {'>=': currentDate}
       };
-      return ClientCredit.findOne(creditQuery);
+      sails.log.info('creditQuery', creditQuery);
+      return ClientCredit.findOne(creditQuery)
+        .then(function(credit){
+          sails.log.info('credit', credit);
+          if(credit){
+            return credit;
+          }
+          return false;
+        });
     });
 }
 

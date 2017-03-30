@@ -19,6 +19,11 @@ function createOrderInvoice(orderId) {
     
     var orderFound;
     var errInvoice;
+
+    if(process.env.MODE !== 'production'){
+      resolve({});
+      return;
+    }
     
     Order.findOne(orderId)
       .populate('Client')
