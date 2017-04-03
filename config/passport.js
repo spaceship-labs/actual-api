@@ -4,7 +4,7 @@ var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var Promise = require('bluebird');
 
-var EXPIRES_IN = 60*24*60; //seconds
+var EXPIRES_IN = 60*60*8; //seconds (8hrs)
 var SECRET = process.env.tokenSecret || "4ukI0uIVnB3iI1yxj646fVXSE3ZVk4doZgz6fTbNg7jO41EAtl20J5F7Trtwe7OM";
 var ALGORITHM = "HS256";
 var ISSUER = "actual.com";
