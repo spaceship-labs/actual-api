@@ -33,7 +33,7 @@ module.exports = {
       form.Details = formatProductsIds(form.Details);
     }
 
-    if(storeCode !== ACTUAL_HOME_XCARET_CODE && storeCode !== PROJECTS_CODE){
+    if(storeCode !== ACTUAL_HOME_XCARET_CODE && storeCode !== PROJECTS_CODE && process.env.MODE === 'production'){
       res.negotiate(new Error("La creación de pedidos para esta tienda esta deshabilitada"));
       return;
     }
