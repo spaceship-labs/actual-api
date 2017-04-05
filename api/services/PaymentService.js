@@ -127,6 +127,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
         methodsGroups = filterMethodsGroupsForDiscountClients(methodsGroups);
       }
 
+      sails.log.info('clientHasCredit', clientHasCredit);
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
       }
@@ -204,9 +205,11 @@ function checkIfClientHasCredit(quotationId){
       return ClientCredit.findOne(creditQuery)
         .then(function(credit){
           sails.log.info('credit', credit);
-          if(credit){
+          if( credit && !_.isUndefined(credit) ){
+            sails.log.info('has credit');
             return credit;
           }
+          sails.log.info('doesnt have credit');
           return false;
         });
     });
