@@ -78,7 +78,13 @@ module.exports = {
   },
 
   homeStatus: function(req, res){
-    res.ok({status:'ok!'});
+    var message = 'ok!';
+
+    if(process.env.MODE !== 'production'){
+      message = 'ok sandbox!';
+    }
+
+    res.ok({status: message});
   }
 
 };

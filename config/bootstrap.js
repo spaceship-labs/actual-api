@@ -19,6 +19,14 @@ module.exports.bootstrap = function(cb) {
   CronJobs.init();
   Files.getContainerLink();
 
+  var msgMode = 'sandbox/dev';
+	if(process.env.MODE === 'production'){
+		msgMode = 'production';
+	}
+
+  sails.log.info('Lifted ' + msgMode + ' mode');
+
+
   sails.config.timezone = {label:'America/Cancun', offset:-6};
   //moment.tz.setDefault(sails.config.timezone.label);
   cb();
