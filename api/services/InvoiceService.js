@@ -20,10 +20,12 @@ function createOrderInvoice(orderId) {
     var orderFound;
     var errInvoice;
 
+    
     if(process.env.MODE !== 'production'){
       resolve({});
       return;
     }
+    
     
     Order.findOne(orderId)
       .populate('Client')
@@ -97,7 +99,7 @@ function send(orderID) {
           'luisperez@spaceshiplabs.com',
           'informatica@actualg.com',
           'cgarcia@actualg.com',
-          'facturar@actualg.com'
+          'facturacion@actualg.com'
         ];
       }else{
         emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
@@ -262,6 +264,11 @@ function prepareItems(details) {
       discount: discount,
       tax: [ {id: alegraIVAID} ],
       quantity: detail.quantity,
+      inventory:{
+        unit:'piece',
+        unitCost: detail.unitPrice,
+        initialQuantity: detail.quantity
+      }
     };
   });
   return Promise.all(createItems(items));
