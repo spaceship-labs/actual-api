@@ -78,7 +78,7 @@ module.exports = {
   },
 
   homeStatus: function(req, res){
-    var message = 'ok!';
+    var message = 'ok production!';
 
     if(process.env.MODE !== 'production'){
       message = 'ok sandbox!';

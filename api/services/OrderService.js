@@ -166,10 +166,22 @@ function createFromQuotation(form, currentUser){
         );
       }
 
-      var user = currentUser;
+      return User.findOne({id: quotation.User.id}).populate('Seller');
+    })
+    .then(function(user){
+
+      if(!user){
+        return Promise.reject(
+          new Error("Esta cotización no tiene un vendedor asignado")
+        );
+      }
+
       if(user.Seller){
         SlpCode = user.Seller.SlpCode;
       }
+
+      currentStore = currentUser.activeStore;
+
       var paymentsIds = quotation.Payments.map(function(p){return p.id;});
       orderParams = {
         source: quotation.source,
@@ -178,7 +190,7 @@ function createFromQuotation(form, currentUser){
         subtotal: quotation.subtotal,
         discount: quotation.discount,
         paymentGroup: opts.paymentGroup,
-        groupCode: user.activeStore.GroupCode,
+        groupCode: currentStore.GroupCode,
         totalProducts: quotation.totalProducts,
         Client: quotation.Client.id,
         CardName: quotation.Client.CardName,
@@ -222,7 +234,6 @@ function createFromQuotation(form, currentUser){
         orderParams = _.extend(orderParams,quotation.Address);
       }
 
-      currentStore = user.activeStore;
 
       return [
         QuotationDetail.find({Quotation: quotation.id})
