@@ -20,6 +20,7 @@ module.exports = {
     var quotation;
     var quotationUpdateParams;
     var ACTUAL_HOME_XCARET_CODE = 'actual_home_xcaret';
+    var ACTUAL_STUDIO_CUMBRES_CODE = 'actual_studio_cumbres';
     var PROJECTS_CODE = 'actual_proyect';
     var storeCode = req.user.activeStore.code;
     var quotationTotal;
@@ -33,7 +34,12 @@ module.exports = {
       form.Details = formatProductsIds(form.Details);
     }
 
-    if(storeCode !== ACTUAL_HOME_XCARET_CODE && storeCode !== PROJECTS_CODE && process.env.MODE === 'production'){
+    if(
+      storeCode !== ACTUAL_HOME_XCARET_CODE &&
+      storeCode !== ACTUAL_STUDIO_CUMBRES_CODE &&
+      storeCode !== PROJECTS_CODE && 
+      process.env.MODE === 'production'
+    ){
       res.negotiate(new Error("La creación de pedidos para esta tienda esta deshabilitada"));
       return;
     }

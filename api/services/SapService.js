@@ -181,8 +181,13 @@ function buildSaleOrderRequestParams(params){
   var products = [];
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
   var PROJECTS_GROUPCODE = 6;
+  var ACTUAL_STUDIO_GROUPCODE = 4;
 
-  if(params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE && params.groupCode != PROJECTS_GROUPCODE && process.env.MODE === 'production' ){
+  if(params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE && 
+    params.groupCode != PROJECTS_GROUPCODE && 
+    params.groupCode != ACTUAL_STUDIO_GROUPCODE &&
+    process.env.MODE === 'production' 
+  ){
     return Promise.reject(new Error("La creación de pedidos para esta tienda esta deshabilitada"));
   }
 
