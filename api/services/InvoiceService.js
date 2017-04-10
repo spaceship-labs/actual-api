@@ -257,6 +257,9 @@ function prepareItems(details) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
+    if(discount < 1){
+      discount = parseFloat( discount.toFixed(4) );
+    }
     return {
       id: detail.id,
       name: detail.Product.ItemName,
