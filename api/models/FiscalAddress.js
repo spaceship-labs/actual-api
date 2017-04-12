@@ -19,7 +19,7 @@ module.exports = {
     U_Localidad:{type:'string'},
     City:{type:'string'},
     State:{type:'string'},
-    ZipCode:{type:'integer'},
+    ZipCode:{type:'string'},
     AdresType:{type:'string'},
 
     //RELATIONS (AUXILIAR)
