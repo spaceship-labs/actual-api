@@ -387,13 +387,11 @@ var paymentGroups = [
         msi:3,
         cardsImages:[
           '/cards/amexcard.png',
-          '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
         cards: [
           'Afirme',
           'American Express',
-          'Banamex',
           'Banbajio',
           'Bancomer',
           'Banca Mifel',
@@ -411,7 +409,6 @@ var paymentGroups = [
         moreCards: true,
         terminals:[
           {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
           {label:'Santander', value:'santander'}
@@ -434,13 +431,11 @@ var paymentGroups = [
         msi:6,
         cardsImages:[
           '/cards/amexcard.png',
-          '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
         cards:[
           'Afirme',
           'American Express',
-          'Banamex',
           'Banbajio',
           'Bancomer',
           'Banca Mifel',
@@ -458,7 +453,6 @@ var paymentGroups = [
         moreCards: true,
         terminals:[
           {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
           {label:'Santander', value:'santander'}
@@ -475,19 +469,16 @@ var paymentGroups = [
         msi:9,
         cardsImages:[
           '/cards/amexcard.png',
-          '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
         cards:[
           'American Express',
-          'Banamex',
           'Bancomer',
           'Santander'
         ],
         moreCards: true,
         terminals:[
           {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Santander', value:'santander'}
         ],
@@ -509,13 +500,11 @@ var paymentGroups = [
         msi:12,
         cardsImages:[
           '/cards/amexcard.png',
-          '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
         cards:[
           'American Express',
           'Afirme',
-          'Banamex',
           'Bancomer',
           'Banbajio',
           'Banca Mifel',
@@ -533,7 +522,6 @@ var paymentGroups = [
         moreCards: true,
         terminals:[
           {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
           {label:'Santander', value:'santander'}
@@ -556,15 +544,12 @@ var paymentGroups = [
         msi:18,
         cardsImages:[
           '/cards/amexcard.png',
-          '/cards/banamex.png'
         ],
         cards: [
           'American Express',
-          'Banamex'
         ],
         terminals:[
           {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'}
         ],
         currency: 'mxn',
         needsVerification: true,
