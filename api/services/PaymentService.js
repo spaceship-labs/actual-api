@@ -130,6 +130,8 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       sails.log.info('clientHasCredit', clientHasCredit);
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
+      }else{
+        methodsGroups = removeCreditMethod(methodsGroups);
       }
 
       methodsGroups = methodsGroups.map(function(mG, index){
@@ -272,6 +274,35 @@ function addCreditMethod(methodsGroups){
     }
     return mg;
   });
+}
+
+function arrayObjectIndexOf(myArray, searchTerm, property) {
+  for(var i = 0, len = myArray.length; i < len; i++) {
+      if (myArray[i][property] === searchTerm) return i;
+  }
+  return -1;
+}
+
+
+function removeCreditMethod(methodsGroups){
+  return methodsGroups.map(function(mg){
+    if(mg.group === 1){
+      var creditMethodIndex = -1;
+      var isCreditMethodAdded = _.find(mg.methods,function(item, index){
+        if(item.type === 'client-credit'){
+          creditMethodIndex = index;
+          return true;
+        }else{
+          return false;
+        }
+      });
+      
+      if(isCreditMethodAdded && creditMethodIndex > -1){
+        mg.methods.splice(creditMethodIndex, 1);
+      }
+    }
+    return mg;
+  });  
 }
 
 var creditMethod = {
