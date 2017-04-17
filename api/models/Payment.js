@@ -48,7 +48,7 @@ module.exports = {
         'banamex',
         'bancomer',
         'banorte',
-        //'santander'
+        'santander'
       ]
     },
     card: {type:'string'},
