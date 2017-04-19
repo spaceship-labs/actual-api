@@ -21,6 +21,7 @@ module.exports = {
     var quotationUpdateParams;
     var ACTUAL_HOME_XCARET_CODE = 'actual_home_xcaret';
     var ACTUAL_STUDIO_CUMBRES_CODE = 'actual_studio_cumbres';
+    var ACTUAL_STUDIO_MALECON_CODE = 'actual_studio_malecon';
     var PROJECTS_CODE = 'actual_proyect';
     var storeCode = req.user.activeStore.code;
     var quotationTotal;
@@ -37,6 +38,7 @@ module.exports = {
     if(
       storeCode !== ACTUAL_HOME_XCARET_CODE &&
       storeCode !== ACTUAL_STUDIO_CUMBRES_CODE &&
+      storeCode !== ACTUAL_STUDIO_MALECON_CODE && 
       storeCode !== PROJECTS_CODE && 
       process.env.MODE === 'production'
     ){
