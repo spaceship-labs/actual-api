@@ -128,11 +128,16 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }
 
       sails.log.info('clientHasCredit', clientHasCredit);
+      
+      //TEMPORAL: DISABLED CREDIT METHOD
+      methodsGroups = removeCreditMethod(methodsGroups);
+      /*
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
       }else{
         methodsGroups = removeCreditMethod(methodsGroups);
       }
+      */
 
       methodsGroups = methodsGroups.map(function(mG, index){
         mG.total = totalsByGroup[index].total || 0;
