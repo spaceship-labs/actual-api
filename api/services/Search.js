@@ -3,6 +3,8 @@ var _        = require('underscore');
 var Promise  = require('bluebird');
 
 module.exports = {
+  applyBrandsQuery        : applyBrandsQuery,
+  applyDiscountsQuery     : applyDiscountsQuery,  
   applyFilters            : applyFilters,
   applyOrFilters          : applyOrFilters,
   areFiltersApplied       : areFiltersApplied,
@@ -84,6 +86,20 @@ function applyFilters(query, filters) {
   return query;
 }
 
+function applyBrandsQuery(query, brandsIds){
+  if( _.isArray(brandsIds) && brandsIds.length > 0 ){
+    query.CustomBrand = brandsIds;
+  }
+  return query;
+}
+
+function applyDiscountsQuery(query, discounts){
+  if( _.isArray(discounts) && discounts.length > 0 ){
+    query.Discount = discounts;
+  }
+  return query;
+}
+
 function applyOrFilters(query, filters){
   if( _.isArray(filters) && filters.length > 0 ){
     var andConditions = [];
@@ -117,8 +133,15 @@ function isFilterValid(filter){
   return false;
 }
 
+function areEmptyTerms(terms){
+  return _.every(terms,function(term){
+    return !term;
+  });
+}
+
 function queryTerms(query, terms) {
-  if (!terms || terms.length == 0) {
+
+  if (!terms || terms.length === 0 || areEmptyTerms(terms) ) {
     return query;
   }
   var searchFields = [

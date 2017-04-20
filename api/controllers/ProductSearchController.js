@@ -9,6 +9,8 @@ module.exports = {
     var filtervalues   = [].concat(form.ids || []);
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
+    var brandsIds      = form.brandsIds;
+    var discounts      = form.discounts;
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore.id || false;
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
@@ -26,7 +28,11 @@ module.exports = {
 
     query            = Search.queryTerms(query, terms);
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
+    query            = Search.applyBrandsQuery(query, brandsIds);
+    query            = Search.applyDiscountsQuery(query, discounts);
+
     query.Active     = 'Y';
+    sails.log.info('query', JSON.stringify(query));
     
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
