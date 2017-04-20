@@ -11,9 +11,9 @@ module.exports = {
         'cheque',
         'deposit',
         'transfer',
-        'ewallet',
-        'client-credit',
-        'credit-card', //TODO remove
+        //'ewallet',
+        //'client-credit',
+        //'credit-card', //TODO remove
         'single-payment-terminal',
         'client-balance',
         '3-msi',
