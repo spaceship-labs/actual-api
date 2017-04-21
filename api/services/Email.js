@@ -217,7 +217,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
-  var toAux2 = new helper.Email('informatica@actualg.com', 'Informatica ActualGroup');
+  var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar Pavia ActualGroup');
   personalization.addTo(toAux2);
 
 
@@ -365,7 +365,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
   */
-  var toAux = new helper.Email('informatica@actualg.com', 'Informatica ActualGroup');
+  var toAux = new helper.Email('cpavia@actualg.com', 'Cesar Pavia ActualGroup');
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
