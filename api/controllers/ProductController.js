@@ -164,6 +164,7 @@ module.exports = {
       profile: 'gallery',
     };
 
+    sails.log.info('uploading image: ' + new Date() + ' ', form.id);
     Product.findOne({ItemCode:form.id})
       .then(function(product){
         return product.addFiles(req, options);
@@ -172,6 +173,7 @@ module.exports = {
         return Product.findOne({ItemCode:form.id}).populate('files');
       })
       .then(function(foundProduct){
+        sails.log.info('uploaded image: ' + new Date() + ' ', form.id);
         res.json(foundProduct);
       })
       .catch(function(err){

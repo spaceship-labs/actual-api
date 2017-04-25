@@ -448,7 +448,6 @@ var paymentGroups = [
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
         min:300,
@@ -493,7 +492,6 @@ var paymentGroups = [
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
         min:600,
@@ -518,7 +516,7 @@ var paymentGroups = [
         terminals:[
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
-          {label:'Santander', value:'santander'}
+          {label:'Banorte', value:'banorte'},
         ],
         currency: 'mxn',
         min:900,
@@ -563,7 +561,6 @@ var paymentGroups = [
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
         min: 1200,
