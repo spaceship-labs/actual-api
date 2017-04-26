@@ -12,7 +12,7 @@ module.exports = {
         'deposit',
         'transfer',
         //'ewallet',
-        //'client-credit',
+        'client-credit',
         //'credit-card', //TODO remove
         'single-payment-terminal',
         'client-balance',
