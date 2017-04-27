@@ -539,6 +539,7 @@ function paymentMethod(payment) {
     case '6-msi':
     case '9-msi':
     case'12-msi':
+    case '13-msi':
     case'18-msi':
       payment_name = 'Terminal';
       break;
@@ -584,6 +585,7 @@ function paymentType(payment) {
     case '6-msi':
     case '9-msi':
     case'12-msi':
+    case'13-msi':
     case'18-msi':
       payment_name = payment.type + ' ' + payment.terminal;
       break;

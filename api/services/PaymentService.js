@@ -567,6 +567,25 @@ var paymentGroups = [
         needsVerification: true,
         web:true
       },
+      {
+        label:'13',
+        name:'13 meses sin intereses',
+        type:'13-msi',
+        msi:13,
+        cardsImages:[
+          '/cards/banamex.png',
+        ],
+        cards:[
+          'Banamex'
+        ],
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+        ],
+        currency: 'mxn',
+        min: 1300,
+        needsVerification: true,
+        web:true
+      },      
     ]
   },
   {

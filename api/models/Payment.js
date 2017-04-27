@@ -20,6 +20,7 @@ module.exports = {
         '6-msi',
         '9-msi',
         '12-msi',
+        '13-msi',
         '18-msi',
       ]
     },
