@@ -217,6 +217,10 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
+  var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar Pavia ActualGroup');
+  personalization.addTo(toAux2);
+
+
   if(process.env.MODE === 'production'){
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(to);
@@ -235,9 +239,9 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   mail.addContent(content);
   mail.addPersonalization(personalization);
   requestBody = mail.toJSON();
-  request.method = 'POST'
-  request.path = '/v3/mail/send'
-  request.body = requestBody
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
   return new Promise(function(resolve, reject){
     sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
@@ -361,7 +365,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
   */
-  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  var toAux = new helper.Email('cpavia@actualg.com', 'Cesar Pavia ActualGroup');
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
@@ -482,7 +486,8 @@ function sendFreesale(user, order, products, store) {
 
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
-
+  var toAux2 = new helper.Email('informatica@actualg.com', 'Informatica ActualGroup');
+  personalization.addTo(toAux2);
   /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');

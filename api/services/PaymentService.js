@@ -128,11 +128,16 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }
 
       sails.log.info('clientHasCredit', clientHasCredit);
+      
+      //TEMPORAL: DISABLED CREDIT METHOD
+      //methodsGroups = removeCreditMethod(methodsGroups);
+      
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
       }else{
         methodsGroups = removeCreditMethod(methodsGroups);
       }
+      
 
       methodsGroups = methodsGroups.map(function(mG, index){
         mG.total = totalsByGroup[index].total || 0;
@@ -443,7 +448,6 @@ var paymentGroups = [
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
         min:300,
@@ -488,7 +492,6 @@ var paymentGroups = [
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
         min:600,
@@ -513,7 +516,7 @@ var paymentGroups = [
         terminals:[
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
-          {label:'Santander', value:'santander'}
+          {label:'Banorte', value:'banorte'},
         ],
         currency: 'mxn',
         min:900,
@@ -558,7 +561,6 @@ var paymentGroups = [
           {label:'American Express', value:'american-express'},
           {label:'Bancomer', value:'bancomer'},
           {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
         min: 1200,
