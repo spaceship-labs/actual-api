@@ -241,7 +241,7 @@ function buildSaleOrderRequestParams(params){
 
 function getCompanyCode(code, storeGroup){
   var companyCode = code;
-  if(companyCode === COMPANY_BOTH_CODE){
+  if(companyCode === COMPANY_BOTH_CODE || !companyCode){
     switch (storeGroup){
       case STUDIO_GROUP:
         companyCode = COMPANY_STUDIO_CODE;
