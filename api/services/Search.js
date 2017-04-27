@@ -8,6 +8,7 @@ module.exports = {
   applyFilters            : applyFilters,
   applyOrFilters          : applyOrFilters,
   areFiltersApplied       : areFiltersApplied,
+  applyStockRangesQuery   : applyStockRangesQuery,
   getMultiIntersection    : getMultiIntersection,
   getProductsByCategories : getProductsByCategories,
   getProductsByCategory   : getProductsByCategory,
@@ -63,6 +64,7 @@ function queryIdsProducts(query, idProducts) {
   });
 }
 
+
 function getPriceQuery(query, priceField, minPrice, maxPrice) {
   var priceQuery = {
     '>=': minPrice || 0,
@@ -100,6 +102,30 @@ function applyDiscountsQuery(query, discounts){
   return query;
 }
 
+function applyStockRangesQuery(query, stockField, stockRanges) {
+  if( _.isArray(stockRanges) && stockRanges.length > 0 ){
+    var orConditions = stockRanges.map(function(stockRange){
+      var stockRangeQuery = {
+        '>=': stockRange[0],
+        '<=': stockRange[1]
+      };
+
+      var orQuery = {};
+      orQuery[stockField] = stockRangeQuery;
+
+      return orQuery;
+    });
+
+    if(query.$and){
+      query.$and.push({$or: orConditions});
+    }else{
+      query.$and = [{$or:orConditions}];
+    }
+  }
+
+  return query;
+}
+
 function applyOrFilters(query, filters){
   if( _.isArray(filters) && filters.length > 0 ){
     var andConditions = [];
@@ -116,8 +142,9 @@ function applyOrFilters(query, filters){
         }
       }
     });
+
     if(andConditions.length > 0){
-      query.$and = andConditions;
+      query.$and = query.$and ?  query.$and.concat(andConditions) : query.$and;
     }
   }
   return query;

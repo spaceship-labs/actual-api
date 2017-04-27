@@ -9,6 +9,7 @@ module.exports = {
     var filtervalues   = [].concat(form.ids || []);
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
+    var stockRanges    = form.stockRanges;
     var brandsIds      = form.brandsIds;
     var discounts      = form.discounts;
     var queryPromos    = Search.getPromotionsQuery();
@@ -32,7 +33,6 @@ module.exports = {
     query            = Search.applyDiscountsQuery(query, discounts);
 
     query.Active     = 'Y';
-    sails.log.info('query', JSON.stringify(query));
     
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
@@ -45,12 +45,19 @@ module.exports = {
           query[activeStore.code] = {'>':0};
         }
 
+        if(stockRanges){
+          delete query[activeStore.code];
+          query = Search.applyStockRangesQuery(query, activeStore.code, stockRanges);
+        }
+
         var freeSaleQuery = _.clone(query);
         freeSaleQuery = _.extend(freeSaleQuery, {
           freeSale: true,
           freeSaleStock: {'>':0}
         });
         delete freeSaleQuery[activeStore.code];
+
+        sails.log.info('query', JSON.stringify(query));
 
         var searchQuery = {
           $or: [
