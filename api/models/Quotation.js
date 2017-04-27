@@ -13,7 +13,7 @@ module.exports = {
       model: 'User',
     },
     Broker:{
-      model: 'User',
+      model: 'BrokerSAP',
     },
     Details: {
       collection:'QuotationDetail',
