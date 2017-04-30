@@ -213,10 +213,8 @@ function checkIfClientHasCredit(quotationId){
         .then(function(credit){
           sails.log.info('credit', credit);
           if( credit && !_.isUndefined(credit) ){
-            sails.log.info('has credit');
             return credit;
           }
-          sails.log.info('doesnt have credit');
           return false;
         });
     });
@@ -397,7 +395,6 @@ var paymentGroups = [
         label:'1 pago con',
         name:'Una sola exhibición terminal',
         type:'single-payment-terminal',
-        //type:'credit-card',
         description:'VISA, MasterCard, American Express',
         cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
         cards:['Visa','MasterCard','American Express'],
@@ -460,6 +457,25 @@ var paymentGroups = [
     group:3,
     discountKey:'discountPg3',
     methods: [
+      {
+        label:'3',
+        name:'3 meses sin intereses con Banamex',
+        type:'3-msi-banamex',
+        msi:3,
+        cardsImages:[
+          '/cards/banamex.png',
+        ],
+        cards: [
+          'Banamex'
+        ],
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+        ],
+        currency: 'mxn',
+        min:300,
+        needsVerification: true,
+        web:true
+      },    
       {
         label:'6',
         name:'6 meses sin intereses',
@@ -530,6 +546,44 @@ var paymentGroups = [
     discountKey:'discountPg4',
     methods: [
       {
+        label:'6',
+        name:'6 meses sin intereses con Banamex',
+        type:'6-msi-banamex',
+        msi:6,
+        cardsImages:[
+          '/cards/banamex.png',
+        ],
+        cards: [
+          'Banamex'
+        ],
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+        ],
+        currency: 'mxn',
+        min:600,
+        needsVerification: true,
+        web:true
+      }, 
+      {
+        label:'9',
+        name:'9 meses sin intereses con Banamex',
+        type:'9-msi-banamex',
+        msi:9,
+        cardsImages:[
+          '/cards/banamex.png',
+        ],
+        cards: [
+          'Banamex'
+        ],
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+        ],
+        currency: 'mxn',
+        min:900,
+        needsVerification: true,
+        web:true
+      },           
+      {
         label:'12',
         name:'12 meses sin intereses',
         type:'12-msi',
@@ -566,11 +620,17 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },
+      },     
+    ]
+  },
+  {
+    group:5,
+    discountKey:'discountPg5',
+    methods: [
       {
         label:'13',
-        name:'13 meses sin intereses',
-        type:'13-msi',
+        name:'13 meses sin intereses con Banamex',
+        type:'13-msi-banamex',
         msi:13,
         cardsImages:[
           '/cards/banamex.png',
@@ -585,13 +645,8 @@ var paymentGroups = [
         min: 1300,
         needsVerification: true,
         web:true
-      },      
-    ]
-  },
-  {
-    group:5,
-    discountKey:'discountPg5',
-    methods: [
+      },     
+      /*
       {
         label:'18',
         name:'18 meses sin intereses',
@@ -611,6 +666,7 @@ var paymentGroups = [
         min:2000,
         web:true
       },
+      */
     ]
   },
 ];
