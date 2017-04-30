@@ -52,6 +52,7 @@ module.exports = {
       via: 'Quotation'
     },
 
+    brokerCode: {type:'string'},
     CardName: {type:'string'},
     CardCode:{type:'string'},
     isClosed:{type:'boolean'},
