@@ -15,6 +15,7 @@ module.exports = {
     U_Sociedad: 'string',
     U_FijoMovil: 'string',
     U_Porcentaje: 'float',
+    U_Porcentaje2: 'float',
     U_VigDesde: 'datetime',
     U_VigHasta: 'datetime',
     lastModified: 'datetime'

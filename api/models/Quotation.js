@@ -13,7 +13,7 @@ module.exports = {
       model: 'User',
     },
     Broker:{
-      model: 'User',
+      model: 'BrokerSAP',
     },
     Details: {
       collection:'QuotationDetail',
@@ -52,6 +52,7 @@ module.exports = {
       via: 'Quotation'
     },
 
+    brokerCode: {type:'string'},
     CardName: {type:'string'},
     CardCode:{type:'string'},
     isClosed:{type:'boolean'},

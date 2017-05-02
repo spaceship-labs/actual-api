@@ -377,6 +377,11 @@ module.exports.routes = {
   },
   */
 
+  '/brokers':{
+    controller: 'broker',
+    action: 'list'
+  },
+
   '/seller/getall':{
     controller: 'seller',
     action:'getAll'

@@ -472,9 +472,19 @@ module.exports = {
     var brokerId = form.brokerId;
     var params = {
       Broker: brokerId,
-      source: null
+      source: 'Broker'
+      //source: null
     };
-    Quotation.update({id:id}, params)
+    BrokerSAP.findOne({id:brokerId})
+      .then(function(brokerFound){
+        if(!brokerFound){
+          return Promise.reject(new Error('No existe este broker'));
+        }
+
+        params.brokerCode = brokerFound.Code;
+
+        return Quotation.update({id:id}, params);
+      })
       .then(function(updated){
         res.json(updated);
       })

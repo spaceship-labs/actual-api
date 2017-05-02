@@ -18,6 +18,7 @@ module.exports = {
     paymentGroup:{type:'integer'},
     appliesClientDiscount: {type:'boolean'},
     WhsCode:{type:'string'},
+    brokerCode: {type:'string'},
     status:{
       type:'string',
       enum:['lost','pending','on-delivery','minimum-paid','paid']
@@ -49,7 +50,7 @@ module.exports = {
       model: 'User',
     },
     Broker:{
-      model: 'User',
+      model: 'BrokerSAP',
     },
     Address:{
       model:'ClientContact',
