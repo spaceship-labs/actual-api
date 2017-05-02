@@ -152,6 +152,22 @@ function createFromQuotation(form, currentUser){
     .then(function(quotationFound){
       quotation = quotationFound;
 
+      if(!quotation.Client){
+        return Promise.reject(
+          new Error('No hay un cliente asociado a esta cotización')
+        );
+      }
+
+      return FiscalAddress.findOne({CardCode:quotation.Client.CardCode});
+    })
+    .then(function(fiscalAddress){
+
+      if(!fiscalAddress){
+        return Promise.reject(
+          new Error('No hay una dirección fiscal asociada al cliente')
+        );
+      }
+
       if(quotation.Order){
         var frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
         var orderUrl = frontUrl + '/checkout/order/' + quotation.Order;
