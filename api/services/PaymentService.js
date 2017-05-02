@@ -629,8 +629,8 @@ var paymentGroups = [
     methods: [
       {
         label:'13',
-        name:'13 meses sin intereses con Banamex',
-        type:'13-msi-banamex',
+        name:'13 meses sin intereses',
+        type:'13-msi',
         msi:13,
         cardsImages:[
           '/cards/banamex.png',
