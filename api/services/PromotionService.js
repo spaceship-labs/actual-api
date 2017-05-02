@@ -166,7 +166,7 @@ function mapClientFixedDiscounts(promotions, clientDiscount){
 }
 
 function buildClientFixedDiscount(clientDiscount){
-  var fixedDiscount = clientDiscount.U_Porcentaje;
+  var fixedDiscount = clientDiscount.U_Porcentaje2;
   var defaultName = 'Descuento fijo cliente '+ clientDiscount.U_SocioNegocio +' '+ fixedDiscount + '%';
   var clientDiscountReference = 'clientFixedDiscount-' + fixedDiscount + '-' + clientDiscount.U_SocioNegocio;
   clientDiscountReference += '-code-' + clientDiscount.Code;
@@ -185,7 +185,7 @@ function buildClientFixedDiscount(clientDiscount){
 }
 
 function buildClientAdditionalDiscount(promotion, clientDiscount){
-  var additionalDiscount = clientDiscount.U_Porcentaje;
+  var additionalDiscount = clientDiscount.U_Porcentaje2;
   var auxPromotion = {};
   var defaultName = 'Descuento cliente '+ clientDiscount.U_SocioNegocio +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
   var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_SocioNegocio;
