@@ -474,7 +474,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:300,
         needsVerification: true,
-        web:true
+        web:true,
+        mainCard: 'banamex'
       },    
       {
         label:'6',
@@ -562,7 +563,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:600,
         needsVerification: true,
-        web:true
+        web:true,
+        mainCard: 'banamex'
       }, 
       {
         label:'9',
@@ -581,7 +583,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:900,
         needsVerification: true,
-        web:true
+        web:true,
+        mainCard: 'banamex'
       },           
       {
         label:'12',
@@ -644,7 +647,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:1200,
         needsVerification: true,
-        web:true
+        web:true,
+        mainCard: 'banamex'
       },      
       {
         label:'13',
@@ -665,7 +669,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true
       },     
-      /*
+      
       {
         label:'18',
         name:'18 meses sin intereses',
@@ -685,7 +689,7 @@ var paymentGroups = [
         min:2000,
         web:true
       },
-      */
+      
     ]
   },
 ];
