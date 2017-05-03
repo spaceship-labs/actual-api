@@ -23,8 +23,8 @@ module.exports = {
         '9-msi-banamex',
         '12-msi',
         '12-msi-banamex',
-        '13-msi',
-        '18-msi',
+        //'13-msi',
+        //'18-msi',
       ]
     },
     folio:{type:'string'},

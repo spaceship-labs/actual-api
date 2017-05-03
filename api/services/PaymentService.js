@@ -650,6 +650,7 @@ var paymentGroups = [
         web:true,
         mainCard: 'banamex'
       },      
+      /*
       {
         label:'13',
         name:'13 meses sin intereses',
@@ -667,7 +668,8 @@ var paymentGroups = [
         currency: 'mxn',
         min: 1300,
         needsVerification: true,
-        web:true
+        web:true,
+        mainCard: 'banamex'
       },     
       
       {
@@ -689,6 +691,7 @@ var paymentGroups = [
         min:2000,
         web:true
       },
+      */
       
     ]
   },
