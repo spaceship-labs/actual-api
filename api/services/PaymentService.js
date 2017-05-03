@@ -628,6 +628,25 @@ var paymentGroups = [
     discountKey:'discountPg5',
     methods: [
       {
+        label:'12',
+        name:'12 meses sin intereses con Banamex',
+        type:'12-msi-banamex',
+        msi:12,
+        cardsImages:[
+          '/cards/banamex.png',
+        ],
+        cards: [
+          'Banamex'
+        ],
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+        ],
+        currency: 'mxn',
+        min:1200,
+        needsVerification: true,
+        web:true
+      },      
+      {
         label:'13',
         name:'13 meses sin intereses',
         type:'13-msi',

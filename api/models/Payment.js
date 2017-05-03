@@ -13,7 +13,6 @@ module.exports = {
         'transfer',
         //'ewallet',
         'client-credit',
-        //'credit-card', //TODO remove
         'single-payment-terminal',
         'client-balance',
         '3-msi',
@@ -23,8 +22,9 @@ module.exports = {
         '9-msi',
         '9-msi-banamex',
         '12-msi',
+        '12-msi-banamex',
         '13-msi',
-        '18-msi',
+        //'18-msi',
       ]
     },
     folio:{type:'string'},

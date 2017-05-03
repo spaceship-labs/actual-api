@@ -100,7 +100,7 @@ function orderEmail(orderId) {
           ship: date,
           price: numeral(detail.unitPrice).format('0,0.00'),
           total: numeral(detail.total).format('0,0.00'),
-          discount: detail.discountPercent,
+          discount: numeral(detail.discountPercent).format('0,0.00'),
           promo: (detail.Promotion || {}).publicName,
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
@@ -288,7 +288,7 @@ function quotation(quotationId, activeStore) {
           ship: date,
           price: numeral(detail.unitPrice).format('0,0.00'),
           total: numeral(detail.total).format('0,0.00'),
-          discount: detail.discountPercent,
+          discount: numeral(detail.discountPercent).format('0,0.00'),
           promo: (detail.Promotion || {}).publicName,
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
@@ -536,11 +536,15 @@ function paymentMethod(payment) {
     case 'credit-card':
     case 'single-payment-terminal':
     case '3-msi':
+    case '3-msi-banamex':    
     case '6-msi':
+    case '6-msi-banamex':    
     case '9-msi':
-    case'12-msi':
+    case '9-msi-banamex':    
+    case '12-msi':
+    case '12-msi-banamex':
     case '13-msi':
-    case'18-msi':
+    case '18-msi':
       payment_name = 'Terminal';
       break;
     case 'cheque':
@@ -588,6 +592,13 @@ function paymentType(payment) {
     case'13-msi':
     case'18-msi':
       payment_name = payment.type + ' ' + payment.terminal;
+      break;
+
+    case '3-msi-banamex':
+    case '6-msi-banamex':
+    case '9-msi-banamex':
+    case '12-msi-banamex':
+      payment_name = payment.type;
       break;
     case 'cheque':
       payment_name = 'Contado';
