@@ -127,7 +127,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
         methodsGroups = filterMethodsGroupsForDiscountClients(methodsGroups);
       }
 
-      sails.log.info('clientHasCredit', clientHasCredit);
+      //sails.log.info('clientHasCredit', clientHasCredit);
       
       //TEMPORAL: DISABLED CREDIT METHOD
       //methodsGroups = removeCreditMethod(methodsGroups);
