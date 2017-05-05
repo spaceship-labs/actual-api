@@ -159,6 +159,8 @@ module.exports = {
     var id = form.id;
     var createdRecord = false;
     var addedFile = false;
+    var updatedQuotation = false;
+    var promises = [];
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -168,10 +170,28 @@ module.exports = {
     QuotationRecord.create(form)
       .then(function(createdRecordResult){
         createdRecord = createdRecordResult;
-        return QuotationRecord.findOne({id:createdRecord.id}).populate('User');
+        promises = [
+          QuotationRecord.findOne({id:createdRecord.id}).populate('User'),
+        ];
+
+        if(form.estimatedCloseDate){
+          promises.push(
+            Quotation.update({id: form.Quotation}, {estimatedCloseDate: form.estimatedCloseDate})
+          );
+        }
+
+        return Promise.all(promises); 
       })
-      .then(function(foundRecord){
+      .then(function(results){
+        var foundRecord = results[0];
+        var updatedQuotations = results[1];
+
         createdRecord = foundRecord;
+
+        if(updatedQuotations){
+          updatedQuotation = updatedQuotations[0];
+        }
+
         //if(req.file('file')._files[0]){
         if(req._fileparser.upstreams.length){
 
@@ -193,7 +213,17 @@ module.exports = {
         return createdRecord;
       })
       .then(function(record){
-        res.json(record);
+
+        var responseData = {
+          record: record
+        };
+
+        if(updatedQuotation && form.estimatedCloseDate){
+          responseData.estimatedCloseDate = updatedQuotation.estimatedCloseDate;
+        }
+
+        res.json(responseData);
+
       })
       .catch(function(err){
         console.log(err);

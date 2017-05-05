@@ -14,6 +14,7 @@ module.exports = {
     notes: {type:'text'},
     eventType: {type:'string'},
     dateTime: {type:'datetime'},
+    estimatedCloseDate: {type:'datetime'},
     files: {
       collection: 'QuotationRecordFile',
       via:'QuotationRecord',

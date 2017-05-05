@@ -72,6 +72,8 @@ module.exports = {
     financingCostPercentage: 'float',    
     paymentGroup:{type:'integer'},
     appliesClientDiscount: {type:'boolean'},
+    estimatedCloseDate: {type:'datetime'},
+
     bigticketMaxPercentage:{
       type:'integer',
       enum:[0,1,2,3,4,5]
