@@ -155,7 +155,8 @@ function getQueryDateRange(query, date) {
     },
     EndDate: {
       '>=': date
-    }
+    },
+    Active: "Y"
   });
 }
 
