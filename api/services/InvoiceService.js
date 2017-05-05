@@ -20,7 +20,6 @@ function createOrderInvoice(orderId) {
     var orderFound;
     var errInvoice;
 
-    
     if(process.env.MODE !== 'production'){
       resolve({});
       return;
@@ -47,7 +46,7 @@ function createOrderInvoice(orderId) {
       .spread(function(order, payments, details, address, client) {
         return [
           order,
-          preparePayments(payments),
+          payments,
           prepareClient(order, client, address),
           prepareItems(details)
         ];
@@ -133,13 +132,14 @@ function prepareInvoice(order, payments, client, items) {
     dueDate: dueDate,
     client: client,
     items: items,
-    paymentMethod: 'other',
+    paymentMethod: getPaymentMethodBasedOnPayments(payments),
     anotation: order.folio,
     stamp: {
       generateStamp: true,
     },
     orderObject: order
   };
+  
   return createInvoice(data);
 }
 
@@ -195,6 +195,62 @@ function createInvoice(data) {
       });
 
   });
+}
+
+function getPaymentMethodBasedOnPayments(payments){
+  if(payments.length > 1){
+    return 'other';
+  }
+
+  var paymentMethod = 'other';
+  var uniquePaymentMethod = payments[0];
+
+  switch(uniquePaymentMethod.type){
+
+    case 'cash':
+    case 'cash-usd':
+    case 'deposit':
+      paymentMethod = 'cash';
+      break;
+
+    case 'transfer':
+      paymentMethod = 'transfer';
+      break;
+    
+    case 'ewallet':
+      paymentMethod = 'electronic-wallet';
+      break;
+
+    case 'single-payment-terminal':
+    case '3-msi':
+    case '3-msi-banamex':    
+    case '6-msi':
+    case '6-msi-banamex':    
+    case '9-msi':
+    case '9-msi-banamex':    
+    case '12-msi':
+    case '12-msi-banamex':
+    case '13-msi':
+    case '18-msi':
+      paymentMethod = 'credit-card';
+      break;
+    
+    case 'cheque':
+      paymentMethod = 'check';
+      break;
+
+    case 'client-balance':
+      paymentMethod = 'other';
+      break;
+    case 'client-credit':
+      paymentMethod = 'other';
+      break;      
+    default:
+      paymentMethod = 'other';
+      break;
+  }
+
+  return paymentMethod;
 }
 
 function prepareClient(order, client, address) {
