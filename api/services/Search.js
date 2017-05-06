@@ -22,8 +22,21 @@ module.exports = {
   queryTerms              : queryTerms,
   populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   relatePromotionsToProducts: relatePromotionsToProducts,
-  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode  
+  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode,
+  getSortValueBySortOption: getSortValueBySortOption
 };
+
+function getSortValueBySortOption(sortOption, activeStore){
+  var sortValue = 'DiscountPrice ASC';
+
+  if(sortOption.key === 'stock'){
+    sortOption.key = activeStore.code;
+  }
+
+  sortValue = sortOption.key + ' ' + sortOption.direction;
+
+  return sortValue;
+}
 
 //Promotions array of promotion object with property productsIds
 function relatePromotionsToProducts(promotions, products){

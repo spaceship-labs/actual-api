@@ -12,6 +12,7 @@ module.exports = {
     var stockRanges    = form.stockRanges;
     var brandsIds      = form.brandsIds;
     var discounts      = form.discounts;
+    var sortOption     = form.sortOption;
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore.id || false;
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
@@ -71,6 +72,10 @@ module.exports = {
 
         if(populateImgs){
           //find = find.populate('files');
+        }
+
+        if(sortOption){
+          sortValue = Search.getSortValueBySortOption(sortOption, activeStore);
         }
 
         return [
