@@ -33,6 +33,20 @@ function getSortValueBySortOption(sortOption, activeStore){
     sortOption.key = activeStore.code;
   }
 
+  switch(sortOption.key){
+    case 'stock':
+      sortOption.key = activeStore.code;
+      break;
+    case 'spotlight':
+    case 'lm':
+      sortOption.key = 'DiscountPrice';
+      break;
+    default:
+      sortOption.key = sortOption.key;
+      break;
+  }
+
+
   sortValue = sortOption.key + ' ' + sortOption.direction;
 
   return sortValue;
@@ -245,8 +259,10 @@ function getProductsByFilterValue(filtervaluesIds){
     .then(function(relations) {
       relationsHash   = getProductRelationsHash(relations, 'product', 'productfiltervalue');
       relationsArray  = hashToArray(relationsHash);
+      
        //Check if product has all the filter values
-      relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      //relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      
       return relationsArray.map(function(relation) {
         return relation[0]; //Product ID
       });
