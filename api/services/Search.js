@@ -3,9 +3,12 @@ var _        = require('underscore');
 var Promise  = require('bluebird');
 
 module.exports = {
+  applyBrandsQuery        : applyBrandsQuery,
+  applyDiscountsQuery     : applyDiscountsQuery,  
   applyFilters            : applyFilters,
   applyOrFilters          : applyOrFilters,
   areFiltersApplied       : areFiltersApplied,
+  applyStockRangesQuery   : applyStockRangesQuery,
   getMultiIntersection    : getMultiIntersection,
   getProductsByCategories : getProductsByCategories,
   getProductsByCategory   : getProductsByCategory,
@@ -19,8 +22,35 @@ module.exports = {
   queryTerms              : queryTerms,
   populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   relatePromotionsToProducts: relatePromotionsToProducts,
-  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode  
+  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode,
+  getSortValueBySortOption: getSortValueBySortOption
 };
+
+function getSortValueBySortOption(sortOption, activeStore){
+  var sortValue = 'DiscountPrice ASC';
+
+  if(sortOption.key === 'stock'){
+    sortOption.key = activeStore.code;
+  }
+
+  switch(sortOption.key){
+    case 'stock':
+      sortOption.key = activeStore.code;
+      break;
+    case 'spotlight':
+    case 'lm':
+      sortOption.key = 'DiscountPrice';
+      break;
+    default:
+      sortOption.key = sortOption.key;
+      break;
+  }
+
+
+  sortValue = sortOption.key + ' ' + sortOption.direction;
+
+  return sortValue;
+}
 
 //Promotions array of promotion object with property productsIds
 function relatePromotionsToProducts(promotions, products){
@@ -61,6 +91,7 @@ function queryIdsProducts(query, idProducts) {
   });
 }
 
+
 function getPriceQuery(query, priceField, minPrice, maxPrice) {
   var priceQuery = {
     '>=': minPrice || 0,
@@ -84,6 +115,44 @@ function applyFilters(query, filters) {
   return query;
 }
 
+function applyBrandsQuery(query, brandsIds){
+  if( _.isArray(brandsIds) && brandsIds.length > 0 ){
+    query.CustomBrand = brandsIds;
+  }
+  return query;
+}
+
+function applyDiscountsQuery(query, discounts){
+  if( _.isArray(discounts) && discounts.length > 0 ){
+    query.Discount = discounts;
+  }
+  return query;
+}
+
+function applyStockRangesQuery(query, stockField, stockRanges) {
+  if( _.isArray(stockRanges) && stockRanges.length > 0 ){
+    var orConditions = stockRanges.map(function(stockRange){
+      var stockRangeQuery = {
+        '>=': stockRange[0],
+        '<=': stockRange[1]
+      };
+
+      var orQuery = {};
+      orQuery[stockField] = stockRangeQuery;
+
+      return orQuery;
+    });
+
+    if(query.$and){
+      query.$and.push({$or: orConditions});
+    }else{
+      query.$and = [{$or:orConditions}];
+    }
+  }
+
+  return query;
+}
+
 function applyOrFilters(query, filters){
   if( _.isArray(filters) && filters.length > 0 ){
     var andConditions = [];
@@ -100,8 +169,9 @@ function applyOrFilters(query, filters){
         }
       }
     });
+
     if(andConditions.length > 0){
-      query.$and = andConditions;
+      query.$and = query.$and ?  query.$and.concat(andConditions) : query.$and;
     }
   }
   return query;
@@ -117,8 +187,15 @@ function isFilterValid(filter){
   return false;
 }
 
+function areEmptyTerms(terms){
+  return _.every(terms,function(term){
+    return !term;
+  });
+}
+
 function queryTerms(query, terms) {
-  if (!terms || terms.length == 0) {
+
+  if (!terms || terms.length === 0 || areEmptyTerms(terms) ) {
     return query;
   }
   var searchFields = [
@@ -182,8 +259,10 @@ function getProductsByFilterValue(filtervaluesIds){
     .then(function(relations) {
       relationsHash   = getProductRelationsHash(relations, 'product', 'productfiltervalue');
       relationsArray  = hashToArray(relationsHash);
+      
        //Check if product has all the filter values
-      relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      //relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      
       return relationsArray.map(function(relation) {
         return relation[0]; //Product ID
       });

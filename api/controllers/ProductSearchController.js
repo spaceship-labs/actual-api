@@ -9,6 +9,10 @@ module.exports = {
     var filtervalues   = [].concat(form.ids || []);
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
+    var stockRanges    = form.stockRanges;
+    var brandsIds      = form.brandsIds;
+    var discounts      = form.discounts;
+    var sortOption     = form.sortOption;
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore.id || false;
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
@@ -26,6 +30,9 @@ module.exports = {
 
     query            = Search.queryTerms(query, terms);
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
+    query            = Search.applyBrandsQuery(query, brandsIds);
+    query            = Search.applyDiscountsQuery(query, discounts);
+
     query.Active     = 'Y';
     
     Search.getProductsByFilterValue(filtervalues)
@@ -37,6 +44,11 @@ module.exports = {
         }
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
+        }
+
+        if(stockRanges && _.isArray(stockRanges) && stockRanges.length > 0 ){
+          delete query[activeStore.code];
+          query = Search.applyStockRangesQuery(query, activeStore.code, stockRanges);
         }
 
         var freeSaleQuery = _.clone(query);
@@ -60,6 +72,10 @@ module.exports = {
           //find = find.populate('files');
         }
 
+        if(sortOption){
+          sortValue = Search.getSortValueBySortOption(sortOption, activeStore);
+        }
+
         return [
           Product.count(searchQuery),
           find.paginate(paginate).sort(sortValue)
@@ -77,19 +93,27 @@ module.exports = {
   searchByCategory: function(req, res) {
     var form           = req.params.all();
     var handle         = [].concat(form.category);
-    var filtervalues   = [].concat(form.filtervalues);
+    var filtervalues   = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore.id || false;
-    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
+    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;   
+    var minPrice       = form.minPrice;
+    var maxPrice       = form.maxPrice;
+    var stockRanges    = form.stockRanges;
+    var brandsIds      = form.brandsIds;
+    var discounts      = form.discounts;
+    var sortOption     = form.sortOption;
+
     var query          = {};
     var productsIds    = [];
     var promotions     = [];
     var activeStore    = req.user.activeStore;
     var priceField     = 'DiscountPrice';
-    var minPrice       = form.minPrice;
-    var maxPrice       = form.maxPrice;
 
     query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
+    query = Search.applyBrandsQuery(query, brandsIds);
+    query = Search.applyDiscountsQuery(query, discounts);
+
 
     var paginate       = {
       page:  form.page  || 1,
@@ -99,21 +123,22 @@ module.exports = {
 
     Search.getProductsByCategory({Handle:handle})
       .then(function(results) {
-        var catprods = results;
-
+        var categoryProducts = results;
         return [
-          catprods, 
+          categoryProducts, 
           Search.getProductsByFilterValue(filtervalues)
         ];
       })
-      .spread(function(catprods, filterprods) {
+      .spread(function(categoryProducts, filterprods) {
+
         if (!handle || handle.length === 0) {
           return filterprods;
         } else if(!filtervalues || filtervalues.length === 0) {
-          return catprods;
+          return categoryProducts;
         } else {
-          return _.intersection(catprods, filterprods);
+          return _.intersection(categoryProducts, filterprods);
         }
+
       })
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
@@ -126,6 +151,11 @@ module.exports = {
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
         } 
+
+        if(stockRanges && _.isArray(stockRanges) && stockRanges.length > 0 ){
+          delete query[activeStore.code];
+          query = Search.applyStockRangesQuery(query, activeStore.code, stockRanges);
+        }        
 
         var freeSaleQuery = _.clone(query);
         freeSaleQuery = _.extend(freeSaleQuery, {
@@ -142,6 +172,10 @@ module.exports = {
         };
 
         var sortValue = 'DiscountPrice ASC';
+
+        if(sortOption){
+          sortValue = Search.getSortValueBySortOption(sortOption, activeStore);
+        }
 
         return [
           Product.count(searchQuery),
