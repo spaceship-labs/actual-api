@@ -154,8 +154,27 @@ module.exports = {
       });
   },
 
+  setEstimatedCloseDate: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+
+    Quotation.update({id: id}, {estimatedCloseDate: form.estimatedCloseDate})
+      .then(function(updated){
+        if(updated.length > 0){
+          res.json(updated[0].estimatedCloseDate);
+        }
+        else{
+          res.json(false);
+        }
+      })
+      .catch(function(err){
+        console.log('err setEstimatedCloseDate', err);
+        res.negotiate(err);
+      });
+  },
+
   addRecord: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var createdRecord = false;
     var addedFile = false;
@@ -170,27 +189,11 @@ module.exports = {
     QuotationRecord.create(form)
       .then(function(createdRecordResult){
         createdRecord = createdRecordResult;
-        promises = [
-          QuotationRecord.findOne({id:createdRecord.id}).populate('User'),
-        ];
-
-        if(form.estimatedCloseDate){
-          promises.push(
-            Quotation.update({id: form.Quotation}, {estimatedCloseDate: form.estimatedCloseDate})
-          );
-        }
-
-        return Promise.all(promises); 
+        
+        return QuotationRecord.findOne({id:createdRecord.id}).populate('User');
       })
-      .then(function(results){
-        var foundRecord = results[0];
-        var updatedQuotations = results[1];
-
+      .then(function(foundRecord){
         createdRecord = foundRecord;
-
-        if(updatedQuotations){
-          updatedQuotation = updatedQuotations[0];
-        }
 
         //if(req.file('file')._files[0]){
         if(req._fileparser.upstreams.length){
@@ -213,17 +216,7 @@ module.exports = {
         return createdRecord;
       })
       .then(function(record){
-
-        var responseData = {
-          record: record
-        };
-
-        if(updatedQuotation && form.estimatedCloseDate){
-          responseData.estimatedCloseDate = updatedQuotation.estimatedCloseDate;
-        }
-
-        res.json(responseData);
-
+        res.json(record);
       })
       .catch(function(err){
         console.log(err);
