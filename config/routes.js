@@ -114,6 +114,26 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  'post /spotlightproducts':{
+    controller: 'product',
+    action: 'setSpotlightProducts'
+  },
+
+  'get /spotlightproducts':{
+    controller: 'product',
+    action: 'getSpotlightProducts'
+  },
+
+  'post /slowmovementproducts':{
+    controller: 'product',
+    action: 'setSlowMovementProducts'
+  },
+
+  'get /slowmovementproducts':{
+    controller: 'product',
+    action: 'getSlowMovementProducts'
+  },
+
   '/sync/syncproductbyitemcode/:itemcode':{
     controller: 'sync',
     action: 'syncProductByItemCode'

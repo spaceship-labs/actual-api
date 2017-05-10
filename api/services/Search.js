@@ -7,24 +7,36 @@ module.exports = {
   applyDiscountsQuery     : applyDiscountsQuery,  
   applyFilters            : applyFilters,
   applyOrFilters          : applyOrFilters,
-  areFiltersApplied       : areFiltersApplied,
+  applySlowMovementQuery  : applySlowMovementQuery,
+  applySpotlightQuery     : applySpotlightQuery,
   applyStockRangesQuery   : applyStockRangesQuery,
+  areFiltersApplied       : areFiltersApplied,
+  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode,
   getMultiIntersection    : getMultiIntersection,
+  getPriceQuery           : getPriceQuery,
   getProductsByCategories : getProductsByCategories,
   getProductsByCategory   : getProductsByCategory,
   getProductsByFilterValue: getProductsByFilterValue,
   getProductsByGroup      : getProductsByGroup,
   getPromotionsQuery      : getPromotionsQuery,
+  getSortValueBySortOption: getSortValueBySortOption,
   hashToArray             : hashToArray,
+  populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   promotionCronJobSearch  : promotionCronJobSearch,
   queryIdsProducts        : queryIdsProducts,
-  getPriceQuery           : getPriceQuery,
   queryTerms              : queryTerms,
-  populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   relatePromotionsToProducts: relatePromotionsToProducts,
-  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode,
-  getSortValueBySortOption: getSortValueBySortOption
 };
+
+function applySlowMovementQuery(query){
+  query.slowMovement = true;
+  return query;
+}
+
+function applySpotlightQuery(query){
+  query.spotlight = true;
+  return query;
+}
 
 function getSortValueBySortOption(sortOption, activeStore){
   var sortValue = 'DiscountPrice ASC';
@@ -38,7 +50,7 @@ function getSortValueBySortOption(sortOption, activeStore){
       sortOption.key = activeStore.code;
       break;
     case 'spotlight':
-    case 'lm':
+    case 'slowMovement':
       sortOption.key = 'DiscountPrice';
       break;
     default:

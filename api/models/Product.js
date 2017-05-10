@@ -134,6 +134,7 @@ module.exports = {
           'softline'
         ]
       },
+      spotlight: {type:'boolean'},
 
       actual_studio_merida:{type:'integer'},
       actual_studio_malecon:{type:'integer'},

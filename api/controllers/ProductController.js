@@ -297,5 +297,69 @@ module.exports = {
         console.log('err', err);
         res.negotiate(err);
       });
-  }
+  },
+
+  getSpotlightProducts: function(req, res){
+    Product.find({spotlight: true})
+      .then(function(products){
+        res.json(products);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  },
+
+  setSpotlightProducts: function(req, res){
+    var form = req.allParams();
+    var itemCodes = form.itemCodes;
+
+    Common.nativeUpdate({},{spotlight: false}, Product)
+      .then(function(){
+        var query = {
+          ItemCode: { $in: itemCodes }
+        };
+
+        return Common.nativeUpdate(query,{spotlight: true}, Product);
+      })
+      .then(function(result){
+        res.json(result);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  },
+
+  getSlowMovementProducts: function(req, res){
+    Product.find({slowMovement: true})
+      .then(function(products){
+        res.json(products);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  },
+
+  setSlowMovementProducts: function(req, res){
+    var form = req.allParams();
+    var itemCodes = form.itemCodes;
+
+    Common.nativeUpdate({},{slowMovement: false}, Product)
+      .then(function(){
+        var query = {
+          ItemCode: { $in: itemCodes }
+        };
+
+        return Common.nativeUpdate(query,{slowMovement: true}, Product);
+      })
+      .then(function(result){
+        res.json(result);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  }  
 };
