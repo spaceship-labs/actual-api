@@ -15,6 +15,8 @@ module.exports = {
     var sortOption     = form.sortOption;
     var slowMovement   = form.slowMovement;
     var spotlight      = form.spotlight;
+    var societyCodes   = form.societyCodes;
+
     var queryPromos    = Search.getPromotionsQuery();
     var activeStoreId  = req.user.activeStore.id || false;
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
@@ -34,6 +36,7 @@ module.exports = {
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query            = Search.applyBrandsQuery(query, brandsIds);
     query            = Search.applyDiscountsQuery(query, discounts);
+    query            = Search.applySocietiesQuery(query, societyCodes);            
 
     if(spotlight){
       query = Search.applySpotlightQuery(query);
@@ -115,7 +118,7 @@ module.exports = {
     var sortOption     = form.sortOption;
     var slowMovement   = form.slowMovement;
     var spotlight      = form.spotlight;
-
+    var societyCodes   = form.societyCodes;
 
     var query          = {};
     var productsIds    = [];
@@ -126,7 +129,7 @@ module.exports = {
     query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query = Search.applyBrandsQuery(query, brandsIds);
     query = Search.applyDiscountsQuery(query, discounts);
-
+    query = Search.applySocietiesQuery(query, societyCodes);            
 
     if(spotlight){
       query = Search.applySpotlightQuery(query);

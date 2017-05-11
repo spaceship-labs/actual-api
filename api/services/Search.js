@@ -10,6 +10,7 @@ module.exports = {
   applySlowMovementQuery  : applySlowMovementQuery,
   applySpotlightQuery     : applySpotlightQuery,
   applyStockRangesQuery   : applyStockRangesQuery,
+  applySocietiesQuery     : applySocietiesQuery,
   areFiltersApplied       : areFiltersApplied,
   getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode,
   getMultiIntersection    : getMultiIntersection,
@@ -35,6 +36,13 @@ function applySlowMovementQuery(query){
 
 function applySpotlightQuery(query){
   query.spotlight = true;
+  return query;
+}
+
+function applySocietiesQuery(query, societyCodes){
+  if( _.isArray(societyCodes) && societyCodes.length > 0 ){
+    query.U_Empresa = societyCodes;
+  }
   return query;
 }
 
