@@ -567,17 +567,11 @@ function getPaidPercentage(amountPaid, total){
 
   //Floating point issue precision with JS
   //TODO find fix to precision
-  //When the remaining percentage of total to pay is less than 0.0001 round to 100%
-  //For example: 99.99999999999999 round to 100
-  var toleranceFloat = 0.0001;
-  var minTolerance = 99;
-  var remainingPercentage = (100 - percentage);
-  console.log('percentage', percentage);
-  console.log('remainingPercentage', remainingPercentage);
-  if( remainingPercentage <= toleranceFloat && percentage > minTolerance && remainingPercentage > 0){
+  //Problem: sometimes ammount paid and total is equal, but percentage throws: 99.99999999999999
+  //Return 100 when total and ammount paid is equal
+  if(ammountPaid === total){
     percentage = 100;
   }
-  console.log('final percentage', percentage);
 
 
   return percentage;
