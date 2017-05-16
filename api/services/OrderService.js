@@ -564,6 +564,22 @@ function createEwalletRecord(record){
 
 function getPaidPercentage(amountPaid, total){
   var percentage = amountPaid / (total / 100);
+
+  //Floating point issue precision with JS
+  //TODO find fix to precision
+  //When the remaining percentage of total to pay is less than 0.0001 round to 100%
+  //For example: 99.99999999999999 round to 100
+  var toleranceFloat = 0.0001;
+  var minTolerance = 99;
+  var remainingPercentage = (100 - percentage);
+  console.log('percentage', percentage);
+  console.log('remainingPercentage', remainingPercentage);
+  if( remainingPercentage <= toleranceFloat && percentage > minTolerance && remainingPercentage > 0){
+    percentage = 100;
+  }
+  console.log('final percentage', percentage);
+
+
   return percentage;
 }
 
