@@ -569,7 +569,7 @@ function getPaidPercentage(amountPaid, total){
   //TODO find fix to precision
   //Problem: sometimes ammount paid and total is equal, but percentage throws: 99.99999999999999
   //Return 100 when total and ammount paid is equal
-  if(ammountPaid === total){
+  if(amountPaid === total){
     percentage = 100;
   }
 
