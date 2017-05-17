@@ -184,6 +184,7 @@ function buildSaleOrderRequestParams(params){
   var ACTUAL_STUDIO_CUMBRES_GROUPCODE = 4;
   var ACTUAL_STUDIO_MALECON_GROUPCODE = 1;
   var ACTUAL_STUDIO_PLAYA_GROUPCODE = 2;
+  var ACTUAL_STUDIO_MERIDA_GROUPCODE = 3;
 
 
   if(params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE && 
@@ -191,6 +192,7 @@ function buildSaleOrderRequestParams(params){
     params.groupCode != ACTUAL_STUDIO_CUMBRES_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_MALECON_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_PLAYA_GROUPCODE &&
+    params.groupCode != ACTUAL_STUDIO_MERIDA_GROUPCODE &&
     process.env.MODE === 'production' 
   ){
     return Promise.reject(new Error("La creación de pedidos para esta tienda esta deshabilitada"));

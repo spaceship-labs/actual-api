@@ -23,7 +23,9 @@ module.exports = {
     var ACTUAL_STUDIO_CUMBRES_CODE = 'actual_studio_cumbres';
     var ACTUAL_STUDIO_MALECON_CODE = 'actual_studio_malecon';
     var ACTUAL_STUDIO_PLAYA_CODE = 'actual_studio_playa_del_carmen';
+    var ACTUAL_STUDIO_MERIDA_CODE = 'actual_studio_merida';    
     var PROJECTS_CODE = 'actual_proyect';
+    
     var storeCode = req.user.activeStore.code;
     var quotationTotal;
     var previousPayments;
@@ -41,6 +43,7 @@ module.exports = {
       storeCode !== ACTUAL_STUDIO_CUMBRES_CODE &&
       storeCode !== ACTUAL_STUDIO_MALECON_CODE && 
       storeCode !== ACTUAL_STUDIO_PLAYA_CODE && 
+      storeCode !== ACTUAL_STUDIO_MERIDA_CODE && 
       storeCode !== PROJECTS_CODE && 
       process.env.MODE === 'production'
     ){
