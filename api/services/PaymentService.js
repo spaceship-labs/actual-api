@@ -96,7 +96,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
     'discountPg4',
     'discountPg5'
   ];
-      
+
   var totalsPromises = methodsGroups.map(function(mG) {
     var id = quotationId;
     var paymentGroup = mG.group || 1;
@@ -107,7 +107,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
     };
     params.currentStoreId = activeStore.id;
     var calculator = QuotationService.Calculator();
-    return calculator.getQuotationTotals(id, params);        
+    return calculator.getQuotationTotals(id, params);
   });
 
   return Promise.all(totalsPromises)
@@ -128,16 +128,16 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }
 
       //sails.log.info('clientHasCredit', clientHasCredit);
-      
+
       //TEMPORAL: DISABLED CREDIT METHOD
       //methodsGroups = removeCreditMethod(methodsGroups);
-      
+
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
       }else{
         methodsGroups = removeCreditMethod(methodsGroups);
       }
-      
+
 
       methodsGroups = methodsGroups.map(function(mG, index){
         mG.total = totalsByGroup[index].total || 0;
@@ -229,7 +229,7 @@ function filterPaymentTotalsForDiscountClients(paymentTotals){
 function filterMethodsGroupsForDiscountClients(methodsGroups){
   methodsGroups = methodsGroups.filter(function(mg){
     return mg.group === 1;
-  });  
+  });
 
   return methodsGroups;
 }
@@ -238,17 +238,29 @@ function getPaymentGroupsForEmail(quotation, activeStore) {
   return getMethodGroupsWithTotals(quotation, activeStore)
     .then(function(res) {
       var cash = [{
-        name: 'Pago único',
+        name: '1 pago de contado',
         cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
         total: numeral(res[0].total).format('0,0.00'),
       }];
       res = res.slice(1);
       var methods  = res.reduce(function(acum, current) {
-        return acum.concat(current.methods);
+        var grouped = _.groupBy(current.methods, 'mainCard');
+        for (var k in grouped) {
+          var msi = _.every(grouped[k], function(m) { return m.msi });
+          var merged = grouped[k].reduce(function(a, b) {
+            return {
+              name:  msi ? [a.msi, b.msi].join(', ') + ' Meses sin intereses' : [a.name, b.name].join(', '),
+              cards: a.cards,
+              total: a.total,
+            };
+          });
+          acum = acum.concat(merged);
+        }
+        return acum;
       }, []);
       methods = methods.map(function(mi) {
         return {
-          name: mi.name,
+          name: mi.msi ? mi.msi + ' Meses sin intereses' : mi.name,
           cards: mi.cards.join(','),
           total: numeral(mi.total).format('0,0.00'),
         };
@@ -270,7 +282,7 @@ function addCreditMethod(methodsGroups){
   return methodsGroups.map(function(mg){
     if(mg.group === 1){
       var isCreditMethodAdded = _.findWhere(mg.methods,{type:'client-credit'});
-      
+
       if(!isCreditMethodAdded){
         mg.methods.unshift(creditMethod);
       }
@@ -299,13 +311,13 @@ function removeCreditMethod(methodsGroups){
           return false;
         }
       });
-      
+
       if(isCreditMethodAdded && creditMethodIndex > -1){
         mg.methods.splice(creditMethodIndex, 1);
       }
     }
     return mg;
-  });  
+  });
 }
 
 var creditMethod = {
@@ -329,7 +341,7 @@ var paymentGroups = [
         description:'',
         currency:'mxn',
         needsVerification: false
-      },    
+      },
       {
         label:'Efectivo MXN',
         name:'Efectivo MXN',
@@ -476,7 +488,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },    
+      },
       {
         label:'6',
         name:'6 meses sin intereses',
@@ -496,7 +508,7 @@ var paymentGroups = [
           'Banjercito',
           'Banorte',
           'Banregio',
-          'HSBC',          
+          'HSBC',
           'Inbursa',
           'Itaucard',
           'Ixe',
@@ -565,7 +577,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      }, 
+      },
       {
         label:'9',
         name:'9 meses sin intereses con Banamex',
@@ -585,7 +597,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },           
+      },
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -605,7 +617,7 @@ var paymentGroups = [
           'Banjercito',
           'Banorte',
           'Banregio',
-          'HSBC',          
+          'HSBC',
           'Inbursa',
           'Itaucard',
           'Ixe',
@@ -623,7 +635,7 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },     
+      },
     ]
   },
   {
@@ -649,7 +661,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },      
+      },
       /*
       {
         label:'13',
@@ -670,8 +682,8 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },     
-      
+      },
+
       {
         label:'18',
         name:'18 meses sin intereses',
@@ -692,7 +704,7 @@ var paymentGroups = [
         web:true
       },
       */
-      
+
     ]
   },
 ];
