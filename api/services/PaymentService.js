@@ -238,17 +238,29 @@ function getPaymentGroupsForEmail(quotation, activeStore) {
   return getMethodGroupsWithTotals(quotation, activeStore)
     .then(function(res) {
       var cash = [{
-        name: 'Pago único',
+        name: '1 pago de contado',
         cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
         total: numeral(res[0].total).format('0,0.00'),
       }];
       res = res.slice(1);
       var methods  = res.reduce(function(acum, current) {
-        return acum.concat(current.methods);
+        var grouped = _.groupBy(current.methods, 'mainCard');
+        for (var k in grouped) {
+          var msi = _.every(grouped[k], function(m) { return m.msi });
+          var merged = grouped[k].reduce(function(a, b) {
+            return {
+              name:  msi ? [a.msi, b.msi].join(', ') + ' Meses sin intereses' : [a.name, b.name].join(', '),
+              cards: a.cards,
+              total: a.total,
+            };
+          });
+          acum = acum.concat(merged);
+        }
+        return acum;
       }, []);
       methods = methods.map(function(mi) {
         return {
-          name: mi.name,
+          name: mi.msi ? mi.msi + ' Meses sin intereses' : mi.name,
           cards: mi.cards.join(','),
           total: numeral(mi.total).format('0,0.00'),
         };
@@ -393,7 +405,7 @@ var paymentGroups = [
       */
       {
         label:'1 pago con',
-        name:'Una sola exhibición terminal',
+        name:'Una sola exhibición',
         type:'single-payment-terminal',
         description:'VISA, MasterCard, American Express',
         cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
