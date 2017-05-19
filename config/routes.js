@@ -339,11 +339,6 @@ module.exports.routes = {
     action: 'findById'
   },
 
-  '/productgroup/findbyid/:id':{
-    controller: 'productGroup',
-    action: 'findById'
-  },
-
   '/productgroup/create':{
     controller: 'productgroup',
     action:'create'
@@ -777,6 +772,11 @@ module.exports.routes = {
     controller:'payment',
     action:'getPaymentGroups'
   },
+
+  '/srservices':{
+    controller: 'srservice',
+    action: 'find'
+  }
 
   /*
   '/fixorders':{
