@@ -224,6 +224,7 @@ function buildSaleOrderRequestParams(params){
           DiscountPercent: detail.discountPercent,
           Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
           Price: detail.total,
+          InvntItem: detail.Product.InvntItem, //FOR SR SERVICES
           ImmediateDelivery: Shipping.isDateImmediateDelivery(detail.shipDate),
           DetailId: detail.id
           //unitPrice: detail.Product.Price
