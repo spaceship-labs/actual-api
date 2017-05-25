@@ -16,6 +16,7 @@ module.exports = {
   calculateQuotationAmountPaid: calculateQuotationAmountPaid,
   calculateQuotationAmountPaidGroup1: calculateQuotationAmountPaidGroup1,
   calculateUSDPayment: calculateUSDPayment,
+  checkIfClientHasCreditById: checkIfClientHasCreditById,
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
   getPaymentGroups: getPaymentGroups,
@@ -116,7 +117,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       return [
         totalsPromises,
         getExchangeRate(),
-        checkIfClientHasCredit(quotationId)
+        checkIfClientHasCreditByQuotationId(quotationId)
       ];
     })
     .spread(function(totalsPromises, exchangeRate, clientHasCredit) {
@@ -194,7 +195,7 @@ function isADiscountClient(paymentTotals){
   });
 }
 
-function checkIfClientHasCredit(quotationId){
+function checkIfClientHasCreditByQuotationId(quotationId){
   return Quotation.findOne({id: quotationId}).populate('Client')
     .then(function(quotation){
       if(!quotation || !quotation.Client){
@@ -208,16 +209,48 @@ function checkIfClientHasCredit(quotationId){
         Name: quotation.Client.CardCode,
         U_Vigencia: {'>=': currentDate}
       };
-      sails.log.info('creditQuery', creditQuery);
       return ClientCredit.findOne(creditQuery)
         .then(function(credit){
-          sails.log.info('credit', credit);
           if( credit && !_.isUndefined(credit) ){
             return credit;
           }
           return false;
         });
     });
+}
+
+function checkIfClientHasCreditById(clientId, options){
+    var defaultOptions = {
+      throwError: true
+    };
+    options = options || defaultOptions;
+
+    return Client.findOne({id: clientId})
+      .then(function(client){
+        if(!client){
+          return Promise.reject(new Error('Este cliente no tiene credito autorizado'));
+        }
+
+        var currentDate = new Date();
+        var creditQuery = {
+          Name: client.CardCode,
+          U_Vigencia: {'>=': currentDate}
+        };
+        sails.log.info('creditQuery', creditQuery);
+        return ClientCredit.findOne(creditQuery);
+      })
+      .then(function(credit){
+        sails.log.info('credit', credit);
+        if( credit && !_.isUndefined(credit) ){
+          return credit;
+        }
+        
+        if(!credit && options.throwError){
+          return Promise.reject(new Error('Este cliente no tiene credito autorizado'));          
+        }
+
+        return false;
+      });
 }
 
 function filterPaymentTotalsForDiscountClients(paymentTotals){

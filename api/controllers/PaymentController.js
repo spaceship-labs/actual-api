@@ -3,6 +3,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var EWALLET_TYPE = 'ewallet';
 var CLIENT_BALANCE_TYPE = 'client-balance';
+var CLIENT_CREDIT_TYPE = 'client-credit';
 var EWALLET_NEGATIVE = 'negative';
 var CANCELLED_STATUS = 'cancelled';
 var PAYMENT_CANCEL_TYPE = 'cancellation';
@@ -93,10 +94,16 @@ module.exports = {
           financingTotals: true
         };
 
-        return [
+        var auxPromises = [
           PaymentService.getExchangeRate(),
           calculator.getQuotationTotals(form.Quotation ,calculatorParams),
         ];
+
+        if(typeof form.Client === 'string' && form.type === CLIENT_CREDIT_TYPE){
+          auxPromises.push(PaymentService.checkIfClientHasCreditById(form.Client));
+        }
+
+        return auxPromises;
       })
       .spread(function(exchangeRateFound, quotationTotals){
         exchangeRate = exchangeRateFound;
