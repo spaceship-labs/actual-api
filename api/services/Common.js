@@ -36,9 +36,13 @@ module.exports = {
             console.log('err findOne',errFind);
             reject(errFind);
           }
-          recordFound = formatMongoRecord(recordFound);
-          resolve(recordFound);
-        });
+          if(recordFound){
+            recordFound = formatMongoRecord(recordFound);
+            resolve(recordFound);
+          }else{
+            resolve();
+          }
+      });
       });
 
     });
