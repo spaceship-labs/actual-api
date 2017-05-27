@@ -129,10 +129,10 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }
 
       //sails.log.info('clientHasCredit', clientHasCredit);
-      
-      //TEMPORAL: DISABLED CREDIT METHOD
-      //methodsGroups = removeCreditMethod(methodsGroups);
-      
+            
+      //TEMPORAL DISABLED 12msi in group 4
+      methodsGroups = remove12msiMethodFromGroup4(methodsGroups);
+
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
       }else{
@@ -352,6 +352,28 @@ function removeCreditMethod(methodsGroups){
     return mg;
   });  
 }
+
+function remove12msiMethodFromGroup4(methodsGroups){
+  return methodsGroups.map(function(mg){
+    if(mg.group === 4){
+      var _12msiMethodIndex = -1;
+      var is12msiMethodAdded = _.find(mg.methods,function(item, index){
+        if(item.type === '12-msi'){
+          _12msiMethodIndex = index;
+          return true;
+        }else{
+          return false;
+        }
+      });
+      
+      if(is12msiMethodAdded && _12msiMethodIndex > -1){
+        mg.methods.splice(_12msiMethodIndex, 1);
+      }
+    }
+    return mg;
+  });  
+}
+
 
 var creditMethod = {
   label:'Credito',
@@ -647,7 +669,6 @@ var paymentGroups = [
         web:true,
         mainCard: 'banamex'
       }, 
-      /*          
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -687,7 +708,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true
       },  
-      */   
+         
     ]
   },
   {
