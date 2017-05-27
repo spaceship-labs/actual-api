@@ -646,7 +646,8 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },           
+      }, 
+      /*          
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -685,7 +686,8 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },     
+      },  
+      */   
     ]
   },
   {
