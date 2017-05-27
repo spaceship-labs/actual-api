@@ -131,7 +131,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       //sails.log.info('clientHasCredit', clientHasCredit);
             
       //TEMPORAL DISABLED 12msi in group 4
-      methodsGroups = remove12msiMethodFromGroup4(methodsGroups);
+      //methodsGroups = remove12msiMethodFromGroup4(methodsGroups);
 
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
@@ -668,7 +668,13 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      }, 
+      },          
+    ]
+  },
+  {
+    group:5,
+    discountKey:'discountPg5',
+    methods: [
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -707,14 +713,7 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },  
-         
-    ]
-  },
-  {
-    group:5,
-    discountKey:'discountPg5',
-    methods: [
+      },        
       {
         label:'12',
         name:'12 meses sin intereses con Banamex',
