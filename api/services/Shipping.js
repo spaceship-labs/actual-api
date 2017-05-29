@@ -100,6 +100,7 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
       if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
         days = productDays;
       }
+
       
       var date = addDays(new Date(), days);
 
