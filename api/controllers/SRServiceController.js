@@ -7,7 +7,7 @@ module.exports = {
     var items = form.items || 10;
     var page = form.page || 1;
     var query = {
-      InvntItem: 'N',
+      Service: 'Y',
       skip: (page-1) * items,
       limit: items
     };
