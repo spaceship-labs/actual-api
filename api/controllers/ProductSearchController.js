@@ -13,17 +13,11 @@ module.exports = {
     var brandsIds      = form.brandsIds;
     var discounts      = form.discounts;
     var sortOption     = form.sortOption;
-    var slowMovement   = form.slowMovement;
-    var spotlight      = form.spotlight;
     var societyCodes   = form.societyCodes;
 
-    var queryPromos    = Search.getPromotionsQuery();
-    var activeStoreId  = req.user.activeStore.id || false;
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
-    var warehouses     = [];
     var productsIds    = [];
-    var promotions     = [];
     var activeStore    = req.user.activeStore;
     var paginate     = {
       page:  form.page  || 1,
@@ -37,15 +31,6 @@ module.exports = {
     query            = Search.applyBrandsQuery(query, brandsIds);
     query            = Search.applyDiscountsQuery(query, discounts);
     query            = Search.applySocietiesQuery(query, societyCodes);            
-
-    if(spotlight){
-      query = Search.applySpotlightQuery(query);
-    }
-
-    if(slowMovement){
-      query = Search.applySlowMovementQuery(query);      
-    }
-
     query.Active     = 'Y';
     
     Search.getProductsByFilterValue(filtervalues)
@@ -107,8 +92,6 @@ module.exports = {
     var form           = req.params.all();
     var handle         = [].concat(form.category);
     var filtervalues   = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
-    var queryPromos    = Search.getPromotionsQuery();
-    var activeStoreId  = req.user.activeStore.id || false;
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;   
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
@@ -116,13 +99,10 @@ module.exports = {
     var brandsIds      = form.brandsIds;
     var discounts      = form.discounts;
     var sortOption     = form.sortOption;
-    var slowMovement   = form.slowMovement;
-    var spotlight      = form.spotlight;
     var societyCodes   = form.societyCodes;
 
     var query          = {};
     var productsIds    = [];
-    var promotions     = [];
     var activeStore    = req.user.activeStore;
     var priceField     = 'DiscountPrice';
 
@@ -131,19 +111,10 @@ module.exports = {
     query = Search.applyDiscountsQuery(query, discounts);
     query = Search.applySocietiesQuery(query, societyCodes);            
 
-    if(spotlight){
-      query = Search.applySpotlightQuery(query);
-    }
-
-    if(slowMovement){
-      query = Search.applySlowMovementQuery(query);      
-    }
-
     var paginate       = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
-    var productsIdsAux = [];
 
     Search.getProductsByCategory({Handle:handle})
       .then(function(results) {
@@ -229,8 +200,6 @@ module.exports = {
     var groups             = [].concat(form.groups);
     var sas                = [].concat(form.sas);
     var populateImgs       = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;
-    var populatePromotions = !_.isUndefined(form.populatePromotions) ? form.populatePromotions : true;
-    var queryPromos        = Search.getPromotionsQuery();
     var activeStoreId      = req.user.activeStore.id || false;
     var filterByStore      = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var query              = {};
