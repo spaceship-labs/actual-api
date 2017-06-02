@@ -203,7 +203,7 @@ function Calculator(){
       totalProducts: 0,
       paymentGroup: options.paymentGroup,
       immediateDelivery: processedDetails.every(function(detail){
-        return detail.immediateDelivery;
+        return detail.immediateDelivery && !detail.isSRService;
       }),
       appliesClientDiscount: _.some(processedDetails,function(detail){
         return detail.clientDiscountReference;
@@ -418,8 +418,10 @@ function Calculator(){
           financingCostPercentage     : financingCostPercentage,
           unitPrice                   : unitPrice,
           unitPriceWithDiscount       : unitPriceWithDiscount,
-          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate)
+          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate),
+          isSRService                 : ProductService.isSRService(product)
         };
+
 
         if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){
           detailTotals.Promotion = mainPromo.id;

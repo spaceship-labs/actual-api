@@ -57,6 +57,7 @@ module.exports = {
           model:'productbrand'
       },
 
+      Service: {type:'string'},
       Grouper:{type:'string',size:17},
       SA:{type:'text'},
       MainFeatures:{type:'text'},
