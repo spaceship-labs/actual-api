@@ -125,6 +125,10 @@ module.exports = {
         type:'integer',
         defaultsTo: 0
       },
+      salesCount:{
+        type:'integer',
+        defaultsTo: 0
+    },
       slowMovement:{type:'boolean'},
       seenTimes: {type:'integer'},
       immediateDelivery:{type:'boolean'},

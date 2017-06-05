@@ -361,5 +361,17 @@ module.exports = {
         console.log('err', err);
         res.negotiate(err);
       });
+  },
+
+  testSold: function(req, res){
+    ProductService.cacheProductSoldCount()
+      .then(function(results){
+        res.ok();
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate('err', err);
+      })
   }  
+
 };

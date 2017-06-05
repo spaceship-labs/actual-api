@@ -14,6 +14,8 @@ module.exports = {
     var discounts      = form.discounts;
     var sortOption     = form.sortOption;
     var societyCodes   = form.societyCodes;
+    var slowMovement   = form.slowMovement;
+    
 
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
@@ -33,6 +35,10 @@ module.exports = {
     query            = Search.applySocietiesQuery(query, societyCodes);            
     query.Active     = 'Y';
     
+    if(slowMovement){
+      query = Search.applySlowMovementQuery(query);      
+    }    
+
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
         productsIds = result;
@@ -100,6 +106,7 @@ module.exports = {
     var discounts      = form.discounts;
     var sortOption     = form.sortOption;
     var societyCodes   = form.societyCodes;
+    var slowMovement   = form.slowMovement;
 
     var query          = {};
     var productsIds    = [];
@@ -110,6 +117,10 @@ module.exports = {
     query = Search.applyBrandsQuery(query, brandsIds);
     query = Search.applyDiscountsQuery(query, discounts);
     query = Search.applySocietiesQuery(query, societyCodes);            
+
+    if(slowMovement){
+      query = Search.applySlowMovementQuery(query);      
+    }    
 
     var paginate       = {
       page:  form.page  || 1,

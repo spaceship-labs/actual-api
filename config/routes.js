@@ -776,7 +776,8 @@ module.exports.routes = {
   '/srservices':{
     controller: 'srservice',
     action: 'find'
-  }
+  },
+
 
   /*
   '/fixorders':{
