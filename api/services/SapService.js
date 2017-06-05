@@ -255,6 +255,7 @@ function getCompanyCode(code, storeGroup){
         break;
       case PROJECTS_GROUP:
         companyCode = COMPANY_HOME_CODE;
+        break;
     }
   }
   return companyCode;
