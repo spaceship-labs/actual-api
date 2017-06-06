@@ -506,6 +506,11 @@ module.exports.routes = {
     action:'addRecord'
   },
 
+  '/quotation/:id/estimatedclosedate':{
+    controller: 'quotation',
+    action: 'setEstimatedCloseDate'
+  },
+
   '/quotation/adddetail/:id':{
     controller:'quotation',
     action:'addDetail'

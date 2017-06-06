@@ -389,6 +389,9 @@ function Calculator(){
           var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
           totalPg1 = _unitPriceWithDiscount * quantity;
           financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
+          if(isNaN(financingCostPercentage)){
+            financingCostPercentage = 0;
+          }
         }
 
         /*

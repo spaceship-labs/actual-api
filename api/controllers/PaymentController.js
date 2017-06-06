@@ -3,6 +3,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var EWALLET_TYPE = 'ewallet';
 var CLIENT_BALANCE_TYPE = 'client-balance';
+var CLIENT_CREDIT_TYPE = 'client-credit';
 var EWALLET_NEGATIVE = 'negative';
 var CANCELLED_STATUS = 'cancelled';
 var PAYMENT_CANCEL_TYPE = 'cancellation';
@@ -23,7 +24,9 @@ module.exports = {
     var ACTUAL_STUDIO_CUMBRES_CODE = 'actual_studio_cumbres';
     var ACTUAL_STUDIO_MALECON_CODE = 'actual_studio_malecon';
     var ACTUAL_STUDIO_PLAYA_CODE = 'actual_studio_playa_del_carmen';
+    var ACTUAL_STUDIO_MERIDA_CODE = 'actual_studio_merida';    
     var PROJECTS_CODE = 'actual_proyect';
+    
     var storeCode = req.user.activeStore.code;
     var quotationTotal;
     var previousPayments;
@@ -41,6 +44,7 @@ module.exports = {
       storeCode !== ACTUAL_STUDIO_CUMBRES_CODE &&
       storeCode !== ACTUAL_STUDIO_MALECON_CODE && 
       storeCode !== ACTUAL_STUDIO_PLAYA_CODE && 
+      storeCode !== ACTUAL_STUDIO_MERIDA_CODE && 
       storeCode !== PROJECTS_CODE && 
       process.env.MODE === 'production'
     ){
@@ -90,10 +94,16 @@ module.exports = {
           financingTotals: true
         };
 
-        return [
+        var auxPromises = [
           PaymentService.getExchangeRate(),
           calculator.getQuotationTotals(form.Quotation ,calculatorParams),
         ];
+
+        if(typeof form.Client === 'string' && form.type === CLIENT_CREDIT_TYPE){
+          auxPromises.push(PaymentService.checkIfClientHasCreditById(form.Client));
+        }
+
+        return auxPromises;
       })
       .spread(function(exchangeRateFound, quotationTotals){
         exchangeRate = exchangeRateFound;

@@ -16,6 +16,7 @@ module.exports = {
   calculateQuotationAmountPaid: calculateQuotationAmountPaid,
   calculateQuotationAmountPaidGroup1: calculateQuotationAmountPaidGroup1,
   calculateUSDPayment: calculateUSDPayment,
+  checkIfClientHasCreditById: checkIfClientHasCreditById,
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
   getPaymentGroups: getPaymentGroups,
@@ -116,7 +117,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       return [
         totalsPromises,
         getExchangeRate(),
-        checkIfClientHasCredit(quotationId)
+        checkIfClientHasCreditByQuotationId(quotationId)
       ];
     })
     .spread(function(totalsPromises, exchangeRate, clientHasCredit) {
@@ -128,9 +129,11 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }
 
       //sails.log.info('clientHasCredit', clientHasCredit);
-
       //TEMPORAL: DISABLED CREDIT METHOD
       //methodsGroups = removeCreditMethod(methodsGroups);
+            
+      //TEMPORAL DISABLED 12msi in group 4
+      //methodsGroups = remove12msiMethodFromGroup4(methodsGroups);
 
       if(clientHasCredit){
         methodsGroups = addCreditMethod(methodsGroups);
@@ -194,7 +197,7 @@ function isADiscountClient(paymentTotals){
   });
 }
 
-function checkIfClientHasCredit(quotationId){
+function checkIfClientHasCreditByQuotationId(quotationId){
   return Quotation.findOne({id: quotationId}).populate('Client')
     .then(function(quotation){
       if(!quotation || !quotation.Client){
@@ -208,16 +211,48 @@ function checkIfClientHasCredit(quotationId){
         Name: quotation.Client.CardCode,
         U_Vigencia: {'>=': currentDate}
       };
-      sails.log.info('creditQuery', creditQuery);
       return ClientCredit.findOne(creditQuery)
         .then(function(credit){
-          sails.log.info('credit', credit);
           if( credit && !_.isUndefined(credit) ){
             return credit;
           }
           return false;
         });
     });
+}
+
+function checkIfClientHasCreditById(clientId, options){
+    var defaultOptions = {
+      throwError: true
+    };
+    options = options || defaultOptions;
+
+    return Client.findOne({id: clientId})
+      .then(function(client){
+        if(!client){
+          return Promise.reject(new Error('Este cliente no tiene credito autorizado'));
+        }
+
+        var currentDate = new Date();
+        var creditQuery = {
+          Name: client.CardCode,
+          U_Vigencia: {'>=': currentDate}
+        };
+        sails.log.info('creditQuery', creditQuery);
+        return ClientCredit.findOne(creditQuery);
+      })
+      .then(function(credit){
+        sails.log.info('credit', credit);
+        if( credit && !_.isUndefined(credit) ){
+          return credit;
+        }
+        
+        if(!credit && options.throwError){
+          return Promise.reject(new Error('Este cliente no tiene credito autorizado'));          
+        }
+
+        return false;
+      });
 }
 
 function filterPaymentTotalsForDiscountClients(paymentTotals){
@@ -320,6 +355,28 @@ function removeCreditMethod(methodsGroups){
   });
 }
 
+function remove12msiMethodFromGroup4(methodsGroups){
+  return methodsGroups.map(function(mg){
+    if(mg.group === 4){
+      var _12msiMethodIndex = -1;
+      var is12msiMethodAdded = _.find(mg.methods,function(item, index){
+        if(item.type === '12-msi'){
+          _12msiMethodIndex = index;
+          return true;
+        }else{
+          return false;
+        }
+      });
+      
+      if(is12msiMethodAdded && _12msiMethodIndex > -1){
+        mg.methods.splice(_12msiMethodIndex, 1);
+      }
+    }
+    return mg;
+  });  
+}
+
+
 var creditMethod = {
   label:'Credito',
   name: 'Credito',
@@ -405,7 +462,7 @@ var paymentGroups = [
       */
       {
         label:'1 pago con',
-        name:'Una sola exhibición terminal',
+        name:'Una sola exhibición',
         type:'single-payment-terminal',
         description:'VISA, MasterCard, American Express',
         cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
@@ -446,6 +503,7 @@ var paymentGroups = [
           'Banregio',
           'HSBC',
           'Inbursa',
+          'Invex Banco',
           'Itaucard',
           'Ixe',
           'Liverpool Premium Card',
@@ -510,6 +568,7 @@ var paymentGroups = [
           'Banregio',
           'HSBC',
           'Inbursa',
+          'Invex Banco',
           'Itaucard',
           'Ixe',
           'Liverpool Premium Card',
@@ -538,8 +597,22 @@ var paymentGroups = [
         ],
         cards:[
           'American Express',
+          'Afirme',
           'Bancomer',
-          'Santander'
+          'Banbajio',
+          'Banca Mifel',
+          'Banco Ahorro Famsa',
+          'Banjercito',
+          'Banorte',
+          'Banregio',
+          'HSBC',          
+          'Inbursa',
+          'Itaucard',
+          'Invex Banco',
+          'Ixe',
+          'Liverpool Premium Card',
+          'Santander',
+          'Scotiabank'
         ],
         moreCards: true,
         terminals:[
@@ -597,7 +670,13 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },
+      },          
+    ]
+  },
+  {
+    group:5,
+    discountKey:'discountPg5',
+    methods: [
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -620,6 +699,7 @@ var paymentGroups = [
           'HSBC',
           'Inbursa',
           'Itaucard',
+          'Invex Banco',
           'Ixe',
           'Liverpool Premium Card',
           'Santander',
@@ -635,13 +715,7 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },
-    ]
-  },
-  {
-    group:5,
-    discountKey:'discountPg5',
-    methods: [
+      },      
       {
         label:'12',
         name:'12 meses sin intereses con Banamex',

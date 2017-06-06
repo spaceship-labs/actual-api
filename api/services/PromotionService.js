@@ -127,7 +127,7 @@ function mapClientDiscountWithPromotions(promotions, product, quotationId){
         clientDiscount = result;
       }
 
-      if(clientDiscount){
+      if(clientDiscount && !_.isUndefined(clientDiscount.U_Porcentaje2) ){
         
         if(clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT){
           promotions = mapClientAdditionalDiscounts(promotions, clientDiscount);
