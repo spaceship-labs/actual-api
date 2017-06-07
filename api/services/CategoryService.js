@@ -45,7 +45,7 @@ function getProductsStoresStock(products){
   stock = products.reduce(function(stockAux, product){
     for(var i = 0;i < storesCodes.length;i++){
       stockAux[storesCodes[i]] = stockAux[storesCodes[i]] || 0;
-      if(product[storesCodes[i]]){
+      if(product[storesCodes[i]] > 0){
         stockAux[storesCodes[i]]++;
       }
     }
