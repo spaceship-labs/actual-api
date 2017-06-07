@@ -57,6 +57,7 @@ module.exports = {
           model:'productbrand'
       },
 
+      Service: {type:'string'},
       Grouper:{type:'string',size:17},
       SA:{type:'text'},
       MainFeatures:{type:'text'},
@@ -124,6 +125,10 @@ module.exports = {
         type:'integer',
         defaultsTo: 0
       },
+      salesCount:{
+        type:'integer',
+        defaultsTo: 0
+    },
       slowMovement:{type:'boolean'},
       seenTimes: {type:'integer'},
       immediateDelivery:{type:'boolean'},
@@ -134,6 +139,7 @@ module.exports = {
           'softline'
         ]
       },
+      spotlight: {type:'boolean'},
 
       actual_studio_merida:{type:'integer'},
       actual_studio_malecon:{type:'integer'},

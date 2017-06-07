@@ -53,6 +53,7 @@ module.exports.policies = {
     update: ['isAuthenticated', 'isAllowed'],
     findById: true,
     search: true,
+    testSold: true
   },
   ProductCategoryController:{
     getCategoriesGroups: true,

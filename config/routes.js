@@ -114,6 +114,26 @@ module.exports.routes = {
     action: 'findById'
   },
 
+  'post /spotlightproducts':{
+    controller: 'product',
+    action: 'setSpotlightProducts'
+  },
+
+  'get /spotlightproducts':{
+    controller: 'product',
+    action: 'getSpotlightProducts'
+  },
+
+  'post /slowmovementproducts':{
+    controller: 'product',
+    action: 'setSlowMovementProducts'
+  },
+
+  'get /slowmovementproducts':{
+    controller: 'product',
+    action: 'getSlowMovementProducts'
+  },
+
   '/sync/syncproductbyitemcode/:itemcode':{
     controller: 'sync',
     action: 'syncProductByItemCode'
@@ -312,11 +332,6 @@ module.exports.routes = {
   '/productgroup/find/:page':{
     controller: 'productgroup',
     action: 'find'
-  },
-
-  '/productgroup/findbyid/:id':{
-    controller: 'productGroup',
-    action: 'findById'
   },
 
   '/productgroup/findbyid/:id':{
@@ -762,6 +777,12 @@ module.exports.routes = {
     controller:'payment',
     action:'getPaymentGroups'
   },
+
+  '/srservices':{
+    controller: 'srservice',
+    action: 'find'
+  },
+
 
   /*
   '/fixorders':{

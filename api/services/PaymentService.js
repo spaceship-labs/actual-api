@@ -97,7 +97,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
     'discountPg4',
     'discountPg5'
   ];
-      
+
   var totalsPromises = methodsGroups.map(function(mG) {
     var id = quotationId;
     var paymentGroup = mG.group || 1;
@@ -108,7 +108,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
     };
     params.currentStoreId = activeStore.id;
     var calculator = QuotationService.Calculator();
-    return calculator.getQuotationTotals(id, params);        
+    return calculator.getQuotationTotals(id, params);
   });
 
   return Promise.all(totalsPromises)
@@ -129,6 +129,8 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }
 
       //sails.log.info('clientHasCredit', clientHasCredit);
+      //TEMPORAL: DISABLED CREDIT METHOD
+      //methodsGroups = removeCreditMethod(methodsGroups);
             
       //TEMPORAL DISABLED 12msi in group 4
       //methodsGroups = remove12msiMethodFromGroup4(methodsGroups);
@@ -138,7 +140,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       }else{
         methodsGroups = removeCreditMethod(methodsGroups);
       }
-      
+
 
       methodsGroups = methodsGroups.map(function(mG, index){
         mG.total = totalsByGroup[index].total || 0;
@@ -262,7 +264,7 @@ function filterPaymentTotalsForDiscountClients(paymentTotals){
 function filterMethodsGroupsForDiscountClients(methodsGroups){
   methodsGroups = methodsGroups.filter(function(mg){
     return mg.group === 1;
-  });  
+  });
 
   return methodsGroups;
 }
@@ -315,7 +317,7 @@ function addCreditMethod(methodsGroups){
   return methodsGroups.map(function(mg){
     if(mg.group === 1){
       var isCreditMethodAdded = _.findWhere(mg.methods,{type:'client-credit'});
-      
+
       if(!isCreditMethodAdded){
         mg.methods.unshift(creditMethod);
       }
@@ -344,13 +346,13 @@ function removeCreditMethod(methodsGroups){
           return false;
         }
       });
-      
+
       if(isCreditMethodAdded && creditMethodIndex > -1){
         mg.methods.splice(creditMethodIndex, 1);
       }
     }
     return mg;
-  });  
+  });
 }
 
 function remove12msiMethodFromGroup4(methodsGroups){
@@ -396,7 +398,7 @@ var paymentGroups = [
         description:'',
         currency:'mxn',
         needsVerification: false
-      },    
+      },
       {
         label:'Efectivo MXN',
         name:'Efectivo MXN',
@@ -544,7 +546,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },    
+      },
       {
         label:'6',
         name:'6 meses sin intereses',
@@ -564,7 +566,7 @@ var paymentGroups = [
           'Banjercito',
           'Banorte',
           'Banregio',
-          'HSBC',          
+          'HSBC',
           'Inbursa',
           'Invex Banco',
           'Itaucard',
@@ -648,7 +650,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      }, 
+      },
       {
         label:'9',
         name:'9 meses sin intereses con Banamex',
@@ -694,7 +696,7 @@ var paymentGroups = [
           'Banjercito',
           'Banorte',
           'Banregio',
-          'HSBC',          
+          'HSBC',
           'Inbursa',
           'Itaucard',
           'Invex Banco',
@@ -713,7 +715,7 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },        
+      },      
       {
         label:'12',
         name:'12 meses sin intereses con Banamex',
@@ -733,7 +735,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },      
+      },
       /*
       {
         label:'13',
@@ -754,8 +756,8 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },     
-      
+      },
+
       {
         label:'18',
         name:'18 meses sin intereses',
@@ -776,7 +778,7 @@ var paymentGroups = [
         web:true
       },
       */
-      
+
     ]
   },
 ];

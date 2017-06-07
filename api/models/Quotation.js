@@ -94,6 +94,9 @@ module.exports = {
     source:{
       type:'string',
     },
+    sourceType:{
+      type:'string',
+    },
     tracing: {
       type:'datetime'
     }

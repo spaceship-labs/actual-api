@@ -475,9 +475,12 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var source = form.source;
+    var sourceType = form.sourceType;
+
     var params = {
       Broker: null,
-      source: source
+      source: source,
+      sourceType: sourceType
     };    
     Quotation.update({id:id}, params)
       .then(function(updated){

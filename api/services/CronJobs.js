@@ -9,6 +9,13 @@ module.exports.init = function(){
       },
       time:'0 */30 * * * *'
     },
+    {
+      fn: function(d){
+        ProductService.cacheProductSoldCount();
+      },
+      time: '00 00 04 * * 0-6' //Runs everyday at 4am (0-6 is sunday to saturday)
+
+    }
 
   ].forEach(function(v){
     
