@@ -9,6 +9,7 @@ module.exports = {
 		IsMain:{type:'boolean'},
 		CategoryLevel:{type:'integer'},
     productsNum: {type:'integer'},
+    customOrder: {type:'boolean'},
     Parents:{
       collection: 'productcategory',
       via:'Childs',
