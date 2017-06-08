@@ -8,6 +8,7 @@ module.exports = {
     var page = form.page || 1;
     var query = {
       Service: 'Y',
+      Active: 'Y',
       skip: (page-1) * items,
       limit: items
     };
