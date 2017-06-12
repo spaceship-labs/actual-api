@@ -277,7 +277,7 @@ function prepareClient(order, client, address) {
     data = {
       name: order.CardName,
       identification: RFCPUBLIC,
-      email: order.E_Mail,
+      //email: order.E_Mail,
       address: {
         country: 'México',
         state: order.U_Estado || 'Quintana Roo',
