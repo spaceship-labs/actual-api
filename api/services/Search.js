@@ -27,7 +27,6 @@ module.exports = {
   queryIdsProducts        : queryIdsProducts,
   queryTerms              : queryTerms,
   relatePromotionsToProducts: relatePromotionsToProducts,
-  isSlowMovement          : isSlowMovement
 };
 
 function applySlowMovementQuery(query){
@@ -48,7 +47,11 @@ function applySocietiesQuery(query, societyCodes){
 }
 
 function getSortValueBySortOption(sortOption, activeStore){
-  var sortValue = 'DiscountPrice ASC';
+  //var sortValue = 'DiscountPrice ASC';
+  var sortValue = {
+    DiscountPrice:1
+  };
+  var originalSortOption = _.clone(sortOption);
 
   if(sortOption.key === 'stock'){
     sortOption.key = activeStore.code;
@@ -60,22 +63,24 @@ function getSortValueBySortOption(sortOption, activeStore){
       break;
     case 'spotlight':
     case 'slowMovement':
-      sortOption.key = 'DiscountPrice';
+      sortOption.key = activeStore.code;
+      //sortOption.key = 'DiscountPrice';
       break;
     default:
       sortOption.key = sortOption.key;
       break;
   }
 
+  sortOption.direction = sortOption.direction === 'ASC' ? 1 : -1;
+  sortValue = {};
 
-  sortValue = sortOption.key + ' ' + sortOption.direction;
-
+  if(originalSortOption.key === 'slowMovement'){
+    sortValue.slowMovement = -1;
+  }
+  sortValue[sortOption.key] = sortOption.direction;
   return sortValue;
 }
 
-function isSlowMovement(sortOption){
-  return sortOption && sortOption.key === 'slowMovement';
-}
 
 //Promotions array of promotion object with property productsIds
 function relatePromotionsToProducts(promotions, products){

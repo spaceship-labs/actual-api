@@ -35,7 +35,7 @@ module.exports = {
     query            = Search.applySocietiesQuery(query, societyCodes);            
     query.Active     = 'Y';
     
-    if(Search.isSlowMovement(sortOption)){
+    if(slowMovement){
       query = Search.applySlowMovementQuery(query);      
     }    
 
@@ -118,7 +118,7 @@ module.exports = {
     query = Search.applyDiscountsQuery(query, discounts);
     query = Search.applySocietiesQuery(query, societyCodes);            
 
-    if(Search.isSlowMovement(sortOption)){
+    if(slowMovement){
       query = Search.applySlowMovementQuery(query);      
     }    
 
