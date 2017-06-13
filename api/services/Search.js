@@ -27,6 +27,7 @@ module.exports = {
   queryIdsProducts        : queryIdsProducts,
   queryTerms              : queryTerms,
   relatePromotionsToProducts: relatePromotionsToProducts,
+  isSlowMovement          : isSlowMovement
 };
 
 function applySlowMovementQuery(query){
@@ -70,6 +71,10 @@ function getSortValueBySortOption(sortOption, activeStore){
   sortValue = sortOption.key + ' ' + sortOption.direction;
 
   return sortValue;
+}
+
+function isSlowMovement(sortOption){
+  return sortOption && sortOption.key === 'slowMovement';
 }
 
 //Promotions array of promotion object with property productsIds
