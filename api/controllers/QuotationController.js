@@ -211,7 +211,7 @@ module.exports = {
             });
 
         }else{
-          sails.log.info('not adding file');
+          //sails.log.info('not adding file');
         }
         return createdRecord;
       })
