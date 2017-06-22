@@ -45,8 +45,15 @@ function getProductsStoresStock(products){
   stock = products.reduce(function(stockAux, product){
     for(var i = 0;i < storesCodes.length;i++){
       stockAux[storesCodes[i]] = stockAux[storesCodes[i]] || 0;
-      if(product[storesCodes[i]] > 0){
-        stockAux[storesCodes[i]]++;
+      
+      if( isAWebStoreCode(storesCodes[i]) ){
+        if(product[storesCodes[i]] > 0 && !product.excludeWeb){
+          stockAux[storesCodes[i]]++;
+        }
+      }else{
+        if(product[storesCodes[i]] > 0){
+          stockAux[storesCodes[i]]++;
+        }
       }
     }
     return stockAux;
@@ -59,6 +66,16 @@ function getProductsStoresStock(products){
 
   stock.productsNum = products.length;
   return stock;
+}
+
+function isAWebStoreCode(storeCode){
+  var webStoreCodes = [
+    'actual_home',
+    'actual_kids',
+    'actual_studio'
+  ];
+
+  return webStoreCodes.indexOf(storeCode) > -1;
 }
 
 

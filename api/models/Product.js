@@ -147,9 +147,14 @@ module.exports = {
       actual_studio_cumbres:{type:'integer'},
       actual_home_xcaret:{type:'integer'},
       actual_home_merida:{type:'integer'},
+      actual_home:{type:'integer'},
+      actual_studio:{type:'integer'},
+      actual_kids:{type:'integer'},
+
       proyectos:{type:'integer'},
       actual_proyect:{type:'integer'},
 
+      excludeWeb:{type:'boolean'},
 
       //CACHE DISCOUNT PRICES BY STORE
       discountPrice_actual_studio_merida:{type:'float'},
