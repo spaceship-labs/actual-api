@@ -95,7 +95,7 @@ module.exports = {
       .populate('Order');
 
     if(getPayments){
-      quotationQuery.populate('Payments');
+      quotationQuery.populate('Payments',{sort: 'createdAt ASC'});
     }
 
     var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
@@ -592,7 +592,7 @@ module.exports = {
   getQuotationPayments: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    Payment.find({Quotation: quotationId})
+    Payment.find({Quotation: quotationId}).sort('createdAt ASC')
       .then(function(payments){
         res.json(payments);
       })
