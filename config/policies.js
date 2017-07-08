@@ -33,6 +33,9 @@ module.exports.policies = {
     update_password: true,
     stores: true
   },
+  UserWebController:{
+    '*': ['isAuthenticated', 'isAdmin'],
+  },
   MeController: {
     '*': ['isAuthenticated'],
   },

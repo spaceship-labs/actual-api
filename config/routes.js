@@ -73,6 +73,28 @@ module.exports.routes = {
     action: 'update'
   },
 
+
+  '/userweb/create':{
+    controller: 'userweb',
+    action: 'create'
+  },
+
+  '/userweb/findbyid/:id':{
+    controller: 'userweb',
+    action: 'findById'
+  },
+
+  '/userweb/find/:page':{
+    controller: 'userweb',
+    action: 'find'
+  },
+
+  '/userweb/update/:id':{
+    controller: 'userweb',
+    action: 'update'
+  },
+
+
   '/product/find/:page':{
     controller: 'product',
     action: 'find'
