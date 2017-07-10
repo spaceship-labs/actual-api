@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 module.exports = {
 
   find: function(req, res){
@@ -33,6 +35,7 @@ module.exports = {
 
   create: function(req, res){
     var form = req.allParams();
+    form.role = 'admin';
     UserWeb.create(form)
       .then(function(_user){
         return res.ok({user: _user});
@@ -47,7 +50,17 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     delete form.password;
-    UserWeb.update({id: id}, form)
+
+    UserWeb.findOne({id: id})
+      .then(function(userToUpdate){
+        if(userToUpdate){
+          if(userToUpdate.role !== 'admin'){
+            return Promise.reject(new Error('Solo es posible editar usuarios administradores'));
+          }
+        }
+
+        return UserWeb.update({id: id}, form);
+      })
       .then(function(user){
         return res.ok({
           user: user

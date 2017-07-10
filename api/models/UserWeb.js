@@ -3,6 +3,10 @@ module.exports = {
   migrate:'alter',
   schema: true,
   attributes: {
+    role:{
+      type:'string',
+      enum: ['admin','client']
+    },
     password: {
         type: 'string'
     },
