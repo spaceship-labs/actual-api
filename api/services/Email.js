@@ -525,7 +525,7 @@ function paymentMethod(payment) {
       payment_name = 'Efectivo (USD)';
       break;
     case 'deposit':
-      payment_name = 'Depósito';
+      payment_name = 'Depósito en ventanilla';
       break;
     case 'transfer':
       payment_name = 'Transferencia';
@@ -571,7 +571,7 @@ function paymentType(payment) {
       payment_name = 'Contado';
       break;
     case 'deposit':
-      payment_name = 'Depósito';
+      payment_name = 'Depósito en ventanilla';
       break;
     case 'transfer':
       payment_name = 'Transferencia';

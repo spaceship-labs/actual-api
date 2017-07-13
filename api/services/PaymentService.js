@@ -423,8 +423,8 @@ var paymentGroups = [
         needsVerification: false
       },
       {
-        label:'Deposito',
-        name:'Deposito',
+        label:'Deposito en ventanilla',
+        name:'Deposito en ventanilla',
         type:'deposit',
         description:'Sujeto a verificación contable',
         currency:'mxn',
