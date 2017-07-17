@@ -56,6 +56,9 @@ module.exports = {
         return Promise.each(packageRules, updatePackageRule);
       })
       .then(function(){
+        return removeUnusedPackageRules(id);
+      })
+      .then(function(){
         res.json(updatedPackage);
       })
       .catch(function(err){
@@ -80,23 +83,23 @@ module.exports = {
 
 };
 
-function updatePackageRule(product){
+function updatePackageRule(packageObj){
   var q = {
-    Product         : product.productId,
-    PromotionPackage: product.packageId
+    Product         : packageObj.productId,
+    PromotionPackage: packageObj.packageId
   };
   return PackageRule.findOne(q)
     .then(function(productPackage){
       var params = {
-        quantity: product.packageRule.quantity,
-        discountPg1: product.packageRule.discountPg1,
-        discountPg2: product.packageRule.discountPg2,
-        discountPg3: product.packageRule.discountPg3,
-        discountPg4: product.packageRule.discountPg4,
-        discountPg5: product.packageRule.discountPg5,
-        discountType: product.packageRule.discountType,
-        Product: product.productId,
-        PromotionPackage: product.packageId
+        quantity: packageObj.packageRule.quantity,
+        discountPg1: packageObj.packageRule.discountPg1,
+        discountPg2: packageObj.packageRule.discountPg2,
+        discountPg3: packageObj.packageRule.discountPg3,
+        discountPg4: packageObj.packageRule.discountPg4,
+        discountPg5: packageObj.packageRule.discountPg5,
+        discountType: packageObj.packageRule.discountType,
+        Product: packageObj.productId,
+        PromotionPackage: packageObj.packageId
       };
       if(!productPackage){
         return PackageRule.create(params);
@@ -110,5 +113,26 @@ function updatePackageRule(product){
     .catch(function(err){
       console.log(err);
       return err;
+    });
+}
+
+
+function removeUnusedPackageRules(packageId){
+  return ProductGroup.findOne({id:packageId,Type:'packages'})
+    .populate('Products')
+    .populate('PackageRules')
+    .then(function(productGroup){
+
+      var products = productGroup.Products || [];
+      var unusedRulesIds = (productGroup.PackageRules|| []).reduce(function(arr, rule){
+
+        var ruleHasProduct = _.findWhere(products,{id:rule.Product});
+        if(!ruleHasProduct){
+          arr.push(rule.id);
+        }
+        return arr;
+      },[]);
+
+      return PackageRule.destroy({id:unusedRulesIds});
     });
 }
