@@ -15,6 +15,13 @@ function productShipping(product, storeWarehouse, options) {
       var companies = deliveries.map(function(delivery) {
         return delivery.FromCode;
       });
+
+      if(product.ItemCode === 'ST02535'){
+        companies = companies.filter(function(company){
+          return company != '01';
+        });
+      }
+
       return [
         DatesDelivery.find({
           ItemCode: product.ItemCode,
