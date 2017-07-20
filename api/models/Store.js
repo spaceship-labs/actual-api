@@ -44,7 +44,11 @@ module.exports = {
     PromotionPackages:{
       collection:'ProductGroup',
       via:'Stores'
-    }
+    },
+    PaymentsWeb: {
+      collection:'PaymentWeb',
+      via:'Store'
+    },    
   }
 };
 
