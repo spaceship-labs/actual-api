@@ -33,7 +33,6 @@ var paymentGroups = [
         currency: 'mxn',
         min:0,
       },
-      /*
       {
         label:'Transferencia',
         name:'Transferencia',
@@ -63,7 +62,6 @@ var paymentGroups = [
           {label:'Santander', value:'santander'}
         ],
       },
-      */
     ]
   },
   {
