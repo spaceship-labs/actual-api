@@ -85,7 +85,7 @@ module.exports = {
     var userId = req.user.id;
     var getPayments = form.payments;
     if( !isNaN(id) ){
-      id = parseInt(id);
+      //id = parseInt(id);
     }
     
     var quotationQuery =  Quotation.findOne({id: id})
@@ -181,7 +181,7 @@ module.exports = {
     var updatedQuotation = false;
     var promises = [];
     if( !isNaN(id) ){
-      id = parseInt(id);
+      //id = parseInt(id);
     }
     delete form.id;
     form.Quotation = id;
