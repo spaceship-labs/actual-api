@@ -2,7 +2,8 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 var moment = require('moment');
 var CEDIS_QROO_CODE = '01';
-var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
+var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
   product: productShipping,
@@ -10,6 +11,9 @@ module.exports = {
 };
 
 function productShipping(product, storeWarehouse, options) {
+
+  var pendingProductDetailSum = 0;
+  
   return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
     .then(function(deliveries) {
       var companies = deliveries.map(function(delivery) {
@@ -24,9 +28,12 @@ function productShipping(product, storeWarehouse, options) {
           }
         }),
         deliveries,
+        getPendingProductDetailsSum(product)
       ];
     })
-    .spread(function(stockItems, deliveries) {
+    .spread(function(stockItems, deliveries, _pendingProductDetailSum) {
+      pendingProductDetailSum = _pendingProductDetailSum;
+
       var codes = stockItems.map(function(p){return p.whsCode});
       return Company
         .find({WhsCode: codes})
@@ -49,7 +56,8 @@ function productShipping(product, storeWarehouse, options) {
           return buildShippingItem(
             stockItem, 
             deliveries, 
-            storeWarehouse.id
+            storeWarehouse.id,
+            pendingProductDetailSum
           );
         });
 
@@ -62,12 +70,17 @@ function productShipping(product, storeWarehouse, options) {
           whsCode: CEDIS_QROO_CODE,
           OpenCreQty: product.freeSaleStock,
           ItemCode: product.ItemCode,
-          warehouseId: CEDISQ_QROO_ID,
+          warehouseId: CEDIS_QROO_ID,
           ShipDate: shipDate
         };
 
         return Promise.all([
-          buildShippingItem(freeSaleStockItem, deliveries, storeWarehouse.id)
+          buildShippingItem(
+            freeSaleStockItem, 
+            deliveries, 
+            storeWarehouse.id,
+            pendingProductDetailSum
+          )
         ]);
       }
 
@@ -79,8 +92,7 @@ function productShipping(product, storeWarehouse, options) {
 
 }
 
-function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
-  options = options || {};
+function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProductDetailSum){
 
   var delivery = _.find(deliveries, function(delivery) {
     return delivery.FromCode == stockItem.whsCode;
@@ -89,6 +101,8 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
   var productDate  = new Date(stockItem.ShipDate);
   var productDays  = daysDiff(new Date(), productDate);
   var seasonQuery  = getQueryDateRange({}, productDate);
+
+
 
   return Season.findOne(seasonQuery)
     .then(function(season){
@@ -100,12 +114,16 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
       if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
         days = productDays;
       }
-
       
       var date = addDays(new Date(), days);
+      var available = stockItem.OpenCreQty;
+
+      if(stockItem.whsCode === CEDIS_QROO_CODE){
+        available -= pendingProductDetailSum;
+      }
 
       return {
-        available: stockItem.OpenCreQty,
+        available: available,
         days: days,
         date: date,
         productDate: productDate,
@@ -181,4 +199,46 @@ function isDateImmediateDelivery(shipDate){
   var currentDate = moment().format(FORMAT);
   shipDate = moment(shipDate).format(FORMAT);
   return currentDate === shipDate;
+}
+
+function getPendingProductDetailsSum(product){
+  
+  var match = {
+    Product: ObjectId(product.id),
+    inSapWriteProgress: true
+  };
+
+  var group = {
+    _id: '$Product',
+    //_id: '$quantity',
+    pendingStock: {$sum:'$quantity'}
+  };
+
+  return new Promise(function(resolve, reject){
+    OrderDetailWeb.native(function(err, collection){
+      if(err){
+        console.log('err', err);
+        return reject(err);
+      }
+      
+      collection.aggregate([
+        {$match: match},
+        {$group:group}
+      ],
+        function(_err,results){
+          if(err){
+            console.log('_err', _err);
+            return reject(_err);
+          }
+
+          //sails.log.info('results', results);
+          if(results && results.length > 0){
+            return resolve(results[0].pendingStock);
+          }else{
+            return resolve(0);
+          }
+        }
+      );
+    });
+  });  
 }
