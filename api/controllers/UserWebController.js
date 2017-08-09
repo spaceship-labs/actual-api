@@ -7,7 +7,11 @@ module.exports = {
     var model = 'userweb';
     var extraParams = {
       searchFields: ['firstName','email'],
+      filters:{
+        role: 'admin'
+      }
     };
+    form.filters = extraParams.filters;
     Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
@@ -22,7 +26,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     
-    var userQuery =  UserWeb.findOne({id: id});
+    var userQuery =  UserWeb.findOne({id: id, role:'admin'});
 
     userQuery.then(function(result){
       res.ok({data:result});
