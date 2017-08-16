@@ -320,7 +320,8 @@ function prepareItems(details) {
       id: detail.id,
       name: detail.Product.ItemName,
       price: detail.unitPrice / 1.16,
-      discount: discount,
+      //discount: discount,
+      discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
       quantity: detail.quantity,
       inventory:{
