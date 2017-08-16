@@ -208,8 +208,10 @@ function buildSaleOrderRequestParams(params){
     SalesPersonCode: params.slpCode || -1,
     CardCode: params.cardCode,
     DescuentoPDocumento: calculateUsedEwalletByPayments(params.payments),
-    Group: params.currentStore.group
+    Group: params.currentStore.group,
+    Broker: params.brokerCode
   };
+
 
   if(saleOrderRequest.SalesPersonCode === []){
     saleOrderRequest.SalesPersonCode = -1;
@@ -239,7 +241,7 @@ function buildSaleOrderRequestParams(params){
       requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
       requestParams += '&products=' + encodeURIComponent(JSON.stringify(products));
       requestParams += '&payments=' + encodeURIComponent(JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate)));
-
+    
       return requestParams;
     });
 }

@@ -147,6 +147,7 @@ function createFromQuotation(form, currentUser){
         .populate('Address')
         .populate('User')
         .populate('Client')
+        .populate('Broker')
         .populate('EwalletRecords');
     })
     .then(function(quotationFound){
@@ -215,13 +216,16 @@ function createFromQuotation(form, currentUser){
         EwalletRecords: quotation.EwalletRecords,
         ClientBalanceRecords: quotation.ClientBalanceRecords,
         User: user.id,
-        Broker: quotation.Broker,
         CardCode: quotation.Client.CardCode,
         SlpCode: SlpCode,
         Store: opts.currentStoreId,
         Manager: quotation.Manager
         //Store: user.activeStore
       };
+
+      if(quotation.Broker){
+        orderParams.Broker = quotation.Broker.id;
+      }
 
       var minPaidPercentage = quotation.minPaidPercentage || 100;
       
@@ -258,7 +262,7 @@ function createFromQuotation(form, currentUser){
       ];
     })
     .spread(function(quotationDetails, site){
-      return SapService.createSaleOrder({
+      var sapSaleOrderParams = {
         quotationId:      quotationId,
         groupCode:        orderParams.groupCode,
         cardCode:         orderParams.CardCode,
@@ -267,8 +271,14 @@ function createFromQuotation(form, currentUser){
         payments:         quotation.Payments,
         exchangeRate:     site.exchangeRate,
         currentStore:     currentStore,
-        quotationDetails: quotationDetails
-      });
+        quotationDetails: quotationDetails,
+      };
+
+      if(quotation.Broker){
+        sapSaleOrderParams.brokerCode = quotation.Broker.Code;
+      }
+
+      return SapService.createSaleOrder(sapSaleOrderParams);
     })
     .then(function(sapResponseAux){
       sapResponse = sapResponseAux.response;
