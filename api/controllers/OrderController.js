@@ -51,7 +51,7 @@ module.exports = {
     var id = form.id;
     var order;
     if( !isNaN(id) ){
-      id = parseInt(id);
+      //id = parseInt(id);
     }
     Order.findOne({id: id})
       .populate('Details')
