@@ -126,6 +126,6 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  }  
+  },
 
 };

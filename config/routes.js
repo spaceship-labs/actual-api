@@ -740,6 +740,11 @@ module.exports.routes = {
     action: 'getAll'
   },
 
+  '/sites/cashreport':{
+    controller:'site',
+    action: 'generateSitesCashReport'
+  },
+
   '/store/find':{
     controller:'store',
     action:'find'
@@ -798,6 +803,11 @@ module.exports.routes = {
   '/paymentgroups':{
     controller:'payment',
     action:'getPaymentGroups'
+  },
+
+  '/paymentwebgroups':{
+    controller:'paymentweb',
+    action:'getPaymentWebGroups'
   },
 
   '/srservices':{

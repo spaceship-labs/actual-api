@@ -24,6 +24,10 @@ module.exports.policies = {
   AuthController:{
     '*': true
   },
+  SiteController:{
+    '*': ['isAuthenticated'],
+    'generateSitesCashReport': ['isAuthenticated','isAdmin']
+  },
   UserController:{
     '*': ['isAuthenticated'],
     find: ['isAuthenticated', 'isAllowed'],
