@@ -25,6 +25,8 @@ module.exports = {
     var ACTUAL_STUDIO_MALECON_CODE = 'actual_studio_malecon';
     var ACTUAL_STUDIO_PLAYA_CODE = 'actual_studio_playa_del_carmen';
     var ACTUAL_STUDIO_MERIDA_CODE = 'actual_studio_merida';    
+    var ACTUAL_PUERTO_CANCUN_CODE = 'actual_puerto_cancun';    
+
     var PROJECTS_CODE = 'actual_proyect';
     
     var storeCode = req.user.activeStore.code;
@@ -45,6 +47,7 @@ module.exports = {
       storeCode !== ACTUAL_STUDIO_MALECON_CODE && 
       storeCode !== ACTUAL_STUDIO_PLAYA_CODE && 
       storeCode !== ACTUAL_STUDIO_MERIDA_CODE && 
+      storeCode !== ACTUAL_PUERTO_CANCUN_CODE && 
       storeCode !== PROJECTS_CODE && 
       process.env.MODE === 'production'
     ){

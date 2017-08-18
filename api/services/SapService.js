@@ -179,6 +179,7 @@ function createSaleOrder(params){
 function buildSaleOrderRequestParams(params){
   var requestParams = '/SalesOrder?sales=';
   var products = [];
+  var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
   var PROJECTS_GROUPCODE = 6;
   var ACTUAL_STUDIO_CUMBRES_GROUPCODE = 4;
@@ -188,6 +189,7 @@ function buildSaleOrderRequestParams(params){
 
 
   if(params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE && 
+    params.groupCode != ACTUAL_PUERTO_CANCUN_GROUPCODE && 
     params.groupCode != PROJECTS_GROUPCODE && 
     params.groupCode != ACTUAL_STUDIO_CUMBRES_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_MALECON_GROUPCODE &&
