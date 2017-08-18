@@ -150,6 +150,7 @@ module.exports = {
       actual_home:{type:'integer'},
       actual_studio:{type:'integer'},
       actual_kids:{type:'integer'},
+      actual_puerto_cancun:{type:'integer'},
 
       proyectos:{type:'integer'},
       actual_proyect:{type:'integer'},

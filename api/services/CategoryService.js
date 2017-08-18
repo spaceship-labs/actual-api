@@ -18,6 +18,9 @@ function cacheCategoriesProducts(){
     Active: 'Y'
   };
 
+  //sails.log.info('cache categories stock start: ' + new Date());
+
+
   return getAllStoresCodes().then(function(codes){
       storesCodes = codes;
       return ProductCategory.find({select:['Name']}).populate('Products', productsQuery);

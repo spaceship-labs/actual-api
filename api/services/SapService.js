@@ -383,6 +383,9 @@ function mapWhsSeries(whsName){
     case 'HOME XCARET':
       series = 209;
       break;
+    case 'HOME PUERTO CANCUN':
+      series = 186;
+      break;
     case 'HOME MERIDA':
       series = 210;
       break;
