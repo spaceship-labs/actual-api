@@ -65,6 +65,9 @@ module.exports = {
     Client:{
       model: 'Client'
     },
+    OrderWeb:{
+      model:'OrderWeb'
+    }    
   },
 
   beforeCreate: function(val,cb){

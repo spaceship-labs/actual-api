@@ -4,7 +4,8 @@ var _ = require('underscore');
 module.exports = {
 	generateStoreCashReportBySellers: generateStoreCashReportBySellers,
 	generateStoresCashReport: generateStoresCashReport,
-  generateMagerCashReprot: generateMagerCashReprot
+  generateMagerCashReprot: generateMagerCashReprot,
+  isWebStore: isWebStore
 };
 
 function generateStoresCashReport(params){
@@ -67,9 +68,15 @@ function generateMagerCashReprot(params){
           id: store.id
         });
         return generateStoreCashReportBySellers(storeParams)
-          .then(function(sellersByStore){
+          .then(function(results){
             store = store.toObject();
-            store.Sellers = sellersByStore;
+            
+            if(isWebStore(store.id)){
+              store.PaymentsWeb = results;
+            }else{
+              store.Sellers = results;
+            }
+
             return store;
           });
 
@@ -82,6 +89,14 @@ function generateStoreCashReportBySellers(params){
   var startDate = params.startDate || new Date();
   var endDate = params.endDate || new Date();
   var populateOrders = params.populateOrders;
+
+  if(isWebStore(storeId)){
+    var query = {
+      createdAt: { '>=': startDate, '<=': endDate },
+      Store: storeId
+    };    
+    return PaymentWeb.find(query).populate('OrderWeb');
+  }
 
   return getStoreSellers(storeId)
     .then(function(sellers){
@@ -127,3 +142,12 @@ function getPaymentsBySeller(options){
       return seller;
     });
 }
+
+function isWebStore(storeId){
+  var storesIds = [
+    '58ab5fa9d21cb61c6ec4473c', //KIDS
+    '589b5fdd24b5055c104fd5b8', //STUDIO
+    '5876b417d21cb61c6e57db63' //HOME
+  ];
+  return storesIds.indexOf(storeId) > -1;          
+}   
