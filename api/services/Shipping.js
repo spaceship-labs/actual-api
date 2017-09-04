@@ -5,6 +5,11 @@ var CEDIS_QROO_CODE = '01';
 var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
+var PUERTOCANCUN_WHS_ID = '599aaa1fbe1fd281203f5e8a';
+var PUERTOCANCUN_WHS_ID_SANDBOX = '59972da6b7dccab7b8cf753a';
+var PUERTOCANCUN_WHS_CODE = '82';
+var PUERTOCANCUN_LIMIT_DATE = moment('2017-09-17').toDate();
+
 module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery
@@ -51,7 +56,7 @@ function productShipping(product, storeWarehouse, options) {
     .spread(function(stockItems, deliveries){
       if(deliveries.length > 0 && stockItems.length > 0){
 
-        stockItems = filterStockItems(stockItems, deliveries);
+        stockItems = filterStockItems(stockItems, deliveries, storeWarehouse.id);
         var shippingPromises = stockItems.map(function(stockItem){
           return buildShippingItem(
             stockItem, 
@@ -116,12 +121,24 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
         days = productDays;
       }
       
-      var date = addDays(new Date(), days);
+      var todayDate = new Date();
+      var date = addDays(todayDate, days);
       var available = stockItem.OpenCreQty;
-
+      
       if(stockItem.whsCode === CEDIS_QROO_CODE){
         available -= pendingProductDetailSum;
       }
+      
+      if(stockItem.whsCode === PUERTOCANCUN_WHS_CODE){
+        //sails.log.info('working with PUERTOCANCUN_WHS');
+
+        if(date < PUERTOCANCUN_LIMIT_DATE){
+          //sails.log.info('PUERTOCANCUN_LIMIT_DATE', PUERTOCANCUN_LIMIT_DATE);
+          date = PUERTOCANCUN_LIMIT_DATE;
+          days = daysDiff(new Date(), date);
+        }
+      }
+      
 
       return {
         available: available,
@@ -138,10 +155,18 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
     });
 }
 
-function filterStockItems(stockItems, deliveries){
+function filterStockItems(stockItems, deliveries, storeWarehouseId){
 
   return stockItems.filter(function(stockItem){
   
+    if(
+      (storeWarehouseId === PUERTOCANCUN_WHS_ID || storeWarehouseId === PUERTOCANCUN_WHS_ID_SANDBOX)
+      && stockItem.ImmediateDelivery
+    ){
+      return false;
+    }
+
+
     var delivery = _.find(deliveries, function(delivery) {
       return delivery.FromCode == stockItem.whsCode;
     });
