@@ -740,6 +740,11 @@ module.exports.routes = {
     action: 'getAll'
   },
 
+  '/sites/find/:page':{
+    controller: 'site',
+    action: 'find'
+  },  
+
   '/sites/cashreport':{
     controller:'site',
     action: 'generateSitesCashReport'

@@ -35,6 +35,21 @@ module.exports = {
     });
   },
 
+  find: function(req, res){
+    var form = req.params.all();
+    var model = 'site';
+    var extraParams = {
+      searchFields: ['name']
+    };
+    Common.find(model, form, extraParams).then(function(result){
+      res.ok(result);
+    })
+    .catch(function(err){
+      console.log(err);
+      res.notFound();
+    });
+  },  
+
   generateSitesCashReport: function(req, res){
     var form = req.allParams();
     var ADMIN_ROLE_NAME = 'admin';
@@ -52,6 +67,64 @@ module.exports = {
         res.negotiate(err);
       });
 
-  }  
+  },
+
+  addBanner : function(req,res){
+    process.setMaxListeners(0);
+    var form = req.params.all();
+
+    var options = {
+      dir : 'sites/banners',
+      profile: 'gallery',
+      filesAssociationName: 'Banners'
+    };
+
+    sails.log.info('uploading image: ' + new Date() + ' ', form.id);
+    Site.findOne({id:form.id})
+      .then(function(site){
+        return site.addFiles(req, options);
+      })
+      .then(function(updatedProduct){
+        return Site.findOne({id:form.id}).populate('Banners');
+      })
+      .then(function(foundSite){
+        sails.log.info('uploaded image: ' + new Date() + ' ', form.id);
+        res.json(foundSite);
+      })
+      .catch(function(err){
+        console.log('addFiles err', err);
+        res.negotiate(err);
+      });     
+  },
+
+  removeFiles : function(req,res){
+    process.setMaxListeners(0);
+    var form = req.params.all();
+    Product.findOne({ItemCode:form.ItemCode})
+      .populate('files')
+      .then(function(product){
+        var options = {
+          dir : 'products/gallery',
+          profile : 'gallery',
+          files : form.removeFiles,
+          fileModel: ProductFile
+        };
+
+        return product.removeFiles(req,options);
+      })
+      .then(function(product){
+        return Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']})
+            .populate('files');
+      }) 
+      .then(function(updatedProduct){
+        res.json(updatedProduct.files);
+      })
+      .catch(function(err){
+        console.log('err removeFiles',err);
+        res.negotiate(err);
+      });        
+   
+  },
+
 
 };

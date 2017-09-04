@@ -146,7 +146,13 @@ module.exports.models = {
 
     addFiles : function(req,opts){
       var object = this;
-      var objectFiles = object.files ? object.files : [];
+
+      var filesAssociationName = 'files';
+      if(opts.filesAssociationName){
+        filesAssociationName = opts.filesAssociationName; 
+      }
+
+      var objectFiles = object[filesAssociationName] ? object[filesAssociationName] : [];
       req.onProgress = getOnProgress(req);
       
       if(process.env.CLOUDUSERNAME){
@@ -171,7 +177,7 @@ module.exports.models = {
         })
         .then(function(crops){
           //sails.log.info('crops created', crops);
-          object.files.add(objectFiles);
+          object[filesAssociationName].add(objectFiles);
           return object.save();
         })
         .then(function(){
