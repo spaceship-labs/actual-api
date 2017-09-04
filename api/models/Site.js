@@ -6,6 +6,7 @@ module.exports = {
     handle:{type:'string',unique:true},
     deliveryText: {type:'text'},
     exchangeRate: {type:'float'},
+    bannersOrder:{type:'string'},
 
     Banners:{
     	collection: 'SiteBanner',

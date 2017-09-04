@@ -16,6 +16,7 @@ module.exports = {
     var form = req.params.all();
     var handle = form.handle;
     Site.findOne({handle:handle})
+      .populate('Banners')
       .then(function(site){
         res.json(site);
       }).catch(function(err){

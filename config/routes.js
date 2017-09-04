@@ -735,6 +735,11 @@ module.exports.routes = {
     action:'findByHandle'
   },
 
+  '/site/addbanner':{
+    controller: 'site',
+    action: 'addBanner'
+  },
+
   '/sites':{
     controller: 'site',
     action: 'getAll'
