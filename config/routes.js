@@ -735,10 +735,25 @@ module.exports.routes = {
     action:'findByHandle'
   },
 
+  '/site/addbanner':{
+    controller: 'site',
+    action: 'addBanner'
+  },
+
+  '/site/removefiles':{
+    controller: 'site',
+    action: 'removeFiles'
+  },
+
   '/sites':{
     controller: 'site',
     action: 'getAll'
   },
+
+  '/sites/find/:page':{
+    controller: 'site',
+    action: 'find'
+  },  
 
   '/sites/cashreport':{
     controller:'site',

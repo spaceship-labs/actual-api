@@ -146,7 +146,13 @@ module.exports.models = {
 
     addFiles : function(req,opts){
       var object = this;
-      var objectFiles = object.files ? object.files : [];
+
+      var filesAssociationName = 'files';
+      if(opts.filesAssociationName){
+        filesAssociationName = opts.filesAssociationName; 
+      }
+
+      var objectFiles = object[filesAssociationName] ? object[filesAssociationName] : [];
       req.onProgress = getOnProgress(req);
       
       if(process.env.CLOUDUSERNAME){
@@ -171,7 +177,7 @@ module.exports.models = {
         })
         .then(function(crops){
           //sails.log.info('crops created', crops);
-          object.files.add(objectFiles);
+          object[filesAssociationName].add(objectFiles);
           return object.save();
         })
         .then(function(){
@@ -180,6 +186,11 @@ module.exports.models = {
     },
 
     removeFiles : function(req,opts,cb){
+      var filesAssociationName = 'files';
+      if(opts.filesAssociationName){
+        filesAssociationName = opts.filesAssociationName; 
+      }
+
       var object = this;
       var files = opts.files ? opts.files : [];
       var FileModel = opts.fileModel;
@@ -187,13 +198,13 @@ module.exports.models = {
       filesToDelete = [];
       return Promise.each(files, function(file){
         opts.file = file;
-        var fileIndex = getFileIndex(opts.file, object.files);
-        var fileId  = object.files[fileIndex].id;
+        var fileIndex = getFileIndex(opts.file, object[filesAssociationName]);
+        var fileId  = object[filesAssociationName][fileIndex].id;
         sails.log.info('destroy id', fileId);
         //sails.log.info('destroy index', fileIndex);
         return FileModel.destroy({id: fileId})
           .then(function(destroyedFile){
-            object.files.splice(fileIndex, 1);
+            object[filesAssociationName].splice(fileIndex, 1);
             return Files.removeFile(opts);
           });
       })
