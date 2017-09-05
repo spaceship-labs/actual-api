@@ -740,6 +740,11 @@ module.exports.routes = {
     action: 'addBanner'
   },
 
+  '/site/removefiles':{
+    controller: 'site',
+    action: 'removeFiles'
+  },
+
   '/sites':{
     controller: 'site',
     action: 'getAll'

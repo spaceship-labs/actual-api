@@ -101,24 +101,25 @@ module.exports = {
   removeFiles : function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
-    Product.findOne({ItemCode:form.ItemCode})
-      .populate('files')
-      .then(function(product){
+    Site.findOne({id:form.id})
+      .populate('Banners')
+      .then(function(site){
         var options = {
-          dir : 'products/gallery',
+          dir : 'sites/banners',
           profile : 'gallery',
           files : form.removeFiles,
-          fileModel: ProductFile
+          fileModel: SiteBanner,
+          filesAssociationName: 'Banners'
         };
 
-        return product.removeFiles(req,options);
+        return site.removeFiles(req,options);
       })
       .then(function(product){
-        return Product.findOne({ItemCode:form.ItemCode}, {select:['ItemCode']})
-            .populate('files');
+        return Site.findOne({id:form.id}, {select:['id']})
+            .populate('Banners');
       }) 
       .then(function(updatedProduct){
-        res.json(updatedProduct.files);
+        res.json(updatedProduct.Banners);
       })
       .catch(function(err){
         console.log('err removeFiles',err);
