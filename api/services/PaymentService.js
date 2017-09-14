@@ -422,6 +422,7 @@ var paymentGroups = [
         currency:'mxn',
         needsVerification: false
       },
+      /*
       {
         label:'Deposito en ventanilla',
         name:'Deposito en ventanilla',
@@ -436,6 +437,7 @@ var paymentGroups = [
         ],
         needsVerification: false
       },
+      */
       {
         label:'Transferencia',
         name:'Transferencia',
