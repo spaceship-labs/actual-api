@@ -5,8 +5,8 @@ var EWALLET_TYPE = 'ewallet';
 var CLIENT_BALANCE_TYPE = 'client-balance';
 var CLIENT_CREDIT_TYPE = 'client-credit';
 var EWALLET_NEGATIVE = 'negative';
-var CANCELLED_STATUS = 'cancelled';
-var PAYMENT_CANCEL_TYPE = 'cancellation';
+var CANCELED_STATUS = 'canceled';
+var PAYMENT_CANCEL_TYPE = 'cancelation';
 
 module.exports = {
 

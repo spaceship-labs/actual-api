@@ -53,7 +53,7 @@ module.exports = {
     description:{type:'string'},
     status:{
       type:'string',
-      enum: ['paid','pending','cancelled']
+      enum: ['paid','pending','canceled']
     },
     sentToSap: {
       type:'boolean'

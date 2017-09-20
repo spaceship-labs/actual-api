@@ -13,7 +13,7 @@ function getSitesCashReport(params){
   var endDate = params.endDate || new Date();
   var queryPayments = {
   	createdAt: { '>=': startDate, '<=': endDate },
-  	status: {'!':'cancelled'}
+  	status: {'!':'canceled'}
   };
 
 	return Store.find({name:sitesStoresNames}).populate('PaymentsWeb',queryPayments)

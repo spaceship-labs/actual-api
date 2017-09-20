@@ -63,7 +63,7 @@ module.exports = {
     isInternational: {type:'boolean'},
     status:{
       type:'string',
-      enum: ['paid','pending','cancelled']
+      enum: ['paid','pending','canceled']
     },
     sentToSap: {
       type:'boolean'
