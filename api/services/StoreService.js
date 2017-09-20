@@ -93,7 +93,8 @@ function generateStoreCashReportBySellers(params){
   if(isWebStore(storeId)){
     var query = {
       createdAt: { '>=': startDate, '<=': endDate },
-      Store: storeId
+      Store: storeId,
+      status: {'!':'canceled'}
     };    
     return PaymentWeb.find(query).populate('OrderWeb');
   }
