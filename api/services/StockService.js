@@ -219,7 +219,9 @@ function findValidDelivery(detail,deliveryDates){
 		var isValidDelivery;
 
 
-		if( detailShipDate === deliveryDate && 
+		if( 
+				detail.Product.ItemCode === delivery.itemCode &&
+				detailShipDate === deliveryDate && 
 			  detail.quantity <= delivery.available &&
 			  detail.immediateDelivery === delivery.ImmediateDelivery &&
 				detail.shipCompanyFrom === delivery.companyFrom &&
