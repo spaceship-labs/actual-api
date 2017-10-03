@@ -50,7 +50,7 @@ function getProductsStoresStock(products){
       stockAux[storesCodes[i]] = stockAux[storesCodes[i]] || 0;
       
       if( isAWebStoreCode(storesCodes[i]) ){
-        if(product[storesCodes[i]] > 0 && !product.excludeWeb){
+        if(product[storesCodes[i]] > 0 && !product.excludeWeb && product.U_FAMILIA === 'SI'){
           stockAux[storesCodes[i]]++;
         }
       }else{
