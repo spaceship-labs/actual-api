@@ -454,6 +454,20 @@ var paymentGroups = [
         ],
         needsVerification: true
       },
+      {
+        label:'Transferencia USD',
+        name:'Transferencia USD',
+        type:'transfer-usd',
+        description:'Sujeto a verificación contable',
+        currency: 'usd',
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+          {label:'Bancomer', value:'bancomer'},
+          {label:'Banorte', value:'banorte'},
+          {label:'Santander', value:'santander'}
+        ],
+        needsVerification: true
+      },      
       /*
       {
         label:'Monedero electrónico',
