@@ -5,6 +5,7 @@ var _ = require('underscore');
 
 var EWALLET_TYPE = 'ewallet';
 var CASH_USD_TYPE = 'cash-usd';
+var TRANSFER_USD_TYPE = 'transfer-usd';
 var CLIENT_BALANCE_TYPE = 'client-balance';
 var CLIENT_CREDIT_TYPE = 'client-credit';
 var EWALLET_GROUP_INDEX = 0;
@@ -23,6 +24,7 @@ module.exports = {
   getExchangeRate: getExchangeRate,
   EWALLET_TYPE: EWALLET_TYPE,
   CASH_USD_TYPE: CASH_USD_TYPE,
+  TRANSFER_USD_TYPE: TRANSFER_USD_TYPE,
   EWALLET_GROUP_INDEX: EWALLET_GROUP_INDEX,
   CLIENT_BALANCE_TYPE: CLIENT_BALANCE_TYPE,
   CLIENT_CREDIT_TYPE: CLIENT_CREDIT_TYPE,
@@ -153,7 +155,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
           m.subtotal = mG.subtotal;
           m.discount = mG.discount;
           m.exchangeRate = exchangeRate;
-          if(m.type === CASH_USD_TYPE){
+          if(m.currency === CURRENCY_USD){
             var exrStr = numeral(exchangeRate).format('0,0.00');
             m.description = 'Tipo de cambio '+exrStr+' MXN';
           }

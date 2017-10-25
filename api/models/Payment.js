@@ -11,6 +11,7 @@ module.exports = {
         'cheque',
         'deposit',
         'transfer',
+        'transfer-usd',
         //'ewallet',
         'client-credit',
         'single-payment-terminal',

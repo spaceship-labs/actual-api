@@ -530,6 +530,9 @@ function paymentMethod(payment) {
     case 'transfer':
       payment_name = 'Transferencia';
       break;
+    case 'transfer-usd':
+      payment_name = 'Transferencia (USD)';
+      break;
     case 'ewallet':
       payment_name = 'Monedero electrónico';
       break;
@@ -573,6 +576,7 @@ function paymentType(payment) {
     case 'deposit':
       payment_name = 'Depósito en ventanilla';
       break;
+    case 'transfer-usd':
     case 'transfer':
       payment_name = 'Transferencia';
       break;

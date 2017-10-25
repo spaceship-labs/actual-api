@@ -213,6 +213,7 @@ function getPaymentMethodBasedOnPayments(payments){
       paymentMethod = 'cash';
       break;
 
+    case 'transfer-usd':
     case 'transfer':
       paymentMethod = 'transfer';
       break;
