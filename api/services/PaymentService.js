@@ -155,6 +155,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
           m.subtotal = mG.subtotal;
           m.discount = mG.discount;
           m.exchangeRate = exchangeRate;
+          /*
           if(m.currency === CURRENCY_USD){
             var exrStr = numeral(exchangeRate).format('0,0.00');
             m.description = 'Tipo de cambio '+exrStr+' MXN';
@@ -163,6 +164,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
             //var balance = vm.quotation.Client.ewallet || 0;
             //m.description = getEwalletDescription(balance);
           }
+          */
 
           return m;
         });
@@ -404,6 +406,7 @@ var paymentGroups = [
       {
         label:'Efectivo MXN',
         name:'Efectivo MXN',
+        description: 'Sujeto a verificación contable',
         type:'cash',
         currency: 'mxn',
         needsVerification: false
@@ -413,7 +416,7 @@ var paymentGroups = [
         name:'Efectivo USD',
         type:'cash-usd',
         currency:'usd',
-        description:'Tipo de cambio $18.76 MXN',
+        description:'Sujeto a verificación contable',
         needsVerification: false
       },
       {
