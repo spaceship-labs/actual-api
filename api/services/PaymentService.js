@@ -39,7 +39,7 @@ function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
   }
 
   var ammounts = payments.map(function(payment){
-    if(payment.type === 'cash-usd'){
+    if(payment.currency === 'usd'){
      return calculateUSDPayment(payment, exchangeRate);
     }
     return payment.ammount;
@@ -65,7 +65,7 @@ function calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate){
 
 
   var ammounts = paymentsG1.map(function(payment){
-    if(payment.type === 'cash-usd'){
+    if(payment.currency === 'usd'){
      return calculateUSDPayment(payment, exchangeRate);
     }
     return payment.ammount;
@@ -466,7 +466,7 @@ var paymentGroups = [
           {label:'Banorte', value:'banorte'},
           {label:'Santander', value:'santander'}
         ],
-        needsVerification: true
+        needsVerification: true        
       },      
       /*
       {
