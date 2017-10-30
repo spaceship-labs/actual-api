@@ -33,7 +33,7 @@ module.exports = {
         'CardCode'
       ],
       selectFields: form.fields,
-      populateFields: ['Client']
+      populateFields: ['Client','Broker']
     };
     Common.find(model, form, extraParams)
       .then(function(result){
