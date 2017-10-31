@@ -689,13 +689,7 @@ var paymentGroups = [
         needsVerification: true,
         web:true,
         mainCard: 'banamex'
-      },          
-    ]
-  },
-  {
-    group:5,
-    discountKey:'discountPg5',
-    methods: [
+      },  
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -734,7 +728,13 @@ var paymentGroups = [
         min: 1200,
         needsVerification: true,
         web:true
-      },      
+      },                
+    ]
+  },
+  {
+    group:5,
+    discountKey:'discountPg5',
+    methods: [    
       {
         label:'12',
         name:'12 meses sin intereses con Banamex',
