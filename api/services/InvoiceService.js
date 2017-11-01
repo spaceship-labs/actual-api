@@ -336,14 +336,14 @@ function prepareItems(details) {
   });
 
   return Promise.mapSeries(items, function(item){
-    return createItem(item);
+    return createItemWithDelay(item);
   });
 
   //Uncomment to use instant requests instead of delaying the requests
   //return Promise.all(createItems(items));
 }
 
-function createItem(item){
+function createItemWithDelay(item){
   var options = {
     method: 'POST',
     uri: 'https://app.alegra.com/api/v1/items',
