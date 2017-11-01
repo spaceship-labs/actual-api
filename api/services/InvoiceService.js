@@ -5,6 +5,7 @@ var Promise = require('bluebird');
 var ALEGRAUSER = process.env.ALEGRAUSER;
 var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
+var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
@@ -20,6 +21,7 @@ function createOrderInvoice(orderId) {
     var orderFound;
     var errInvoice;
 
+    
     if(process.env.MODE !== 'production'){
       resolve({});
       return;
@@ -332,7 +334,29 @@ function prepareItems(details) {
       }
     };
   });
-  return Promise.all(createItems(items));
+
+  return Promise.mapSeries(items, function(item){
+    return createItem(item);
+  });
+
+  //Uncomment to use instant requests instead of delaying the requests
+  //return Promise.all(createItems(items));
+}
+
+function createItem(item){
+  var options = {
+    method: 'POST',
+    uri: 'https://app.alegra.com/api/v1/items',
+    body: item,
+    headers: {
+      Authorization: 'Basic ' + token,
+    },
+    json: true,
+  };
+  return promiseDelay(600,request(options)).then(function(ic) {
+    //console.log('item delayed ' + item.name, new Date());
+    return _.assign({}, item, { id: ic.id});
+  });  
 }
 
 function createItems(items) {
