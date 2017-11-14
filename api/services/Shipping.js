@@ -10,6 +10,9 @@ var PUERTOCANCUN_WHS_ID_SANDBOX = '59972da6b7dccab7b8cf753a';
 var PUERTOCANCUN_WHS_CODE = '82';
 var PUERTOCANCUN_LIMIT_DATE = moment('2017-09-17').toDate();
 
+var CEDIS_MERIDA_WHS_CODE = '10';
+var STUDIO_MERIDA_WHS_CODE = '11';
+
 module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery
@@ -111,8 +114,25 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
 
   return Season.findOne(seasonQuery)
     .then(function(season){
-      var LOW_SEASON_DAYS = 8; //Original: 7
-      var seasonDays   = (season && season.Days) || LOW_SEASON_DAYS;
+      var LOW_SEASON_DAYS; //Original: 7
+      var MAIN_SEASON_DAYS;
+      var seasonDays;
+      //var seasonDays   = (season && season.Days) || LOW_SEASON_DAYS;
+      
+      if( isMeridaWhsCode(stockItem.whsCode) ){
+        MAIN_SEASON_DAYS = 11;
+        LOW_SEASON_DAYS = 10;
+      }else{
+        MAIN_SEASON_DAYS = 14;
+        LOW_SEASON_DAYS = 8;
+      }
+
+      if(season){
+        seasonDays = MAIN_SEASON_DAYS;
+      }else{
+        seasonDays = LOW_SEASON_DAYS;
+      }
+
       var deliveryDays = (delivery && delivery.Days) || 0;
       var days = productDays + seasonDays + deliveryDays;
       
@@ -142,6 +162,11 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
         PurchaseDocument: stockItem.PurchaseDocument
       };      
     });
+}
+
+function isMeridaWhsCode(whsCode){
+  return (whsCode === CEDIS_MERIDA_WHS_CODE || 
+    whsCode === STUDIO_MERIDA_WHS_CODE);
 }
 
 function filterStockItems(stockItems, deliveries, storeWarehouseId){
