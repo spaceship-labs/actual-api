@@ -777,7 +777,6 @@ var paymentGroups = [
         mainCard: 'banamex'
       },
       */
-      /*  
       {
         label:'18',
         name:'18 meses sin intereses',
@@ -804,7 +803,6 @@ var paymentGroups = [
         min:2000,
         web:true
       },
-      */
     ]
   },
 ];
