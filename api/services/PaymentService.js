@@ -777,20 +777,18 @@ var paymentGroups = [
         mainCard: 'banamex'
       },
       */
-
+      /*  
       {
         label:'18',
         name:'18 meses sin intereses',
         type:'18-msi',
         msi:18,
-        /*
-        cardsImages:[
-          '/cards/amexcard.png',
-        ],
-        cards: [
-          'American Express',
-        ],
-        */
+        //cardsImages:[
+        //  '/cards/amexcard.png',
+        //],
+        //cards: [
+        //  'American Express',
+        //],
         cardsImages:[
           '/cards/banamex.png',
         ],
@@ -806,7 +804,7 @@ var paymentGroups = [
         min:2000,
         web:true
       },
-
+      */
     ]
   },
 ];
