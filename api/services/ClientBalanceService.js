@@ -19,22 +19,21 @@ function applyClientBalanceRecord(payment, options){
   if (client.Balance < payment.ammount || !client.Balance) {
     return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
   }
-  var updateParams = {Balance: client.Balance - payment.ammount};
+  //var updateParams = {Balance: client.Balance - payment.ammount};
+  updateParams = {};
 
-  return Client.update({id:client.id}, updateParams)
-	  .then(function(clientUpdated){
-		    if(payment.type == CLIENT_BALANCE_TYPE){
-		      var clientBalanceRecord = {
-		        Store: payment.Store,
-		        Quotation: options.quotationId,
-		        User: options.userId,
-		        Client: options.client.id,
-		        Payment: options.paymentId,
-		        type: CLIENT_BALANCE_NEGATIVE,
-		        amount: payment.ammount
-		      };
-		      return ClientBalanceRecord.create(clientBalanceRecord);
-		    }
-		    return null;
-	    });
+  if(payment.type == CLIENT_BALANCE_TYPE && false){
+    var clientBalanceRecord = {
+      Store: payment.Store,
+      Quotation: options.quotationId,
+      User: options.userId,
+      Client: options.client.id,
+      Payment: options.paymentId,
+      type: CLIENT_BALANCE_NEGATIVE,
+      amount: payment.ammount
+    };
+    return ClientBalanceRecord.create(clientBalanceRecord);
+  }
+  return Promise.resolve(null);
+
 }

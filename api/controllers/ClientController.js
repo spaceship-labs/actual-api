@@ -385,9 +385,20 @@ module.exports = {
   getClientBalance: function(req, res){
     var form = req.allParams();
     var id = form.id;
+    var client;
     Client.findOne({id:id, select:['Balance']})
-      .then(function(client){
-        var balance = client.Balance;
+      .then(function(_client){
+        client = _client;
+
+        //Getting client balance payments from open quotations
+        return Payment.find({Client:client.id, Order:null})
+      })
+      .then(function(unfinishedPayments){
+        appliedBalance = unfinishedPayments.reduce(function(acum, payment){
+          return acum += payment.ammount;
+        },0);
+
+        var balance = client.Balance - appliedBalance;
         res.json(balance);
       })
       .catch(function(err){
@@ -398,4 +409,5 @@ module.exports = {
 
 
 };
+
 
