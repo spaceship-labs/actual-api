@@ -74,19 +74,27 @@ module.exports = {
         quotation = quotationFound;
         client = quotation.Client;
         form.Client = client.id || client;
-
         previousPayments = quotation.Payments;
+        var fundsValidationPromise = Promise.resolve();
 
         if(form.type === EWALLET_TYPE){
-          if( !EwalletService.isValidEwalletPayment(form, client) ){
-            return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
-          }
+          fundsValidationPromise = EwalletService.isValidEwalletPayment(form, form.Client);
         }
 
         if(form.type === CLIENT_BALANCE_TYPE){
-          if(!ClientBalanceService.isValidClientBalancePayment(form, client)){
-            return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
-          }
+          fundsValidationPromise = ClientBalanceService.isValidClientBalancePayment(form, form.Client);
+        }
+
+        return fundsValidationPromise;
+      })
+      .then(function(hasEnoughFunds){
+
+        if(form.type === EWALLET_TYPE && !hasEnoughFunds){
+          return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
+        }
+
+        if(form.type === CLIENT_BALANCE_TYPE && !hasEnoughFunds){
+          return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
         }
 
         var calculator = QuotationService.Calculator();

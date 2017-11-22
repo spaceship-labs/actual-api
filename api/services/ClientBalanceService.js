@@ -4,14 +4,51 @@ var Promise = require('bluebird');
 
 module.exports = {
 	applyClientBalanceRecord: applyClientBalanceRecord,
-	isValidClientBalancePayment: isValidClientBalancePayment
+	isValidClientBalancePayment: isValidClientBalancePayment,
+	getClientBalanceById: getClientBalanceById
 };
 
-function isValidClientBalancePayment(payment, client){
-  if (client.Balance < payment.ammount || !client.Balance) {
-  	return false;
-  }
-  return true;
+function getUnfinishedClientBalancePayments(clientId){
+	var query = {
+		Client:clientId, 
+		type:CLIENT_BALANCE_TYPE, 
+		Order:null, 
+		select:['ammount']
+	};  
+  return Payment.find(query);
+}
+
+function getClientBalanceById(clientId){
+  return Promise.all([
+	   getUnfinishedClientBalancePayments(clientId),
+	   Client.findOne({id:clientId, select:['Balance']})
+  	])
+		.then(function(results){
+			var unfinishedPayments = results[0];
+			var client = results[1];
+
+			if(!client){
+				return Promise.reject(new Error('No se encontro el cliente'));
+			}
+
+			var sapBalance = client.Balance;
+		  appliedBalance = unfinishedPayments.reduce(function(acum, payment){
+		    return acum += payment.ammount;
+		  },0);
+	  	var balance = sapBalance - appliedBalance;	
+	  	return balance;
+	  });
+}
+
+function isValidClientBalancePayment(payment, clientId){
+	return getClientBalanceById(clientId)
+		.then(function(clientBalance){
+		  if (clientBalance < payment.ammount || !clientBalance) {
+		  	return false;
+		  }
+		  return true;			
+		});
+
 }
 
 function applyClientBalanceRecord(payment, options){
