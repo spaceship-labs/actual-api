@@ -13,6 +13,7 @@ module.exports = {
     if(form.getAll){
       sails.log.info('Exportando productos');
     }
+
     var extraParams = {
       searchFields: ['ItemName','ItemCode','Name'],
       populateFields: populateFields,
@@ -36,13 +37,22 @@ module.exports = {
     var id = form.id;
     //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
-    Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
+    var populateFields = form.populateFields;
+
+    var findPromise = Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
       .populate('Sizes')
-      .populate('Groups')
-      .then(function(product){
+      .populate('Groups');
+
+    if(populateFields && populateFields.length > 0){
+      populateFields.forEach(function(populateF){
+        findPromise = findPromise.populate(populateF);
+      });
+    }
+
+    findPromise.then(function(product){
         res.ok({data:product});
       })
       .catch(function(err){
