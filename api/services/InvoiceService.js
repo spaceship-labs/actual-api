@@ -326,6 +326,7 @@ function prepareItems(details) {
       //discount: discount,
       discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
+      productKey: detail.Product.U_ClaveProdServ,
       quantity: detail.quantity,
       inventory:{
         unit:'piece',

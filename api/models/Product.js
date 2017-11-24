@@ -36,6 +36,8 @@ module.exports = {
       U_Empresa:{type:'string'},
       nameSA: {type:'string',columnName:'EmpresaName'},
       Active: {type:'string'},
+      U_ClaveProdServ: {type:'string'},
+      U_ClaveUnidad: {type:'string'},
 
       //FIELDS FROM PRICE TABLE
       PriceList:{type:'integer', size: 4},
