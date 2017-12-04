@@ -96,8 +96,12 @@ module.exports.policies = {
     find: true
   },
   ShippingController: {
+    list: ['isAdmin'],
     product: true
   },
+  ZipcodeController:{
+    listZipcodeStates: ['isAdmin'],
+  }
   /*
   LocalController:{
     '*':true

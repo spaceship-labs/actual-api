@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+
   product: function(req, res) {
     var form = req.allParams();
     var productCode = form.productCode;

@@ -831,6 +831,16 @@ module.exports.routes = {
   },
 
 
+  'GET /zipcodestates':{
+    controller: 'zipcode',
+    action: 'listZipcodeStates'
+  },
+
+  '/zipcodestates/multipleupdate':{
+    controller: 'zipcode',
+    action: 'multipleUpdate'
+  }
+
   /*
   '/fixorders':{
     controller:'sync',
