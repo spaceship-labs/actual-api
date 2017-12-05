@@ -18,7 +18,11 @@ module.exports = {
     
     Promise.mapSeries(params.zipcodeStates , function(state){
       var updateQuery = {id: state.id};
-      return ZipcodeState.update(updateQuery, state);
+      updateParams = {
+        deliveryPriceValue: state.deliveryPriceValue,
+        deliveryPriceMode: state.deliveryPriceMode
+      };
+      return ZipcodeState.update(updateQuery, updateParams);
     })
     .then(function(results){
       res.json(results);
