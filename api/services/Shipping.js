@@ -123,7 +123,7 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
         MAIN_SEASON_DAYS = 11;
         LOW_SEASON_DAYS = 10;
       }else{
-        MAIN_SEASON_DAYS = 14;
+        MAIN_SEASON_DAYS = 13;
         LOW_SEASON_DAYS = 8;
       }
 
