@@ -356,7 +356,7 @@ module.exports = {
 
         return [
           FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
-          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum})
+          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum, cfdiUse: form.cfdiUse})
         ];
       })
       .spread(function(fiscalAddressUpdated){

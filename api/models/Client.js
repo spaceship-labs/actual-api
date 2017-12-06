@@ -39,8 +39,10 @@ module.exports = {
       unique: true
     },
 
+
     bussinessLegalName: {type:'string'},
     bussinessName: {type:'string'},
+    cfdiUse: {type: 'string'},
     rfc:{type:'string'},
     isMoral:{type:'boolean'},
     ewallet: {
