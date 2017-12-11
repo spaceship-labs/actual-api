@@ -352,6 +352,11 @@ function prepareItems(details) {
 
 function getUnitTypeByProduct(product){
   var unitType = 'piece';
+  
+  if(product.Service === 'Y'){
+    return 'service';
+  }
+
   switch(product.U_ClaveUnidad){
     case 'H87':
       unitType = 'piece';
