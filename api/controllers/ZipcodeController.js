@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
 
@@ -17,12 +18,12 @@ module.exports = {
     var params = req.allParams();
     
     Promise.mapSeries(params.zipcodeStates , function(state){
-      var updateQuery = {id: state.id};
+      var updateQuery = {_id: ObjectId(state.id)};
       updateParams = {
         deliveryPriceValue: state.deliveryPriceValue,
         deliveryPriceMode: state.deliveryPriceMode
       };
-      return ZipcodeState.update(updateQuery, updateParams);
+      return Common.nativeUpdateOne(updateQuery, updateParams, ZipcodeState);
     })
     .then(function(results){
       res.json(results);
