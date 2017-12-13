@@ -9,6 +9,7 @@ var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
+var DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
   createOrderInvoice: createOrderInvoice,
@@ -129,11 +130,13 @@ function prepareInvoice(order, payments, client, items) {
   var dueDate = moment(order.createdAt)
     .add(7, 'days')
     .format('YYYY-MM-DD');
+
   var data = {
     date: date,
     dueDate: dueDate,
     client: client,
     items: items,
+    cfdiUse: client.cfdiUse,
     paymentMethod: getPaymentMethodBasedOnPayments(payments),
     anotation: order.folio,
     stamp: {
@@ -264,6 +267,7 @@ function prepareClient(order, client, address) {
       name: address.companyName,
       identification: (client.LicTradNum || "").toUpperCase(),
       email: address.U_Correos,
+      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -280,6 +284,7 @@ function prepareClient(order, client, address) {
     data = {
       name: order.CardName,
       identification: (RFCPUBLIC || "").toUpperCase(),
+      cfdiUse: DEFAULT_CFDI_USE,
       //email: order.E_Mail,
       address: {
         country: 'México',
@@ -326,9 +331,11 @@ function prepareItems(details) {
       //discount: discount,
       discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
+      productKey: detail.Product.U_ClaveProdServ,
       quantity: detail.quantity,
       inventory:{
-        unit:'piece',
+        //unit:'piece',
+        getUnitTypeByProduct(detail.Product),
         unitCost: detail.unitPrice,
         initialQuantity: detail.quantity
       }
@@ -342,6 +349,29 @@ function prepareItems(details) {
   //Uncomment to use instant requests instead of delaying the requests
   //return Promise.all(createItems(items));
 }
+
+function getUnitTypeByProduct(product){
+  var unitType = 'piece';
+  
+  if(product.Service === 'Y'){
+    return 'service';
+  }
+
+  switch(product.U_ClaveUnidad){
+    case 'H87':
+      unitType = 'piece';
+      break;
+    case 'SET':
+      unitType = 'piece';
+      break;
+    case 'E48':
+      unitType = 'service';
+      break;
+  }
+
+  return unitType;
+}
+
 
 function createItemWithDelay(item){
   var options = {
