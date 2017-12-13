@@ -317,39 +317,6 @@ function createClient(client) {
   return request(options);
 }
 
-function prepareItems(details) {
-  var items = details.map(function(detail) {
-    var discount = detail.discountPercent ? detail.discountPercent : 0;
-    discount = Math.abs(discount);
-    if(discount < 1){
-      discount = parseFloat( discount.toFixed(4) );
-    }
-    return {
-      id: detail.id,
-      name: detail.Product.ItemName,
-      price: detail.unitPrice / 1.16,
-      //discount: discount,
-      discount: parseFloat((discount).toFixed(4)),
-      tax: [ {id: alegraIVAID} ],
-      productKey: detail.Product.U_ClaveProdServ,
-      quantity: detail.quantity,
-      inventory:{
-        //unit:'piece',
-        getUnitTypeByProduct(detail.Product),
-        unitCost: detail.unitPrice,
-        initialQuantity: detail.quantity
-      }
-    };
-  });
-
-  return Promise.mapSeries(items, function(item){
-    return createItemWithDelay(item);
-  });
-
-  //Uncomment to use instant requests instead of delaying the requests
-  //return Promise.all(createItems(items));
-}
-
 function getUnitTypeByProduct(product){
   var unitType = 'piece';
   
@@ -371,6 +338,41 @@ function getUnitTypeByProduct(product){
 
   return unitType;
 }
+
+function prepareItems(details) {
+  var items = details.map(function(detail) {
+    var discount = detail.discountPercent ? detail.discountPercent : 0;
+    discount = Math.abs(discount);
+    if(discount < 1){
+      discount = parseFloat( discount.toFixed(4) );
+    }
+    var product = detail.Product;
+    return {
+      id: detail.id,
+      name: product.ItemName,
+      price: detail.unitPrice / 1.16,
+      //discount: discount,
+      discount: parseFloat((discount).toFixed(4)),
+      tax: [ {id: alegraIVAID} ],
+      productKey: product.U_ClaveProdServ,
+      quantity: detail.quantity,
+      inventory: {
+        //unit:'piece',
+        unit: getUnitTypeByProduct(product),
+        unitCost: detail.unitPrice,
+        initialQuantity: detail.quantity
+      }
+    };
+  });
+
+  return Promise.mapSeries(items, function(item){
+    return createItemWithDelay(item);
+  });
+
+  //Uncomment to use instant requests instead of delaying the requests
+  //return Promise.all(createItems(items));
+}
+
 
 
 function createItemWithDelay(item){
