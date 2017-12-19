@@ -21,7 +21,7 @@ module.exports = {
 function productShipping(product, storeWarehouse, options) {
 
   var pendingProductDetailSum = 0;
-  
+
   return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
     .then(function(deliveries) {
       var companies = deliveries.map(function(delivery) {
@@ -62,8 +62,8 @@ function productShipping(product, storeWarehouse, options) {
         stockItems = filterStockItems(stockItems, deliveries, storeWarehouse.id);
         var shippingPromises = stockItems.map(function(stockItem){
           return buildShippingItem(
-            stockItem, 
-            deliveries, 
+            stockItem,
+            deliveries,
             storeWarehouse.id,
             pendingProductDetailSum
           );
@@ -84,8 +84,8 @@ function productShipping(product, storeWarehouse, options) {
 
         return Promise.all([
           buildShippingItem(
-            freeSaleStockItem, 
-            deliveries, 
+            freeSaleStockItem,
+            deliveries,
             storeWarehouse.id,
             pendingProductDetailSum
           )
@@ -118,12 +118,12 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
       var MAIN_SEASON_DAYS;
       var seasonDays;
       //var seasonDays   = (season && season.Days) || LOW_SEASON_DAYS;
-      
+
       if( isMeridaWhsCode(stockItem.whsCode) ){
         MAIN_SEASON_DAYS = 11;
         LOW_SEASON_DAYS = 10;
       }else{
-        MAIN_SEASON_DAYS = 13;
+        MAIN_SEASON_DAYS = 10;
         LOW_SEASON_DAYS = 8;
       }
 
@@ -135,19 +135,19 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
 
       var deliveryDays = (delivery && delivery.Days) || 0;
       var days = productDays + seasonDays + deliveryDays;
-      
+
       //Product in same store/warehouse
       if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
         days = productDays;
       }
-      
+
       var todayDate = new Date();
       var date = addDays(todayDate, days);
       var available = stockItem.OpenCreQty;
-      
+
       if(stockItem.whsCode === CEDIS_QROO_CODE){
         available -= pendingProductDetailSum;
-      }      
+      }
 
       return {
         available: available,
@@ -160,12 +160,12 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProdu
         ImmediateDelivery: stockItem.ImmediateDelivery || false,
         PurchaseAfter: stockItem.PurchaseAfter,
         PurchaseDocument: stockItem.PurchaseDocument
-      };      
+      };
     });
 }
 
 function isMeridaWhsCode(whsCode){
-  return (whsCode === CEDIS_MERIDA_WHS_CODE || 
+  return (whsCode === CEDIS_MERIDA_WHS_CODE ||
     whsCode === STUDIO_MERIDA_WHS_CODE);
 }
 
@@ -191,7 +191,7 @@ function filterStockItems(stockItems, deliveries, storeWarehouseId){
 function getImmediateStockItem(stockItems, deliveries){
 
   return _.find(stockItems, function(stockItem){
-  
+
     var delivery = _.find(deliveries, function(delivery) {
       return delivery.FromCode == stockItem.whsCode;
     });
@@ -234,7 +234,7 @@ function isDateImmediateDelivery(shipDate){
 }
 
 function getPendingProductDetailsSum(product){
-  
+
   var match = {
     Product: ObjectId(product.id),
     inSapWriteProgress: true
@@ -252,7 +252,7 @@ function getPendingProductDetailsSum(product){
         console.log('err', err);
         return reject(err);
       }
-      
+
       collection.aggregate([
         {$match: match},
         {$group:group}
@@ -272,5 +272,5 @@ function getPendingProductDetailsSum(product){
         }
       );
     });
-  });  
+  });
 }
