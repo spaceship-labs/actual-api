@@ -212,13 +212,9 @@ function getHighestPayment(payments){
     var currentAmount = current.currency === PaymentService.CURRENCY_USD ? 
       PaymentService.calculateUSDPayment(current, current.exchangeRate) : current.ammount;
 
-    sails.log.info('prevAmount', prevAmount);
-    sails.log.info('currentAmount', currentAmount);
-
     return (prevAmount > currentAmount) ? prev : current;
   });
 
-  sails.log.info('highest', highest);
   return highest;
 }
 
