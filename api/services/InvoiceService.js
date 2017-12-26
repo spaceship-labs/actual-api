@@ -202,13 +202,32 @@ function createInvoice(data) {
   });
 }
 
-function getPaymentMethodBasedOnPayments(payments){
-  if(payments.length > 1){
-    return 'other';
-  }
 
+function getHighestPayment(payments){
+  var highest = payments.reduce(function(prev, current){
+
+    var prevAmount = prev.currency === PaymentService.CURRENCY_USD ? 
+      PaymentService.calculateUSDPayment(prev, prev.exchangeRate) : prev.ammount;
+
+    var currentAmount = current.currency === PaymentService.CURRENCY_USD ? 
+      PaymentService.calculateUSDPayment(current, current.exchangeRate) : current.ammount;
+
+    sails.log.info('prevAmount', prevAmount);
+    sails.log.info('currentAmount', currentAmount);
+
+    return (prevAmount > currentAmount) ? prev : current;
+  });
+
+  return highest;
+}
+
+function getPaymentMethodBasedOnPayments(payments){
   var paymentMethod = 'other';
   var uniquePaymentMethod = payments[0];
+  
+  if(payments.length > 1){
+    uniquePaymentMethod = getHighestPayment(payments);
+  }
 
   switch(uniquePaymentMethod.type){
 
