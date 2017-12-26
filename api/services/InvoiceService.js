@@ -218,6 +218,7 @@ function getHighestPayment(payments){
     return (prevAmount > currentAmount) ? prev : current;
   });
 
+  sails.log.info('highest', highest);
   return highest;
 }
 
