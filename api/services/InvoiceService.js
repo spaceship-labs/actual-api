@@ -22,13 +22,11 @@ function createOrderInvoice(orderId) {
     var orderFound;
     var errInvoice;
 
-    
     if(process.env.MODE !== 'production'){
       resolve({});
       return;
-    }
-    
-    
+    } 
+
     Order.findOne(orderId)
       .populate('Client')
       .populate('Details')
@@ -173,6 +171,7 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
+
   return new Promise(function(resolve, reject){
 
     AlegraLog.create(log)
@@ -218,12 +217,24 @@ function getHighestPayment(payments){
   return highest;
 }
 
+
 function getPaymentMethodBasedOnPayments(payments){
   var paymentMethod = 'other';
   var uniquePaymentMethod = payments[0];
   
   if(payments.length > 1){
-    uniquePaymentMethod = getHighestPayment(payments);
+
+    //Taking the highest payment as main, except the 
+    //client-credit and client balance payment type
+    var auxPayments = payments.filter(function(p){
+      return p.type !== PaymentService.CLIENT_BALANCE_TYPE && 
+        p.type !== PaymentService.CLIENT_CREDIT_TYPE;
+    });
+
+    if(auxPayments.length === 0){
+      return 'other';
+    }
+    uniquePaymentMethod = getHighestPayment(auxPayments);
   }
 
   switch(uniquePaymentMethod.type){
