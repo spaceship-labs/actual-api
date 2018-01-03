@@ -1,10 +1,3 @@
-/**
- * LoggingController
- *
- * @description :: Server-side logic for managing Loggings
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
- */
-
 module.exports = {
   create: function(req, res) {
     var form        = req.params.all();
@@ -12,6 +5,11 @@ module.exports = {
     var message     = form.message;
     var action      = form.action;
     var references  = form.references || {};
+
+    //@param {Object User} form.user
+    //@param {string} form.message
+    //@param {string} form.action
+    //@param {Object} form.references
     Logger.log(user, message, action, references).then(function(log) {
       return res.json(log);
     }).catch(function(err){
@@ -26,6 +24,8 @@ module.exports = {
       page:  form.page  || 1,
       limit: form.limit || 5
     };
+
+    //@param {Object User o id/hexadecimal} form.user
     if (form.user) {
       query.user = form.user;
     }

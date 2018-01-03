@@ -12,6 +12,7 @@ module.exports = {
   sendOrderEmail: function(req, res){
     var form = req.params.all();
     var orderId = form.id;
+    //@param {id/hexadecimal} orderId
     Email.sendOrderConfirmation(orderId)
       .then(function(){
         res.ok();
@@ -46,8 +47,10 @@ module.exports = {
   },
 
 
-  findById: function(req, res){
+  findById: function(req, res){    
     var form = req.params.all();
+    
+    //@param {id/hexadecimal} form.id
     var id = form.id;
     var order;
     if( !isNaN(id) ){
@@ -88,6 +91,7 @@ module.exports = {
     var form = req.params.all();
     var orderId = form.orderId;
 
+    //@param {id/hexadecimal} form.orderId
     AlegraLog.find({Order: orderId})
       .then(function(logs){
         res.json(logs);
@@ -104,6 +108,8 @@ module.exports = {
     var responseSent = false;
     var orderDetails;
 
+    //@param {Object Order} form
+    //@param {Object User} req.user
     OrderService.createFromQuotation(form, req.user)
       .then(function(orderCreated){
         //RESPONSE
@@ -144,6 +150,16 @@ module.exports = {
 
   getCountByUser: function(req, res){
     var form = req.params.all();
+
+    //@param {Object} form
+    /*
+    Example:
+    {
+      userId: <MongoId>,
+      startDate: Wed Jan 03 2018 15:50:26 GMT-0500 (EST)
+      endDate: Wed Jan 03 2018 16:50:26 GMT-0500 (EST)
+    }
+    */
     OrderService.getCountByUser(form)
       .then(function(result){
         res.json(result);
@@ -157,6 +173,17 @@ module.exports = {
 
   getTotalsByUser: function(req, res){
     var form = req.params.all();
+
+    //@param {Object} form
+    /*
+    Example:
+    {
+      userId: <MongoId>,
+      startDate: Wed Jan 03 2018 15:50:26 GMT-0500 (EST)
+      endDate: Wed Jan 03 2018 16:50:26 GMT-0500 (EST)
+      fortnight: true/false
+    }
+    */
     OrderService.getTotalsByUser(form)
       .then(function(result){
         res.json(result);

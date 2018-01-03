@@ -71,6 +71,7 @@ function getProductsStoresStock(products){
   return stock;
 }
 
+//@param {string} storeCode 
 function isAWebStoreCode(storeCode){
   var webStoreCodes = [
     'actual_home',
@@ -94,6 +95,11 @@ function getAllStoresCodes(){
     });
 }
 
+/*
+  @param {array ProductCategory} categoriesLv1
+  @param {array ProductCategory} categoriesLv2
+  @param {array ProductCategory} categoriesLv3
+*/
 function buildCategoriesTree(categoriesLv1, categoriesLv2, categoriesLv3){
   var categoryTree = [];
   categoriesLv1.forEach(function(clv1){

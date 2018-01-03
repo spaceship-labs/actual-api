@@ -1,6 +1,8 @@
 module.exports = {
   create: function(req, res){
     var form = req.params.all();
+
+    //@param {Object PMPeriod} form
     var startDate = new Date(form.startDate);
     var endDate = new Date(form.endDate);
     overlapsRange(startDate, endDate).then(function(overlaps){
@@ -24,6 +26,8 @@ module.exports = {
 
   update: function(req, res){
     var form = req.params.all();
+
+    //@param {Object PMPeriod} form
     var id = form.id;
     var startDate = new Date(form.startDate);
     var endDate = new Date(form.endDate);
@@ -61,9 +65,12 @@ module.exports = {
         res.negotiate(err);
       });
   },
+
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {id/hexadecimal} id
     PMPeriod.findOne({id:id})
       .then(function(pma){
         res.json(pma);
@@ -72,7 +79,9 @@ module.exports = {
         res.negotiate(err);
       });
   },
+
   getActive: function(req, res){
+    //TODO: Remove
     var form = req.params.all();
     //Today range
     var currentDate = new Date();
@@ -90,7 +99,9 @@ module.exports = {
 
 };
 
-//Params must be Date objects
+//@param {Object Date} newStart
+//@param {Object Date} newEnd
+//@param {id/hexadecimal} currentPeriodId
 function overlapsRange(newStart, newEnd, currentPeriodId){
   var query = {
     endDate: {'>': newStart},

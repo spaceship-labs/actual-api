@@ -26,6 +26,8 @@ module.exports = {
 
   create: function(req, res){
     var form = req.params.all();
+
+    //@param {Object CustomBrand} form
     CustomBrand.create(form).then(function(created){
       res.json(created);
     })
@@ -37,6 +39,8 @@ module.exports = {
   destroy: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {string/hexadecimal} form.id
     CustomBrand.destroy({id:id}).then(function(){
       res.json({destroyed:true});
     })
@@ -48,6 +52,9 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {string/hexadecimal} form.id
+    //@param {Object CustomBrand} form
     CustomBrand.update({id:id},form).then(function(updated){
       res.json(updated);
     })
@@ -59,6 +66,8 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    
+    //@param {string/hexadecimal} form.id
     CustomBrand.findOne({id:id}).then(function(brand){
       res.json(brand);
     })

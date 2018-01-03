@@ -21,6 +21,8 @@ module.exports = {
   getProducts: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {id/hexadecimal} form.id
     ProductGroup.findOne({id: id, Type:'packages'}).populate('Products')
       .then(function(group){
         var products = group.Products;
@@ -47,6 +49,10 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {id/hexadecimal} form.id
+    //@param {array PackageRule} form.packageRules
+    //@param {Object ProductGroup} form
     var packageRules = form.packageRules || [];
     var updatedPackage = false;
 
@@ -69,6 +75,8 @@ module.exports = {
   getDetailedPackage: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {id/hexadecimal} form.id    
     ProductGroup.findOne({id:id,Type:'packages'})
       .populate('Stores')
       .populate('PackageRules')
@@ -82,6 +90,23 @@ module.exports = {
   }
 
 };
+
+/*
+  @param {Object} packageObj
+  Example: 
+  {
+    productId: <MongoId Product>
+    pacakageId: <MongoId ProductGroup>
+    packageRule: {
+      discountPg1: 10,
+      discountPg2: 10,
+      discountPg3: 10,
+      discountPg4: 10,
+      discountPg5: 10,
+      discountType: TODO: remover
+    }
+  }
+*/
 
 function updatePackageRule(packageObj){
   var q = {
@@ -116,7 +141,7 @@ function updatePackageRule(packageObj){
     });
 }
 
-
+//@param {id/hexadecimal} packageId
 function removeUnusedPackageRules(packageId){
   return ProductGroup.findOne({id:packageId,Type:'packages'})
     .populate('Products')

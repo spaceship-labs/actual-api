@@ -1,10 +1,3 @@
-/**
- * CompanyController
- *
- * @description :: Server-side logic for managing companies
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
- */
-
 module.exports = {
   find: function(req, res) {
     Company.find()
@@ -28,6 +21,7 @@ module.exports = {
       });
   },
 
+  //TODO: Revisar si esta en uso
   countSellersGeneral: function(req, res) {
     var form    = req.allParams();
     var company = form.company;
@@ -48,6 +42,7 @@ module.exports = {
       });
   },
 
+  //TODO: Revisar si esta en uso
   countSellersProject: function(req, res) {
     var form    = req.allParams();
     var company = form.company;

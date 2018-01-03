@@ -1,14 +1,10 @@
-/**
- * InvoiceController
- *
- * @description :: Server-side logic for managing invoices
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
- */
-
 module.exports = {
   create: function(req, res) {
     var form = req.allParams();
     var order = form.order;
+    
+    //@param {string/hexadecimal} form.order
+    //TODO: Cambiar order a algo mas entendible como var orderId = form.order
     Invoice
       .findOne({ order: order })
       .then(function(exists) {
@@ -39,6 +35,9 @@ module.exports = {
   find: function(req, res) {
     var form = req.allParams();
     var order = form.order;
+
+    //@param {string/hexadecimal} form.order
+    //TODO: Cambiar order a algo mas entendible como var orderId = form.order
     Invoice
       .find({ order: order })
       .then(function(order) {
@@ -52,6 +51,9 @@ module.exports = {
   send: function(req, res) {
     var form = req.allParams();
     var order = form.order;
+
+    //@param {string/hexadecimal} form.order
+    //TODO: Cambiar order a algo mas entendible como var orderId = form.order
     InvoiceService
       .send(order)
       .then(function(order) {
