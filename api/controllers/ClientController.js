@@ -30,6 +30,7 @@ module.exports = {
       });
   },
 
+  //TODO: Revisar si esta en uso
   findBySeller: function(req, res){
     var form = req.params.all();
     var model = 'client';
@@ -49,6 +50,8 @@ module.exports = {
 
   findById: function(req, res){
     var form        = req.params.all();
+
+    //@params {id/hexadecimal} form.id
     var id          = form.id;
     var clientFound = false;
     Client.findOne({id:id}).then(function(client){
@@ -69,6 +72,18 @@ module.exports = {
 
   create: function(req, res) {
     var form           = req.params.all();
+
+    //@param {Object Client} form
+    /*
+    Example:
+    {
+      ...{Object Client},
+      fiscalAddress: {Object FiscalAddress},
+      contacts: {array ClientContact}      
+
+    }
+    */
+
     var email          = form.E_Mail;
     var actualMail     =  /@actualgroup.com$/;
     var createdClient  = false;
@@ -197,7 +212,9 @@ module.exports = {
   },
 
   update: function(req, res){
+    //@param {Object Client} form    
     var form = req.params.all();
+
     var CardCode = form.CardCode;
     var email = form.E_Mail;
     form = ClientService.mapClientFields(form);
@@ -247,6 +264,7 @@ module.exports = {
   getContactsByClient: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
+    //@param {string} CardCode
     ClientContact.find({CardCode:CardCode})
       .then(function(contacts){
         res.json(contacts);
@@ -260,6 +278,9 @@ module.exports = {
   createContact: function(req, res){
     var form = req.params.all();
     var cardCode = form.CardCode;
+
+    //@param {string} form.CardCode
+    //@param {Object ClientContact} form
     form = ClientService.mapContactFields(form);    
     
     SapService.createContact(cardCode, form)
@@ -293,6 +314,11 @@ module.exports = {
     var form = req.params.all();
     var contactCode = form.CntctCode;
     var cardCode = form.CardCode;
+
+    //@param {string} form.CardCode
+    //@param {int} form.CntctCode
+    //@param {Object ClientContact} form
+
     form = ClientService.mapContactFields(form);
     ClientContact.find({CardCode: cardCode, select:['CntctCode']})
       .then(function(contacts){
@@ -328,6 +354,8 @@ module.exports = {
   },
 
   updateFiscalAddress: function(req, res){
+    //@param {Object FiscalAddress} form
+
     var form = req.params.all();
     var CardCode = form.CardCode;
     var id = form.id;
@@ -372,6 +400,8 @@ module.exports = {
   getEwalletByClient: function(req, res){
     var form = req.allParams();
     var id = form.id;
+
+    //@param {id/hexadecimal} form.id
     Client.findOne({id:id, select:['ewallet']})
       .then(function(client){
         res.json(client.ewallet);
@@ -385,6 +415,8 @@ module.exports = {
   getClientBalance: function(req, res){
     var form = req.allParams();
     var id = form.id;
+    //@param {id/hexadecimal} form.id
+    
     var client;
     ClientBalanceService.getClientBalanceById(id)
       .then(function(balance){
