@@ -161,22 +161,29 @@ module.exports = {
   },
   find: function(modelName,form, extraParams){
     var deferred = q.defer();
-    var searchFields = extraParams.searchFields || [];
-    var populateFields = extraParams.populateFields || [];
-    var selectFields = extraParams.selectFields || [];
-    var items = form.items || 10;
-    var page = form.page || 1;
-    var term = form.term;
-    var orderBy = form.orderby;
-    var query = {};
+    var searchFields = extraParams.searchFields || []; // ["firstName", "lastName"]
+    var populateFields = extraParams.populateFields || []; // ["Quotations", "Orders"]
+    var selectFields = extraParams.selectFields || []; // ["CardCode", "email"]
+    var items = form.items || 10; //numero de items por pagina, por ejemplo: 10
+    var page = form.page || 1; // Pagina activa, por ejemplo: 1
+    var term = form.term; // Termino de busqueda, por ejemplo "Yupit"
+    var orderBy = form.orderby; // ASC o DESC
+    var query = {}; 
     var querySearchAux = {};
-    var model = sails.models[modelName];
-    var filters = form.filters;
+    var model = sails.models[modelName]; //ModelName: string del modelo a buscar por ejemplo "Product"
+    var filters = form.filters; // {CardCode:"C01393933"}
     var selectObj = false;
     var read = false;
-    var getAll = form.getAll;
-    var dateRange = form.dateRange;
-    var keywords = form.keywords;
+    var getAll = form.getAll; // true/false
+    var dateRange = form.dateRange; //
+    /*
+      {
+        start: "Tue Jan 02 2018 16:49:04 GMT-0500 (EST)"
+        end: "Tue Jan 02 2018 17:49:04 GMT-0500 (EST)",
+        field: "createdAt"
+      }
+    */ 
+    var keywords = form.keywords; //["silla", "blanca"]
 
     if(term){
       if(searchFields.length > 0){
