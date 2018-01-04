@@ -19,6 +19,14 @@ module.exports = {
 
   list: function(req, res){
     var form = req.params.all();
+    /*
+    @param {Object} form
+    Example:
+    {
+      ids: {array <MongoId>},
+      quickread: true/false
+    }
+    */
     var reading;
     var query = {};
 
@@ -43,6 +51,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@param {id/hexadecimal} form.id
     ProductFilter.findOne({id:id}).populate('Values').populate('Categories')
       .then(function(filter){
         res.json(filter);
@@ -57,6 +66,7 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     //Creating filter
+    //@param {Object ProductFilter} form
     ProductFilter.create(form)
       .then(function(created){
         res.json(created);
@@ -71,6 +81,7 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@param {Object ProductFilter} form
     ProductFilter.update({id:id},form)
       .then(function(updatedFilter){
         res.json(updatedFilter);
@@ -87,6 +98,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
 
+    //@param {id/hexadecimal} form.id
     ProductFilter.destroy({id:id})
       .then(function(){
         res.json({destroyed:true});

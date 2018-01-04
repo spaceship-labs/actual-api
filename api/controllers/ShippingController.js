@@ -1,14 +1,15 @@
-/**
- * ShippingController
- *
- * @description :: Server-side logic for managing shippings
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
- */
-
 module.exports = {
 
   product: function(req, res) {
     var form = req.allParams();
+    /*
+      @param {Object} form
+      Example:
+      {
+        productCode: "ST10293",
+        storeId: <MongoId Store>
+      }
+    */
     var productCode = form.productCode;
     var storeId = form.storeId;
     var store = false;

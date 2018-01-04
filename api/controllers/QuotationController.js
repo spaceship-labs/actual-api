@@ -18,6 +18,18 @@ module.exports = {
       currentStoreId: req.user.activeStore.id
     };
 
+    /*
+      @param {Object Store} req.user.activeStore
+      @param {Object Quotation} form
+      Example form:
+      {
+        ...{Object Store},
+        Details: {array QuotationDetail},
+        Store: <MongoId Store>,
+        Client: <MongoId Client>,        
+        User: <MongoId User>        
+      }
+    */
     Quotation.create(form)
       .then(function(created){
         createdId = created.id;
@@ -46,6 +58,11 @@ module.exports = {
     var id = form.id;
     form.Store =  req.user.activeStore.id;
 
+    /*
+      @param {Object Store} req.user.activeStore
+      @param {Object Quotation} form    
+    */
+
     Quotation.update({id:id}, form)
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -64,6 +81,11 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var userId = req.user.id;
+
+    /*
+      @param {Object User} req.user
+      @param {<MongoId Quotation>} form.id
+    */
 
     Quotation.findOne({id: id})
       .populate('Details')
@@ -84,6 +106,13 @@ module.exports = {
     var id = form.id;
     var userId = req.user.id;
     var getPayments = form.payments;
+
+    /*
+      @param {Object User} req.user
+      @param {<MongoId Quotation>} form.id
+      @param {boolean} form.payments
+    */
+
     if( !isNaN(id) ){
       //id = parseInt(id);
     }
@@ -121,6 +150,15 @@ module.exports = {
 
   closeQuotation: function(req, res){
     var form = req.params.all();
+
+    //TODO: Reemplazar form.id en config/routes.js a quotationId
+    //Por ejemplo de /quotation/:id/close a /quotation/:quotationId/close
+    //Para diferenciar id de QuotationRecord de Quotation
+    /*
+      @param {Object QuotationRecord} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     var id = _.clone(form.id);
     var createdRecord = false;
     form.dateTime = new Date();
@@ -158,6 +196,11 @@ module.exports = {
     var form = req.allParams();
     var id = form.id;
 
+    /*
+      @param {<MongoId Quotation>} form.id
+      @param {Date} form.estimatedCloseDate
+    */
+
     Quotation.update({id: id}, {estimatedCloseDate: form.estimatedCloseDate})
       .then(function(updated){
         if(updated.length > 0){
@@ -175,6 +218,15 @@ module.exports = {
 
   addRecord: function(req, res){
     var form = req.allParams();
+
+    //TODO: Reemplazar form.id en config/routes.js a quotationId
+    //Por ejemplo de /quotation/addrecord/:id' a /quotation/addrecord/:quotationId'
+    //Para diferenciar id de QuotationRecord de Quotation
+    /*
+      @param {Object QuotationRecord} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     var id = form.id;
     var createdRecord = false;
     var addedFile = false;
@@ -228,8 +280,20 @@ module.exports = {
 
   addDetail: function(req, res){
     var form = req.params.all();
+
+    //TODO: Reemplazar form.id en config/routes.js a quotationId
+    //Por ejemplo de '/quotation/adddetail/:id' a '/quotation/adddetail/:quotationId'
+    //Para diferenciar id de QuotationDetail de Quotation
+    /*
+      @param {Object User} req.user
+      @param {Object QuotationDetail} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     var id = form.id;
     form.Quotation = id;
+
+    //TODO: Revisar si form.Details esta en uso
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
 
@@ -260,6 +324,12 @@ module.exports = {
 
   addMultipleDetails: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {<MongoId Quotation>} form.id
+      @param {array QuotationDetail} form.Details,
+      Example:
+    */
     var id = form.id;
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
@@ -298,6 +368,14 @@ module.exports = {
 
   removeDetailsGroup: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {Object User} req.user
+      @param {Object} form
+      @param {array <MongoId QuotationDetail>} detailsIds
+      @param {<MongoId Quotation>} form.quotation
+    */
+
     var detailsIds = form.detailsIds;
     var quotationId = form.quotation;
     var opts = {
@@ -381,6 +459,15 @@ module.exports = {
 
   getQuotationTotals: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {Object User} req.user
+      @param {Object Store} req.user.activeStore      
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+      @param {int} form.paymentGroup
+    */
+
     var id = form.id;
     var paymentGroup = form.paymentGroup || 1;
     var params = {
@@ -404,6 +491,12 @@ module.exports = {
   getRecords: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     QuotationRecord.find({Quotation:id})
       .populate('User')
       .populate('files')
@@ -419,6 +512,18 @@ module.exports = {
 
   getCountByUser: function(req, res){
     var form    = req.params.all();
+    /*
+      @param {Object} form
+      Example:
+      {
+        userId: <MongoId User>,
+        isClosed: false,
+        endDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        dateField: "createdAt",
+      }
+    */
+
     var options = form;
     QuotationService.getCountByUser(options)
       .then(function(count){
@@ -433,6 +538,18 @@ module.exports = {
 
   getTotalsByUser: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {Object} form
+      Example:
+      {
+        userId: <MongoId User>,
+        isClosed: false,
+        endDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        dateField: "createdAt",
+      }
+    */
     var options = form;
     QuotationService.getTotalsByUser(options)
       .then(function(totals){
@@ -446,6 +563,18 @@ module.exports = {
 
   getMultipleUsersTotals: function(req, res){
     var form = req.params.all();
+    /*
+      @param {Object} form
+      Example:
+      {
+        usersIds: {array <MongoId User>},
+        isClosed: false,
+        endDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        dateField: "createdAt",
+      }
+    */
+
     var options = form;
     QuotationService.getMultipleUsersTotals(options)
       .then(function(totals){
@@ -459,6 +588,13 @@ module.exports = {
 
   sendEmail: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {Object Store} req.user.activeStore
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     var id = form.id;
     var activeStore = req.user.activeStore;
     Email
@@ -473,6 +609,13 @@ module.exports = {
 
   updateSource: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+      @param {string} form.source
+      @param {string} form.sourceType
+    */
     var id = form.id;
     var source = form.source;
     var sourceType = form.sourceType;
@@ -494,6 +637,13 @@ module.exports = {
 
   updateBroker: function(req, res){
     var form = req.params.all();
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+      @param {<MongoId BrokerSAP>} form.brokerId
+    */
+
     var id = form.id;
     var brokerId = form.brokerId;
     var params = {
@@ -522,6 +672,11 @@ module.exports = {
 
   getCurrentStock: function(req, res){
     var form = req.allParams();
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.quotationId
+    */
     var quotationId = form.quotationId;
     var warehouse;
     var details;
@@ -546,6 +701,11 @@ module.exports = {
 
   validateStock: function(req, res){
     var form = req.allParams();
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+    */    
     var quotationId = form.id;
     StockService.validateQuotationStockById(quotationId, req.user.activeStore)
       .then(function(isValid){
@@ -560,6 +720,13 @@ module.exports = {
   getQuotationPaymentOptions: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+      @param {boolean} form.financingTotals
+    */
+
     Quotation.findOne({id:quotationId})
       .then(function(quotation){
         var options = {
@@ -579,6 +746,12 @@ module.exports = {
   getQuotationSapLogs: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     SapOrderConnectionLog.find({Quotation:quotationId})
       .then(function(logs){
         res.json(logs);
@@ -592,6 +765,12 @@ module.exports = {
   getQuotationPayments: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
+
+    /*
+      @param {Object} form
+      @param {<MongoId Quotation>} form.id
+    */
+
     Payment.find({Quotation: quotationId}).sort('createdAt ASC')
       .then(function(payments){
         res.json(payments);
@@ -604,6 +783,13 @@ module.exports = {
 
 };
 
+/*
+  @param {string} term
+  @param {array string} searchFields
+  Example:
+    term = "Cinthya"
+    searchFields = ["CardName", "FirstName", "CardCode"] 
+*/
 function clientsIdSearch(term, searchFields){
   var query = {};
   if(searchFields.length > 0){
@@ -624,6 +810,7 @@ function clientsIdSearch(term, searchFields){
     });
 }
 
+//@param {array QuotationDetail} details
 function tagImmediateDeliveriesDetails(details){
   if(details && details.length > 0){
     for(var i=0;i<details.length;i++){
@@ -637,6 +824,7 @@ function tagImmediateDeliveriesDetails(details){
 }
 
 
+//@param {array QuotationDetail} details
 function formatProductsIds(details){
   var result = [];
   if(details && details.length > 0){

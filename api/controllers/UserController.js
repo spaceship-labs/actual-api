@@ -30,6 +30,15 @@ module.exports = {
     var id = form.id;
     var quickRead = form.quickRead;
     
+    //@param {Object} form
+    //Example
+    /*
+      {
+        id: <MongoId User>,
+        quickRead: false
+      }
+    */
+
     var userQuery =  User.findOne({id: id})
       .populate('permissions')
       .populate('mainStore')
@@ -51,6 +60,8 @@ module.exports = {
 
   create: function(req, res){
     var form = req.allParams();
+
+    //@param {Object User} form
     User.create(form)
       .then(function(_user){
         return res.ok({user: _user});
@@ -65,6 +76,8 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     delete form.password;
+
+    //@param {Object User} form
     User.update({id: id}, form)
       .then(function(user){
         return res.ok({
@@ -79,6 +92,14 @@ module.exports = {
 
   send_password_recovery: function(req, res){
     var form  = req.params.all();
+    //@param {Object} form
+    /*
+      Example:
+      {
+        email: "example@test.com"
+      }
+    */
+
     var email = form.email || false;
     if(email && Common.validateEmail(email) ){
       User.findOne( {email:email}, {select: ['id', 'password', 'email']} )
@@ -117,6 +138,17 @@ module.exports = {
 
   update_password: function(req, res){
     var form = req.params.all();
+    /*
+      @param {Object} form
+      Example:
+      {
+        token: "4949493ROFKRFF",
+        email: "test@example.com",
+        password: "1234",
+        confirmPass: "1234"
+      }
+    */
+
     var token = form.token || false;
     var email = form.email || false;
     var password = form.password || false;
@@ -146,6 +178,7 @@ module.exports = {
   stores: function(req, res) {
     var form  = req.allParams();
     var email = form.email;
+    //@params {string} form.email
     User.findOne({email: email})
       .populate('Stores')
       .then(function(user) {
@@ -159,6 +192,11 @@ module.exports = {
   }
 };
 
+/*
+  @param {string} token
+  @param {string} email
+  @param {Function} cb
+*/
 function validateToken(token, email, cb){
   User.findOne(
     {email:email},

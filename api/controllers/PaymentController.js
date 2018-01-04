@@ -11,6 +11,10 @@ var PAYMENT_CANCEL_TYPE = 'cancelation';
 module.exports = {
 
   add: function(req, res){
+    //@param {Object Payment} form
+    //@param {id/hexadecimal} form.quotationId
+    //@param {Object User} req.user
+
     var form          = req.params.all();
     var quotationId   = form.quotationid;
     var totalDiscount = form.totalDiscount || 0;
@@ -37,6 +41,7 @@ module.exports = {
     form.Store = req.user.activeStore.id;
     form.User = req.user.id;    
 
+    //TODO: Remover
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
     }
@@ -198,6 +203,7 @@ module.exports = {
       });
   },
 
+  //TODO: Remover
   cancel: function(req, res){
     var form = req.allParams();
     var paymentId = form.paymentId;
@@ -208,12 +214,19 @@ module.exports = {
 
   getPaymentGroups: function(req, res){
     var form = req.allParams();
+    //{Object} form
+    /*
+      Example: 
+      {
+        readCreditPayments: true/false
+      }
+    */
     var paymentGroups = PaymentService.getPaymentGroups(form);
     res.json(paymentGroups);
   }	
 };
 
-
+//TODO: Remover
 function formatProductsIds(details){
   var result = [];
   if(details && details.length > 0){

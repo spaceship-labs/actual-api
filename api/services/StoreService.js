@@ -8,6 +8,13 @@ module.exports = {
   isWebStore: isWebStore
 };
 
+/*
+  @param {Object} params
+  Example:{
+    startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)"
+  }
+*/
 function generateStoresCashReport(params){
   params.populateOrders = false;
 
@@ -27,6 +34,14 @@ function generateStoresCashReport(params){
 		});
 }
 
+/*
+  @param {<MongoId Store>} storeId
+  @param {Object} params
+  Example:{
+    startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)"
+  }
+*/
 function getPaymentsByStore(storeId, params){
   var startDate = params.startDate || new Date();
   var endDate = params.endDate || new Date();
@@ -48,6 +63,7 @@ function getPaymentsByStore(storeId, params){
     });
 }
 
+//@param {<MongoId Store>} storeId
 function getStoreSellers(storeId){
   return Role.findOne({name:'seller'})
     .then(function(sellerRole){
@@ -56,6 +72,15 @@ function getStoreSellers(storeId){
     });
 }
 
+//@param {Object} params
+/*
+  Example:
+  {
+    userId: {<MongoId User>},
+    startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)"    
+  }
+*/
 function generateMagerCashReprot(params){
   var userId = params.userId;
 
@@ -84,6 +109,14 @@ function generateMagerCashReprot(params){
     });
   }
 
+/*
+  @param {Object} params
+  Example:{
+    id: <MongoId Store>,
+    startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)"
+  }
+*/
 function generateStoreCashReportBySellers(params){
   var storeId = params.id;
   var startDate = params.startDate || new Date();
@@ -118,6 +151,19 @@ function generateStoreCashReportBySellers(params){
     });
 }
 
+/*
+  TODO: Cambiar nombre de funcion a algo mas descriptivo
+  Por ejemplo: populateSellersWithPayments
+  @param {Object} options
+  Example:
+  {
+    seller: {Object Seller},
+    startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)",
+    storeId: <MongoId Store>,
+    populateOrders: true
+  }
+*/
 function getPaymentsBySeller(options){
   var seller = options.seller;
   var startDate = options.startDate;

@@ -26,6 +26,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     
+    //@param {id/hexadecimal} form.id
     var userQuery =  UserWeb.findOne({id: id, role:'admin'});
 
     userQuery.then(function(result){
@@ -40,6 +41,8 @@ module.exports = {
   create: function(req, res){
     var form = req.allParams();
     form.role = 'admin';
+
+    //@param {Object UserWeb} form
     UserWeb.create(form)
       .then(function(_user){
         return res.ok({user: _user});
@@ -53,6 +56,8 @@ module.exports = {
   update: function(req, res) {
     var form = req.params.all();
     var id = form.id;
+    //@param {Object UserWeb} form
+
     delete form.password;
 
     UserWeb.findOne({id: id})

@@ -17,6 +17,7 @@ module.exports = {
   multipleUpdate: function(req, res){
     var params = req.allParams();
     
+    //@params {array ZipcodeState} params.zipcodeStates 
     Promise.mapSeries(params.zipcodeStates , function(state){
       var updateQuery = {_id: ObjectId(state.id)};
       updateParams = {
@@ -33,6 +34,15 @@ module.exports = {
 
   list: function(req, res){
     var form  = req.params.all();
+
+    //@param {Object} form
+    //Example:
+    /*
+      {
+        page: 1,
+        limit: 20
+      }
+    */
     var page  = form.page;
     var limit = form.limit;
     var find = ZipcodeDelivery.find();

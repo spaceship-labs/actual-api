@@ -15,6 +15,7 @@ module.exports = {
   getPackagesByStore: function(req, res){
     var form        = req.params.all();
     var id          = form.id;
+    //@param {id/hexadecimal} form.id
     var queryPromos = Search.getPromotionsQuery();
     Store.findOne({id:id})
       .populate('PromotionPackages', queryPromos)
@@ -30,6 +31,8 @@ module.exports = {
   getSellersByStore: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@param {id/hexadecimal} form.id
+
     Role.findOne({name:'seller'})
       .then(function(sellerRole){
         var sellerRoleId = sellerRole.id;
@@ -46,6 +49,10 @@ module.exports = {
   getCommissionables: function(req, res) {
     var form = req.params.all();
     var store = form.store;
+
+    //TODO cambiar var store a var storeId
+    //@param {id/hexadecimal} form.store
+
     Role.find({name:['seller', 'store manager']})
       .then(function(commissionables){
         var commissionables = commissionables.map(function(c){ return c.id; });
@@ -74,6 +81,10 @@ module.exports = {
   countSellers: function(req, res) {
     var form  = req.allParams();
     var store = form.store;
+    
+    //TODO cambiar var store a var storeId
+    //@param {id/hexadecimal} form.store
+
     Role
       .findOne({name: 'seller'})
       .then(function(role) {
@@ -92,6 +103,17 @@ module.exports = {
 
   generateStoreCashReport: function(req, res){
     var form = req.params.all();
+    /*
+      @param {Object User} req.user
+      @param {Object} form
+      Example:{
+        populateOrders: true,
+        id: <MongoId Store>,
+        startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)"
+      }
+    */
+
     var STORE_MANAGER_ROLE_NAME = 'store manager';
     var ADMIN_ROLE_NAME = 'admin';
     form.populateOrders = true;
@@ -112,6 +134,15 @@ module.exports = {
 
   generatAllStoresCashReport: function(req, res){
     var form = req.params.all();
+    /*
+      @param {Object User} req.user
+      @param {Object} form
+      Example:{
+        startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+        endDate: "Thu Jan 04 2018 11:04:16 GMT-0500 (EST)"
+      }
+    */
+    
     var ADMIN_ROLE_NAME = 'admin';
 
     if(req.user.role.name !== ADMIN_ROLE_NAME){

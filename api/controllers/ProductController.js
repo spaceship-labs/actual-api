@@ -35,9 +35,16 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
     var populateFields = form.populateFields;
+
+    //@param {Object} form
+    /*
+      {
+        id: <MongoID>
+        populateFields: ["PackageRules","files", ...],
+      }
+    */
 
     var findPromise = Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
       .populate('files')
@@ -65,6 +72,16 @@ module.exports = {
   multipleFindByIds: function(req, res){
     var form = req.params.all();
     var ids = form.ids;
+
+    //@param {Object}
+    /*
+    Example:
+    {
+      populate_fields: ["files", "Sizes", ...],
+      ids: [<MongoId>,<MongoId>]
+    }
+    */
+
     var populateFields = form.populate_fields;
     var read = Product.find({id: ids});
 
@@ -83,6 +100,7 @@ module.exports = {
     });
   },
 
+  //TODO: Revisar si esta en uso
   search: function(req, res){
     var form = req.params.all();
     var items = form.items || 10;
@@ -155,6 +173,8 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@param {id/hexadecimal} form.id
     Product.update({ItemCode: id}, form)
       .then(function(product){
         res.json(product);
@@ -168,6 +188,7 @@ module.exports = {
   addFiles : function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
+    //@param {id/hex} form.id
 
     var options = {
       dir : 'products/gallery',
@@ -195,6 +216,16 @@ module.exports = {
   removeFiles : function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
+
+    //@param {Object} form
+    //Example:
+    /*
+      {
+        removeFiles: {array ProductFile},
+        ItemCode: ST10239
+      }
+    */
+
     Product.findOne({ItemCode:form.ItemCode})
       .populate('files')
       .then(function(product){
@@ -224,6 +255,8 @@ module.exports = {
   updateIcon: function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
+    //@param {id/hexadecimal} form.id
+
     var options = {
       dir : 'products',
       profile: 'avatar',
@@ -243,6 +276,8 @@ module.exports = {
   removeIcon: function(req,res){
     process.setMaxListeners(0);
     var form = req.params.all();
+    //@param {id/hexadecimal} form.id
+    
     var options = {
       dir : 'products',
       profile: 'avatar',
@@ -262,6 +297,8 @@ module.exports = {
   getProductsbySuppCatNum: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@param {id/hexadecimal} form.id
+
     Product.find( {SuppCatNum: id}, {select: ['ItemCode']} )
       .then(function(prods) {
         res.json(prods);
@@ -275,6 +312,9 @@ module.exports = {
   addSeenTime: function(req, res){
     var form = req.params.all();
     var ItemCode = form.ItemCode;
+    //@param {string} form.ItemCode
+
+
     Product.findOne({
       select:['id','ItemCode','seenTimes'],
       ItemCode: ItemCode
@@ -299,6 +339,8 @@ module.exports = {
     var form = req.allParams();
     var id = form.id;
     var activeQuotationId = form.activeQuotationId;
+
+    //@param {id/hexadecimal} form.activeQuotationId
     PromotionService.getProductMainPromo(id, activeQuotationId)
       .then(function(mainPromo){
         res.json(mainPromo);
@@ -323,6 +365,13 @@ module.exports = {
   setSpotlightProducts: function(req, res){
     var form = req.allParams();
     var itemCodes = form.itemCodes;
+    //@param {array string} form.itemCodes
+    /*
+      Example:
+      {
+        itemCodes: ["ST10293", "C039493", ....]
+      }
+    */
 
     Common.nativeUpdate({},{spotlight: false}, Product)
       .then(function(){
@@ -355,6 +404,13 @@ module.exports = {
   setSlowMovementProducts: function(req, res){
     var form = req.allParams();
     var itemCodes = form.itemCodes;
+    //@param {array string} form.itemCodes
+    /*
+      Example:
+      {
+        itemCodes: ["ST10293", "C039493", ....]
+      }
+    */
 
     Common.nativeUpdate({},{slowMovement: false}, Product)
       .then(function(){

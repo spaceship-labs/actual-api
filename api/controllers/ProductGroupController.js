@@ -21,6 +21,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@param {id/hexadecimal} form.id
     ProductGroup.findOne({id:id})
       .populate('Products')
       .then(function(group){
@@ -35,6 +36,8 @@ module.exports = {
   getVariantGroupProducts: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@param {id/hexadecimal} form.id
+
     ProductGroup.findOne({id:id, Type:'variations'}).populate('Products')
       .then(function(group){
         if(group.Products.length > 0){
@@ -61,6 +64,8 @@ module.exports = {
 
   create: function(req, res){
     var form = req.params.all();
+
+    //@param {Object ProductGroup} form
     ProductGroup.create(form)
       .then(function(created){
         res.json(created);
@@ -74,6 +79,8 @@ module.exports = {
   update: function(req,res){
     var form = req.params.all();
     delete form.Products;
+
+    //@param {Object ProductGroup} form
     ProductGroup.update({id: form.id}, form)
       .then(function(updated){
         res.json(updated);
@@ -86,6 +93,8 @@ module.exports = {
 
   destroy: function(req, res){
     var form = req.params.all();
+    
+    //@param {id/hexadecimal} form.id
     ProductGroup.destroy({id: form.id})
       .then(function(){
         res.json({destroyed:true});
@@ -101,6 +110,16 @@ module.exports = {
     var product = form.product;
     var group = form.group;
 
+    //TODO: Cambiar var product y var group a productId y groupId para ser mas descriptivo
+    //@param {Object} form
+    /*
+    Example:
+    {
+      product: <MongoId Product>,
+      group: <MongoId ProductGroup>
+    }
+    */
+
     Product_ProductGroup.create({product:product, productgroup:group})
       .then(function(created){
         res.json(created);
@@ -115,6 +134,16 @@ module.exports = {
     var form = req.params.all();
     var product = form.product;
     var group = form.group;
+
+    //TODO: Cambiar var product y var group a productId y groupId para ser mas descriptivo
+    //@param {Object} form
+    /*
+    Example:
+    {
+      product: <MongoId Product>,
+      group: <MongoId ProductGroup>
+    }
+    */
 
     Product_ProductGroup.destroy({product:product, productgroup:group})
       .then(function(){
@@ -151,6 +180,7 @@ module.exports = {
       profile: 'avatar',
       id : form.id,
     };
+    //@param {id/hexadecimal} form.id
 
     ProductGroup.updateAvatar(req,options)
       .then(function(productGroup){
@@ -171,6 +201,8 @@ module.exports = {
       profile: 'avatar',
       id : form.id,
     };
+    //@param {id/hexadecimal} form.id
+
 
     ProductGroup.destroyAvatar(req,options)
       .then(function(result){

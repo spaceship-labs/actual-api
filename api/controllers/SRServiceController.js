@@ -4,6 +4,14 @@ module.exports = {
 
   find: function(req, res){
     var form = req.allParams();
+    /*
+      @param {Object} form
+      Example:
+      {
+        items: 20,
+        page: 1
+      }
+    */
     var items = form.items || 10;
     var page = form.page || 1;
     var query = {

@@ -78,6 +78,7 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@params {id/hexadecimal} form.id
     ProductCategory.findOne({id:id}).populate('Childs').populate('Parents')
       .then(function(category){
         res.json(category);
@@ -92,6 +93,10 @@ module.exports = {
   //TODO: Check why .add() doesnt work for ProductCategory.Parents
   create: function(req, res){
     var form = req.params.all();
+
+    //@params {Object ProductCategory} form
+    //@params {array ProductCategory} form.Parents
+
     var parents = form.Parents;
     var relationRecords = [];
     ProductCategory.create(form).then(function(result){
@@ -111,6 +116,7 @@ module.exports = {
   destroy: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    //@params {id/hexadecimal} form.id
     ProductCategory.destroy({id:id}).then(function(){
       return res.json({destroyed: true});
     })
@@ -124,6 +130,8 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    //@params {Object ProductCategory} form
     ProductCategory.update({id:id},form).then(function(updatedCategory){
       res.json(updatedCategory);
     })
@@ -136,6 +144,8 @@ module.exports = {
   getCategory: function(req, res){
     var form = req.params.all();
     var handle = form.handle;
+
+    //@param {string} form.handle
     ProductCategory.findOne({Handle:handle}).populate('Products')
       .then(function(category){
         res.json(category);
@@ -149,6 +159,8 @@ module.exports = {
   findByHandle: function(req, res){
     var form = req.params.all();
     var handle = form.handle;
+    
+    //@param {string} form.handle
     ProductCategory.findOne({Handle:handle})
       .populate('Childs')
       .populate('Filters')

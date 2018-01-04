@@ -5,6 +5,32 @@ module.exports = {
   
   searchByFilters: function(req, res){
     var form           = req.params.all();
+    /*
+      @param {Object User} req.user
+      @param {Object} form
+      Example:
+      {
+        keywords: {array string},
+        filtervalues: {array <MongoId ProductFilterValue>},
+        minPrice: 2500,
+        maxPrice: 3200,
+        stockRanges: [20, 50],
+        brandsIds: {array <MongoId ProductBrand>},
+        discounts: [5, 10, 20],
+        sortOption: {
+          direction: "ASC" / "DESC"
+          key: "stock" / "price" ... etc
+        },
+        societyCodes: ["001", "002"],
+        slowMovement: false,
+        populateImgs: false,
+        filterByStore: true,
+        page: 1,
+        items: 15,
+
+      }
+    */
+
     var terms          = [].concat(form.keywords || []);
     var filtervalues   = [].concat(form.ids || []);
     var minPrice       = form.minPrice;
@@ -96,6 +122,34 @@ module.exports = {
 
   searchByCategory: function(req, res) {
     var form           = req.params.all();
+    
+    /*
+      @param {Object User} req.user
+      @param {Object} form
+      Example:
+      {
+        category: "sillas",
+        keywords: {array string},
+        filtervalues: {array <MongoId ProductFilterValue>},
+        minPrice: 2500,
+        maxPrice: 3200,
+        stockRanges: [20, 50],
+        brandsIds: {array <MongoId ProductBrand>},
+        discounts: [5, 10, 20],
+        sortOption: {
+          direction: "ASC" / "DESC"
+          key: "stock" / "price" ... etc
+        },
+        societyCodes: ["001", "002"],
+        slowMovement: false,
+        populateImgs: false,
+        filterByStore: true,
+        page: 1,
+        items: 15,
+
+      }
+    */
+
     var handle         = [].concat(form.category);
     var filtervalues   = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;   
@@ -206,6 +260,42 @@ module.exports = {
 
   advancedSearch: function(req, res) {
     var form               = req.params.all();
+    
+    /*
+      @param {Object User} req.user
+      @param {Object} form
+      Example:
+      {
+        category: "sillas",
+        keywords: {array string},
+        filtervalues: {array <MongoId ProductFilterValue>},
+        groups: {array <MongoId ProductGroup>}
+        minPrice: 2500,
+        maxPrice: 3200,
+        stockRanges: [20, 50],
+        brandsIds: {array <MongoId ProductBrand>},
+        discounts: [5, 10, 20],
+        sortOption: {
+          direction: "ASC" / "DESC"
+          key: "stock" / "price" ... etc
+        },
+        sas: ["001", "002"],
+        slowMovement: false,
+        populateImgs: false,
+        filterByStore: true,
+        page: 1,
+        items: 15,
+        itemCode: "ST20302",
+        OnStudio: true,
+        OnHome: true,
+        OnKids: true,
+        OnAmueble: true,
+        customBrands: {array <MongoId CustomBrand>}
+        excludedCategories: {array <MongoId ProductCategory>} TODO: Revisar si esta en uso,
+      }
+    */
+
+
     var categories         = [].concat(form.categories);
     var filtervalues       = [].concat(form.filtervalues);
     var groups             = [].concat(form.groups);
