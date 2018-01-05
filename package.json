@@ -64,7 +64,7 @@
   "author": "luis",
   "license": "",
   "engines": {
-    "node": "6.9.4",
+    "node": ">=6",
     "npm": "3.10.10"
   }
 }

@@ -40,152 +40,152 @@ module.exports.routes = {
 
   '/auth/signin': {
     controller: 'auth',
-    action: 'signin'
+    action: 'signin',
   },
 
   '/auth/manager': {
     controller: 'auth',
-    action: 'authorizeManager'
+    action: 'authorizeManager',
   },
 
   '/user/create': {
     controller: 'user',
-    action: 'create'
+    action: 'create',
   },
 
   '/user/findbyid/:id': {
     controller: 'user',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/user/find/:page': {
     controller: 'user',
-    action: 'find'
+    action: 'find',
   },
 
   '/user/update/:id': {
     controller: 'user',
-    action: 'update'
+    action: 'update',
   },
 
   '/userweb/create': {
     controller: 'userweb',
-    action: 'create'
+    action: 'create',
   },
 
   '/userweb/findbyid/:id': {
     controller: 'userweb',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/userweb/find/:page': {
     controller: 'userweb',
-    action: 'find'
+    action: 'find',
   },
 
   '/userweb/update/:id': {
     controller: 'userweb',
-    action: 'update'
+    action: 'update',
   },
 
   '/product/find/:page': {
     controller: 'product',
-    action: 'find'
+    action: 'find',
   },
 
   '/product/multiplefindbyids': {
     controller: 'product',
-    action: 'multipleFindByIds'
+    action: 'multipleFindByIds',
   },
 
   '/product/search': {
     controller: 'product',
-    action: 'search'
+    action: 'search',
   },
 
   '/product/addfiles': {
     controller: 'product',
-    action: 'addFiles'
+    action: 'addFiles',
   },
 
   '/product/removefiles': {
     controller: 'product',
-    action: 'removeFiles'
+    action: 'removeFiles',
   },
 
   '/product/updateicon': {
     controller: 'product',
-    action: 'updateIcon'
+    action: 'updateIcon',
   },
 
   '/product/removeicon': {
     controller: 'product',
-    action: 'removeIcon'
+    action: 'removeIcon',
   },
 
   '/product/findbyid/:id': {
     controller: 'product',
-    action: 'findById'
+    action: 'findById',
   },
 
   'post /spotlightproducts': {
     controller: 'product',
-    action: 'setSpotlightProducts'
+    action: 'setSpotlightProducts',
   },
 
   'get /spotlightproducts': {
     controller: 'product',
-    action: 'getSpotlightProducts'
+    action: 'getSpotlightProducts',
   },
 
   'post /slowmovementproducts': {
     controller: 'product',
-    action: 'setSlowMovementProducts'
+    action: 'setSlowMovementProducts',
   },
 
   'get /slowmovementproducts': {
     controller: 'product',
-    action: 'getSlowMovementProducts'
+    action: 'getSlowMovementProducts',
   },
 
   '/sync/syncproductbyitemcode/:itemcode': {
     controller: 'sync',
-    action: 'syncProductByItemCode'
+    action: 'syncProductByItemCode',
   },
 
   '/sync/syncclientbycardcode/:cardcode': {
     controller: 'sync',
-    action: 'syncClientByCardCode'
+    action: 'syncClientByCardCode',
   },
 
   '/sync/clientsdiscounts': {
     controller: 'sync',
-    action: 'syncClientsDiscounts'
+    action: 'syncClientsDiscounts',
   },
 
   '/sync/clientscredit': {
     controller: 'sync',
-    action: 'syncClientsCredit'
+    action: 'syncClientsCredit',
   },
 
   '/product/update/:id': {
     controller: 'product',
-    action: 'update'
+    action: 'update',
   },
 
   '/product/getproductsbysuppcatnum/:id': {
     controller: 'product',
-    action: 'getProductsbySuppCatNum'
+    action: 'getProductsbySuppCatNum',
   },
 
   '/product/addseen/:ItemCode': {
     controller: 'product',
-    action: 'addSeenTime'
+    action: 'addSeenTime',
   },
 
   '/product/mainpromo/:id': {
     controller: 'product',
-    action: 'getProductMainPromo'
+    action: 'getProductMainPromo',
   },
 
   /*
@@ -197,197 +197,198 @@ module.exports.routes = {
 
   '/invoice/find/:page': {
     controller: 'invoice',
-    action: 'find'
+    action: 'find',
   },
 
   '/productcategory/find/:page': {
     controller: 'productcategory',
-    action: 'find'
+    action: 'find',
   },
 
   '/productcategory/create': {
     controller: 'productcategory',
-    action: 'create'
+    action: 'create',
   },
 
   '/productcategory/getallcategories': {
     controller: 'productcategory',
-    action: 'getAllCategories'
+    action: 'getAllCategories',
   },
 
   '/productcategory/getcategoriesgroups': {
     controller: 'productcategory',
-    action: 'getCategoriesGroups'
+    action: 'getCategoriesGroups',
   },
 
   '/productcategory/getmaincategories': {
     controller: 'productcategory',
-    action: 'getMainCategories'
+    action: 'getMainCategories',
   },
 
   '/productcategory/findbyid/:id': {
     controller: 'productcategory',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/productcategory/findbyhandle/:handle': {
     controller: 'productcategory',
-    action: 'findByHandle'
+    action: 'findByHandle',
   },
 
   '/productcategory/destroy/:id': {
     controller: 'productcategory',
-    action: 'destroy'
+    action: 'destroy',
   },
 
   '/productcategory/update/:id': {
     controller: 'productcategory',
-    action: 'update'
+    action: 'update',
   },
 
   '/productcategory/getcategoriestree': {
     controller: 'productcategory',
-    action: 'getCategoriesTree'
+    action: 'getCategoriesTree',
   },
 
   '/productfilter/find/:page': {
     controller: 'productfilter',
-    action: 'find'
+    action: 'find',
   },
 
   '/productfilter/list': {
     controller: 'productfilter',
-    action: 'list'
+    action: 'list',
   },
 
   '/productfilter/create': {
     controller: 'productfilter',
-    action: 'create'
+    action: 'create',
   },
 
   '/productfilter/findbyid/:id': {
     controller: 'productfilter',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/productfilter/destroy/:id': {
     controller: 'productfilter',
-    action: 'destroy'
+    action: 'destroy',
   },
 
   '/productfiltervalue/create': {
     controller: 'productfiltervalue',
-    action: 'create'
+    action: 'create',
   },
 
   '/productfiltervalue/update/:id': {
     controller: 'productfiltervalue',
-    action: 'update'
+    action: 'update',
   },
 
   '/productfiltervalue/destroy/:id': {
     controller: 'productfiltervalue',
-    action: 'destroy'
+    action: 'destroy',
   },
 
   '/productbrand/getall': {
     controller: 'productbrand',
-    action: 'getAll'
+    action: 'getAll',
   },
 
+  // 'get /custombrand': 'CustomBrandController.index',
   '/custombrand/find/:page': {
     controller: 'custombrand',
-    action: 'find'
+    action: 'find',
   },
 
   '/custombrand/getall': {
     controller: 'custombrand',
-    action: 'getAll'
+    action: 'getAll',
   },
 
   '/custombrand/create': {
     controller: 'custombrand',
-    action: 'create'
+    action: 'create',
   },
 
   '/custombrand/update/:id': {
     controller: 'custombrand',
-    action: 'update'
+    action: 'update',
   },
 
   '/custombrand/findbyid/:id': {
     controller: 'custombrand',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/custombrand/destroy/:id': {
     controller: 'custombrand',
-    action: 'destroy'
+    action: 'destroy',
   },
 
   '/productsize/create': {
     controller: 'productsize',
-    action: 'create'
+    action: 'create',
   },
 
   '/productsize/update/:id': {
     controller: 'productsize',
-    action: 'update'
+    action: 'update',
   },
 
   '/productsize/destroy/:id': {
     controller: 'productsize',
-    action: 'destroy'
+    action: 'destroy',
   },
 
   '/productgroup/find/:page': {
     controller: 'productgroup',
-    action: 'find'
+    action: 'find',
   },
 
   '/productgroup/findbyid/:id': {
     controller: 'productGroup',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/productgroup/create': {
     controller: 'productgroup',
-    action: 'create'
+    action: 'create',
   },
 
   '/productgroup/update/:id': {
     controller: 'productgroup',
-    action: 'update'
+    action: 'update',
   },
 
   '/productgroup/destroy/:id': {
     controller: 'productgroup',
-    action: 'destroy'
+    action: 'destroy',
   },
 
   '/productgroup/addproducttogroup': {
     controller: 'productgroup',
-    action: 'addProductToGroup'
+    action: 'addProductToGroup',
   },
 
   '/productgroup/removeproductfromgroup': {
     controller: 'productgroup',
-    action: 'removeProductFromGroup'
+    action: 'removeProductFromGroup',
   },
 
   '/productgroup/search': {
     controller: 'productgroup',
-    action: 'search'
+    action: 'search',
   },
 
   '/productgroup/updateicon': {
     controller: 'productgroup',
-    action: 'updateIcon'
+    action: 'updateIcon',
   },
 
   '/productgroup/removeicon': {
     controller: 'productgroup',
-    action: 'removeIcon'
+    action: 'removeIcon',
   },
 
   /*
@@ -404,37 +405,39 @@ module.exports.routes = {
 
   '/brokers': {
     controller: 'broker',
-    action: 'list'
+    action: 'list',
   },
 
   '/seller/getall': {
     controller: 'seller',
-    action: 'getAll'
+    action: 'getAll',
   },
 
   '/client/find': {
     controller: 'client',
-    action: 'find'
+    action: 'find',
   },
+
+  // 'get /client/:id': 'ClientController.findById',
 
   '/client/findbyid/:id': {
     controller: 'client',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/client/:CardCode/contacts': {
     controller: 'client',
-    action: 'getContactsByClient'
+    action: 'getContactsByClient',
   },
 
   '/client/:CardCode/update/contact/:CntctCode': {
     controller: 'client',
-    action: 'updateContact'
+    action: 'updateContact',
   },
 
   '/client/:CardCode/contact/create': {
     controller: 'client',
-    action: 'createContact'
+    action: 'createContact',
   },
 
   /*
@@ -446,384 +449,384 @@ module.exports.routes = {
 
   '/client/update/fiscaladdress/:id/:CardCode': {
     controller: 'client',
-    action: 'updateFiscalAddress'
+    action: 'updateFiscalAddress',
   },
 
   '/client/:id/ewallet': {
     controller: 'client',
-    action: 'getEwalletByClient'
+    action: 'getEwalletByClient',
   },
 
   '/client/:id/balance': {
     controller: 'client',
-    action: 'getClientBalance'
+    action: 'getClientBalance',
   },
 
   '/quotation/create': {
     controller: 'quotation',
-    action: 'create'
+    action: 'create',
   },
 
   '/quotation/update/:id': {
     controller: 'quotation',
-    action: 'update'
+    action: 'update',
   },
 
   '/quotation/findbyid/:id': {
     controller: 'quotation',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/quotation/findbyidquickread/:id': {
     controller: 'quotation',
-    action: 'findByIdQuickRead'
+    action: 'findByIdQuickRead',
   },
 
   '/quotation/findbyclient/:page': {
     controller: 'quotation',
-    action: 'findByClient'
+    action: 'findByClient',
   },
 
   '/quotation/find/:page': {
     controller: 'quotation',
-    action: 'find'
+    action: 'find',
   },
 
   '/quotation/user/:userId/totals': {
     controller: 'quotation',
-    action: 'getTotalsByuser'
+    action: 'getTotalsByuser',
   },
 
   '/quotation/users/totals': {
     controller: 'quotation',
-    action: 'getMultipleUsersTotals'
+    action: 'getMultipleUsersTotals',
   },
 
   '/quotation/user/:userId/count': {
     controller: 'quotation',
-    action: 'getCountByUser'
+    action: 'getCountByUser',
   },
 
   '/quotation/:id/records': {
     controller: 'quotation',
-    action: 'getRecords'
+    action: 'getRecords',
   },
 
   '/quotation/addrecord/:id': {
     controller: 'quotation',
-    action: 'addRecord'
+    action: 'addRecord',
   },
 
   '/quotation/:id/estimatedclosedate': {
     controller: 'quotation',
-    action: 'setEstimatedCloseDate'
+    action: 'setEstimatedCloseDate',
   },
 
   '/quotation/adddetail/:id': {
     controller: 'quotation',
-    action: 'addDetail'
+    action: 'addDetail',
   },
 
   '/quotation/addmultipledetails/:id': {
     controller: 'quotation',
-    action: 'addMultipleDetails'
+    action: 'addMultipleDetails',
   },
 
   '/quotation/removedetailsgroup/:quotation': {
     controller: 'quotation',
-    action: 'removeDetailsGroup'
+    action: 'removeDetailsGroup',
   },
 
   '/quotation/totals/:id': {
     controller: 'quotation',
-    action: 'getQuotationTotals'
+    action: 'getQuotationTotals',
   },
 
   '/quotation/sendemail/:id': {
     controller: 'quotation',
-    action: 'sendEmail'
+    action: 'sendEmail',
   },
 
   '/order/sendemail/:id': {
     controller: 'order',
-    action: 'sendOrderEmail'
+    action: 'sendOrderEmail',
   },
 
   '/quotation/:id/source': {
     controller: 'quotation',
-    action: 'updateSource'
+    action: 'updateSource',
   },
 
   '/quotation/:id/broker': {
     controller: 'quotation',
-    action: 'updateBroker'
+    action: 'updateBroker',
   },
 
   '/quotation/:id/validatestock': {
     controller: 'quotation',
-    action: 'validateStock'
+    action: 'validateStock',
   },
 
   '/quotation/:id/close': {
     controller: 'quotation',
-    action: 'closeQuotation'
+    action: 'closeQuotation',
   },
 
   '/quotation/:id/paymentoptions': {
     controller: 'quotation',
-    action: 'getQuotationPaymentOptions'
+    action: 'getQuotationPaymentOptions',
   },
 
   '/quotation/:id/saporderconnectionlogs': {
     controller: 'quotation',
-    action: 'getQuotationSapLogs'
+    action: 'getQuotationSapLogs',
   },
 
   '/quotation/:id/payments': {
     controller: 'quotation',
-    action: 'getQuotationPayments'
+    action: 'getQuotationPayments',
   },
 
   '/payment/add/:quotationid': {
     controller: 'payment',
-    action: 'add'
+    action: 'add',
   },
 
   '/payment/cancel/:quotationId/:paymentId': {
     controller: 'payment',
-    action: 'cancel'
+    action: 'cancel',
   },
 
   '/client/update/:CardCode': {
     controller: 'client',
-    action: 'update'
+    action: 'update',
   },
 
   '/product/advancedsearch': {
     controller: 'productsearch',
-    action: 'advancedSearch'
+    action: 'advancedSearch',
   },
 
   '/product/searchbyfilters': {
     controller: 'productsearch',
-    action: 'searchByfilters'
+    action: 'searchByfilters',
   },
 
   '/product/searchbycategory': {
     controller: 'productsearch',
-    action: 'searchByCategory'
+    action: 'searchByCategory',
   },
 
   '/order/find/:page': {
     controller: 'order',
-    action: 'find'
+    action: 'find',
   },
 
   '/order/createfromquotation/:quotationId': {
     controller: 'order',
     action: 'createFromQuotation',
-    skipAssets: true
+    skipAssets: true,
   },
 
   '/order/findbyid/:id': {
     controller: 'order',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/order/user/:userId/totals': {
     controller: 'order',
-    action: 'getTotalsByuser'
+    action: 'getTotalsByuser',
   },
 
   '/order/user/:userId/count': {
     controller: 'order',
-    action: 'getCountByUser'
+    action: 'getCountByUser',
   },
 
   '/order/invoicelogs/:orderId': {
     controller: 'order',
-    action: 'getInvoicesLogs'
+    action: 'getInvoicesLogs',
   },
 
   '/me/update': {
     controller: 'me',
-    action: 'update'
+    action: 'update',
   },
 
   '/me/cashreport': {
     controller: 'me',
-    action: 'generateCashReport'
+    action: 'generateCashReport',
   },
 
   '/me/managercashreport': {
     controller: 'me',
-    action: 'generateManagerCashReport'
+    action: 'generateManagerCashReport',
   },
 
   '/promotion/create': {
     controller: 'promotion',
-    action: 'create'
+    action: 'create',
   },
 
   '/promotion/find/:page': {
     controller: 'promotion',
-    action: 'find'
+    action: 'find',
   },
 
   '/promotion/findbyid/:id': {
     controller: 'promotion',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/promotion/update/:id': {
     controller: 'promotion',
-    action: 'update'
+    action: 'update',
   },
 
   '/promotion/searchproducts': {
     controller: 'promotion',
-    action: 'searchPromotionProducts'
+    action: 'searchPromotionProducts',
   },
 
   '/pmperiod/create': {
     controller: 'pmperiod',
-    action: 'create'
+    action: 'create',
   },
 
   '/pmperiod/update/:id': {
     controller: 'pmperiod',
-    action: 'update'
+    action: 'update',
   },
 
   '/pmperiod/find/:page': {
     controller: 'pmperiod',
-    action: 'find'
+    action: 'find',
   },
 
   '/pmperiod/findbyid/:id': {
     controller: 'pmperiod',
-    action: 'findById'
+    action: 'findById',
   },
 
   '/pmperiod/getactive': {
     controller: 'pmperiod',
-    action: 'getActive'
+    action: 'getActive',
   },
 
   '/site/update/:handle': {
     controller: 'site',
-    action: 'update'
+    action: 'update',
   },
 
   '/site/findbyhandle/:handle': {
     controller: 'site',
-    action: 'findByHandle'
+    action: 'findByHandle',
   },
 
   '/site/addbanner': {
     controller: 'site',
-    action: 'addBanner'
+    action: 'addBanner',
   },
 
   '/site/removefiles': {
     controller: 'site',
-    action: 'removeFiles'
+    action: 'removeFiles',
   },
 
   '/sites': {
     controller: 'site',
-    action: 'getAll'
+    action: 'getAll',
   },
 
   '/sites/find/:page': {
     controller: 'site',
-    action: 'find'
+    action: 'find',
   },
 
   '/sites/cashreport': {
     controller: 'site',
-    action: 'generateSitesCashReport'
+    action: 'generateSitesCashReport',
   },
 
   '/store/find': {
     controller: 'store',
-    action: 'find'
+    action: 'find',
   },
 
   '/store/:id/packages': {
     controller: 'store',
-    action: 'getPackagesByStore'
+    action: 'getPackagesByStore',
   },
 
   '/store/:id/sellers': {
     controller: 'store',
-    action: 'getSellersByStore'
+    action: 'getSellersByStore',
   },
 
   '/store/:id/cashreport': {
     controller: 'store',
-    action: 'generateStoreCashReport'
+    action: 'generateStoreCashReport',
   },
 
   '/stores/cashreport': {
     controller: 'store',
-    action: 'generatAllStoresCashReport'
+    action: 'generatAllStoresCashReport',
   },
 
   '/common/states': {
     controller: 'common',
-    action: 'getStates'
+    action: 'getStates',
   },
 
   '/packages/find/:page': {
     controller: 'package',
-    action: 'findPackages'
+    action: 'findPackages',
   },
 
   '/packages/:id/products': {
     controller: 'package',
-    action: 'getProducts'
+    action: 'getProducts',
   },
 
   '/packages/update/:id': {
     controller: 'package',
-    action: 'update'
+    action: 'update',
   },
 
   '/packages/details/:id': {
     controller: 'package',
-    action: 'getDetailedPackage'
+    action: 'getDetailedPackage',
   },
 
   '/quotation/getcurrentstock/:quotationId': {
     controller: 'quotation',
-    action: 'getCurrentStock'
+    action: 'getCurrentStock',
   },
 
   '/paymentgroups': {
     controller: 'payment',
-    action: 'getPaymentGroups'
+    action: 'getPaymentGroups',
   },
 
   '/paymentwebgroups': {
     controller: 'paymentweb',
-    action: 'getPaymentWebGroups'
+    action: 'getPaymentWebGroups',
   },
 
   '/srservices': {
     controller: 'srservice',
-    action: 'find'
+    action: 'find',
   },
 
   'GET /zipcodestates': {
     controller: 'zipcode',
-    action: 'listZipcodeStates'
+    action: 'listZipcodeStates',
   },
 
   '/zipcodestates/multipleupdate': {
     controller: 'zipcode',
-    action: 'multipleUpdate'
-  }
+    action: 'multipleUpdate',
+  },
 
   /*
   '/fixorders':{
