@@ -8,6 +8,9 @@ module.exports = {
 	getClientBalanceById: getClientBalanceById
 };
 
+/*
+	@param {<MongoId Client>} clientId
+*/
 function getUnfinishedClientBalancePayments(clientId){
 	var query = {
 		Client:clientId, 
@@ -18,6 +21,9 @@ function getUnfinishedClientBalancePayments(clientId){
   return Payment.find(query);
 }
 
+/*
+	@param {<MongoId Client>} clientId
+*/
 function getClientBalanceById(clientId){
   return Promise.all([
 	   getUnfinishedClientBalancePayments(clientId),
@@ -40,6 +46,10 @@ function getClientBalanceById(clientId){
 	  });
 }
 
+/*
+	@param {Object Payment} payment
+	@param {<MongoId Client>} clientId
+*/
 function isValidClientBalancePayment(payment, clientId){
 	return getClientBalanceById(clientId)
 		.then(function(clientBalance){
@@ -51,6 +61,17 @@ function isValidClientBalancePayment(payment, clientId){
 
 }
 
+/*
+	@param {Object Payment} payment
+	@param {Object} options
+	options example:
+	{
+		quotationId: <MongoId Quotation>,
+		userId: <MongoId User>,
+		client: <Object Client>,
+		paymentId: <MongoId Payment> 
+	}
+*/
 function applyClientBalanceRecord(payment, options){
 	var client = options.client;
   if (client.Balance < payment.ammount || !client.Balance) {

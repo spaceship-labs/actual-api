@@ -614,6 +614,17 @@ function getMultipleUsersTotals(options){
   });
 }
 
+/*
+  @param {Object} options
+  Example:
+  {
+    userId: <MongoId User>,
+    isClosed: false,
+    endDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    startDate: "Thu Jan 04 2018 10:04:16 GMT-0500 (EST)",
+    dateField: "createdAt",
+  }
+*/
 function getTotalsByUser(options){
   var userId    = options.userId;
   var todayDate = moment().endOf('day').toDate(); 

@@ -26,6 +26,12 @@ module.exports = {
   sendQuotation: quotation
 };
 
+/*
+  @param {string} userName
+  @param {string} userEmail
+  @param {string} recoveryUrl
+  @param {Function} cb
+*/
 function password(userName, userEmail, recoveryUrl, cb) {
   var user_name       = userName;
   var user_link       = recoveryUrl;
@@ -62,6 +68,9 @@ function password(userName, userEmail, recoveryUrl, cb) {
   });
 }
 
+/*
+  @param {<MongoId Order>} orderId
+*/
 function orderEmail(orderId) {
   return Order
     .findOne(orderId)
@@ -164,6 +173,15 @@ function orderEmail(orderId) {
     });
 }
 
+/*
+  @param {Object Client} client
+  @param {Object User} user
+  @param {Object Order} order
+  @param {array Object Product} products
+  @param {array Object Payment} payments
+  @param {Object} ewallet
+  @param {Object Store} store
+*/
 function sendOrder(client, user, order, products, payments, ewallet, store) {
   var address = 'Número ' + order.U_Noexterior + ' Entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + ' colonia ' + order.U_Colonia + ', ' + order.U_Mpio + ', ' + order.U_Estado + ', ' + order.U_CP;
   var emailBody = orderTemplate({
@@ -253,6 +271,10 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   });
 }
 
+/*
+  @param {<MongoId Quotation>} quotationId
+  @param {Object Store} activeStore
+*/
 function quotation(quotationId, activeStore) {
   return Quotation
     .findOne(quotationId)
@@ -310,6 +332,15 @@ function quotation(quotationId, activeStore) {
     });
 }
 
+/*
+  @param {Object Client} client
+  @param {Object User} user
+  @param {Object Quotation} quotation
+  @param {array Object Product} products
+  @param {array Object Payment} payments
+  @param {array Object} transfers
+  @param {Object Store} store
+*/
 function sendQuotation(client, user, quotation, products, payments, transfers, store) {
   var date = moment(quotation.updatedAt);
   moment.locale('es');
@@ -393,6 +424,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   });
 }
 
+//@param {<MongoId Order>} orderId
 function freesaleEmail(orderId) {
   return Order
     .findOne(orderId)
@@ -446,6 +478,12 @@ function freesaleEmail(orderId) {
     });
 }
 
+/*
+  @param {Object User} user
+  @param {Object Order} order
+  @param {array Object Product} products
+  @param {Object Store} store
+*/
 function sendFreesale(user, order, products, store) {
   console.log('orden ', order.folio, ' tiene ', products.length, ' articulos con freesale');
   if (!(products.length > 0)) return order;
@@ -514,7 +552,7 @@ function sendFreesale(user, order, products, store) {
   });
 }
 
-
+//@param {Object Payment} payment
 function paymentMethod(payment) {
   var payment_name;
   switch (payment.type) {
@@ -566,6 +604,7 @@ function paymentMethod(payment) {
   return payment_name;
 }
 
+//@param {Object Payment} payment
 function paymentType(payment) {
   var payment_name;
   switch (payment.type) {
@@ -620,6 +659,7 @@ function paymentType(payment) {
   return payment_name;
 }
 
+//@param {Object Product} product
 function materials(product) {
   var material = 'Material';
   var filter = ProductFilter

@@ -5,6 +5,7 @@ var moment = require('moment');
 var assign = require('object-assign');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
+//@param {NativeMongoRecord} record
 function formatMongoRecord(record){
   record.id = record._id.toString();
   for(var key in record){
@@ -23,6 +24,17 @@ function formatMongoRecord(record){
 
 module.exports = {
 
+  /*
+    @param {Object} findCriteria
+    @param {Object Model} model
+    findCriteria example:
+    {
+      E_Mail: "raul@example.com",
+      CardCode: "C0394939"
+    }
+    model Example:
+    Client
+  */
   nativeFindOne: function(findCrieria, model){
     return new Promise(function(resolve, reject){
       
@@ -48,6 +60,17 @@ module.exports = {
     });
   },
 
+  /*
+    @param {Object} findCriteria
+    @param {Object Model} model
+    findCriteria example:
+    {
+      E_Mail: "raul@example.com",
+      CardCode: "C0394939"
+    }
+    model Example:
+    Client
+  */
   nativeFind: function(findCriteria, model){
     return new Promise(function(resolve, reject){
       model.native(function(err, collection){
@@ -70,6 +93,22 @@ module.exports = {
     });
   },  
 
+  /*
+    @param {Object} findCriteria
+    @param {Object} params
+    @param {Object Model} model
+    findCriteria example:
+    {
+      E_Mail: "raul@example.com",
+      CardCode: "C0394939"
+    }
+    params example:
+    {
+      CardName: "Raul Mendez",
+    }
+    model Example:
+    Client
+  */
   nativeUpdateOne: function(findCriteria, params, model){
     return new Promise(function(resolve, reject){
       model.native(function(err, collection){
@@ -92,6 +131,22 @@ module.exports = {
     });
   },  
 
+  /*
+    @param {Object} findCriteria
+    @param {Object} params
+    @param {Object Model} model
+    findCriteria example:
+    {
+      E_Mail: "raul@example.com",
+      CardCode: "C0394939"
+    }
+    params example:
+    {
+      CardName: "Raul Mendez",
+    }
+    model Example:
+    Client
+  */
   nativeUpdate: function(findCriteria, params, model){
     return new Promise(function(resolve, reject){
       model.native(function(err, collection){
@@ -114,6 +169,7 @@ module.exports = {
     });
   },    
 
+  //TODO: Verificar uso
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
     Order.find({}).populate('Quotation')
@@ -155,10 +211,41 @@ module.exports = {
     return false;
   },
 
+  //@param {string} email
   validateEmail: function(email) {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
   },
+
+  /*
+    @param {string} modelName
+    @param {Object} form
+    @param {Object} extraParams
+
+    modelName example: "Client",
+    form example:
+    {
+      items: 15,
+      page: 1,
+      orderby: "ASC",
+      filters: {CardCode:"C01393933"},
+      term: "Yupit",
+      getAll: false,
+      dateRange:{
+        start: "Tue Jan 02 2018 16:49:04 GMT-0500 (EST)"
+        end: "Tue Jan 02 2018 17:49:04 GMT-0500 (EST)",
+        field: "createdAt"  
+      },
+      keywords: ["emanuel", "yupit"],
+      extraParams:{
+        searchFields: ["firstName", "lastName"],
+        populateFields: ["Quotations", "Orders"],
+        selectFields: ["CardCode", "email"]
+      }
+    }
+
+  */
+
   find: function(modelName,form, extraParams){
     var deferred = q.defer();
     var searchFields = extraParams.searchFields || []; // ["firstName", "lastName"]
@@ -309,6 +396,7 @@ module.exports = {
     return deferred.promise;
   },
 
+  //@param {string} filename
   getImgExtension: function(filename){
     if(filename){
       return filename.split('.').pop();
@@ -316,6 +404,11 @@ module.exports = {
     return false;
   },
 
+  /*
+    @param {Object} val 
+    @param {string} folioName,
+    @param {Function} cb
+  */
   orderCustomAI: function(val, folioName, cb){
     Counter.native(function(err, counter){
         counter.findAndModify(
@@ -364,7 +457,7 @@ module.exports = {
     return range;
   },
 
-
+  //@param {string} str
   formatHandle: function(str) {
 
     str = str.replace(/\s+/g, '-').toLowerCase();
@@ -465,7 +558,8 @@ module.exports = {
   }
 };
 
-
+//@param {int} num
+//@param {int} size
 function numLeftPad(num, size) {
   var numStr = num+"";
   while (numStr.length < size) numStr = "0" + numStr;

@@ -9,6 +9,7 @@ module.exports = {
 
   /**
   * Hash any password
+  * @param {string} password
   */
   hashPassword: function(password){
     return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
@@ -16,6 +17,8 @@ module.exports = {
 
   /**
    * Compare user password hash with unhashed password
+   * @param {string} password
+   * @param {Object User} user
    * @returns boolean indicating a match
    */
   comparePassword: function(password, user){
@@ -24,7 +27,7 @@ module.exports = {
 
   /**
    * Create a token based on the passed user
-   * @param user
+   * @param {Object User} user
    */
   createToken: function(user){
 

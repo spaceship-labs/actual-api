@@ -7,6 +7,10 @@ module.exports = {
 	isValidEwalletPayment: isValidEwalletPayment
 };
 
+/*
+@param {Object Payment} payment
+@param {Object Client} client
+*/
 function isValidEwalletPayment(payment, client){
   if (client.ewallet < payment.ammount || !client.ewallet) {
   	return false;
@@ -14,6 +18,17 @@ function isValidEwalletPayment(payment, client){
   return true;
 }
 
+/*
+@param {Object Payment} payment
+@param {Object} options
+options example: 
+{
+	client: <Object Client> client,
+	quotationId: <MongoId Quotation>,
+	userId: <MongoId User>,
+	paymentId: <MongoId Payment>
+}
+*/
 function applyEwalletRecord(payment, options){
 	var client = options.client;
   if (client.ewallet < payment.ammount || !client.ewallet) {

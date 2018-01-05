@@ -20,6 +20,11 @@ module.exports = {
   makeCrops: makeCrops
 };
 
+/*
+  @param {Object Request} req
+  @param {Object} opts
+  @param {Function} cb 
+*/
 function saveFiles(req,opts,cb){
   var directoryToSaveIn = __dirname+'/../../assets/uploads/'+opts.dir+'/';
   var $files = req.file && req.file('file')._files || [];
@@ -119,6 +124,9 @@ function saveFiles(req,opts,cb){
   });
 }
 
+/*
+  @param {array Object} files
+*/
 function mapUploadedFiles(files){
   var uploadedFiles = [];
   if(!files){
@@ -139,7 +147,10 @@ function mapUploadedFiles(files){
   return uploadedFiles;  
 }
 
-
+/*
+  @param {Object} _stream
+  @param {Function} callback
+*/
 function generateFileName(_stream,callback){
   var error = null;
   var extension = _stream.filename.split('.');
@@ -152,6 +163,9 @@ function generateFileName(_stream,callback){
   callback(error,fileName);
 }
 
+/*
+  @param {Object} _stream
+*/
 function generateFileNameSync(_stream){
   var error = null;
   var extension = _stream.filename.split('.');
@@ -167,6 +181,11 @@ function generateFileNameSync(_stream){
 
 // crop streams rackspace.
 //Makes crops acording to a profile defined in config/images.js
+/*
+  @param {Object} uploadOptions
+  @param {Object} opts
+  @param {Function} cb
+*/
 function makeCropsStreams(uploadOptions, opts, cb){
   var sizes = sails.config.images[opts.profile];
   var adapter = adapterPkgCloud(uploadOptions);
