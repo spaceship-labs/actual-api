@@ -128,9 +128,12 @@ module.exports = {
     var form = req.params.all();
     var id = _.clone(form.id);
     var createdRecord = false;
+    
     form.dateTime = new Date();
     form.eventType = 'Cierre';
     form.Quotation = id;
+    form.User = req.user.id;
+
     delete form.id;
     QuotationRecord.create(form)
       .then(function(createdRecordResult){
