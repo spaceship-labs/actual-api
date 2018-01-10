@@ -193,6 +193,7 @@ module.exports = {
     }
     delete form.id;
     form.Quotation = id;
+    form.User = req.user.id;
 
     QuotationRecord.create(form)
       .then(function(createdRecordResult){
