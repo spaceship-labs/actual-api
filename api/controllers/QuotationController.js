@@ -10,8 +10,11 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     var createdId;
+    
     form.Details = formatProductsIds(form.Details);
     form.Store = req.user.activeStore.id;
+    form.User = req.user.id;
+
     var opts = {
       paymentGroup:1,
       updateDetails: true,
@@ -44,6 +47,8 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
+
+    form.User = req.user.id;
     form.Store =  req.user.activeStore.id;
 
     Quotation.update({id:id}, form)
