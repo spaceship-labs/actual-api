@@ -48,8 +48,12 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
 
-    form.User = req.user.id;
     form.Store =  req.user.activeStore.id;
+
+    //Never update the quotation User
+    if(form.User){
+      delete form.User;
+    }
 
     Quotation.update({id:id}, form)
       .then(function(updatedQuotation){
