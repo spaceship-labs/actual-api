@@ -1,167 +1,139 @@
-var Promise = require('bluebird');
-var _       = require('underscore');
-var moment = require('moment');
-var CEDIS_QROO_CODE = '01';
-var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
-var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+const Promise= require('bluebird');
+const _= require('underscore');
+const moment= require('moment');
+const {ObjectId} = require('sails-mongo/node_modules/mongodb');
 
-var PUERTOCANCUN_WHS_ID = '599aaa1fbe1fd281203f5e8a';
-var PUERTOCANCUN_WHS_ID_SANDBOX = '59972da6b7dccab7b8cf753a';
-var PUERTOCANCUN_WHS_CODE = '82';
-var PUERTOCANCUN_LIMIT_DATE = moment('2017-09-17').toDate();
-
-var CEDIS_MERIDA_WHS_CODE = '10';
-var STUDIO_MERIDA_WHS_CODE = '11';
+const CEDIS_QROO_CODE = '01';
+const CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
+const CEDIS_MERIDA_WHS_CODE = '10';
+const STUDIO_MERIDA_WHS_CODE = '11';
 
 module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery
 };
 
-function productShipping(product, storeWarehouse, options) {
+async function productShipping(product, storeWarehouse, activeQuotationId) {
 
-  var pendingProductDetailSum = 0;
-
-  return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
-    .then(function(deliveries) {
-      var companies = deliveries.map(function(delivery) {
-        return delivery.FromCode;
-      });
-      return [
-        DatesDelivery.find({
-          ItemCode: product.ItemCode,
-          whsCode: companies,
-          OpenCreQty: {
-            '>': 0
-          }
-        }),
-        deliveries,
-        getPendingProductDetailsSum(product)
-      ];
-    })
-    .spread(function(stockItems, deliveries, _pendingProductDetailSum) {
-      pendingProductDetailSum = _pendingProductDetailSum;
-
-      var codes = stockItems.map(function(p){return p.whsCode});
-      return Company
-        .find({WhsCode: codes})
-        .then(function(codes) {
-          stockItems = stockItems.map(function(stockItem) {
-            //stockItem.company is storeWarehouse id
-            stockItem.warehouseId = _.find(codes, function(ci) {
-              return ci.WhsCode == stockItem.whsCode;
-            }).id;
-            return stockItem;
-          });
-          return [stockItems, deliveries];
-        });
-    })
-    .spread(function(stockItems, deliveries){
-      if(deliveries.length > 0 && stockItems.length > 0){
-
-        stockItems = filterStockItems(stockItems, deliveries, storeWarehouse.id);
-        var shippingPromises = stockItems.map(function(stockItem){
-          return buildShippingItem(
-            stockItem,
-            deliveries,
-            storeWarehouse.id,
-            pendingProductDetailSum
-          );
-        });
-
-        return Promise.all(shippingPromises);
-      }
-      else if( StockService.isFreeSaleProduct(product) && deliveries){
-        product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
-        var shipDate = moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate();
-        var freeSaleStockItem = {
-          whsCode: CEDIS_QROO_CODE,
-          OpenCreQty: product.freeSaleStock,
-          ItemCode: product.ItemCode,
-          warehouseId: CEDIS_QROO_ID,
-          ShipDate: shipDate
-        };
-
-        return Promise.all([
-          buildShippingItem(
-            freeSaleStockItem,
-            deliveries,
-            storeWarehouse.id,
-            pendingProductDetailSum
-          )
-        ]);
-      }
-
-      return Promise.resolve([]);
-    })
-    .then(function(result){
-      return result;
-    });
-
-}
-
-function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProductDetailSum){
-
-  var delivery = _.find(deliveries, function(delivery) {
-    return delivery.FromCode == stockItem.whsCode;
+  const deliveries = await Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'});
+  const companies = deliveries.map(function(delivery) {
+    return delivery.FromCode;
+  });
+  const stockItemsQuery = {
+    ItemCode: product.ItemCode,
+    whsCode: companies,
+    OpenCreQty: {
+      '>': 0
+    }
+  };
+  let stockItems =  await DatesDelivery.find(stockItemsQuery);
+  const pendingProductDetailSum = await getPendingProductDetailsSum(product);
+  const stockItemscodes = stockItems.map(function(p){return p.whsCode;});
+  const whsCodes = await Company.find({WhsCode: stockItemscodes});
+  
+  stockItems = stockItems.map(function(stockItem) {
+    //stockItem.company is storeWarehouse id
+    stockItem.warehouseId = _.find(whsCodes, function(ci) {
+      return ci.WhsCode == stockItem.whsCode;
+    }).id;
+    return stockItem;
   });
 
-  var productDate  = new Date(stockItem.ShipDate);
-  var productDays  = daysDiff(new Date(), productDate);
-  var seasonQuery  = getQueryDateRange({}, productDate);
+  if(deliveries.length > 0 && stockItems.length > 0){
 
-
-
-  return Season.findOne(seasonQuery)
-    .then(function(season){
-      var LOW_SEASON_DAYS; //Original: 7, then 8
-      var MAIN_SEASON_DAYS;
-      var seasonDays;
-      //var seasonDays   = (season && season.Days) || LOW_SEASON_DAYS;
-
-      if( isMeridaWhsCode(stockItem.whsCode) ){
-        MAIN_SEASON_DAYS = 11;
-        LOW_SEASON_DAYS = 10;
-      }else{
-        MAIN_SEASON_DAYS = 10;
-        LOW_SEASON_DAYS = 8;
-      }
-
-      if(season){
-        seasonDays = MAIN_SEASON_DAYS;
-      }else{
-        seasonDays = LOW_SEASON_DAYS;
-      }
-
-      var deliveryDays = (delivery && delivery.Days) || 0;
-      var days = productDays + seasonDays + deliveryDays;
-
-      //Product in same store/warehouse
-      if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
-        days = productDays;
-      }
-
-      var todayDate = new Date();
-      var date = addDays(todayDate, days);
-      var available = stockItem.OpenCreQty;
-
-      if(stockItem.whsCode === CEDIS_QROO_CODE){
-        available -= pendingProductDetailSum;
-      }
-
-      return {
-        available: available,
-        days: days,
-        date: date,
-        productDate: productDate,
-        company: storeWarehouseId,
-        companyFrom: stockItem.warehouseId,
-        itemCode: stockItem.ItemCode,
-        ImmediateDelivery: stockItem.ImmediateDelivery || false,
-        PurchaseAfter: stockItem.PurchaseAfter,
-        PurchaseDocument: stockItem.PurchaseDocument
-      };
+    stockItems = filterStockItems(stockItems, deliveries, storeWarehouse.id);
+    var shippingPromises = stockItems.map(function(stockItem){
+      return buildShippingItem(
+        stockItem,
+        deliveries,
+        storeWarehouse.id,
+        pendingProductDetailSum
+      );
     });
+
+    return Promise.all(shippingPromises);
+  }
+  else if( StockService.isFreeSaleProduct(product) && deliveries){
+    product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
+    var shipDate = moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate();
+    var freeSaleStockItem = {
+      whsCode: CEDIS_QROO_CODE,
+      OpenCreQty: product.freeSaleStock,
+      ItemCode: product.ItemCode,
+      warehouseId: CEDIS_QROO_ID,
+      ShipDate: shipDate
+    };
+
+    return Promise.all([
+      buildShippingItem(
+        freeSaleStockItem,
+        deliveries,
+        storeWarehouse.id,
+        pendingProductDetailSum
+      )
+    ]);
+  }
+
+  return Promise.resolve([]);
+}
+
+async function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProductDetailSum){
+
+  const delivery = _.find(deliveries, function(d) {
+    return d.FromCode == stockItem.whsCode;
+  });
+
+  const productDate  = new Date(stockItem.ShipDate);
+  const productDays  = daysDiff(new Date(), productDate);
+  const seasonQuery  = getQueryDateRange({}, productDate);
+
+  const season = await Season.findOne(seasonQuery);
+  let LOW_SEASON_DAYS; //Original: 7, then 8
+  let MAIN_SEASON_DAYS;
+  let seasonDays;
+
+  if( isMeridaWhsCode(stockItem.whsCode) ){
+    MAIN_SEASON_DAYS = 11;
+    LOW_SEASON_DAYS = 10;
+  }else{
+    MAIN_SEASON_DAYS = 10;
+    LOW_SEASON_DAYS = 8;
+  }
+
+  if(season){
+    seasonDays = MAIN_SEASON_DAYS;
+  }else{
+    seasonDays = LOW_SEASON_DAYS;
+  }
+
+  const deliveryDays = (delivery && delivery.Days) || 0;
+  let days = productDays + seasonDays + deliveryDays;
+
+  //Product in same store/warehouse
+  if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
+    days = productDays;
+  }
+
+  const todayDate = new Date();
+  const date = addDays(todayDate, days);
+  let available = stockItem.OpenCreQty;
+
+  if(stockItem.whsCode === CEDIS_QROO_CODE){
+    available -= pendingProductDetailSum;
+  }
+
+  return {
+    available: available,
+    days: days,
+    date: date,
+    productDate: productDate,
+    company: storeWarehouseId,
+    companyFrom: stockItem.warehouseId,
+    itemCode: stockItem.ItemCode,
+    ImmediateDelivery: stockItem.ImmediateDelivery || false,
+    PurchaseAfter: stockItem.PurchaseAfter,
+    PurchaseDocument: stockItem.PurchaseDocument
+  };
 }
 
 function isMeridaWhsCode(whsCode){
@@ -234,7 +206,6 @@ function isDateImmediateDelivery(shipDate){
 }
 
 function getPendingProductDetailsSum(product){
-
   var match = {
     Product: ObjectId(product.id),
     inSapWriteProgress: true
@@ -242,7 +213,6 @@ function getPendingProductDetailsSum(product){
 
   var group = {
     _id: '$Product',
-    //_id: '$quantity',
     pendingStock: {$sum:'$quantity'}
   };
 
@@ -263,7 +233,6 @@ function getPendingProductDetailsSum(product){
             return reject(_err);
           }
 
-          //sails.log.info('results', results);
           if(results && results.length > 0){
             return resolve(results[0].pendingStock);
           }else{

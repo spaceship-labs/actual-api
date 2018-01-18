@@ -34,7 +34,8 @@
     "rc": "~0.5.0",
     "request": "^2.72.0",
     "request-promise": "^4.1.1",
-    "sails": "^0.12.0",
+    "express": "3.4.3",
+    "sails": "0.12.11",
     "sails-disk": "~0.10.0",
     "sails-hook-email": "^0.12.1",
     "sails-mongo": "^0.12.2",
@@ -62,7 +63,7 @@
   "author": "luis",
   "license": "",
   "engines": {
-    "node": "6.9.4",
-    "npm": "3.10.10"
+    "node": "8.9.4",
+    "npm": "5.6.0"
   }
 }
