@@ -266,7 +266,7 @@ module.exports.routes = {
 
   '/custombrand/getall': {
     controller: 'custombrand',
-    action: 'getAll',
+    action: 'index',
   },
 
   '/custombrand/create': {
@@ -281,7 +281,7 @@ module.exports.routes = {
 
   '/custombrand/findbyid/:id': {
     controller: 'custombrand',
-    action: 'findById',
+    action: 'show',
   },
 
   '/custombrand/destroy/:id': {

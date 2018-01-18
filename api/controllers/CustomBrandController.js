@@ -1,7 +1,7 @@
 module.exports = {
   async index(req, res) {
     try {
-      const custumBrands = await CustomBrand.find().limit(1000);
+      const custombrands = await CustomBrand.find().limit(1000);
       res.ok(custombrands);
     } catch (err) {
       res.negotiate(err);
