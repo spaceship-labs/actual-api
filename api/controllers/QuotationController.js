@@ -72,7 +72,7 @@ module.exports = {
   async findByIdQuickRead(req, res){
     try{
       const {id} = req.params.all();
-      const quotation = await Quotation.findOne({id: id+'dede'});
+      const quotation = await Quotation.findOne({id: id});
       if(!quotation){
         return res.negotiate(new Error('Cotización no encontrada'));
       }        
