@@ -14,6 +14,7 @@ module.exports = {
 };
 
 async function productShipping(product, storeWarehouse, activeQuotationId) {
+  let shippingItems = [];
 
   const deliveries = await Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'});
   const companies = deliveries.map(function(delivery) {
@@ -30,6 +31,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   const pendingProductDetailSum = await getPendingProductDetailsSum(product);
   const stockItemscodes = stockItems.map(function(p){return p.whsCode;});
   const whsCodes = await Company.find({WhsCode: stockItemscodes});
+
   
   stockItems = stockItems.map(function(stockItem) {
     //stockItem.company is storeWarehouse id
@@ -51,7 +53,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
       );
     });
 
-    return Promise.all(shippingPromises);
+    shippingItems = await Promise.all(shippingPromises);
   }
   else if( StockService.isFreeSaleProduct(product) && deliveries){
     product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
@@ -64,7 +66,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
       ShipDate: shipDate
     };
 
-    return Promise.all([
+    shippingItems = await Promise.all([
       buildShippingItem(
         freeSaleStockItem,
         deliveries,
@@ -73,8 +75,17 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
       )
     ]);
   }
+  else{
+    shippingItems = [];
+  }
 
-  return Promise.resolve([]);
+  
+  if(activeQuotationId){
+    const details = await QuotationDetail.find({Quotation: activeQuotationId});
+    shippingItems = substractDeliveriesStockByQuotationDetails(details, shippingItems, product.id);
+  }
+
+  return shippingItems;
 }
 
 async function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendingProductDetailSum){
@@ -161,7 +172,6 @@ function filterStockItems(stockItems, deliveries, storeWarehouseId){
 
 
 function getImmediateStockItem(stockItems, deliveries){
-
   return _.find(stockItems, function(stockItem){
 
     var delivery = _.find(deliveries, function(delivery) {
@@ -204,6 +214,23 @@ function isDateImmediateDelivery(shipDate){
   shipDate = moment(shipDate).format(FORMAT);
   return currentDate === shipDate;
 }
+
+function substractDeliveriesStockByQuotationDetails(quotationDetails, shippingItems, productId){
+  let details = quotationDetails.slice();
+  details = details.filter(function(detail){
+    return detail.Product === productId;
+  });
+
+  return shippingItems.map(function(item){
+    for(var j=0; j<details.length; j++){
+      if(details[j].shipCompany === item.company && details[j].shipCompanyFrom === item.companyFrom){
+        item.available -= details[j].quantity;
+      }
+    }
+    return item;    
+  });
+}
+
 
 function getPendingProductDetailsSum(product){
   var match = {
