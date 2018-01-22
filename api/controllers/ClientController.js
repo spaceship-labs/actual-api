@@ -51,21 +51,22 @@ module.exports = {
   async findById(req, res) {
     try {
       const id = req.param('id');
-      console.log('id', id);
-      const { CardCode } = await Client.findOne({ id });
+      const client = await Client.findOne({ id });
       const Contacts = await ClientContact.find({ CardCode });
       const query = {
-        CardCode,
+        client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       };
-      console.log('query address', query );
       const fiscalAddress = await FiscalAddress.findOne({
-        CardCode,
+        client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       });
-      console.log('fiscalAddress', fiscalAddress);
-      const client = { Contacts, FiscalAddress: fiscalAddress };
-      res.ok(client);
+      const response = { 
+        ...client,
+        Contacts, 
+        FiscalAddress: fiscalAddress 
+      };
+      res.ok(response);
     } catch (err) {
       res.negotiate(err);
     }
