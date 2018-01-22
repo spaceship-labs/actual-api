@@ -59,11 +59,12 @@ module.exports = {
         AdresType: ClientService.ADDRESS_TYPE,
       };
       console.log('query address', query );
-      const FiscalAddress = await FiscalAddress.findOne({
+      const fiscalAddress = await FiscalAddress.findOne({
         CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       });
-      const client = { Contacts, FiscalAddress };
+      console.log('fiscalAddress', fiscalAddress);
+      const client = { Contacts, FiscalAddress: fiscalAddress };
       res.ok(client);
     } catch (err) {
       res.negotiate(err);
