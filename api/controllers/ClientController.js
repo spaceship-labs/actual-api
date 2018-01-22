@@ -1,14 +1,13 @@
-var _            = require('underscore');
-var moment       = require('moment');
-var Promise      = require('bluebird');
+var _ = require('underscore');
+var moment = require('moment');
+var Promise = require('bluebird');
 var ADDRESS_TYPE_S = 'S';
 var ADDRESS_TYPE_B = 'B';
 
-
 module.exports = {
-  find: function(req, res){
-    var form           = req.params.all();
-    var model          = 'client';
+  find: function(req, res) {
+    var form = req.params.all();
+    var model = 'client';
     var extraParams = {
       searchFields: [
         'id',
@@ -17,132 +16,137 @@ module.exports = {
         'firstName',
         'lastName',
         'E_Mail',
-        'phone'
-      ]
+        'phone',
+      ],
     };
     Common.find(model, form, extraParams)
-      .then(function(result){
+      .then(function(result) {
         res.ok(result);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  findBySeller: function(req, res){
+  findBySeller: function(req, res) {
     var form = req.params.all();
     var model = 'client';
     var extraParams = {
-      searchFields: ['CardCode','CardName'],
-      populateFields: ['Quotations']
+      searchFields: ['CardCode', 'CardName'],
+      populateFields: ['Quotations'],
     };
-    form.filters = {SlpCode: form.seller};
-    Common.find(model, form, extraParams)
-      .then(function(result){
+    form.filters = { SlpCode: form.seller };
+    Common.find(model, form, extraParams).then(
+      function(result) {
         res.ok(result);
-      },function(err){
+      },
+      function(err) {
         console.log(err);
         res.notFound();
-      });
+      }
+    );
   },
 
-  findById: function(req, res){
-    var form        = req.params.all();
-    var id          = form.id;
-    var clientFound = false;
-    Client.findOne({id:id}).then(function(client){
-      if(!client){
-        return Promise.reject(new Error('Cliente no encontrado'));
-      }
-      return ClientService.populateClientRelations(client);
-    })
-    .then(function(populatedClient){
-      res.json(populatedClient);
-    })
-    .catch(function(err){
-      console.log(err);
-      return res.negotiate(err);
-    });
-
+  async findById(req, res) {
+    try {
+      const id = req.param('id');
+      const { CardCode } = await Client.findOne({ id });
+      const Contacts = await ClientContact.find({ CardCode });
+      const FiscalAddress = await FiscalAddress.findOne({
+        CardCode,
+        AdresType: ClientService.ADDRESS_TYPE,
+      });
+      const client = { Contacts, FiscalAddress };
+      res.ok(client);
+    } catch (err) {
+      res.negotiate(err);
+    }
   },
 
   create: function(req, res) {
-    var form           = req.params.all();
-    var email          = form.E_Mail;
-    var actualMail     =  /@actualgroup.com$/;
-    var createdClient  = false;
-    var contacts       = [];
-    var params         = {};
+    var form = req.params.all();
+    var email = form.E_Mail;
+    var actualMail = /@actualgroup.com$/;
+    var createdClient = false;
+    var contacts = [];
+    var params = {};
 
-    var fiscalAddress  = {};
+    var fiscalAddress = {};
 
     if (email && email.match(actualMail)) {
       return res.badRequest({
-        error: 'user could not be created with an employee\'s mail'
+        error: "user could not be created with an employee's mail",
       });
     }
-    form               = ClientService.mapClientFields(form);
-    form.User          = req.user.id;
-    contacts           = ClientService.filterContacts(form.contacts);
-    contacts           = contacts.map(ClientService.mapContactFields);
+    form = ClientService.mapClientFields(form);
+    form.User = req.user.id;
+    contacts = ClientService.filterContacts(form.contacts);
+    contacts = contacts.map(ClientService.mapContactFields);
 
-    if(contacts.length > 0 && ClientService.areContactsRepeated(contacts)){
+    if (contacts.length > 0 && ClientService.areContactsRepeated(contacts)) {
       return res.negotiate(new Error('Nombres de contactos repetidos'));
     }
 
-    if(!email){
+    if (!email) {
       return res.negotiate(new Error('Email requerido'));
     }
 
-    if(form.LicTradNum){
-      if(!ClientService.isValidRFC(form.LicTradNum)){
+    if (form.LicTradNum) {
+      if (!ClientService.isValidRFC(form.LicTradNum)) {
         var err = new Error('RFC no valido');
         return res.negotiate(err);
       }
     }
-    
-    if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
-      fiscalAddress  = _.clone(form.fiscalAddress);
-      fiscalAddress  = ClientService.mapFiscalFields(fiscalAddress);
+
+    if (
+      form.fiscalAddress &&
+      ClientService.isValidFiscalAddress(form.fiscalAddress)
+    ) {
+      fiscalAddress = _.clone(form.fiscalAddress);
+      fiscalAddress = ClientService.mapFiscalFields(fiscalAddress);
     }
-   
+
     delete form.contacts;
     delete form.fiscalAddress;
 
     params = {
       client: form,
       fiscalAddress: fiscalAddress,
-      clientContacts: contacts
+      clientContacts: contacts,
     };
 
-    Client.findOne({E_Mail:email})
-      .then(function(usedEmail){
-        if(usedEmail){
+    Client.findOne({ E_Mail: email })
+      .then(function(usedEmail) {
+        if (usedEmail) {
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         return SapService.createClient(params);
       })
-      .then(function(result){
+      .then(function(result) {
         sails.log.info('result createClient', result);
         var sapData = JSON.parse(result.value);
-        var isValidSapResponse = ClientService.isValidSapClientCreation(sapData, contacts, fiscalAddress);
+        var isValidSapResponse = ClientService.isValidSapClientCreation(
+          sapData,
+          contacts,
+          fiscalAddress
+        );
 
-        if( !sapData || isValidSapResponse.error  ) {
+        if (!sapData || isValidSapResponse.error) {
           var defualtErrMsg = 'Error al crear cliente en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
+          if (err === true) {
             err = defualtErrMsg;
           }
           return Promise.reject(new Error(err));
         }
-        
-        form.CardCode     = sapData.result;
-        form.BirthDate    = moment(form.BirthDate).toDate();
-        var contactCodes  = sapData.pers;
-        contacts          = contacts.map(function(contact, i){
+
+        form.CardCode = sapData.result;
+        form.BirthDate = moment(form.BirthDate).toDate();
+        var contactCodes = sapData.pers;
+        contacts = contacts.map(function(contact, i) {
           contact.CntctCode = contactCodes[i];
-          contact.CardCode  = form.CardCode;
+          contact.CardCode = form.CardCode;
           return contact;
         });
 
@@ -150,53 +154,51 @@ module.exports = {
 
         return Client.create(form);
       })
-      .then(function(created){
+      .then(function(created) {
         createdClient = created;
         var promises = [];
 
-        if(contacts && contacts.length > 0){
+        if (contacts && contacts.length > 0) {
           promises.push(ClientContact.create(contacts));
         }
 
         //Created automatically
-        if(fiscalAddress){
-          fiscalAddress           = ClientService.mapFiscalFields(fiscalAddress);
-          fiscalAddress.CardCode  = createdClient.CardCode;
+        if (fiscalAddress) {
+          fiscalAddress = ClientService.mapFiscalFields(fiscalAddress);
+          fiscalAddress.CardCode = createdClient.CardCode;
           fiscalAddress.AdresType = ADDRESS_TYPE_S;
-          
+
           var fiscalAddressTypeS = _.clone(fiscalAddress);
           var fiscalAddressTypeB = _.clone(fiscalAddress);
           fiscalAddressTypeB.AdresType = ADDRESS_TYPE_B;
 
-          var fiscalAddresses = [
-            fiscalAddressTypeS,
-            fiscalAddressTypeB
-          ];
+          var fiscalAddresses = [fiscalAddressTypeS, fiscalAddressTypeB];
 
           promises.push(FiscalAddress.create(fiscalAddresses));
         }
 
-        if(promises.length > 0){
+        if (promises.length > 0) {
           return promises;
+        } else {
+          return Promise.resolve();
         }
-        else{
-          return Promise.resolve();        
-        }
-
       })
-      .spread(function(contactsCreated, fiscalAddressCreated){
-        sails.log.info('contactsCreated or fiscalAddressCreated', contactsCreated);
+      .spread(function(contactsCreated, fiscalAddressCreated) {
+        sails.log.info(
+          'contactsCreated or fiscalAddressCreated',
+          contactsCreated
+        );
         sails.log.info('fiscalAddressCreated', fiscalAddressCreated);
-        
+
         res.json(createdClient);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  update: function(req, res){
+  update: function(req, res) {
     var form = req.params.all();
     var CardCode = form.CardCode;
     var email = form.E_Mail;
@@ -205,149 +207,155 @@ module.exports = {
     //Dont remove
     delete form.Balance;
 
-    if(!email){
+    if (!email) {
       return res.negotiate(new Error('Email requerido'));
     }
 
-    Client.findOne({E_Mail:email, id: {'!=': form.id}})
-      .then(function(usedEmail){
-        if(usedEmail){
+    Client.findOne({ E_Mail: email, id: { '!=': form.id } })
+      .then(function(usedEmail) {
+        if (usedEmail) {
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         return SapService.updateClient(CardCode, form);
       })
-      .then(function(resultSap){
+      .then(function(resultSap) {
         sails.log.info('update client resultSap', resultSap);
 
         var sapData = JSON.parse(resultSap.value);
         var isValidSapResponse = ClientService.isValidSapClientUpdate(sapData);
 
-        if( !sapData || isValidSapResponse.error  ) {
+        if (!sapData || isValidSapResponse.error) {
           var defualtErrMsg = 'Error al actualizar datos personales en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
+          if (err === true) {
             err = defualtErrMsg;
           }
           sails.log.info('err', err);
           return Promise.reject(new Error(err));
         }
 
-        return Client.update({CardCode: CardCode}, form);
-
+        return Client.update({ CardCode: CardCode }, form);
       })
-      .then(function(updated){
+      .then(function(updated) {
         res.json(updated);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  getContactsByClient: function(req, res){
+  getContactsByClient: function(req, res) {
     var form = req.params.all();
     var CardCode = form.CardCode;
-    ClientContact.find({CardCode:CardCode})
-      .then(function(contacts){
+    ClientContact.find({ CardCode: CardCode })
+      .then(function(contacts) {
         res.json(contacts);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  createContact: function(req, res){
+  createContact: function(req, res) {
     var form = req.params.all();
     var cardCode = form.CardCode;
-    form = ClientService.mapContactFields(form);    
-    
+    form = ClientService.mapContactFields(form);
+
     SapService.createContact(cardCode, form)
-      .then(function(resultSap){
+      .then(function(resultSap) {
         sails.log.info('response createContact', resultSap);
         var sapData = JSON.parse(resultSap.value);
-        var isValidSapResponse = ClientService.isValidSapContactCreation(sapData);
+        var isValidSapResponse = ClientService.isValidSapContactCreation(
+          sapData
+        );
 
-        if( !sapData || isValidSapResponse.error  ) {
+        if (!sapData || isValidSapResponse.error) {
           var defualtErrMsg = 'Error al crear contacto en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
+          if (err === true) {
             err = defualtErrMsg;
           }
           return Promise.reject(new Error(err));
-        } 
-        var CntctCode  = sapData[0].result;       
+        }
+        var CntctCode = sapData[0].result;
         form.CntctCode = parseInt(CntctCode);
         return ClientContact.create(form);
       })
-      .then(function(createdContact){
+      .then(function(createdContact) {
         res.json(createdContact);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
-  },  
+  },
 
-  updateContact: function(req, res){
+  updateContact: function(req, res) {
     var form = req.params.all();
     var contactCode = form.CntctCode;
     var cardCode = form.CardCode;
     form = ClientService.mapContactFields(form);
-    ClientContact.find({CardCode: cardCode, select:['CntctCode']})
-      .then(function(contacts){
+    ClientContact.find({ CardCode: cardCode, select: ['CntctCode'] })
+      .then(function(contacts) {
         var contactIndex = ClientService.getContactIndex(contacts, contactCode);
-        return SapService.updateContact(cardCode ,contactIndex, form);
+        return SapService.updateContact(cardCode, contactIndex, form);
       })
-      .then(function(resultSap){
+      .then(function(resultSap) {
         sails.log.info('updateContact response', resultSap);
 
         var sapData = JSON.parse(resultSap.value);
         var isValidSapResponse = ClientService.isValidSapContactUpdate(sapData);
 
-        if( !sapData || isValidSapResponse.error  ) {
+        if (!sapData || isValidSapResponse.error) {
           var defualtErrMsg = 'Error al actualizar contacto en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
+          if (err === true) {
             err = defualtErrMsg;
           }
           return Promise.reject(new Error(err));
-        } 
+        }
 
-        return ClientContact.update({CardCode:cardCode,CntctCode: contactCode}, form);        
+        return ClientContact.update(
+          { CardCode: cardCode, CntctCode: contactCode },
+          form
+        );
         //return ClientContact.update({CntctCode: contactCode}, form);
       })
-      .then(function(updatedApp){
+      .then(function(updatedApp) {
         sails.log.info('contact updatedApp', updatedApp);
         res.json(updatedApp);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  updateFiscalAddress: function(req, res){
+  updateFiscalAddress: function(req, res) {
     var form = req.params.all();
     var CardCode = form.CardCode;
     var id = form.id;
     var fiscalAddress = ClientService.mapFiscalFields(form);
     delete form.AdresType;
-    if(!form.LicTradNum || !ClientService.isValidRFC(form.LicTradNum)){
+    if (!form.LicTradNum || !ClientService.isValidRFC(form.LicTradNum)) {
       var err = new Error('RFC no valido');
       return res.negotiate(err);
     }
     SapService.updateFiscalAddress(CardCode, fiscalAddress)
-      .then(function(resultSap){
+      .then(function(resultSap) {
         sails.log.info('updateFiscalAddress response', resultSap);
 
         var sapData = JSON.parse(resultSap.value);
-        var isValidSapResponse = ClientService.isValidSapFiscalClientUpdate(sapData);
+        var isValidSapResponse = ClientService.isValidSapFiscalClientUpdate(
+          sapData
+        );
 
-        if( !sapData || isValidSapResponse.error  ) {
+        if (!sapData || isValidSapResponse.error) {
           var defualtErrMsg = 'Error al actualizar datos fiscales en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
+          if (err === true) {
             err = defualtErrMsg;
           }
           sails.log.info('err reject', err);
@@ -355,48 +363,47 @@ module.exports = {
         }
 
         return [
-          FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
-          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum, cfdiUse: form.cfdiUse})
+          FiscalAddress.update({ CardCode: CardCode }, fiscalAddress),
+          Client.update(
+            { CardCode: CardCode },
+            { LicTradNum: form.LicTradNum, cfdiUse: form.cfdiUse }
+          ),
         ];
       })
-      .spread(function(fiscalAddressUpdated){
+      .spread(function(fiscalAddressUpdated) {
         sails.log.info('updated in sails fiscalAddress', fiscalAddressUpdated);
         return res.json(fiscalAddressUpdated);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  getEwalletByClient: function(req, res){
+  getEwalletByClient: function(req, res) {
     var form = req.allParams();
     var id = form.id;
-    Client.findOne({id:id, select:['ewallet']})
-      .then(function(client){
+    Client.findOne({ id: id, select: ['ewallet'] })
+      .then(function(client) {
         res.json(client.ewallet);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  getClientBalance: function(req, res){
+  getClientBalance: function(req, res) {
     var form = req.allParams();
     var id = form.id;
     var client;
     ClientBalanceService.getClientBalanceById(id)
-      .then(function(balance){
+      .then(function(balance) {
         res.json(balance);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
       });
-  }  
-
-
+  },
 };
-
-

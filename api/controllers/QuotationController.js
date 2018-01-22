@@ -69,23 +69,19 @@ module.exports = {
       });
   },
 
-  findByIdQuickRead: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var userId = req.user.id;
-
-    Quotation.findOne({id: id})
-      .populate('Details')
-      .then(function(quotation){
-        if(!quotation){
-          return Promise.reject(new Error('Cotización no encontrada'));
-        }        
-        res.json(quotation);
-      })
-      .catch(function(err){
-        console.log('err', err);
-        res.negotiate(err);
-      });
+  async findByIdQuickRead(req, res){
+    try{
+      const {id} = req.params.all();
+      const quotation = await Quotation.findOne({id: id});
+      if(!quotation){
+        return res.negotiate(new Error('Cotización no encontrada'));
+      }        
+      res.json(quotation);
+    }
+    catch(err){
+      console.log('err', err);
+      res.negotiate(err);      
+    }
   },
 
   findById: function(req, res){

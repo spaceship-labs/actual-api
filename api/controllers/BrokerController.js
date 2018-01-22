@@ -1,20 +1,11 @@
 module.exports = {
-	list: function(req, res){
-    var form  = req.params.all();
-    var page  = form.page;
-    var limit = form.limit;
-    var find = BrokerSAP.find();
-
-    if(limit && page){
-      find = find.paginate({page:page, limit:limit});
+  async list(req, res) {
+    try {
+      const { page = 1, limit = 10 } = req.allParams();
+      const brokers = await BrokerSAP.find().paginate({ page, limit });
+      res.ok(brokers);
+    } catch (err) {
+      res.negotiate(err);
     }
-
-    find.then(function(brokers){
-        return res.json(brokers);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-	},
+  }
 };
