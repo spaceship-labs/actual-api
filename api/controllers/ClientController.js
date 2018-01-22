@@ -54,11 +54,11 @@ module.exports = {
       const client = await Client.findOne({ id });
       const Contacts = await ClientContact.find({ CardCode });
       const query = {
-        client.CardCode,
+        CardCode: client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       };
       const fiscalAddress = await FiscalAddress.findOne({
-        client.CardCode,
+        CardCode: client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       });
       const response = { 
