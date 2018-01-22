@@ -52,7 +52,7 @@ module.exports = {
     try {
       const id = req.param('id');
       const client = await Client.findOne({ id });
-      const Contacts = await ClientContact.find({ CardCode });
+      const Contacts = await ClientContact.find({ CardCode: client.CardCode });
       const query = {
         CardCode: client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
