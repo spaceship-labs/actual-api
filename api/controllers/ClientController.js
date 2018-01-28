@@ -123,7 +123,7 @@ module.exports = {
   async createContact(req, res){
     var form = req.allParams();
     try{
-      const createdContact = await ContactService.createContact(form, req);
+      const createdContact = await ContactService.createContact(form);
       res.json(createdContact);
     }catch(err){
       console.log('err', err);
@@ -131,51 +131,20 @@ module.exports = {
     }
   },
 
-  updateContact: function(req, res) {
-    var form = req.params.all();
-    var contactCode = form.CntctCode;
-    var cardCode = form.CardCode;
-    form = ClientService.mapContactFields(form);
-    ClientContact.find({ CardCode: cardCode, select: ['CntctCode'] })
-      .then(function(contacts) {
-        var contactIndex = ClientService.getContactIndex(contacts, contactCode);
-        return SapService.updateContact(cardCode, contactIndex, form);
-      })
-      .then(function(resultSap) {
-        sails.log.info('updateContact response', resultSap);
-
-        var sapData = JSON.parse(resultSap.value);
-        var isValidSapResponse = ClientService.isValidSapContactUpdate(sapData);
-
-        if (!sapData || isValidSapResponse.error) {
-          var defualtErrMsg = 'Error al actualizar contacto en SAP';
-          var err = isValidSapResponse.error || defualtErrMsg;
-          if (err === true) {
-            err = defualtErrMsg;
-          }
-          return Promise.reject(new Error(err));
-        }
-
-        return ClientContact.update(
-          { CardCode: cardCode, CntctCode: contactCode },
-          form
-        );
-        //return ClientContact.update({CntctCode: contactCode}, form);
-      })
-      .then(function(updatedApp) {
-        sails.log.info('contact updatedApp', updatedApp);
-        res.json(updatedApp);
-      })
-      .catch(function(err) {
-        console.log(err);
-        res.negotiate(err);
-      });
+  async updateContact(req, res) {
+    var form = req.allParams();
+    try{
+      const updatedContact = await ContactService.updateContact(form);
+      res.json(updatedContact);
+    }catch(err){
+      res.negotiate(err);
+    }
   },
 
   async updateFiscalAddress(req, res){
     var form = req.allParams();
     try{
-      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(form, req);
+      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(form);
       res.json(updatedFiscalAddress);
     }catch(err){
       res.negotiate(err);

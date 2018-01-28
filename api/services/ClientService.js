@@ -23,9 +23,6 @@ module.exports = {
   isValidRFC,
 	validateSapClientCreation,
 	validateSapClientUpdate,
-  isValidSapContactCreation,
-  isValidSapContactUpdate,
-  isValidSapFiscalClientUpdate,
   mapClientFields,
   mapContactFields,
   mapFiscalFields,
@@ -101,62 +98,6 @@ function validateSapClientUpdate(sapData){
 		throw new Error(sapData.result);
 	}	
 	throw new Error('Error al actualizar datos personales en SAP');
-}
-
-
-function isValidSapFiscalClientUpdate(sapData) {
-  var result = { error: true };
-  if (sapData.type === ERROR_TYPE) {
-    result = { error: sapData.result || true };
-  }
-
-  if (sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result)) {
-    result = { error: false };
-  }
-
-  return result;
-}
-
-function isValidSapContactCreation(sapData) {
-  var result = { error: true };
-  var contact;
-
-  if (!_.isArray(sapData)) {
-    result = { error: true };
-  }
-
-  contact = sapData[0];
-
-  if (contact.type === ERROR_TYPE) {
-    result = { error: contact.result || true };
-  }
-
-  if (contact.type === PERSON_TYPE) {
-    result = { error: false };
-  }
-
-  return result;
-}
-
-function isValidSapContactUpdate(sapData) {
-  var result = { error: true };
-  var contact;
-
-  if (!_.isArray(sapData)) {
-    result = { error: true };
-  }
-
-  contact = sapData[0];
-
-  if (contact.type === ERROR_TYPE) {
-    result = { error: contact.result || true };
-  }
-
-  if (contact.type === PERSON_TYPE) {
-    result = { error: false };
-  }
-
-  return result;
 }
 
 function areContactsRepeated(contacts) {

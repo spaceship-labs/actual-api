@@ -1,9 +1,8 @@
 module.exports = {
-  updateFiscalAddress,
-  isValidSapFiscalClientUpdate
+  updateFiscalAddress
 };
 
-function isValidSapFiscalClientUpdate(sapData){
+function validateSapFiscalClientUpdate(sapData){
 	if(sapData.type === ClientService.CARDCODE_TYPE && ClientService.isValidCardCode(sapData.result)  ){
 		return true;
 	}	
@@ -14,8 +13,8 @@ function isValidSapFiscalClientUpdate(sapData){
   throw new Error('Error al actualizar datos fiscales en SAP');
 }
 
-async function updateFiscalAddress(params, req) {
-  var CardCode = req.user.CardCode;
+async function updateFiscalAddress(params) {
+  var CardCode = params.CardCode;
   var fiscalAddress = ClientService.mapFiscalFields(params);
   delete params.AdresType;
 
@@ -28,7 +27,7 @@ async function updateFiscalAddress(params, req) {
     sails.log.info('updateFiscalAddress response', sapResult);
     const sapData = JSON.parse(sapResult.value);
 
-    isValidSapFiscalClientUpdate(sapData);
+    validateSapFiscalClientUpdate(sapData);
     const fiscalAddressesUpdated = await FiscalAddress.update({CardCode:CardCode}, fiscalAddress);
     const fiscalAddressUpdated = fiscalAddressesUpdated[0];
     const clientsUpdated =  await Client.update(
