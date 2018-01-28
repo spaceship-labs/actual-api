@@ -1,8 +1,16 @@
 module.exports = {
-    "env": {
-        "node": true
-    },
-    "extends": "eslint:recommended",
+	"env": {
+		"node": true
+	},
+	"parserOptions": {
+	"ecmaVersion": 2017
+	},
+	"parser": "esprima",
+  "rules": {
+		"no-console": 0,
+		"semi": "error"
+	},
+	"extends": "eslint:recommended",
 	"globals": {
 		"sails": true,
 		"AuthController": true,
