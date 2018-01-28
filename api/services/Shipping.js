@@ -17,12 +17,12 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   let shippingItems = [];
 
   const deliveries = await Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'});
-  const companies = deliveries.map(function(delivery) {
+  const companiesCodes = deliveries.map(function(delivery) {
     return delivery.FromCode;
   });
   const stockItemsQuery = {
     ItemCode: product.ItemCode,
-    whsCode: companies,
+    whsCode: companiesCodes,
     OpenCreQty: {
       '>': 0
     }
@@ -108,7 +108,7 @@ async function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendin
     LOW_SEASON_DAYS = 10;
   }else{
     MAIN_SEASON_DAYS = 10;
-    LOW_SEASON_DAYS = 8;
+    LOW_SEASON_DAYS = 6;
   }
 
   if(season){
