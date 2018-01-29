@@ -247,6 +247,8 @@ async function updateClient(params, req){
 	
 	delete params.FiscalAddress;
 	delete params.Balance;
+	delete params.Orders;
+	delete params.Quotations;
 
 	const updateParams = mapClientFields(params);
 	try{
