@@ -142,6 +142,10 @@ function prepareInvoice(order, payments, client, items) {
     },
     orderObject: order
   };
+
+  if(data.paymentMethod === 'other'){
+    data.paymentType = 'PPD';
+  }
   
   return createInvoice(data);
 }
