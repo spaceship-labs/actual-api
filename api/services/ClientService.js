@@ -2,6 +2,8 @@ const _ = require('underscore');
 const moment = require('moment');
 const Promise = require('bluebird');
 const ADDRESS_TYPE = 'B';
+const ADDRESS_TYPE_S = 'S';
+const ADDRESS_TYPE_B = 'B';
 const CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
 const CARDCODE_TYPE = 'CardCode';
 const PERSON_TYPE = 'Person';
@@ -9,7 +11,9 @@ const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
 
 module.exports = {
-  ADDRESS_TYPE,
+	ADDRESS_TYPE,
+	ADDRESS_TYPE_B,
+	ADDRESS_TYPE_S,
   CARDCODE_TYPE,
   PERSON_TYPE,
   ERROR_TYPE,
@@ -210,17 +214,19 @@ async function createClient(params, req){
 		//Created automatically, do we need the if validation?
 		//if(sapFiscalAddressParams){
 			var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
-			fiscalAddressParams = Object.assign(fiscalAddressParams, {
+			var fiscalAddressParams1 = {
+				...fiscalAddressParams,
 				CardCode: createdClient.CardCode,
 				AdresType: ADDRESS_TYPE_S
-			});
+			};
 
-			var fiscalAddressParams2 = Object.assign(fiscalAddressParams,{
+			var fiscalAddressParams2 = {
+				...fiscalAddressParams1,
 				AdresType: ADDRESS_TYPE_B
-			});
+			};
 
 			fiscalAddressesCreated = await FiscalAddress.create([
-				fiscalAddressParams,
+				fiscalAddressParams1,
 				fiscalAddressParams2
 			]);
 		//}
@@ -230,7 +236,7 @@ async function createClient(params, req){
 		}
 
 		return {
-			createdClient: updatedClient, 
+			createdClient, 
 			contactsCreated, 
 			fiscalAddressesCreated
 		};
