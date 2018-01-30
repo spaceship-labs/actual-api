@@ -56,21 +56,24 @@ async function createContact(params){
 async function updateContact(params){
   const contactCode = params.CntctCode;
   const cardCode = params.CardCode;
-  params = ClientService.mapContactFields(params);
-  const contacts = await ClientContact.find({ CardCode: cardCode, select: ['CntctCode'] })
-  const contactIndex = ClientService.getContactIndex(contacts, contactCode);
-  const sapResult = await SapService.updateContact(cardCode, contactIndex, params);
-  sails.log.info('updateContact response', sapResult);
+  try{
+    params = ClientService.mapContactFields(params);
+    const contacts = await ClientContact.find({ CardCode: cardCode, select: ['CntctCode'] })
+    const contactIndex = ClientService.getContactIndex(contacts, contactCode);
+    const sapResult = await SapService.updateContact(cardCode, contactIndex, params);
+    sails.log.info('updateContact response', sapResult);
 
-  const sapData = JSON.parse(sapResult.value);
-  validateSapContactUpdate(sapData);
+    const sapData = JSON.parse(sapResult.value);
+    validateSapContactUpdate(sapData);
+      
+    const updatedContacts = await ClientContact.update(
+      { CardCode: cardCode, CntctCode: contactCode },
+      params
+    );
 
-  
-  const updatedContacts = await ClientContact.update(
-    { CardCode: cardCode, CntctCode: contactCode },
-    params
-  );
-
-  return updatedContacts[0];
+    return updatedContacts[0];
+  }catch(err){
+    throw new Error(err);
+  }
 }
 
