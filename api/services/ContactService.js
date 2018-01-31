@@ -32,9 +32,7 @@ function validateSapContactUpdate(sapData){
 }
 
 
-async function createContact(params){
-  var cardCode = req.user.CardCode;
-  params.CardCode = cardCode;
+async function createContact(params, cardCode){
   params = ClientService.mapContactFields(params);
 
   try{

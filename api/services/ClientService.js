@@ -163,15 +163,18 @@ async function createClient(params, req){
     }
 
     //Seller assign
-    params.User = req.user.id;
+		params.User = req.user.id;
+		delete params.fiscalAddress;
+		delete params.contacts;		
+
     const sapClientParams = _.clone(params);
-    var sapCreateParams = {
+
+		var sapCreateParams = {
       client: sapClientParams,
       fiscalAddress: sapFiscalAddressParams || {},
       clientContacts: sapContactsParams,
       activeStore: req.activeStore
     };
-
 
     const isClientEmailTaken = await Client.findOne({ E_Mail: email });
     if(isClientEmailTaken){
@@ -200,6 +203,7 @@ async function createClient(params, req){
 		const contactsParams = sapContactsParams.map(function(c, i){
 			c.CntctCode = contactCodes[i];
 			c.CardCode = clientCreateParams.CardCode;
+			return c;
 		});
 
 		sails.log.info('contacts app', contactsParams);
@@ -268,7 +272,6 @@ async function updateClient(params, req){
     if(isClientEmailTaken){	
 			throw new Error('Email previamente utilizado');
 		}
-		sails.log.info('updateParams', updateParams);
 		const sapResult = await SapService.updateClient(CardCode, params);
 		sails.log.info('update client resultSap', sapResult);
 		var sapData = JSON.parse(sapResult.value);

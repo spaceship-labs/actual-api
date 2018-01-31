@@ -122,8 +122,9 @@ module.exports = {
 
   async createContact(req, res){
     var form = req.allParams();
+    var CardCode = form.CardCode;
     try{
-      const createdContact = await ContactService.createContact(form);
+      const createdContact = await ContactService.createContact(form, CardCode);
       res.json(createdContact);
     }catch(err){
       console.log('err', err);
