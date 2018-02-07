@@ -7,7 +7,6 @@ var moment                = require('moment');
 var numeral               = require('numeral');
 var fs                    = require('fs');
 var ejs                   = require('ejs');
-var moment                = require('moment');
 var sendgrid              = require('sendgrid').SendGrid(key);
 var helper                = require('sendgrid').mail;
 var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password.html').toString();
@@ -217,7 +216,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
-  var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar Pavia ActualGroup');
+  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres ActualGroup');
   personalization.addTo(toAux2);
 
 
@@ -227,14 +226,6 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     personalization.addTo(from);
   }
   personalization.setSubject(subject);
-  /*
-    var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
-    var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
-    var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
-    if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
-    if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
-    if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  */
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
@@ -357,15 +348,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
-  /*
-    var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
-    var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
-    var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
-    if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
-    if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
-    if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  */
-  var toAux = new helper.Email('cpavia@actualg.com', 'Cesar Pavia ActualGroup');
+  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres ActualGroup');
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
@@ -488,14 +471,7 @@ function sendFreesale(user, order, products, store) {
   personalization.addTo(toAux);
   var toAux2 = new helper.Email('informatica@actualg.com', 'Informatica ActualGroup');
   personalization.addTo(toAux2);
-  /*
-    var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
-    var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
-    var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
-    if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
-    if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
-    if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  */
+
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
