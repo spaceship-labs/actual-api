@@ -13,7 +13,6 @@ module.exports = {
   add: function(req, res){
     var form          = req.params.all();
     var quotationId   = form.quotationid;
-    var totalDiscount = form.totalDiscount || 0;
     var paymentGroup  = form.group || 1;
     var client        = false;
     var quotationPayments = [];
@@ -120,7 +119,7 @@ module.exports = {
         exchangeRate = exchangeRateFound;
         quotationTotal = quotationTotals.total;
 
-        return PaymentService.calculateQuotationAmountPaid(previousPayments, exchangeRate);
+        return PaymentService.calculatePaymentsTotal(previousPayments, exchangeRate);
       })
       .then(function(previousAmountPaid){
         var newPaymentAmount;
@@ -145,8 +144,8 @@ module.exports = {
         quotationPayments = quotation.Payments.concat([paymentCreated]);
 
         var promises = [
-          PaymentService.calculateQuotationAmountPaid(quotationPayments, exchangeRate),
-          PaymentService.calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate),
+          PaymentService.calculatePaymentsTotal(quotationPayments, exchangeRate),
+          PaymentService.calculatePaymentsTotalG1(quotationPayments, exchangeRate),
         ];
 
         if(form.type === EWALLET_TYPE){

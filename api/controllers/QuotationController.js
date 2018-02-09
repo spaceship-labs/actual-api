@@ -566,23 +566,20 @@ module.exports = {
       });
   },
 
-  getQuotationPaymentOptions: function(req, res){
+  async getQuotationPaymentOptions(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    Quotation.findOne({id:quotationId})
-      .then(function(quotation){
-        var options = {
-          financingTotals: form.financingTotals || false
-        };
-        return PaymentService.getMethodGroupsWithTotals(quotationId, req.user.activeStore, options);
-      })
-      .then(function(paymentOptions){
-        res.json(paymentOptions);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
+    const quotation = await Quotation.findOne({id:quotationId})
+    const options = {
+      financingTotals: form.financingTotals || false
+    };
+    try{
+      const paymentOptions = await PaymentService.getQuotationTotalsByMethod(quotation.id, req.user.activeStore, options);
+      return res.json(paymentOptions);
+    }catch(err){
+      console.log(err);
+      return res.negotiate(err);
+    }
   },
 
   getQuotationSapLogs: function(req, res){

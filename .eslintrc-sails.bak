@@ -1,4 +1,7 @@
 {
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
 	"globals": {
 		"sails": true,
 		"AuthController": true,

@@ -1,4 +1,3 @@
-//APP COLLECTION
 module.exports = {
   schema:true,
   migrate:'alter',
@@ -71,7 +70,6 @@ module.exports = {
     },
     Store:{
       model:'store'
-      //model:'company'
     },
     Order:{
       model:'Order'
