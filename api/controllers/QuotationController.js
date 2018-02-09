@@ -1,9 +1,6 @@
 var Promise           = require('bluebird');
 var _                 = require('underscore');
-var assign            = require('object-assign');
 var moment            = require('moment');
-var EWALLET_TYPE      = 'ewallet';
-var EWALLET_NEGATIVE  = 'negative';
 
 module.exports = {
 

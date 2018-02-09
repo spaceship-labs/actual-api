@@ -56,10 +56,8 @@ function applyClientBalanceRecord(payment, options){
   if (client.Balance < payment.ammount || !client.Balance) {
     return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
   }
-  //var updateParams = {Balance: client.Balance - payment.ammount};
-  updateParams = {};
 
-  if(payment.type == CLIENT_BALANCE_TYPE && false){
+  if(payment.type == CLIENT_BALANCE_TYPE){
     var clientBalanceRecord = {
       Store: payment.Store,
       Quotation: options.quotationId,

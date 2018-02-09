@@ -2,6 +2,8 @@ const Promise = require('bluebird');
 const numeral = require('numeral');
 const _ = require('underscore');
 
+const CANCELED_STATUS = 'canceled';
+const PAYMENT_CANCEL_TYPE = 'cancelation';
 const EWALLET_TYPE = 'ewallet';
 const CASH_USD_TYPE = 'cash-usd';
 const TRANSFER_USD_TYPE = 'transfer-usd';
@@ -11,7 +13,18 @@ const EWALLET_GROUP_INDEX = 0;
 const DEFAULT_EXCHANGE_RATE   = 18.78;
 const CURRENCY_USD = 'usd';
 
+const VALID_STORES_CODES = [
+  'actual_home_xcaret',
+  'actual_studio_cumbres',
+  'actual_studio_malecon',
+  'actual_studio_playa_del_carmen',
+  'actual_studio_merida',
+  'actual_puerto_cancun',
+  'actual_proyect'
+];
+
 module.exports = {
+  addPayment,
   calculatePaymentsTotal,
   calculatePaymentsTotalPg1,
   calculateUSDPayment,
@@ -29,6 +42,128 @@ module.exports = {
   CURRENCY_USD,
 };
 
+async function addPayment(params, req){
+  const quotationId = params.quotationid;
+  const paymentGroup = params.group || 1;
+  const storeCode = req.user.activeStore.code;
+
+  params.Quotation    = quotationId;
+  params.Store = req.user.activeStore.id;
+  params.User = req.user.id;    
+
+  if(VALID_STORES_CODES.indexOf(storeCode) === -1 && process.env.MODE === 'production'){
+    throw new Error("La creación de pedidos para esta tienda esta deshabilitada");
+  }
+
+  const isValidStock = await StockService.validateQuotationStockById(quotationId, req.user.activeStore)
+  if(!isValidStock){
+    throw new Error('Inventario no suficiente');
+  }
+
+  var quotation;
+  if(params.type === EWALLET_TYPE || params.type === CLIENT_BALANCE_TYPE){
+    quotation = await Quotation.findOne(params.Quotation).populate('Payments').populate('Client');
+  }else{
+    quotation = await Quotation.findOne(params.Quotation).populate('Payments');
+  }
+
+  const client = quotation.Client;
+  params.Client = client.id || client;
+  const previousPayments = quotation.Payments;
+  let hasEnoughFunds;
+
+  if(params.type === EWALLET_TYPE){
+    hasEnoughFunds = await EwalletService.isValidEwalletPayment(params, params.Client);
+  }
+
+  if(params.type === CLIENT_BALANCE_TYPE){
+    hasEnoughFunds = await ClientBalanceService.isValidClientBalancePayment(params, params.Client);
+  }
+
+  if(params.type === EWALLET_TYPE && !hasEnoughFunds){
+    throw new Error('Fondos insuficientes en monedero electronico');
+  }
+
+  if(params.type === CLIENT_BALANCE_TYPE && !hasEnoughFunds){
+    throw new Error('Fondos insuficientes en balance de cliente');
+  }
+
+  const calculator = QuotationService.Calculator();
+  const calculatorParams = {
+    currentStoreId: req.user.activeStore.id,
+    paymentGroup: paymentGroup,
+    update: false,
+    financingTotals: true
+  };
+
+  const exchangeRate = await getExchangeRate();
+  const quotationTotals = calculator.getQuotationTotals(params.Quotation ,calculatorParams);
+  const quotationTotal = quotationTotals.total;
+  
+  if(typeof params.Client === 'string' && params.type === CLIENT_CREDIT_TYPE){
+    const hasCredit = await checkIfClientHasCreditById(params.Client);
+    if(!hasCredit){
+      throw new Error('Este cliente no cuenta con crédito como forma de pago');
+    }
+  }
+
+  var newPaymentAmount;
+  const previousAmountPaid = await calculatePaymentsTotal(previousPayments, exchangeRate);
+  const ROUNDING_AMOUNT = 1;
+  const quotationRemainingAmount = (quotationTotal - previousAmountPaid) + ROUNDING_AMOUNT;
+
+  if(params.currency === CURRENCY_USD){
+    newPaymentAmount = calculateUSDPayment(params, exchangeRate);
+  }else{
+    newPaymentAmount = params.ammount;
+  }
+
+  if(newPaymentAmount > quotationRemainingAmount){
+    throw new Error('No es posible pagar mas del 100% del pedido');
+  }
+
+  const paymentCreated = await Payment.create(params);
+  const quotationPayments = quotation.Payments.concat([paymentCreated]);
+
+  const ammountPaid = await calculatePaymentsTotal(quotationPayments, exchangeRate);
+  const ammountPaidPg1 = await calculatePaymentsTotalPg1(quotationPayments, exchangeRate);
+
+  if(params.type === EWALLET_TYPE){
+    const ewalletConfig = {
+      quotationId: quotationId,
+      userId: req.user.id,
+      client: client,
+      paymentId: paymentCreated.id
+    };
+    const appliedEwalletRecord = await EwalletService.applyEwalletRecord(params,ewalletConfig);
+  }
+
+  if(params.type === CLIENT_BALANCE_TYPE){
+    const clientBalanceConfig = {
+      quotationId: quotationId,
+      userId: req.user.id,
+      client: client,
+      paymentId: paymentCreated.id              
+    };
+    const appliedClientBalanceRecord = await ClientBalanceService.applyClientBalanceRecord(params, clientBalanceConfig)
+  }        
+
+  const quotationUpdateParams = {
+    ammountPaid: ammountPaid,
+    ammountPaidPg1: ammountPaidPg1,
+    paymentGroup: paymentGroup
+  };
+  
+  const resultUpdate = await QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
+  delete quotation.Payments;
+  quotation.ammountPaid = quotationUpdateParams.ammountPaid;
+  quotation.paymentGroup = quotationUpdateParams.paymentGroup;
+  
+  return quotation;
+  //var updatedQuotation = resultUpdate[0];
+  //res.json(updatedQuotation);
+}
+
 function calculatePaymentsTotal(payments = [], exchangeRate){
   if(payments.length === 0) return 0;
   const ammounts = payments.map(function(payment){
@@ -44,8 +179,8 @@ function calculatePaymentsTotal(payments = [], exchangeRate){
 }
 
 function calculatePaymentsTotalPg1(payments = [], exchangeRate){
-  const paymentsG1 = _.findWhere(payments,{group: 1});
-  if(paymentsG1.length === 0){
+  const paymentsG1 = _.where(payments,{group: 1});
+  if(!paymentsG1 || paymentsG1.length === 0){
     return 0;
   }
   const ammounts = paymentsG1.map(function(payment){
@@ -165,10 +300,10 @@ async function checkIfClientHasCreditByQuotationId(quotationId){
   return false;
 }
 
-async function checkIfClientHasCreditById(clientId, options = {throwError: true}){
+async function checkIfClientHasCreditById(clientId){
   const client = await Client.findOne({id: clientId});
   if(!client){
-    throw new Error('Este cliente no tiene credito autorizado');
+    return false;
   }
   const currentDate = new Date();
   const creditQuery = {
@@ -180,9 +315,7 @@ async function checkIfClientHasCreditById(clientId, options = {throwError: true}
   if( credit && !_.isUndefined(credit) ){
     return credit;
   }    
-  if(!credit && options.throwError){
-    throw new Error('Este cliente no tiene credito autorizado');          
-  }
+
   return false;
 }
 
