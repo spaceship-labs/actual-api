@@ -216,7 +216,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres ActualGroup');
+  var toAux2 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   personalization.addTo(toAux2);
 
 
@@ -348,7 +348,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres ActualGroup');
+  var toAux = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
