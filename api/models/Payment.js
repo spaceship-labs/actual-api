@@ -13,6 +13,8 @@ module.exports = {
         'transfer-usd',
         //'ewallet',
         'client-credit',
+        'debit-card',
+        'credit-card',
         'single-payment-terminal',
         'client-balance',
         '3-msi',

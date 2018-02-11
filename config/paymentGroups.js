@@ -101,9 +101,39 @@ module.exports.paymentGroups = [
         ],
         currency: 'mxn',
         needsVerification: true,
-        min:0,
-        web: true
+        min:0
       },
+      {
+        label:'Tarjeta de débito',
+        name:'Tarjeta de débito',
+        type:'debit-card',
+        description:'VISA, MasterCard, American Express',
+        cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
+        cards:['Visa','MasterCard','American Express'],
+        terminals:[
+          {label:'American Express', value:'american-express'},
+          {label:'Banamex', value:'banamex'}
+        ],
+        currency: 'mxn',
+        needsVerification: true,
+        min:0
+      },
+      {
+        label:'Tarjeta de crédito',
+        name:'Tarjeta de crédito',
+        type:'credit-card',
+        description:'VISA, MasterCard, American Express',
+        cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
+        cards:['Visa','MasterCard','American Express'],
+        terminals:[
+          {label:'American Express', value:'american-express'},
+          {label:'Banamex', value:'banamex'}
+        ],
+        currency: 'mxn',
+        needsVerification: true,
+        min:0
+      },
+
     ]
   },
   {
@@ -146,8 +176,7 @@ module.exports.paymentGroups = [
         ],
         currency: 'mxn',
         min:300,
-        needsVerification: true,
-        web:true
+        needsVerification: true
       }
     ]
   },
@@ -172,7 +201,6 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min:300,
         needsVerification: true,
-        web:true,
         mainCard: 'banamex'
       },
       {
@@ -212,7 +240,6 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min:600,
         needsVerification: true,
-        web:true
       },
       {
         label:'9',
@@ -250,8 +277,7 @@ module.exports.paymentGroups = [
         ],
         currency: 'mxn',
         min:900,
-        needsVerification: true,
-        web:true
+        needsVerification: true
       },
     ]
   },
@@ -276,7 +302,6 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min:600,
         needsVerification: true,
-        web:true,
         mainCard: 'banamex'
       },
       {
@@ -296,7 +321,6 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min:900,
         needsVerification: true,
-        web:true,
         mainCard: 'banamex'
       },  
       {
@@ -335,8 +359,7 @@ module.exports.paymentGroups = [
         ],
         currency: 'mxn',
         min: 1200,
-        needsVerification: true,
-        web:true
+        needsVerification: true
       },                
     ]
   },
@@ -361,7 +384,6 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min:1200,
         needsVerification: true,
-        web:true,
         mainCard: 'banamex'
       },
       /*
@@ -382,7 +404,6 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min: 1300,
         needsVerification: true,
-        web:true,
         mainCard: 'banamex'
       },
       */
@@ -409,8 +430,7 @@ module.exports.paymentGroups = [
         ],
         currency: 'mxn',
         needsVerification: true,
-        min:2000,
-        web:true
+        min:2000
       },
     ]
   },
