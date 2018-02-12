@@ -270,7 +270,7 @@ function getCompanyCode(code, storeGroup){
 function mapPaymentsToSap(payments, exchangeRate){
 
   payments = payments.filter(function(p){
-    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && p.type !== PaymentService.CLIENT_CREDIT_TYPE;
+    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && p.type !== PaymentService.types.CLIENT_CREDIT;
   });
 
 

@@ -2,20 +2,19 @@ const Promise = require('bluebird');
 const numeral = require('numeral');
 const _ = require('underscore');
 
-const CANCELED_STATUS = 'canceled';
-const PAYMENT_CANCEL_TYPE = 'cancelation';
 const EWALLET_TYPE = 'ewallet';
 const CASH_USD_TYPE = 'cash-usd';
 const TRANSFER_USD_TYPE = 'transfer-usd';
 const CLIENT_BALANCE_TYPE = 'client-balance';
-const CLIENT_CREDIT_TYPE = 'client-credit';
 const EWALLET_GROUP_INDEX = 0;
 const DEFAULT_EXCHANGE_RATE   = 18.78;
 const CURRENCY_USD = 'usd';
 const types = {
   CREDIT_CARD: 'credit-card',
   DEBIT_CARD:'debit-card',
-  SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal'
+  SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal',
+  CLIENT_CREDIT: 'client-credit',
+  MSI_12: '12-msi'
 };
 
 const VALID_STORES_CODES = [
@@ -30,6 +29,7 @@ const VALID_STORES_CODES = [
 
 module.exports = {
   addPayment,
+  addCreditMethod,
   calculatePaymentsTotal,
   calculatePaymentsTotalPg1,
   calculateUSDPayment,
@@ -38,13 +38,14 @@ module.exports = {
   getQuotationTotalsByMethod,
   getPaymentGroups,
   getExchangeRate,
+  filterMethodsGroupsForDiscountClients,
   isCardPayment,
+  removeCreditMethod,
   EWALLET_TYPE,
   CASH_USD_TYPE,
   TRANSFER_USD_TYPE,
   EWALLET_GROUP_INDEX,
   CLIENT_BALANCE_TYPE,
-  CLIENT_CREDIT_TYPE,
   CURRENCY_USD,
   types
 };
@@ -114,7 +115,7 @@ async function addPayment(params, req){
   const quotationTotals = calculator.getQuotationTotals(params.Quotation ,calculatorParams);
   const quotationTotal = quotationTotals.total;
   
-  if(typeof params.Client === 'string' && params.type === CLIENT_CREDIT_TYPE){
+  if(typeof params.Client === 'string' && params.type === types.CLIENT_CREDIT){
     const hasCredit = await checkIfClientHasCreditById(params.Client);
     if(!hasCredit){
       throw new Error('Este cliente no cuenta con crédito como forma de pago');
@@ -181,7 +182,7 @@ async function addPayment(params, req){
 function calculatePaymentsTotal(payments = [], exchangeRate){
   if(payments.length === 0) return 0;
   const ammounts = payments.map(function(payment){
-    if(payment.currency === 'usd') {
+    if(payment.currency === CURRENCY_USD) {
       return calculateUSDPayment(payment, exchangeRate);
     }
     return payment.ammount;
@@ -198,7 +199,7 @@ function calculatePaymentsTotalPg1(payments = [], exchangeRate){
     return 0;
   }
   const ammounts = paymentsG1.map(function(payment){
-    if(payment.currency === 'usd'){
+    if(payment.currency === CURRENCY_USD){
      return calculateUSDPayment(payment, exchangeRate);
     }
     return payment.ammount;
@@ -345,8 +346,8 @@ function filterMethodsGroupsForDiscountClients(methodsGroups){
   });
 }
 
-async function getPaymentGroupsForEmail(quotation, activeStore) {
-  var paymentGroups = await getQuotationTotalsByMethod(quotation, activeStore)
+async function getPaymentGroupsForEmail(quotationId, activeStore) {
+  var paymentGroups = await getQuotationTotalsByMethod(quotationId, activeStore)
   
   const fixedMethods = [{
     name: '1 pago de contado',
@@ -393,7 +394,7 @@ function addCreditMethod(methodsGroups){
     if(mg.group === 1){
       var isCreditMethodAdded = _.findWhere(mg.methods,{type:'client-credit'});
       if(!isCreditMethodAdded){
-        mg.methods.unshift(creditMethod);
+        mg.methods.unshift(CREDIT_METHOD);
       }
     }
     return mg;
@@ -401,48 +402,28 @@ function addCreditMethod(methodsGroups){
 }
 
 function removeCreditMethod(methodsGroups){
-  return methodsGroups.map(function(mg){
-    if(mg.group === 1){
-      var creditMethodIndex = -1;
-      var isCreditMethodAdded = _.find(mg.methods,function(item, index){
-        if(item.type === 'client-credit'){
-          creditMethodIndex = index;
-          return true;
-        }else{
-          return false;
-        }
+  return methodsGroups.map(function(methodGroup){
+    if(methodGroup.group === 1){
+      methodGroup.methods = methodGroup.methods.filter(function(method){
+        return method.type !== types.CLIENT_CREDIT;
       });
-
-      if(isCreditMethodAdded && creditMethodIndex > -1){
-        mg.methods.splice(creditMethodIndex, 1);
-      }
     }
-    return mg;
+    return methodGroup;
   });
 }
 
 function remove12msiMethodFromGroup4(methodsGroups){
-  return methodsGroups.map(function(mg){
-    if(mg.group === 4){
-      var _12msiMethodIndex = -1;
-      var is12msiMethodAdded = _.find(mg.methods,function(item, index){
-        if(item.type === '12-msi'){
-          _12msiMethodIndex = index;
-          return true;
-        }else{
-          return false;
-        }
+  return methodsGroups.map(function(methodGroup){
+    if(methodGroup.group === 4){
+      methodGroup.methods = methodGroup.methods.filter(function(method){
+        return method.type !== types.MSI_12;
       });
-      
-      if(is12msiMethodAdded && _12msiMethodIndex > -1){
-        mg.methods.splice(_12msiMethodIndex, 1);
-      }
     }
-    return mg;
-  });  
+    return methodGroup;
+  });
 }
 
-const creditMethod = {
+const CREDIT_METHOD = {
   label:'Credito',
   name: 'Credito',
   type: 'client-credit',

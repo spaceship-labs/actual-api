@@ -5,8 +5,6 @@ describe('Auth controller', function(){
 			var url = '/';
 			try{
 				const {body, status} = await app.get(url);
-				console.log('status', status);
-				console.log('body', body);
 				expect(body.status).to.contain("ok");
 				expect(status).to.equal(200);
 			}catch(e){

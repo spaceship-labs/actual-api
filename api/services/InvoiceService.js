@@ -230,7 +230,7 @@ function getPaymentMethodBasedOnPayments(payments){
     //client-credit and client balance payment type
     var auxPayments = payments.filter(function(p){
       return p.type !== PaymentService.CLIENT_BALANCE_TYPE && 
-        p.type !== PaymentService.CLIENT_CREDIT_TYPE;
+        p.type !== PaymentService.types.CLIENT_CREDIT;
     });
 
     if(auxPayments.length === 0){
