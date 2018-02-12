@@ -1,14 +1,15 @@
-var storesCodes = [];
 var Promise = require('bluebird');
 var _ = require('underscore');
 
 module.exports = {
-	cacheCategoriesProducts: cacheCategoriesProducts,
-  buildCategoriesTree: buildCategoriesTree
+	cacheCategoriesProducts,
+  buildCategoriesTree,
+  isAWebStoreCode,
+  getAllStoresCodes
 };
 
 
-function cacheCategoriesProducts(){
+async function cacheCategoriesProducts(){
   var price = {
     '>=': 0,
     '<=': Infinity
@@ -17,33 +18,21 @@ function cacheCategoriesProducts(){
     Price: price,
     Active: 'Y'
   };
-
   //sails.log.info('cache categories stock start: ' + new Date());
-
-
-  return getAllStoresCodes().then(function(codes){
-      storesCodes = codes;
-      return ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
-    })
-    .then(function(categories){
-      return Promise.each(categories, updateCategory);
-    })
-    .then(function(){
-      //sails.log.info('cache categories stock end: ' + new Date());
-      return true;
-    })
-    .catch(function(err){
-      console.log(err);
-      return err;
-    });
+  const storesCodes = await getAllStoresCodes();
+  const categories = await ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
+  const result = await Promise.each(categories, function(category){
+    return updateCategory(category, storesCodes);
+  });
+  return true;
 }
 
-function updateCategory(category){
-  var categoryStock = getProductsStoresStock(category.Products);
+function updateCategory(category, storesCodes){
+  var categoryStock = getProductsStoresStock(category.Products, storesCodes);
   return ProductCategory.update({id:category.id}, categoryStock);
 }
 
-function getProductsStoresStock(products){
+function getProductsStoresStock(products, storesCodes){
   var stock = {};
   stock = products.reduce(function(stockAux, product){
     for(var i = 0;i < storesCodes.length;i++){
@@ -64,7 +53,7 @@ function getProductsStoresStock(products){
 
   //Assigning 0 stock as default, when no value is provided
   for(var i=0;i<storesCodes.length; i++){
-  	stock[storesCodes[i]] = stock[storesCodes[i]] || 0;
+    stock[storesCodes[i]] = stock[storesCodes[i]] || 0;
   }
 
   stock.productsNum = products.length;
@@ -77,21 +66,16 @@ function isAWebStoreCode(storeCode){
     'actual_kids',
     'actual_studio'
   ];
-
   return webStoreCodes.indexOf(storeCode) > -1;
 }
 
 
-function getAllStoresCodes(){
-  return Store.find({select:['code']})
-    .then(function(stores){
-      var storesCodes = stores.map(function(s){
-        return s.code;
-      });    
-      storesCodes = _.uniq(storesCodes);
-
-      return storesCodes;
-    });
+async function getAllStoresCodes(){
+  const stores = await Store.find({select:['code']});
+  const storesCodes = stores.map(function(s){
+    return s.code;
+  });    
+  return _.uniq(storesCodes);
 }
 
 function buildCategoriesTree(categoriesLv1, categoriesLv2, categoriesLv3){

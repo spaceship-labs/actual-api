@@ -114,6 +114,7 @@ module.exports = {
 		"CronJobs": true,
 		"Email": true,
 		"EwalletService": true,
+		"CypherService": true,
 		"Files": true,
 		"InvoiceService": true,
 		"Logger": true,
