@@ -12,6 +12,11 @@ const CLIENT_CREDIT_TYPE = 'client-credit';
 const EWALLET_GROUP_INDEX = 0;
 const DEFAULT_EXCHANGE_RATE   = 18.78;
 const CURRENCY_USD = 'usd';
+const types = {
+  CREDIT_CARD: 'credit-card',
+  DEBIT_CARD:'debit-card',
+  SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal'
+};
 
 const VALID_STORES_CODES = [
   'actual_home_xcaret',
@@ -33,6 +38,7 @@ module.exports = {
   getQuotationTotalsByMethod,
   getPaymentGroups,
   getExchangeRate,
+  isCardPayment,
   EWALLET_TYPE,
   CASH_USD_TYPE,
   TRANSFER_USD_TYPE,
@@ -40,7 +46,15 @@ module.exports = {
   CLIENT_BALANCE_TYPE,
   CLIENT_CREDIT_TYPE,
   CURRENCY_USD,
+  types
 };
+
+function isCardPayment(payment){
+  return payment.type === types.SINGLE_PAYMENT_TERMINAL
+   || payment.type === types.CREDIT_CARD
+   || payment.type === types.DEBIT_CARD
+   || payment.msi;
+  }
 
 async function addPayment(params, req){
   const quotationId = params.quotationid;

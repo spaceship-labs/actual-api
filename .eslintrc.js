@@ -12,6 +12,11 @@ module.exports = {
 	"extends": "eslint:recommended",
 	"globals": {
 		"sails": true,
+		"before": true,
+		"after": true,
+		"it": true,
+		"should":true,
+		"describe":true,
 		"AuthController": true,
 		"BrokerController": true,
 		"ClientController": true,

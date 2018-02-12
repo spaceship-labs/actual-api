@@ -529,7 +529,6 @@ module.exports = {
   getCurrentStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.quotationId;
-    var warehouse;
     var details;
     QuotationDetail.find({Quotation: quotationId}).populate('Product')
       .then(function(detailsFound){
