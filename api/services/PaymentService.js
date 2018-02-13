@@ -17,6 +17,10 @@ const types = {
   MSI_12: '12-msi'
 };
 
+const LEGACY_METHODS_TYPES = [
+  types.SINGLE_PAYMENT_TERMINAL
+];
+
 const VALID_STORES_CODES = [
   'actual_home_xcaret',
   'actual_studio_cumbres',
@@ -30,6 +34,8 @@ const VALID_STORES_CODES = [
 module.exports = {
   addPayment,
   addCreditMethod,
+  addLegacyMethods,
+  addSinglePaymentTerminalMethod,
   calculatePaymentsTotal,
   calculatePaymentsTotalPg1,
   calculateUSDPayment,
@@ -47,6 +53,7 @@ module.exports = {
   EWALLET_GROUP_INDEX,
   CLIENT_BALANCE_TYPE,
   CURRENCY_USD,
+  LEGACY_METHODS_TYPES,
   types
 };
 
@@ -383,7 +390,10 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
 
 function getPaymentGroups(options = {}){
   let paymentGroups = _.clone(sails.config.paymentGroups);
-  if(options.readCreditPayments){
+  if(options.readLegacyMethods){
+    paymentGroups = addLegacyMethods(paymentGroups);
+  }
+  if(options.readCreditMethod){
     paymentGroups = addCreditMethod(paymentGroups);
   }
   return paymentGroups;
@@ -392,7 +402,7 @@ function getPaymentGroups(options = {}){
 function addCreditMethod(methodsGroups){
   return methodsGroups.map(function(mg){
     if(mg.group === 1){
-      var isCreditMethodAdded = _.findWhere(mg.methods,{type:'client-credit'});
+      var isCreditMethodAdded = _.findWhere(mg.methods,{type: types.CLIENT_CREDIT});
       if(!isCreditMethodAdded){
         mg.methods.unshift(CREDIT_METHOD);
       }
@@ -400,6 +410,24 @@ function addCreditMethod(methodsGroups){
     return mg;
   });
 }
+
+function addSinglePaymentTerminalMethod(methodsGroups){
+  return methodsGroups.map(function(mg){
+    if(mg.group === 1){
+      var isSinglePaymentMethodADDED = _.findWhere(mg.methods,{type: types.SINGLE_PAYMENT_TERMINAL});
+      if(!isSinglePaymentMethodADDED){
+        mg.methods.unshift(SINGLE_PAYMENT_TERMINAL_METHOD);
+      }
+    }
+    return mg;
+  });
+}
+
+function addLegacyMethods(methodsGroups){
+  methodsGroups = addSinglePaymentTerminalMethod(methodsGroups);
+  return methodsGroups;
+}
+
 
 function removeCreditMethod(methodsGroups){
   return methodsGroups.map(function(methodGroup){
@@ -422,6 +450,22 @@ function remove12msiMethodFromGroup4(methodsGroups){
     return methodGroup;
   });
 }
+
+const SINGLE_PAYMENT_TERMINAL_METHOD = {
+    label:'1 pago con',
+    name:'Una sola exhibición',
+    type:'single-payment-terminal',
+    description:'VISA, MasterCard, American Express',
+    cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
+    cards:['Visa','MasterCard','American Express'],
+    terminals:[
+      {label:'American Express', value:'american-express'},
+      {label:'Banamex', value:'banamex'}
+    ],
+    currency: 'mxn',
+    needsVerification: true,
+    min:0
+};
 
 const CREDIT_METHOD = {
   label:'Credito',

@@ -128,6 +128,16 @@ describe("Client service", function(){
       }
       expect(ClientService.validateSapClientUpdate(responseData)).to.equal(true);
     });
+    it("should throw and error when invalid", function(){
+      const responseData = {
+        type: ClientService.ERROR_TYPE,
+        result: "Error SAP message",
+      }
+      expect(() => ClientService.validateSapClientUpdate(responseData))
+        .to.throw("Error SAP message");
+
+    });
+
   });
   
 

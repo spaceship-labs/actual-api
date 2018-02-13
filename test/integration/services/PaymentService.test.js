@@ -65,6 +65,17 @@ describe('Payment service', function(){
     expect(creditMethod.type).to.be.equal(PaymentService.types.CLIENT_CREDIT);
   });
 
+  it('should add the single payment terminal method group to the method groups', async function(){
+    const paymentGroups = PaymentService.getPaymentGroups();
+    const result = PaymentService.addSinglePaymentTerminalMethod(paymentGroups);
+    expect(result).to.be.an('array');
+    const paymentGroup1 = paymentGroups[0];
+    const singlePaymentMethod = _.findWhere(paymentGroup1.methods,{type:PaymentService.types.SINGLE_PAYMENT_TERMINAL});
+    expect(singlePaymentMethod).to.be.an('object');
+    expect(singlePaymentMethod.type).to.be.equal(PaymentService.types.SINGLE_PAYMENT_TERMINAL);
+  });
+
+
   it('should remove the credit method group to the method groups', async function(){
     const paymentGroups = PaymentService.getPaymentGroups();
     const result = PaymentService.addCreditMethod(paymentGroups);
@@ -79,5 +90,26 @@ describe('Payment service', function(){
     expect(creditMethod).to.be.undefined;
   });
 
+
+  it('should add legacy methods  to method groups when calling addLegacyMethods', async function(){
+    const paymentGroups = PaymentService.getPaymentGroups();
+    const result = PaymentService.addLegacyMethods(paymentGroups);
+    expect(result).to.be.an('array');
+
+    const legacyMethodsTypes = PaymentService.LEGACY_METHODS_TYPES;
+    var legacyMethodsCount = 0;
+    result.forEach(function(group){
+      legacyMethodsTypes.forEach(function(legacyMethodType){
+        var hasALegacyMethod = _.some(group.methods, function(method){
+          return method.type === legacyMethodType;
+        });
+        if(hasALegacyMethod){
+          legacyMethodsCount++;
+        }
+      });
+    });
+    expect(legacyMethodsCount).to.be.equal(legacyMethodsTypes.length);
+
+  });
 
 });

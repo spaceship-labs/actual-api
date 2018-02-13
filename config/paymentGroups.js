@@ -88,21 +88,8 @@ module.exports.paymentGroups = [
         needsVerification: false
       },
       */
-      {
-        label:'1 pago con',
-        name:'Una sola exhibición',
-        type:'single-payment-terminal',
-        description:'VISA, MasterCard, American Express',
-        cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
-        cards:['Visa','MasterCard','American Express'],
-        terminals:[
-          {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'}
-        ],
-        currency: 'mxn',
-        needsVerification: true,
-        min:0
-      },
+      /*
+      */
       {
         label:'Tarjeta de débito',
         name:'Tarjeta de débito',

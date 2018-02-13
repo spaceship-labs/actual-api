@@ -348,7 +348,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres ActualGroup');
+  var toAux = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   personalization.addTo(toAux);
 
   if(process.env.MODE === 'production'){
@@ -513,6 +513,7 @@ function paymentMethod(payment) {
       payment_name = 'Monedero electrónico';
       break;
     case 'credit-card':
+    case 'debit-card':
     case 'single-payment-terminal':
     case '3-msi':
     case '3-msi-banamex':    
@@ -557,7 +558,10 @@ function paymentType(payment) {
       payment_name = 'Transferencia';
       break;
     case 'credit-card':
-      payment_name = 'Crédito ' + payment.terminal;
+      payment_name = 'Crédito, terminal ' + payment.terminal;
+      break;
+    case 'debit-card':
+      payment_name = 'Débito, terminal ' + payment.terminal;
       break;
     case 'single-payment-terminal':
       payment_name = 'Una sola exhibición terminal ' + payment.terminal;
