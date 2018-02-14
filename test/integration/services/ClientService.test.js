@@ -50,17 +50,6 @@ describe("Client service", function(){
     });
   });
 
-  describe("validate RFC validation", function(){
-    it("should return true when valid", function(){
-      const rfc = "ABC123456789";
-      expect(ClientService.isValidRFC(rfc)).to.equal(true);
-    });
-    it("should return false when invalid", function(){
-      const rfc = "ABCD1234567890";
-      expect(ClientService.isValidRFC(rfc)).to.equal(false);
-    });
-  });
-
   describe("validate contact code", function(){
     it("should return true when valid", function(){
       const contactCode = 238;
@@ -140,5 +129,20 @@ describe("Client service", function(){
 
   });
   
+  describe("validate RFC", function(){
+    it("should return false when invalid", function(){
+      const invalidRFC = 'wrong.rfc';
+      const result = ClientService.isValidRFC(invalidRFC);
+      expect(result).to.be.equal(false);
+    });
+
+    it("should return true when valid", function(){
+      const validrfc = 'ADB301218DA0';
+      const result = ClientService.isValidRFC(validrfc);
+      expect(result).to.be.equal(true);
+    });
+    
+
+  })
 
 });

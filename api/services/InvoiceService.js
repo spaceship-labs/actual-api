@@ -8,7 +8,6 @@ var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
 var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
-var RFCPUBLIC = 'XAXX010101000';
 var DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
@@ -291,7 +290,7 @@ function getPaymentMethodBasedOnPayments(payments){
 }
 
 function prepareClient(order, client, address) {
-  var generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
+  var generic = !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
   var data;
   if (!generic) {
     data = {
@@ -314,7 +313,7 @@ function prepareClient(order, client, address) {
   } else {
     data = {
       name: order.CardName,
-      identification: (RFCPUBLIC || "").toUpperCase(),
+      identification: (FiscalAddressService.GENERIC_RFC || "").toUpperCase(),
       cfdiUse: DEFAULT_CFDI_USE,
       //email: order.E_Mail,
       address: {

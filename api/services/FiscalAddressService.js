@@ -1,5 +1,8 @@
+var GENERIC_RFC = 'XAXX010101000';
+
 module.exports = {
-  updateFiscalAddress
+  updateFiscalAddress,
+  GENERIC_RFC
 };
 
 function validateSapFiscalClientUpdate(sapData){

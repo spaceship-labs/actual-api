@@ -9,6 +9,7 @@ const CARDCODE_TYPE = 'CardCode';
 const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
+const RFC_VALIDATION_REGEX = /^([A-Z,Ñ,&]{3,4}([0-3][0-9])(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[A-Z|\d]{3})$/;
 
 module.exports = {
 	ADDRESS_TYPE,
@@ -76,7 +77,14 @@ function isValidFiscalAddress(fiscalAddress) {
 }
 
 function isValidRFC(rfc) {
-  return rfc.length === 12 || rfc.length === 13;
+	if(rfc === FiscalAddressService.GENERIC_RFC){ 
+		return true;
+	}
+	var result = (rfc || "").match(RFC_VALIDATION_REGEX);
+	if(_.isArray(result)){
+		return true
+	}
+	return false;
 }
 
 function isValidContactCode(contactCode) {

@@ -5,7 +5,6 @@ module.exports = {
 	"parserOptions": {
 	"ecmaVersion": 2017
 	},
-	"parser": "esprima",
   "rules": {
 		"no-console": 0,
 		"semi": "error"
@@ -116,6 +115,7 @@ module.exports = {
 		"Email": true,
 		"EwalletService": true,
 		"Files": true,
+		"FiscalAddressService": true,
 		"InvoiceService": true,
 		"Logger": true,
 		"OrderService": true,
