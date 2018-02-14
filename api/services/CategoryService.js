@@ -4,7 +4,9 @@ var _ = require('underscore');
 
 module.exports = {
 	cacheCategoriesProducts: cacheCategoriesProducts,
-  buildCategoriesTree: buildCategoriesTree
+  buildCategoriesTree: buildCategoriesTree,
+  isAWebStoreCode,
+  getAllStoresCodes
 };
 
 
