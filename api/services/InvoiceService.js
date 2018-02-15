@@ -96,13 +96,10 @@ function send(orderID) {
       if(process.env.MODE === 'production'){
         emails = [
           address.U_Correos,
-          'luisperez@spaceshiplabs.com',
           'informatica@actualg.com',
           'cgarcia@actualg.com',
           'facturacion@actualg.com'
         ];
-      }else{
-        emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
       }
 
       var id = invoice.alegraId;
