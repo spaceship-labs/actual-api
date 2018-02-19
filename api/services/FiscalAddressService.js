@@ -1,5 +1,6 @@
 module.exports = {
-  updateFiscalAddress
+  updateFiscalAddress,
+  validateSapFiscalClientUpdate
 };
 
 function validateSapFiscalClientUpdate(sapData){

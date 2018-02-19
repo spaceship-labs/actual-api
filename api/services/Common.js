@@ -1,9 +1,9 @@
-var _ = require('underscore');
-var q = require('q');
-var Promise = require('bluebird');
-var moment = require('moment');
-var assign = require('object-assign');
-var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+const _ = require('underscore');
+const q = require('q');
+const Promise = require('bluebird');
+const moment = require('moment');
+const assign = require('object-assign');
+const ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 function formatMongoRecord(record){
   record.id = record._id.toString();
@@ -11,7 +11,6 @@ function formatMongoRecord(record){
     if( record[key] instanceof ObjectId){
       record[key] = record[key].toString();
     }
-
     /*
     if( record[key] instanceof Date ){
       record[key] = record[key].toLocaleString()
@@ -25,7 +24,6 @@ module.exports = {
 
   nativeFindOne: function(findCrieria, model){
     return new Promise(function(resolve, reject){
-      
       model.native(function(err, collection){
         if(err){
           console.log('err finding one',err);
@@ -42,7 +40,7 @@ module.exports = {
           }else{
             resolve();
           }
-      });
+        });
       });
 
     });
@@ -156,8 +154,8 @@ module.exports = {
   },
 
   validateEmail: function(email) {
-      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return re.test(email);
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
   },
   find: function(modelName,form, extraParams){
     var deferred = q.defer();
@@ -217,7 +215,7 @@ module.exports = {
     }
 
     if(filters){
-      for(key in filters){
+      for(var key in filters){
         query[key] = filters[key];
       }
     }
@@ -291,7 +289,7 @@ module.exports = {
       if(err) console.log(err);
       model.count(querySearchAux).exec(function(err2,count){
         if(err2){
-          throw(err2);
+          //throw(err2);
           deferred.reject(err);
         }else{
           deferred.resolve({data:results, total:count});
@@ -328,20 +326,20 @@ module.exports = {
 
 
   getMonthDateRange: function() {
-    var currentTime = new Date()
-    // returns the month (from 0 to 11)
-    var month = currentTime.getMonth() + 1
-    // returns the year (four digits)
-    var year = currentTime.getFullYear()
-    var startDate = moment([year, month]).add(-1,"month");
-    // Clone the value before .endOf()
-    var endDate = moment(startDate).endOf('month');
-    // make sure to call toDate() for plain JavaScript date type
-    return { start: startDate.toDate(), end: endDate.toDate() };
+    return { 
+      start: moment().startOf("month").toDate(), 
+      end: moment().endOf("month").toDate(), 
+    };
   },
 
-  getFortnightRange: function(){
-    var currentDay = moment().date();
+  getFortnightRange: function(currentDate = moment().toDate()){
+    if(!moment(currentDate).isValid()){
+      throw new Error("Not a valid date");
+      //return false;
+    }
+
+    var currentDay = moment(currentDate).date();
+    
     var range = {};
     if(currentDay <= 15){
       range = {
@@ -455,9 +453,10 @@ module.exports = {
 
     return str;
 
-  }
-};
+  },
 
+  numLeftPad: numLeftPad
+};
 
 function numLeftPad(num, size) {
   var numStr = num+"";

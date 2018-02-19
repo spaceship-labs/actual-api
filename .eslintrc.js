@@ -109,6 +109,8 @@ module.exports = {
 		"CipherService": true,
 		"ClientBalanceService": true,
 		"ClientService": true,
+		"ContactService": true,
+		"FiscalAddressService": true,
 		"Commissions": true,
 		"Common": true,
 		"CronJobs": true,

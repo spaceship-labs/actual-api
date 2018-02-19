@@ -11,8 +11,11 @@ const RFCPUBLIC = 'XAXX010101000';
 const DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
-  createOrderInvoice: createOrderInvoice,
-  send: send,
+  createOrderInvoice,
+  send,
+  getHighestPayment,
+  getPaymentMethodBasedOnPayments,
+  prepareClient
 };
 
 function createOrderInvoice(orderId) {
@@ -222,7 +225,6 @@ function getPaymentMethodBasedOnPayments(payments){
   var uniquePaymentMethod = payments[0];
   
   if(payments.length > 1){
-
     //Taking the highest payment as main, except the 
     //client-credit and client balance payment type
     var auxPayments = payments.filter(function(p){
@@ -237,7 +239,6 @@ function getPaymentMethodBasedOnPayments(payments){
   }
 
   switch(uniquePaymentMethod.type){
-
     case 'cash':
     case 'cash-usd':
     case 'deposit':
