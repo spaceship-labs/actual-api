@@ -66,7 +66,7 @@ function getProductsStoresStock(products){
 
   //Assigning 0 stock as default, when no value is provided
   for(var i=0;i<storesCodes.length; i++){
-  	stock[storesCodes[i]] = stock[storesCodes[i]] || 0;
+    stock[storesCodes[i]] = stock[storesCodes[i]] || 0;
   }
 
   stock.productsNum = products.length;
