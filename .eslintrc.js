@@ -2,9 +2,9 @@ module.exports = {
 	"env": {
 		"node": true
 	},
-	"parserOptions": {
-	"ecmaVersion": 2017
-	},
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
   "rules": {
 		"no-console": 0,
 		"semi": "error"
@@ -109,11 +109,14 @@ module.exports = {
 		"CipherService": true,
 		"ClientBalanceService": true,
 		"ClientService": true,
+		"ContactService": true,
+		"FiscalAddressService": true,
 		"Commissions": true,
 		"Common": true,
 		"CronJobs": true,
 		"Email": true,
 		"EwalletService": true,
+		"CypherService": true,
 		"Files": true,
 		"FiscalAddressService": true,
 		"InvoiceService": true,

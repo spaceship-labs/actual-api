@@ -2,6 +2,7 @@ var GENERIC_RFC = 'XAXX010101000';
 
 module.exports = {
   updateFiscalAddress,
+  validateSapFiscalClientUpdate,
   GENERIC_RFC
 };
 

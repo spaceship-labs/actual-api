@@ -270,7 +270,7 @@ function getCompanyCode(code, storeGroup){
 function mapPaymentsToSap(payments, exchangeRate){
 
   payments = payments.filter(function(p){
-    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && p.type !== PaymentService.CLIENT_CREDIT_TYPE;
+    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && p.type !== PaymentService.types.CLIENT_CREDIT;
   });
 
 
@@ -288,7 +288,7 @@ function mapPaymentsToSap(payments, exchangeRate){
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-    if(payment.msi || payment.type === 'single-payment-terminal'){
+    if(PaymentService.isCardPayment(payment)){
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
     }
