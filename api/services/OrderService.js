@@ -466,7 +466,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 
 function everyPaymentIsClientBalanceOrCredit(paymentsToCreate){
   var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
-    return p.type === PaymentService.CLIENT_BALANCE_TYPE || p.type === PaymentService.CLIENT_CREDIT_TYPE;
+    return p.type === PaymentService.CLIENT_BALANCE_TYPE || p.type === PaymentService.types.CLIENT_CREDIT;
   });  
   return everyPaymentIsClientBalance;
 }

@@ -1,4 +1,3 @@
-//APP COLLECTION
 module.exports = {
   schema:true,
   migrate:'alter',
@@ -14,6 +13,8 @@ module.exports = {
         'transfer-usd',
         //'ewallet',
         'client-credit',
+        'debit-card',
+        'credit-card',
         'single-payment-terminal',
         'client-balance',
         '3-msi',
@@ -71,7 +72,6 @@ module.exports = {
     },
     Store:{
       model:'store'
-      //model:'company'
     },
     Order:{
       model:'Order'

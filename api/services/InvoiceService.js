@@ -1,15 +1,14 @@
-var _ = require('underscore');
-var moment = require('moment');
-var request = require('request-promise');
-var Promise = require('bluebird');
-var ALEGRAUSER = process.env.ALEGRAUSER;
-var ALEGRATOKEN = process.env.ALEGRATOKEN;
-var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
-var promiseDelay = require('promise-delay');
-var alegraIVAID = 2;
-var alegraACCOUNTID = 1;
-var RFCPUBLIC = 'XAXX010101000';
-var DEFAULT_CFDI_USE = 'P01';
+const _ = require('underscore');
+const moment = require('moment');
+const request = require('request-promise');
+const Promise = require('bluebird');
+const ALEGRAUSER = process.env.ALEGRAUSER;
+const ALEGRATOKEN = process.env.ALEGRATOKEN;
+const token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
+const promiseDelay = require('promise-delay');
+const ALEGRA_IVA_ID = 2;
+const RFCPUBLIC = 'XAXX010101000';
+const DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
   createOrderInvoice: createOrderInvoice,
@@ -18,7 +17,6 @@ module.exports = {
 
 function createOrderInvoice(orderId) {
   return new Promise(function(resolve, reject){
-    
     var orderFound;
     var errInvoice;
 
@@ -56,7 +54,7 @@ function createOrderInvoice(orderId) {
         return prepareInvoice(order, payments, client, items);
       })
       .then(function(alegraInvoice){
-      	resolve(
+        resolve(
           Invoice.create({ alegraId: alegraInvoice.id, order: orderId })
         );
       })
@@ -229,7 +227,7 @@ function getPaymentMethodBasedOnPayments(payments){
     //client-credit and client balance payment type
     var auxPayments = payments.filter(function(p){
       return p.type !== PaymentService.CLIENT_BALANCE_TYPE && 
-        p.type !== PaymentService.CLIENT_CREDIT_TYPE;
+        p.type !== PaymentService.types.CLIENT_CREDIT;
     });
 
     if(auxPayments.length === 0){
@@ -256,6 +254,7 @@ function getPaymentMethodBasedOnPayments(payments){
       break;
 
     case 'single-payment-terminal':
+    case 'credit-card':
     case '3-msi':
     case '3-msi-banamex':    
     case '6-msi':
@@ -269,6 +268,10 @@ function getPaymentMethodBasedOnPayments(payments){
       paymentMethod = 'credit-card';
       break;
     
+    case 'debit-card':
+      paymentMethod = 'debit-card';
+      break;
+
     case 'cheque':
       paymentMethod = 'check';
       break;
@@ -316,16 +319,8 @@ function prepareClient(order, client, address) {
       //email: order.E_Mail,
       address: {
         country: 'México',
-        state: order.U_Estado || 'Quintana Roo',
-
+        state: order.U_Estado || 'Quintana Roo'
         //TODO; Check default Inovice data for GENERAL PUBLIC
-        //colony: order.U_Colonia,
-        //street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
-        //exteriorNumber: order.U_Noexterior,
-        //interiorNumber: order.U_Nointerior,
-        //municipality:  order.U_Mpio,
-        //localitiy: order.U_Ciudad,
-        //zipCode: order.U_CP,
       }
     };
   }
@@ -346,25 +341,19 @@ function createClient(client) {
 }
 
 function getUnitTypeByProduct(product){
-  var unitType = 'piece';
-  
   if(product.Service === 'Y'){
     return 'service';
   }
-
   switch(product.U_ClaveUnidad){
     case 'H87':
-      unitType = 'piece';
-      break;
+      return 'piece';
     case 'SET':
-      unitType = 'piece';
-      break;
+      return 'piece';
     case 'E48':
-      unitType = 'service';
-      break;
+      return 'service';
+    default: 
+      return 'piece';
   }
-
-  return unitType;
 }
 
 function prepareItems(details) {
@@ -381,11 +370,10 @@ function prepareItems(details) {
       price: detail.unitPrice / 1.16,
       //discount: discount,
       discount: parseFloat((discount).toFixed(4)),
-      tax: [ {id: alegraIVAID} ],
+      tax: [ {id: ALEGRA_IVA_ID} ],
       productKey: product.U_ClaveProdServ,
       quantity: detail.quantity,
       inventory: {
-        //unit:'piece',
         unit: getUnitTypeByProduct(product),
         unitCost: detail.unitPrice,
         initialQuantity: detail.quantity
@@ -397,11 +385,9 @@ function prepareItems(details) {
     return createItemWithDelay(item);
   });
 
-  //Uncomment to use instant requests instead of delaying the requests
+  //Use to instant requests instead of delaying the requests
   //return Promise.all(createItems(items));
 }
-
-
 
 function createItemWithDelay(item){
   var options = {
@@ -435,19 +421,3 @@ function createItems(items) {
     });
   });
 }
-
-function preparePayments(payments) {
-  return payments.map(function(payment) {
-    var date = moment(payment.createdAt)
-      .format('YYYY-MM-DD');
-    return {
-      date: date,
-      account: { id: alegraACCOUNTID },
-      amount: payment.ammount,
-      bankAccount: { id: 1 },
-      type: 'in',
-      paymentMethod: 'cash',
-    };
-  });
-}
-

@@ -2,10 +2,9 @@ module.exports = {
 	"env": {
 		"node": true
 	},
-	"parserOptions": {
-	"ecmaVersion": 2017
-	},
-	"parser": "esprima",
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
   "rules": {
 		"no-console": 0,
 		"semi": "error"
@@ -115,6 +114,7 @@ module.exports = {
 		"CronJobs": true,
 		"Email": true,
 		"EwalletService": true,
+		"CypherService": true,
 		"Files": true,
 		"InvoiceService": true,
 		"Logger": true,
