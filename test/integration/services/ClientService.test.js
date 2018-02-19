@@ -141,8 +141,20 @@ describe("Client service", function(){
       const result = ClientService.isValidRFC(validrfc);
       expect(result).to.be.equal(true);
     });
-    
 
+    it("should return false when using a date like 30/02/18", function(){
+      const validrfc = 'ADB300218DA0';
+      const result = ClientService.isValidRFC(validrfc);
+      expect(result).to.be.equal(false);
+    });
+
+    it("should return true when using a date like 28/02/18 valid", function(){
+      const validrfc = 'ADB280218DA0';
+      const result = ClientService.isValidRFC(validrfc);
+      expect(result).to.be.equal(true);
+    });
+    
+    
   })
 
 });

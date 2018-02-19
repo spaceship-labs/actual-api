@@ -9,7 +9,8 @@ const CARDCODE_TYPE = 'CardCode';
 const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
-const RFC_VALIDATION_REGEX = /^([A-Z,Ñ,&]{3,4}([0-3][0-9])(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[A-Z|\d]{3})$/;
+const DATE_REGEX = "((0[1-9]|[12]\\d|3[01])(01|03|05|07|08|10|12)|(0[1-9]|[12]\\d)02|(0[1-9]|[12]\\d|30)(04|06|09|11))(\\d{2})";
+const RFC_VALIDATION_REGEX = new RegExp("^(([A-Z,Ñ,&]{3,4})"+DATE_REGEX+"([A-Z|\\d]{3}))$");
 
 module.exports = {
 	ADDRESS_TYPE,
