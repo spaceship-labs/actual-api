@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 const numeral = require('numeral');
 const _ = require('underscore');
+const cloneDeep = require('lodash.clonedeep');
 
 const EWALLET_TYPE = 'ewallet';
 const CASH_USD_TYPE = 'cash-usd';
@@ -229,7 +230,7 @@ async function getExchangeRate(){
 }
 
 async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}){
-  var paymentGroups = _.clone(sails.config.paymentGroups);
+  var paymentGroups = cloneDeep(sails.config.paymentGroups);
   const discountKeys = sails.config.discountKeys;
 
   const getTotalsPromises = paymentGroups.map(function(paymentGroup) {
@@ -257,7 +258,6 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
   }else{
     paymentGroups = removeCreditMethod(paymentGroups);
   }
-  paymentGroups = removeSinglePaymentTerminalMethod(paymentGroups);
 
   paymentGroups = paymentGroups.map(function(paymentGroup, index){
     paymentGroup.total = totalsByGroup[index].total || 0;
@@ -390,7 +390,7 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
 }
 
 function getPaymentGroups(options = {}){
-  let paymentGroups = _.clone(sails.config.paymentGroups);
+  let paymentGroups = cloneDeep(sails.config.paymentGroups);
   if(options.readLegacyMethods){
     paymentGroups = addLegacyMethods(paymentGroups);
   }
