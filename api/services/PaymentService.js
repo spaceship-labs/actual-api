@@ -257,6 +257,7 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
   }else{
     paymentGroups = removeCreditMethod(paymentGroups);
   }
+  paymentGroups = removeSinglePaymentTerminalMethod(paymentGroups);
 
   paymentGroups = paymentGroups.map(function(paymentGroup, index){
     paymentGroup.total = totalsByGroup[index].total || 0;
@@ -439,6 +440,18 @@ function removeCreditMethod(methodsGroups){
     return methodGroup;
   });
 }
+
+function removeSinglePaymentTerminalMethod(methodsGroups){
+  return methodsGroups.map(function(methodGroup){
+    if(methodGroup.group === 1){
+      methodGroup.methods = methodGroup.methods.filter(function(method){
+        return method.type !== types.SINGLE_PAYMENT_TERMINAL;
+      });
+    }
+    return methodGroup;
+  });
+}
+
 
 function remove12msiMethodFromGroup4(methodsGroups){
   return methodsGroups.map(function(methodGroup){
