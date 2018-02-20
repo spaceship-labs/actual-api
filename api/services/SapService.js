@@ -287,9 +287,11 @@ function mapPaymentsToSap(payments, exchangeRate){
     if(PaymentService.isCardPayment(payment)){
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
+      /*
       if(!payment.terminal){
         payment.terminal = DEFAULT_TERMINAL;
       }
+      */
     }
     if(payment.terminal){
       paymentSap.Terminal = payment.terminal;
