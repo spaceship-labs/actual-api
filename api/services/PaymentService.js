@@ -15,7 +15,9 @@ const types = {
   DEBIT_CARD:'debit-card',
   SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal',
   CLIENT_CREDIT: 'client-credit',
-  MSI_12: '12-msi'
+  MSI_12: '12-msi',
+  TRANSFER: 'transfer',
+  TRANSFER_USD: 'transfer-usd'
 };
 
 const LEGACY_METHODS_TYPES = [
@@ -47,6 +49,7 @@ module.exports = {
   getExchangeRate,
   filterMethodsGroupsForDiscountClients,
   isCardPayment,
+  isTransferPayment,
   removeCreditMethod,
   EWALLET_TYPE,
   CASH_USD_TYPE,
@@ -63,11 +66,20 @@ function isCardPayment(payment){
    || payment.type === types.CREDIT_CARD
    || payment.type === types.DEBIT_CARD
    || payment.msi;
-  }
+}
+
+function isTransferPayment(payment){
+  return payment.type === types.TRANSFER || payment.type === types.TRANSFER_USD;
+}
 
 async function addPayment(params, req){
   const quotationId = params.quotationid;
   const paymentGroup = params.group || 1;
+
+  if( (isCardPayment(params) || isTransferPayment(params) ) && !params.terminal){
+    throw new Error("Es necesario asignar una terminal a este tipo de pago");
+  }
+
   const storeCode = req.user.activeStore.code;
 
   params.Quotation    = quotationId;

@@ -1,9 +1,31 @@
 const _ = require('underscore');
 
 describe('Payment service', function(){
+
+  describe("addPayment", function(){
+    it("should throw an error when is a card payment and doesnt have a terminal associated", async function(){
+      const req = {};
+      const params = {type:'debit-card'};
+      expect(PaymentService.addPayment(params, req))
+        .to.eventually.be.rejectedWith('Es necesario asignar una terminal a este tipo de pago');
+    });
+
+    it("should throw an error when is a transfer payment and doesnt have a terminal associated", async function(){
+      const req = {};
+      const params = {type:'transfer'};
+      expect(PaymentService.addPayment(params, req))
+        .to.eventually.be.rejectedWith('Es necesario asignar una terminal a este tipo de pago');
+    });
+  });
+
   it('should detect if payment method is a card payment method', async function(){
     const payment = {type: 'credit-card'};
     expect(PaymentService.isCardPayment(payment)).to.equal(true);
+  });
+
+  it("should detect if payment method type is transfer or transfer usd", function(){
+    const payment = {type: 'transfer-usd'};
+    expect(PaymentService.isTransferPayment(payment)).to.equal(true);
   });
 
   it('should calculate payments total', async function(){
