@@ -34,22 +34,6 @@ module.exports.paymentGroups = [
         currency:'mxn',
         needsVerification: false
       },
-      /*
-      {
-        label:'Deposito en ventanilla',
-        name:'Deposito en ventanilla',
-        type:'deposit',
-        description:'Sujeto a verificación contable',
-        currency:'mxn',
-        terminals:[
-          {label:'Banamex', value:'banamex'},
-          {label:'Bancomer', value:'bancomer'},
-          {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
-        ],
-        needsVerification: false
-      },
-      */
       {
         label:'Transferencia MXN',
         name:'Transferencia MXN',

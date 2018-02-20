@@ -115,22 +115,21 @@ describe('Payment service', function(){
 
   it('should add legacy methods  to method groups when calling addLegacyMethods', async function(){
     const paymentGroups = PaymentService.getPaymentGroups();
-    const result = PaymentService.addLegacyMethods(paymentGroups);
-    expect(result).to.be.an('array');
+    const methodGroups = PaymentService.addLegacyMethods(paymentGroups);
+    expect(methodGroups).to.be.an('array');
 
     const legacyMethodsTypes = PaymentService.LEGACY_METHODS_TYPES;
     var legacyMethodsCount = 0;
-    result.forEach(function(group){
-      legacyMethodsTypes.forEach(function(legacyMethodType){
-        var hasALegacyMethod = _.some(group.methods, function(method){
+    legacyMethodsTypes.forEach(function(legacyMethodType){
+      methodGroups.forEach(function(group){
+        var hasLegacyMethod = _.some(group.methods, function(method){
           return method.type === legacyMethodType;
         });
-        if(hasALegacyMethod){
-          legacyMethodsCount++;
-        }
+        if(hasLegacyMethod) legacyMethodsCount++;
       });
     });
-    expect(legacyMethodsCount).to.be.equal(legacyMethodsTypes.length);
+    console.log('legacymethods count', legacyMethodsCount);
+    expect(legacyMethodsTypes.length).to.be.equal(legacyMethodsCount);
 
   });
 

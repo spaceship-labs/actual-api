@@ -17,11 +17,13 @@ const types = {
   CLIENT_CREDIT: 'client-credit',
   MSI_12: '12-msi',
   TRANSFER: 'transfer',
-  TRANSFER_USD: 'transfer-usd'
+  TRANSFER_USD: 'transfer-usd',
+  DEPOSIT: 'deposit'
 };
 
 const LEGACY_METHODS_TYPES = [
-  types.SINGLE_PAYMENT_TERMINAL
+  types.SINGLE_PAYMENT_TERMINAL,
+  types.DEPOSIT,
 ];
 
 const VALID_STORES_CODES = [
@@ -37,6 +39,7 @@ const VALID_STORES_CODES = [
 module.exports = {
   addPayment,
   addCreditMethod,
+  addDepositMethod,
   addLegacyMethods,
   addSinglePaymentTerminalMethod,
   calculatePaymentsTotal,
@@ -436,8 +439,22 @@ function addSinglePaymentTerminalMethod(methodsGroups){
   });
 }
 
+function addDepositMethod(methodsGroups){
+  return methodsGroups.map(function(mg){
+    if(mg.group === 1){
+      var isSinglePaymentMethodADDED = _.findWhere(mg.methods,{type: types.DEPOSIT});
+      if(!isSinglePaymentMethodADDED){
+        mg.methods.unshift(DEPOSIT_METHOD);
+      }
+    }
+    return mg;
+  });
+}
+
+
 function addLegacyMethods(methodsGroups){
-  methodsGroups = addSinglePaymentTerminalMethod(methodsGroups);
+  methodsGroups = addSinglePaymentTerminalMethod(methodsGroups)
+  methodsGroups = addDepositMethod(methodsGroups);  
   return methodsGroups;
 }
 
@@ -447,29 +464,6 @@ function removeCreditMethod(methodsGroups){
     if(methodGroup.group === 1){
       methodGroup.methods = methodGroup.methods.filter(function(method){
         return method.type !== types.CLIENT_CREDIT;
-      });
-    }
-    return methodGroup;
-  });
-}
-
-function removeSinglePaymentTerminalMethod(methodsGroups){
-  return methodsGroups.map(function(methodGroup){
-    if(methodGroup.group === 1){
-      methodGroup.methods = methodGroup.methods.filter(function(method){
-        return method.type !== types.SINGLE_PAYMENT_TERMINAL;
-      });
-    }
-    return methodGroup;
-  });
-}
-
-
-function remove12msiMethodFromGroup4(methodsGroups){
-  return methodsGroups.map(function(methodGroup){
-    if(methodGroup.group === 4){
-      methodGroup.methods = methodGroup.methods.filter(function(method){
-        return method.type !== types.MSI_12;
       });
     }
     return methodGroup;
@@ -490,6 +484,21 @@ const SINGLE_PAYMENT_TERMINAL_METHOD = {
     currency: 'mxn',
     needsVerification: true,
     min:0
+};
+
+const DEPOSIT_METHOD = {
+  label:'Deposito en ventanilla',
+  name:'Deposito en ventanilla',
+  type:'deposit',
+  description:'Sujeto a verificación contable',
+  currency:'mxn',
+  terminals:[
+    {label:'Banamex', value:'banamex'},
+    {label:'Bancomer', value:'bancomer'},
+    {label:'Banorte', value:'banorte'},
+    {label:'Santander', value:'santander'}
+  ],
+  needsVerification: false
 };
 
 const CREDIT_METHOD = {
