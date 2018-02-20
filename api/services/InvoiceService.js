@@ -17,6 +17,7 @@ module.exports = {
   getPaymentMethodBasedOnPayments,
   prepareClient,
   prepareClientParams,
+  getUnitTypeByProduct,
   RFCPUBLIC,
   DEFAULT_CFDI_USE
 };

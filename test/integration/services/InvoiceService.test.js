@@ -124,4 +124,31 @@ describe("InvoiceService", function(){
 
   });
 
+  describe("getUnitTypeByProduct", function(){
+    it("should return service type when product is service", function(){
+      const product = {Service: "Y"};
+      expect(InvoiceService.getUnitTypeByProduct(product))
+        .to.be.equal('service');
+    });
+
+    it("should return service type when product unit clave is E48", function(){
+      const product = {U_ClaveUnidad: "E48"};
+      expect(InvoiceService.getUnitTypeByProduct(product))
+        .to.be.equal("service");
+    });
+
+    it("should return piece type when product unit clave is H87", function(){
+      const product = {U_ClaveUnidad: "H87"};
+      expect(InvoiceService.getUnitTypeByProduct(product))
+        .to.be.equal("piece");
+    });
+
+    it("should return piece type when product unit clave is missing", function(){
+      const product = {};
+      expect(InvoiceService.getUnitTypeByProduct(product))
+        .to.be.equal("piece");
+    });
+
+  });
+
 });

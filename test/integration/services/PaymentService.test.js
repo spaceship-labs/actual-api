@@ -128,7 +128,6 @@ describe('Payment service', function(){
         if(hasLegacyMethod) legacyMethodsCount++;
       });
     });
-    console.log('legacymethods count', legacyMethodsCount);
     expect(legacyMethodsTypes.length).to.be.equal(legacyMethodsCount);
 
   });

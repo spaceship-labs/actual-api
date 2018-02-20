@@ -8,12 +8,18 @@ var ERROR_SAP_TYPE = 'Error';
 var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
-	createFromQuotation: createFromQuotation,
-	getCountByUser: getCountByUser,
-	getTotalsByUser: getTotalsByUser
+	createFromQuotation,
+	getCountByUser,
+  getTotalsByUser,
+  isValidOrderCreated,
+  getGroupByQuotationPayments,
+  collectSapErrors,
+  collectSapErrorsBySapOrder,
+  checkIfSapOrderHasReference,
+  checkIfSapOrderHasPayments,
+  everyPaymentIsClientBalanceOrCredit,
+  extractBalanceFromSapResult
 };
-
-
 
 function getCountByUser(form){
   var userId = form.userId;
@@ -42,7 +48,6 @@ function getCountByUser(form){
       };
       return response;
     });
-
 }
 
 function getTotalsByUser(form){
@@ -387,7 +392,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
     });
 
-    var everyOrderHasFolio    = sapResult.every(checkIfSapOrderHasReference);
+    var everyOrderHasFolio = sapResult.every(checkIfSapOrderHasReference);
 
     sails.log.info('everyOrderHasFolio', everyOrderHasFolio);
     sails.log.info('everyOrderHasPayments', everyOrderHasPayments);
@@ -404,7 +409,8 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
     }
 
     var clientBalance = extractBalanceFromSapResult(sapResultWithBalance);
-    if(!clientBalance || isNaN(clientBalance) ){
+    console.log('clientBalance', clientBalance);
+    if(!clientBalance && clientBalance !== 0){
       return {
         error: 'Balance del cliente no definido en la respuesta'
       };
@@ -442,14 +448,7 @@ function checkIfSapOrderHasReference(sapOrder){
 
 function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
   if( _.isArray(sapOrder.Payments) ){
-
     //No payments are returned when using only client balance or credit
-    console.log('everyPaymentIsClientBalanceOrCredit(paymentsToCreate)', everyPaymentIsClientBalanceOrCredit(paymentsToCreate));
-    
-    /*paymentsToCreate = paymentsToCreate.filter(function(){
-
-    })*/
-
     if(everyPaymentIsClientBalanceOrCredit(paymentsToCreate)){
       return true;
     }
@@ -473,7 +472,7 @@ function everyPaymentIsClientBalanceOrCredit(paymentsToCreate){
 
 
 function saveSapReferences(sapResult, order, orderDetails){
-  var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));
+  var clientBalance = extractBalanceFromSapResult(sapResult);
   var clientId = order.Client.id || order.Client;
 
 
@@ -524,8 +523,8 @@ function saveSapReferences(sapResult, order, orderDetails){
 
 function extractBalanceFromSapResult(sapResult){
   var balanceItem = _.findWhere(sapResult, {type: BALANCE_SAP_TYPE});
-  if(balanceItem){
-    return balanceItem.result;
+  if(balanceItem && balanceItem.result && !isNaN(balanceItem.result)){
+    return parseFloat(balanceItem.result);
   }
   return false;
 }
@@ -560,8 +559,6 @@ function processEwalletBalance(params){
       });
     }
   }
-
-  var clientBalance = (params.client.ewallet || 0) + generated;
   return Client.update({id:params.clientId},{ewallet:generated})
     .then(function(clientUpdated){
       return Promise.each(ewalletRecords, createEwalletRecord);
