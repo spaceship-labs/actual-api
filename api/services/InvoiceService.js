@@ -15,7 +15,10 @@ module.exports = {
   send,
   getHighestPayment,
   getPaymentMethodBasedOnPayments,
-  prepareClient
+  prepareClient,
+  prepareClientParams,
+  RFCPUBLIC,
+  DEFAULT_CFDI_USE
 };
 
 function createOrderInvoice(orderId) {
@@ -291,8 +294,8 @@ function getPaymentMethodBasedOnPayments(payments){
   return paymentMethod;
 }
 
-function prepareClient(order, client, address) {
-  var generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
+function prepareClientParams(order, client, address){
+  const generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
   var data;
   if (!generic) {
     data = {
@@ -324,7 +327,12 @@ function prepareClient(order, client, address) {
         //TODO; Check default Inovice data for GENERAL PUBLIC
       }
     };
-  }
+  }  
+  return data;
+}
+
+function prepareClient(order, client, address) {
+  const data =  prepareClientParams(order, client, address);
   return createClient(data);
 }
 

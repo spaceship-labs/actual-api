@@ -275,6 +275,7 @@ function mapPaymentsToSap(payments, exchangeRate){
 
 
   var paymentsTopSap = payments.map(function(payment){
+    var DEFAULT_TERMINAL = 'banamex';
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
@@ -283,14 +284,17 @@ function mapPaymentsToSap(payments, exchangeRate){
     if(payment.currency === 'usd'){
       paymentSap.rate = exchangeRate;
     }
+    if(PaymentService.isCardPayment(payment)){
+      paymentSap.CardNum = '4802';
+      paymentSap.CardDate = '05/16'; //MM/YY
+      if(!payment.terminal){
+        payment.terminal = DEFAULT_TERMINAL;
+      }
+    }
     if(payment.terminal){
       paymentSap.Terminal = payment.terminal;
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
-    }
-    if(PaymentService.isCardPayment(payment)){
-      paymentSap.CardNum = '4802';
-      paymentSap.CardDate = '05/16'; //MM/YY
     }
 
     return paymentSap;
