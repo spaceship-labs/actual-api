@@ -63,11 +63,11 @@ module.exports = {
       //Discount: discount
     };
 
-    if(sa === PromotionService.STUDIO_CODE){
+    if(sa === ProductService.COMPANY_STUDIO_CODE){
       delete queryProducts.U_Empresa;
       queryProducts.or = [
-        {U_Empresa: PromotionService.STUDIO_CODE},
-        {U_Empresa: PromotionService.AMBAS_CODE},
+        {U_Empresa: ProductService.COMPANY_STUDIO_CODE},
+        {U_Empresa: ProductService.COMPANY_BOTH_CODE},
         {U_Empresa: null}
       ];
     }

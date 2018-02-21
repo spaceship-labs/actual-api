@@ -388,4 +388,22 @@ describe("OrderService", function(){
     });
   });
 
+  describe("getPaidPercentage", function(){
+    it("should return a paid percentage of 50", function(){
+      expect(OrderService.getPaidPercentage(800, 1600))
+        .to.be.equal(50);
+    });
+
+    it("should return a paid percentage of 99", function(){
+      expect(OrderService.getPaidPercentage(990, 1000))
+        .to.be.equal(99);
+    });
+
+    it("should return a paid percentage of 100 when ammount paid and total are the same", function(){
+      expect(OrderService.getPaidPercentage(800.49, 800.49))
+        .to.be.equal(100);
+    });
+
+  });
+
 });

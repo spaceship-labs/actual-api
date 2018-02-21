@@ -18,7 +18,8 @@ module.exports = {
   checkIfSapOrderHasReference,
   checkIfSapOrderHasPayments,
   everyPaymentIsClientBalanceOrCredit,
-  extractBalanceFromSapResult
+  extractBalanceFromSapResult,
+  getPaidPercentage
 };
 
 function getCountByUser(form){

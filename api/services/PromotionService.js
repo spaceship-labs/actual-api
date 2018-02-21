@@ -1,19 +1,15 @@
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 var Promise = require('bluebird');
 var _ = require('underscore');
-var STUDIO_CODE = '001';
-var AMBAS_CODE = '003';
 var CLIENT_FIXED_DISCOUNT = 'F';
 var CLIENT_ADDITIONAL_DISCOUNT = 'M';
 
 module.exports ={
-  areSpecialClientPromotions: areSpecialClientPromotions,
-  removeSpecialClientPromotions: removeSpecialClientPromotions,
-	getProductMainPromo: getProductMainPromo,
-  getProductActivePromotions: getProductActivePromotions,
-  getPromotionWithHighestDiscount: getPromotionWithHighestDiscount,
-  STUDIO_CODE: STUDIO_CODE,
-  AMBAS_CODE: AMBAS_CODE
+  areSpecialClientPromotions,
+  removeSpecialClientPromotions,
+	getProductMainPromo,
+  getProductActivePromotions,
+  getPromotionWithHighestDiscount
 };
 
 function getProductMainPromo(productId, quotationId){
@@ -45,13 +41,11 @@ function getProductActivePromotions(product, activePromotions, quotationId){
   var productActivePromotions = activePromotions.filter(function(promotion){
     var isValid = false;
     if(promotion.sa){
-      var productSA = getProductSA(product);
-
+      var productSA = ProductService.getProductSA(product);
       if(promotion.sa === productSA){
         isValid = true;
       } 
     }
-
     return isValid;
   });
 
@@ -101,7 +95,7 @@ function mapRelatedPromotions(promotions, product, quotationId){
 
 function mapClientDiscountWithPromotions(promotions, product, quotationId){
   var clientFound = true;
-  var productSA = getProductSA(product);
+  var productSA = ProductService.getProductSA(product);
 
   return Quotation.findOne({id: quotationId}).populate('Client')
     .then(function(quotation){
@@ -241,14 +235,6 @@ function getPromotionWithHighestDiscount(promotions){
   });	
   highestDiscountPromo = promotions[indexMaxPromo];
   return highestDiscountPromo;
-}
-
-function getProductSA(product){
-  var productSA = product.U_Empresa;
-  if(productSA === AMBAS_CODE || !productSA){
-    productSA = STUDIO_CODE;
-  }  
-  return productSA;
 }
 
 function areSpecialClientPromotions(promotions){

@@ -1,28 +1,25 @@
-var baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
+const baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
 //var baseUrl = 'http://189.149.131.100:8080';
-var request = require('request-promise');
-var Promise = require('bluebird');
-var buildUrl = require('build-url');
-var _ = require('underscore');
-var moment = require('moment');
+const request = require('request-promise');
+const Promise = require('bluebird');
+const buildUrl = require('build-url');
+const _ = require('underscore');
+const moment = require('moment');
 
-var SAP_DATE_FORMAT       = 'YYYY-MM-DD';
-var CLIENT_CARD_TYPE      = 1;//1.Client, 2.Proveedor, 3.Lead
-var CREATE_CONTACT_ACTION = 0;
-var UPDATE_CONTACT_ACTION = 1;
+const SAP_DATE_FORMAT       = 'YYYY-MM-DD';
+const CLIENT_CARD_TYPE      = 1;//1.Client, 2.Proveedor, 3.Lead
+const CREATE_CONTACT_ACTION = 0;
+const UPDATE_CONTACT_ACTION = 1;
 
+const COMPANY_STUDIO_CODE   = '001';
+const COMPANY_HOME_CODE     = '002';
+const COMPANY_BOTH_CODE     = '003';
+const COMPANY_KIDS_CODE     = '004';
 
-var COMPANY_STUDIO_CODE   = '001';
-var COMPANY_HOME_CODE     = '002';
-var COMPANY_BOTH_CODE     = '003';
-var COMPANY_KIDS_CODE     = '004';
-
-var STUDIO_GROUP          = 'studio';
-var HOME_GROUP            = 'home';
-var KIDS_GROUP            = 'kids';
-var PROJECTS_GROUP        = 'proyectos';
-
-
+const STUDIO_GROUP          = 'studio';
+const HOME_GROUP            = 'home';
+const KIDS_GROUP            = 'kids';
+const PROJECTS_GROUP        = 'proyectos';
 
 var reqOptions = {
   method: 'POST',
