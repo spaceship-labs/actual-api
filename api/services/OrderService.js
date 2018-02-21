@@ -410,7 +410,11 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
 
     var clientBalance = extractBalanceFromSapResult(sapResultWithBalance);
     console.log('clientBalance', clientBalance);
-    if(!clientBalance && clientBalance !== 0){
+    //Important to compare directly to false
+    //When using an expression like !clientBalance 
+    //with clientBalance having a value of 0
+    //(!clientBalance) gives true
+    if(clientBalance === false){
       return {
         error: 'Balance del cliente no definido en la respuesta'
       };

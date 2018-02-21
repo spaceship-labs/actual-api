@@ -73,7 +73,6 @@ describe("Common service" ,function(){
       const startDate = moment().startOf('month').toDate();
       const endDate = moment().endOf('month').toDate();
       const result = Common.getMonthDateRange();
-      console.log('result', result);
       expect(result).to.deep.equal({
         start: startDate,
         end: endDate
