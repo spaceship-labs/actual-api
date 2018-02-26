@@ -362,9 +362,9 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   mail.addContent(content);
   mail.addPersonalization(personalization);
   requestBody = mail.toJSON();
-  request.method = 'POST'
-  request.path = '/v3/mail/send'
-  request.body = requestBody
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
   return new Promise(function(resolve, reject){
     sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {

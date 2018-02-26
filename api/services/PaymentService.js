@@ -2,6 +2,7 @@ const Promise = require('bluebird');
 const numeral = require('numeral');
 const _ = require('underscore');
 const cloneDeep = require('lodash.clonedeep');
+const ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 const EWALLET_TYPE = 'ewallet';
 const CASH_USD_TYPE = 'cash-usd';
@@ -192,7 +193,8 @@ async function addPayment(params, req){
     paymentGroup: paymentGroup
   };
   
-  const resultUpdate = await QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
+  const findCriteria = {_id: new ObjectId(quotationId)};       
+  const resultUpdate = await Common.nativeUpdateOne(findCriteria, quotationUpdateParams, Quotation);
   delete quotation.Payments;
   quotation.ammountPaid = quotationUpdateParams.ammountPaid;
   quotation.paymentGroup = quotationUpdateParams.paymentGroup;

@@ -335,7 +335,6 @@ module.exports = {
   getFortnightRange: function(currentDate = moment().toDate()){
     if(!moment(currentDate).isValid()){
       throw new Error("Not a valid date");
-      //return false;
     }
 
     var currentDay = moment(currentDate).date();

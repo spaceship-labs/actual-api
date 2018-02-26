@@ -1,18 +1,9 @@
-var Promise = require('bluebird');
-var _       = require('underscore');
-var assign  = require('object-assign');
-var moment  = require('moment');
-var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
-
-
-var BIGTICKET_TABLE = [
-  {min:100000, max:199999.99, maxPercentage:2},
-  {min:200000, max:349999.99, maxPercentage:3},
-  {min:350000, max:499999.99, maxPercentage:4},
-  {min:500000, max:Infinity, maxPercentage:5},
-];
-
-var DISCOUNT_KEYS = [
+const Promise = require('bluebird');
+const _ = require('underscore');
+const assign = require('object-assign');
+const moment = require('moment');
+const ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+const DISCOUNT_KEYS = [
   'discountPg1',
   'discountPg2',
   'discountPg3',
@@ -20,23 +11,7 @@ var DISCOUNT_KEYS = [
   'discountPg5'
 ];
 
-var EWALLET_KEYS = [
-  'ewalletPg1',
-  'ewalletPg2',
-  'ewalletPg3',
-  'ewalletPg4',
-  'ewalletPg5'
-];
-
-var EWALLET_TYPES_KEYS = [
-  'ewalletTypePg1',
-  'ewalletTypePg2',
-  'ewalletTypePg3',
-  'ewalletTypePg4',
-  'ewalletTypePg5'
-];
-
-var defaultQuotationTotals = {
+const DEFAULT_QUOTATION_TOTALS = {
     subtotal :0,
     subtotal2:0,
     total:0,
@@ -47,14 +22,13 @@ var defaultQuotationTotals = {
 };
 
 module.exports = {
-  Calculator     : Calculator,
-  nativeQuotationUpdate: nativeQuotationUpdate,
-  updateQuotationToLatestData: updateQuotationToLatestData,
-  getCountByUser: getCountByUser,
-  getTotalsByUser: getTotalsByUser
+  Calculator,
+  updateQuotationToLatestData,
+  getCountByUser,
+  getTotalsByUser
 };
 
-function updateQuotationToLatestData(quotationId, userId, options){
+async function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
     paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
@@ -62,117 +36,74 @@ function updateQuotationToLatestData(quotationId, userId, options){
     isEmptyQuotation: options.isEmptyQuotation
   };
 
+  const findCriteria = {_id: new ObjectId(quotationId)};       
+
   if(options.isEmptyQuotation){
-    return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
+    return Common.nativeUpdateOne(findCriteria, DEFAULT_QUOTATION_TOTALS, Quotation);
   }
-    
-  var findCrieria = {_id: new ObjectId(quotationId)};       
-
-  return Common.nativeFindOne(findCrieria, Quotation)
-    .then(function(quotation){
-      if(!quotation){
-        return Promise.reject(new Error('Cotización no encontrada'));
-      }
-      var calculator = Calculator();
-      return calculator.updateQuotationTotals(quotationId, params);
-    });
-}
-
-function getBigticketMaxPercentage(subtotal2){
-  var maxPercentage = 0;
-  for(var i=0;i<BIGTICKET_TABLE.length;i++){
-    if(subtotal2 >= BIGTICKET_TABLE[i].min && subtotal2 <= BIGTICKET_TABLE[i].max){
-      maxPercentage = BIGTICKET_TABLE[i].maxPercentage;
-    }
+  
+  const quotation = await Common.nativeFindOne(findCriteria, Quotation);
+  if(!quotation){
+    throw new Error('Cotización no encontrada');
   }
-  return maxPercentage;
+  const calculator = Calculator();
+  return calculator.updateQuotationTotals(quotationId, params);
 }
-
 
 function Calculator(){
+  //Calculator variables used on every instance of Calculator
+  //They are used acrossed differente functions in Calculator
   var activePromotions = [];
   var storePackages   = [];
   var packagesRules   = [];
 
-  function updateQuotationTotals(quotationId, options){
-    options = options || {paymentGroup:1 , updateDetails: true};
+  async function updateQuotationTotals(quotationId, options = {paymentGroup:1 , updateDetails: true}){
     options = _.extend(options,{
       financingTotals: true
     });
 
-    var quotationTotals;
+    const findCriteria = {_id: new ObjectId(quotationId)};
 
     if(options.isEmptyQuotation){
-      return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
+      return Common.nativeUpdateOne(findCriteria, DEFAULT_QUOTATION_TOTALS, Quotation);
     }
 
-    return getQuotationTotals(quotationId, options)
-      .then(function(totals){
-        if(options && options.updateParams){
-          totals = _.extend(totals, options.updateParams);
-        }
-        quotationTotals = totals;
-        return nativeQuotationUpdate(quotationId, quotationTotals);
-      });
+    var totals = await getQuotationTotals(quotationId, options); 
+    if(options && options.updateParams){
+      totals = _.extend(totals, options.updateParams);
+    }
+    return Common.nativeUpdateOne(findCriteria, totals, Quotation);
   }
 
 
-  function getQuotationTotals(quotationId, options){
-    var details = [];
-    var quotation;
-    options = options || {paymentGroup:1 , updateDetails: true};
+  async function getQuotationTotals(quotationId, options = {paymentGroup:1 , updateDetails: true}){
+    const promos = await getActivePromos();
+    activePromotions = promos;
+    
+    const quotation = await Quotation.findOne({id:quotationId}).populate('Details');
+    const details = quotation.Details;
+    const packagesIds = getQuotationPackagesIds(details);
 
-    return getActivePromos()
-      .then(function(promos){
-        activePromotions = promos;
-        return Quotation.findOne({id:quotationId}).populate('Details');
-      })
-      .then(function(quotationFound){
-        quotation = quotationFound; 
-        details = quotation.Details;
-        var packagesIds = getQuotationPackagesIds(details);
+    if(packagesIds.length > 0){
+      storePackages = await getPackagesByStoreId(options.currentStoreId);
+      const promotionPackages = await ProductGroup.find({id:packagesIds}).populate('PackageRules');
+      packagesRules = getAllPackagesRules(promotionPackages, details);
+    }
+    
+    var processedDetails = await processQuotationDetails(details, options);
+    var totals = sumProcessedDetails(processedDetails, options);
+    const ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
 
-        if(packagesIds.length > 0){
-          return [
-            getPackagesByStoreId(options.currentStoreId),
-            ProductGroup.find({id:packagesIds})
-              .populate('PackageRules')
-          ];
-        }
+    if( ammountPaidPg1 > 0 && options.financingTotals){
+      processedDetails = mapDetailsWithFinancingCost(processedDetails, ammountPaidPg1, totals);
+      totals = sumProcessedDetails(processedDetails, options);
 
-        return [ [], false ];
-      })
-      .spread(function(storePackagesFound, promotionPackages){
-        storePackages = storePackagesFound;
-        packagesRules = getAllPackagesRules(promotionPackages, details);
-        return processQuotationDetails(details, options);
-      })
-      .then(function(processedDetails){
-        var totals = sumProcessedDetails(processedDetails, options);
-        var ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
-        var plainTotals = _.clone(totals);
-        var auxPromise = Promise.resolve();
+      if(options.updateDetails){
+        await updateDetails(processedDetails);
+      }
+    }
 
-        if( ammountPaidPg1 > 0 && options.financingTotals){
-
-          processedDetails = mapDetailsWithFinancingCost(processedDetails, ammountPaidPg1, totals);
-          totals = sumProcessedDetails(processedDetails, options);
-
-          if(options.updateDetails){
-            auxPromise = updateDetails(processedDetails);
-          }
-
-        }
-
-        return [
-          totals,
-          auxPromise
-        ];
-      })
-      .spread(function(totals, resultUpdateIfNeeeded){
-        return totals;
-      });
-
+    return totals;
   }
 
   function mapDetailsWithFinancingCost(details, ammountPaidPg1, quotationPlainTotals){
@@ -184,9 +115,9 @@ function Calculator(){
       var detailRemaining = (1+detail.financingCostPercentage) * detailRemainingPg1;
       
       detail.originalDiscountPercent = _.clone(detail.discountPercent);
-      detail.total                 = proportionalPayment + detailRemaining;
-      detail.discount              = detail.total - detail.subtotal;
-      detail.discountPercent       = 100 - ((detail.total / detail.subtotal) * 100);
+      detail.total = proportionalPayment + detailRemaining;
+      detail.discount = detail.total - detail.subtotal;
+      detail.discountPercent = 100 - ((detail.total / detail.subtotal) * 100);
       detail.unitPriceWithDiscount = calculateAfterDiscount(detail.unitPrice, detail.discountPercent);
       detail.discountPercentPromos = detail.discountPercentPromos;
       return detail;
@@ -224,14 +155,11 @@ function Calculator(){
     return totals;
   }
 
-  function getActivePromos(){
+  async function getActivePromos(){
     var queryPromos = Search.getPromotionsQuery();
-    return Promotion.find(queryPromos)
-      .then(function(promos){
-        return promos;
-      });
+    const promos = await Promotion.find(queryPromos)
+    return promos;
   }
-
 
   function getQuotationPackagesIds(details){
     var packages = [];
@@ -243,22 +171,19 @@ function Calculator(){
     return _.uniq(packages);
   }
 
-  function getPackagesByStoreId(storeId){
-    var queryPromos = Search.getPromotionsQuery();
-    return Store.findOne({id:storeId})
-      .populate('PromotionPackages', queryPromos)
-      .then(function(store){
-        if(store){
-          return store.PromotionPackages;
-        }
-        return [];
-      });
+  async function getPackagesByStoreId(storeId){
+    const queryPromos = Search.getPromotionsQuery();
+    const store = await Store.findOne({id:storeId}).populate('PromotionPackages', queryPromos);
+    if(store){
+      return store.PromotionPackages;
+    }
+    return [];
   }
 
   function getAllPackagesRules(promotionPackages, details){
     var filteredPackages = filterPromotionPackages(promotionPackages, details);
-    var rules             = [];
-    for(var i=0;i<filteredPackages.length;i++){
+    var rules = [];
+    for(var i=0; i<filteredPackages.length; i++){
       rules = rules.concat(filteredPackages[i].PackageRules);
     }
     return rules;
@@ -275,15 +200,12 @@ function Calculator(){
   }
 
   function isValidPromotionPackage(promotionPackage, details){
-    if(promotionPackage && promotionPackage.id){
-      if (
-        isAStorePackage(promotionPackage.id) && 
-        validatePackageRules(promotionPackage.PackageRules, details) 
-      ){
-        return true;
-      }
-    }
-    return false;
+    return (
+      promotionPackage && 
+      promotionPackage.id && 
+      isAStorePackage(promotionPackage.id) && 
+      validatePackageRules(promotionPackage.PackageRules, details) 
+    );
   }
 
   function isAStorePackage(promotionPackageId){
@@ -306,20 +228,19 @@ function Calculator(){
     return validFlag;
   }
 
-  //@param quotation: 
-  //  Every detail must contain a Product object populated
-  function processQuotationDetails(details, options){
-    options = options || {paymentGroup:1};
+  //@param details {Array <QuotationDetail>}: 
+  //Every detail must contain a Product object populated
+  function processQuotationDetails(details, options = {paymentGroup: 1}){
     return Promise.mapSeries(details, function(detail){
       return getDetailTotals(detail, options);      
     })
-      .then(function(pDetails){
-        if(options.updateDetails){
-          return updateDetails(pDetails);
-        }else{
-          return pDetails;
-        }
-      });
+    .then(function(pDetails){
+      if(options.updateDetails){
+        return updateDetails(pDetails);
+      }else{
+        return pDetails;
+      }
+    });
   }
 
   function calculateAfterDiscount(amount,discountPercentage){
@@ -327,120 +248,78 @@ function Calculator(){
     return result;
   }
 
-  function getEwalletEntryByDetail(options){
-    var ewalletEntry = 0;
+  //@params: detail Object from model Detail
+  async function getDetailTotals(detail, options = {}){
+    const productId = detail.Product;
+    const quantity = detail.quantity;
+    const quotationId = detail.Quotation;
+    const product = await Product.findOne({id:productId});
+    const mainPromo = await getProductMainPromo(product, quantity, quotationId);
 
-    if(options.Promotion && !options.Promotion.PromotionPackage){
-      var paymentGroup = options.paymentGroup || 1;
-      var eKey         = paymentGroup - 1;
-      var ewallet      = options.Promotion[ EWALLET_KEYS[eKey] ];
-      var ewalletType  = options.Promotion[ EWALLET_TYPES_KEYS[eKey] ];
+    const unitPrice = product.Price;
+    const discountKey = getDiscountKey(options.paymentGroup);
+    const discountPercent = mainPromo ? mainPromo[discountKey] : 0;
+    const discountPercentPromos = discountPercent;
+    const unitPriceWithDiscount = calculateAfterDiscount(unitPrice, discountPercent);
+    const subtotal  = quantity * unitPrice;
+    const subtotal2 = quantity * unitPriceWithDiscount;
+    const total = quantity * unitPriceWithDiscount;
+    var totalPg1 = total;
+    var financingCostPercentage = 0;
+    const discountName = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
+    const discount = total - subtotal;
 
-      if(ewalletType === 'ammount'){
-        ewalletEntry = options.total - ewallet;
-      }else{
-        ewalletEntry = ( options.total / 100) * ewallet;
+    //TODO: Reactivate ewallet 
+    const ewallet = 0;
+
+    //Calculate financing cost
+    if(mainPromo){
+      const PAYMENT_GROUP_1 = 1;
+      const _discountKey = getDiscountKey(PAYMENT_GROUP_1);
+      const _discountPercent = mainPromo[_discountKey];
+      const _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
+      totalPg1 = _unitPriceWithDiscount * quantity;
+      financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
+      if(isNaN(financingCostPercentage)){
+        financingCostPercentage = 0;
       }
     }
-    return ewalletEntry;
-  }  
 
-  //@params: detail Object from model Detail
-  //Must contain a Product object populated
-  function getDetailTotals(detail, options){
-    options = options || {};
-    paymentGroup = options.paymentGroup || 1;
-    var productId   = detail.Product;
-    var quantity    = detail.quantity;
-    var currentDate = new Date();
-    var quotationId = detail.Quotation;
-    var product;
-    
-    return Product.findOne({id:productId})
-      .then(function(productResult){
-        product = productResult;
-        return getProductMainPromo(product, quantity, quotationId);
-      })
-      .then(function(mainPromo){
-        var unitPrice                 = product.Price;
-        var discountKey               = getDiscountKey(options.paymentGroup);
-        var discountPercent           = mainPromo ? mainPromo[discountKey] : 0;
-        var discountPercentPromos     = discountPercent;
-        var unitPriceWithDiscount     = calculateAfterDiscount(unitPrice, discountPercent);
-        var subtotal                  = quantity * unitPrice;
-        var subtotal2                 = quantity * unitPriceWithDiscount;
-        var total                     = quantity * unitPriceWithDiscount;
-        var totalPg1                  = total;
-        var financingCostPercentage   = 0;
-        var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
+    var detailTotals = {
+      id: detail.id,
+      discount,
+      discountKey, //Payment group discountKey
+      discountPercentPromos,//discount without BT or FF
+      discountPercent,
+      discountName,
+      ewallet,
+      isFreeSale: StockService.isFreeSaleProduct(product),
+      paymentGroup: options.paymentGroup,
+      PromotionPackageApplied: null,
+      quantity,
+      subtotal,
+      subtotal2,
+      total,
+      totalPg1,
+      financingCostPercentage,
+      unitPrice,
+      unitPriceWithDiscount,
+      immediateDelivery: Shipping.isDateImmediateDelivery(detail.shipDate),
+      isSRService: ProductService.isSRService(product)
+    };
 
-        //var total                 = quantity * unitPriceWithDiscount;
-        var subtotalWithPromotions    = total;
-        var discount                  = total - subtotal;
+    if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){
+      detailTotals.Promotion = mainPromo.id;
+    }
+    else if(mainPromo.PromotionPackage){
+      mainPromo.discountApplied = true;
+      detailTotals.PromotionPackageApplied = mainPromo.PromotionPackage;
+    }        
+    else if(mainPromo.clientDiscountReference){
+      detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
+    }
 
-        //TODO: Reactivate ewallet 
-        var ewallet                   = 0;
-
-
-        //Calculate financing
-        if(mainPromo){
-          var _discountKey = getDiscountKey(1);
-          var _discountPercent = mainPromo[_discountKey];
-          var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
-          totalPg1 = _unitPriceWithDiscount * quantity;
-          financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
-          if(isNaN(financingCostPercentage)){
-            financingCostPercentage = 0;
-          }
-        }
-
-        /*
-        var ewallet = getEwalletEntryByDetail({
-          Promotion: mainPromo,
-          paymentGroup: options.paymentGroup,
-          total: total
-        });
-        */
-
-        var detailTotals = {
-          discount                    : discount,
-          discountKey                 : discountKey, //Payment group discountKey
-          discountPercentPromos       : discountPercentPromos, //discount without BT or FF
-          discountPercent             : discountPercent,
-          discountName                : discountName,
-          ewallet                     : ewallet,
-          id                          : detail.id,
-          isFreeSale                  : StockService.isFreeSaleProduct(product),
-          paymentGroup                : options.paymentGroup,
-          PromotionPackageApplied     : null,
-          quantity                    : quantity,
-          subtotal                    : subtotal,
-          subtotal2                   : subtotal2,
-          total                       : total,
-          totalPg1                    : totalPg1,
-          financingCostPercentage     : financingCostPercentage,
-          unitPrice                   : unitPrice,
-          unitPriceWithDiscount       : unitPriceWithDiscount,
-          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate),
-          isSRService                 : ProductService.isSRService(product)
-        };
-
-
-        if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){
-          detailTotals.Promotion = mainPromo.id;
-        }
-
-        else if(mainPromo.PromotionPackage){
-          mainPromo.discountApplied = true;
-          detailTotals.PromotionPackageApplied = mainPromo.PromotionPackage;
-        }
-        
-        else if(mainPromo.clientDiscountReference){
-          detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
-        }
-
-        return detailTotals;
-      });
+    return detailTotals;
   }
 
   function calculateFinancingPercentage(totalPg1, total){
@@ -451,7 +330,6 @@ function Calculator(){
     var promotionFound = _.findWhere(activePromotions, {id:promotionOrPackage.id});
     if(promotionFound){
       return promotionOrPackage.publicName;
-      //return promotionFound.publicName;
     }
 
     var packageFound = _.findWhere(storePackages, {id:promotionOrPackage.PromotionPackage});
@@ -462,58 +340,15 @@ function Calculator(){
     return null;
   }
 
-  function isImmediateDelivery(shipDate){
-    var FORMAT = 'D/M/YYYY';
-    var currentDate = moment().format(FORMAT);
-    shipDate = moment(shipDate).format(FORMAT);
-    return currentDate === shipDate;
-  }  
-
-  function calculateDiscountPercent(subtotal, total){
-    var discountPercent = 0;
-    discountPercent = ( ((total / subtotal) - 1) * 100 ) * -1;
-    return discountPercent;
-  }
-
-  function getQuotationBigticketPercentage(quotation){
-    var percentage = 0;
-    subtotal2 = quotation.subtotal2 || 0;
-    if(quotation.bigticketPercentage && 
-      (quotation.bigticketPercentage <= getBigticketMaxPercentage(subtotal2))
-    ){
-       percentage = quotation.bigticketPercentage;
-    }
-
-    return percentage;
-  }
-
-
-  //@params product Object from model Product
-  //Populated with promotions
-  function getProductMainPromo(product, quantity, quotationId){
+  //@params product <Product>
+  async function getProductMainPromo(product, quantity, quotationId){
     var packageRule = getDetailPackageRule(product.id, quantity);
-    var promotions = [];
-    return PromotionService.getProductActivePromotions(product, activePromotions, quotationId)
-      .then(function(productActivePromotions){
-        promotions = productActivePromotions;
-
-        //Taking package rule as a promotion
-        if(packageRule){
-
-          //Remove client promotions if there is a package rule 
-          //promotions = PromotionService.removeSpecialClientPromotions(promotions);
-
-          //promotions = promotions.concat([packageRule]);
-
-          //Take package promotion as unique
-          promotions = [packageRule];
-        }
-        return PromotionService.getPromotionWithHighestDiscount(promotions);
-      });
-  }
-
-  function isPackageDiscountApplied(){
-    return _.findWhere(packagesRules, {discountApplied:true});
+    var promotions = await PromotionService.getProductActivePromotions(product, activePromotions, quotationId);
+    if(packageRule){
+      return packageRule;
+    }
+    const mainPromo = await PromotionService.getPromotionWithHighestDiscount(promotions);
+    return mainPromo;
   }
 
   function getDetailPackageRule(productId, quantity){
@@ -551,11 +386,9 @@ function Calculator(){
     return QuotationDetail.update({id: detail.id}, detail);
   }
 
-
   function getDiscountKey(group){
     return DISCOUNT_KEYS[group-1];
   }
-
 
   function isValidPackageRule(rule, details){
     var isValidRule = _.find(details, function(detail){
@@ -574,51 +407,10 @@ function Calculator(){
   };
 }
 
-function nativeQuotationUpdate(quotationId,params){
-  return new Promise(function(resolve, reject){
-    Quotation.native(function(err, collection){
-      if(err){
-        console.log('err updating quotation',err);
-        reject(err);
-      }
-      var findCrieria = {_id: new ObjectId(quotationId)};
-      params.updatedAt = new Date();
-      var updateParams = {
-        $set: _.omit(params, ['id'])
-      };
-      collection.updateOne(findCrieria, updateParams, function(errUpdate, result){
-        if(errUpdate){
-          console.log('errUpdate updating product',errUpdate);
-          reject(errUpdate);
-        }
-        resolve(result);
-      });
-    });
-  });
-}
-
-function getMultipleUsersTotals(options){
-  var usersIds = options.usersIds;
-  return Promise.map(usersIds,function(uid){
-    var _opts = _.extend(options,{
-      userId: uid
-    });
-
-    return getTotalsByUser(_opts)
-      .then(function(totals){
-        var user = {
-          id: uid,
-          totals: totals
-        };
-      });
-  });
-}
-
 function getTotalsByUser(options){
   var userId    = options.userId;
   var todayDate = moment().endOf('day').toDate(); 
   var isClosed  = options.isClosed;
-
 
   if(_.isUndefined(options.endDate)){
     options.endDate = todayDate;

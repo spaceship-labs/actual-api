@@ -21,6 +21,7 @@ describe("PromotionService", function(){
     });
     
   });
+
   /*
   describe("getProductActivePromotions", function(){
     const activePromotions = [

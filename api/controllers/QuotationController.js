@@ -81,44 +81,43 @@ module.exports = {
     }
   },
 
-  findById: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var userId = req.user.id;
-    var getPayments = form.payments;
-    if( !isNaN(id) ){
-      //id = parseInt(id);
+  async findById(req, res){
+    const form = req.allParams();
+    var userId = req.user.id;    
+    const {arePaymentsRequired, id} = form;
+    var quotation;
+    try{
+      const options = {
+        update:true,
+        currentStoreId: req.user.activeStore.id
+      };
+
+      const totals = await QuotationService.updateQuotationToLatestData(id, userId, options);
+      if(arePaymentsRequired){
+        quotation = await Quotation.findOne({id: id})
+        .populate('Details')
+        .populate('User')
+        .populate('Client')
+        .populate('Order')   
+        .populate('Payments',{sort: 'createdAt ASC'});
+      }
+      else{
+        quotation = await Quotation.findOne({id: id})
+        .populate('Details')
+        .populate('User')
+        .populate('Client')
+        .populate('Order');
+      }
+
+      if(!quotation){
+        return Promise.reject(new Error('Cotización no encontrada'));
+      }
+      return res.json(quotation);
     }
-    
-    var quotationQuery =  Quotation.findOne({id: id})
-      .populate('Details')
-      .populate('User')
-      .populate('Client')
-      .populate('Order');
-
-    if(getPayments){
-      quotationQuery.populate('Payments',{sort: 'createdAt ASC'});
+    catch(err){
+      console.log('err findById quotation', err);
+      return res.negotiate(err);  
     }
-
-    var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
-      update:true,
-      currentStoreId: req.user.activeStore.id
-    });
-
-
-    updateToLatest.then(function(){
-        return quotationQuery;
-      })
-      .then(function(quotation){
-        if(!quotation){
-          return Promise.reject(new Error('Cotización no encontrada'));
-        }
-        return res.json(quotation);
-      })
-      .catch(function(err){
-        console.log('err findById quotation', err);
-        return res.negotiate(err);
-      });
   },
 
   closeQuotation: function(req, res){
