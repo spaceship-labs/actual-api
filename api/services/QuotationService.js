@@ -12,20 +12,21 @@ const DISCOUNT_KEYS = [
 ];
 
 const DEFAULT_QUOTATION_TOTALS = {
-    subtotal :0,
-    subtotal2:0,
-    total:0,
-    discount:0,
-    totalProducts: 0,
-    paymentGroup: 1,
-    immediateDelivery: false
+  subtotal :0,
+  subtotal2:0,
+  total:0,
+  discount:0,
+  totalProducts: 0,
+  paymentGroup: 1,
+  immediateDelivery: false
 };
 
 module.exports = {
   Calculator,
   updateQuotationToLatestData,
   getCountByUser,
-  getTotalsByUser
+  getTotalsByUser,
+  DISCOUNT_KEYS  
 };
 
 async function updateQuotationToLatestData(quotationId, userId, options){
@@ -53,9 +54,9 @@ async function updateQuotationToLatestData(quotationId, userId, options){
 function Calculator(){
   //Calculator variables used on every instance of Calculator
   //They are used acrossed differente functions in Calculator
-  var activePromotions = [];
-  var storePackages   = [];
-  var packagesRules   = [];
+  var loadedActivePromotions = [];
+  var loadedStorePackages = [];
+  var loadedPackagesRules = [];
 
   async function updateQuotationTotals(quotationId, options = {paymentGroup:1 , updateDetails: true}){
     options = _.extend(options,{
@@ -78,16 +79,17 @@ function Calculator(){
 
   async function getQuotationTotals(quotationId, options = {paymentGroup:1 , updateDetails: true}){
     const promos = await getActivePromos();
-    activePromotions = promos;
+    setLoadedActivePromotions(promos);
     
     const quotation = await Quotation.findOne({id:quotationId}).populate('Details');
     const details = quotation.Details;
-    const packagesIds = getQuotationPackagesIds(details);
+    const packagesIds = getQuotationDetailsPackagesIds(details);
 
     if(packagesIds.length > 0){
-      storePackages = await getPackagesByStoreId(options.currentStoreId);
+      const storePackages = await getPackagesByStoreId(options.currentStoreId);
+      setLoadedStorePackages(storePackages);
       const promotionPackages = await ProductGroup.find({id:packagesIds}).populate('PackageRules');
-      packagesRules = getAllPackagesRules(promotionPackages, details);
+      setLoadedPackagesRules(getAllPackagesRules(promotionPackages, details));
     }
     
     var processedDetails = await processQuotationDetails(details, options);
@@ -125,50 +127,53 @@ function Calculator(){
   }
 
   function sumProcessedDetails(processedDetails, options){
-    var totals = {
+    var defaultTotals = {
       subtotal :0,
       subtotal2:0,
       total:0,
       totalPg1: 0,
       discount:0,
-      totalProducts: 0,
+      totalProducts: 0
+    };
+
+    var totals = processedDetails.reduce(function(acum, detail){
+      acum.totalPg1 += detail.totalPg1;
+      acum.total += detail.total;
+      acum.subtotal += detail.subtotal;
+      acum.subtotal2 += detail.subtotal2;
+      acum.discount += (detail.subtotal - detail.total);
+      acum.totalProducts += detail.quantity;
+      return acum;
+    }, defaultTotals);
+
+    totals = {
+      ...totals,
       paymentGroup: options.paymentGroup,
       immediateDelivery: processedDetails.every(function(detail){
         return detail.immediateDelivery && !detail.isSRService;
       }),
       appliesClientDiscount: _.some(processedDetails,function(detail){
         return detail.clientDiscountReference;
-      })
-    };
-
-    processedDetails.forEach(function(pd){
-      totals.totalPg1      += pd.totalPg1;
-      totals.total         += pd.total;
-      totals.subtotal      += pd.subtotal;
-      totals.subtotal2     += pd.subtotal2;
-      totals.discount      += (pd.subtotal - pd.total);
-      totals.totalProducts += pd.quantity;
-    });    
-
-    totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
-
+      }),
+      financingCostPercentage: calculateFinancingCostPercentage(totals.totalPg1, totals.total)
+    }
     return totals;
   }
 
   async function getActivePromos(){
     var queryPromos = Search.getPromotionsQuery();
-    const promos = await Promotion.find(queryPromos)
+    const promos = await Promotion.find(queryPromos);
     return promos;
   }
 
-  function getQuotationPackagesIds(details){
-    var packages = [];
-    for (var i=0;i<details.length;i++){
-      if(details[i].PromotionPackage){
-        packages.push( details[i].PromotionPackage ) ;
+  function getQuotationDetailsPackagesIds(details){
+    var ids = details.reduce(function(acum, detail){
+      if(detail.PromotionPackage){
+        acum.push(detail.PromotionPackage);
       }
-    }
-    return _.uniq(packages);
+      return acum;
+    }, []);
+    return _.unique(ids);
   }
 
   async function getPackagesByStoreId(storeId){
@@ -182,21 +187,17 @@ function Calculator(){
 
   function getAllPackagesRules(promotionPackages, details){
     var filteredPackages = filterPromotionPackages(promotionPackages, details);
-    var rules = [];
-    for(var i=0; i<filteredPackages.length; i++){
-      rules = rules.concat(filteredPackages[i].PackageRules);
-    }
+    var rules = filteredPackages.reduce(function(acum, package){
+      acum = acum.concat(package.PackageRules);
+      return acum;
+    }, []);
     return rules;
   }
 
   function filterPromotionPackages(promotionPackages, details){
-    var filtered = [];
-    for(var i=0;i<promotionPackages.length;i++){
-      if(isValidPromotionPackage(promotionPackages[i], details)){
-        filtered.push(promotionPackages[i]);
-      }
-    }
-    return filtered;
+    return promotionPackages.filter(function(package){
+      return isValidPromotionPackage(package, details);
+    });
   }
 
   function isValidPromotionPackage(promotionPackage, details){
@@ -209,7 +210,7 @@ function Calculator(){
   }
 
   function isAStorePackage(promotionPackageId){
-    return _.findWhere(storePackages, {id: promotionPackageId});
+    return _.findWhere(loadedStorePackages, {id: promotionPackageId}) ? true : false;
   }
 
   function validatePackageRules(rules, details){
@@ -257,11 +258,11 @@ function Calculator(){
     const mainPromo = await getProductMainPromo(product, quantity, quotationId);
 
     const unitPrice = product.Price;
-    const discountKey = getDiscountKey(options.paymentGroup);
+    const discountKey = getDiscountKeyByGroup(options.paymentGroup);
     const discountPercent = mainPromo ? mainPromo[discountKey] : 0;
     const discountPercentPromos = discountPercent;
     const unitPriceWithDiscount = calculateAfterDiscount(unitPrice, discountPercent);
-    const subtotal  = quantity * unitPrice;
+    const subtotal = quantity * unitPrice;
     const subtotal2 = quantity * unitPriceWithDiscount;
     const total = quantity * unitPriceWithDiscount;
     var totalPg1 = total;
@@ -275,11 +276,11 @@ function Calculator(){
     //Calculate financing cost
     if(mainPromo){
       const PAYMENT_GROUP_1 = 1;
-      const _discountKey = getDiscountKey(PAYMENT_GROUP_1);
+      const _discountKey = getDiscountKeyByGroup(PAYMENT_GROUP_1);
       const _discountPercent = mainPromo[_discountKey];
       const _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
       totalPg1 = _unitPriceWithDiscount * quantity;
-      financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
+      financingCostPercentage = calculateFinancingCostPercentage(totalPg1, total);
       if(isNaN(financingCostPercentage)){
         financingCostPercentage = 0;
       }
@@ -322,17 +323,17 @@ function Calculator(){
     return detailTotals;
   }
 
-  function calculateFinancingPercentage(totalPg1, total){
+  function calculateFinancingCostPercentage(totalPg1, total){
     return (total - totalPg1) / totalPg1;
   }
 
   function getPromotionOrPackageName(promotionOrPackage){
-    var promotionFound = _.findWhere(activePromotions, {id:promotionOrPackage.id});
+    var promotionFound = _.findWhere(loadedActivePromotions, {id:promotionOrPackage.id});
     if(promotionFound){
       return promotionOrPackage.publicName;
     }
 
-    var packageFound = _.findWhere(storePackages, {id:promotionOrPackage.PromotionPackage});
+    var packageFound = _.findWhere(loadedStorePackages, {id:promotionOrPackage.PromotionPackage});
     if(packageFound){
       return packageFound.Name;
     }
@@ -343,7 +344,7 @@ function Calculator(){
   //@params product <Product>
   async function getProductMainPromo(product, quantity, quotationId){
     var packageRule = getDetailPackageRule(product.id, quantity);
-    var promotions = await PromotionService.getProductActivePromotions(product, activePromotions, quotationId);
+    var promotions = await PromotionService.getProductActivePromotions(product, loadedActivePromotions, quotationId);
     if(packageRule){
       return packageRule;
     }
@@ -351,21 +352,34 @@ function Calculator(){
     return mainPromo;
   }
 
+  function setLoadedPackagesRules(packagesRules){
+    loadedPackagesRules = packagesRules;
+  }
+
+  function setLoadedActivePromotions(promotions){
+    loadedActivePromotions = promotions;
+  }
+
+  function setLoadedStorePackages(packages) {
+    loadedStorePackages = packages;
+  }
+
   function getDetailPackageRule(productId, quantity){
-    if(packagesRules.length > 0){
+    if(loadedPackagesRules.length > 0){
       var query = {
         Product : productId,
         quantity: quantity
       };
-      var detailRuleMatch = false;
-      var matches         = _.where(packagesRules, query);
-      matches = matches.filter(function(m){
+      var packageRuleMatch = false;
+      var matches = _.where(loadedPackagesRules, query);
+      var matchesNotValidated = matches.filter(function(m){
         return !m.validated;
       });
-      detailRuleMatch = matches[0] || false;
-      if( detailRuleMatch && !detailRuleMatch.validated){    
-        detailRuleMatch.validated = true;
-        return detailRuleMatch;
+      packageRuleMatch = matchesNotValidated[0] || false;
+      
+      if( packageRuleMatch && !packageRuleMatch.validated ){    
+        packageRuleMatch.validated = true;
+        return packageRuleMatch;
       }
     }
     return false;
@@ -386,24 +400,40 @@ function Calculator(){
     return QuotationDetail.update({id: detail.id}, detail);
   }
 
-  function getDiscountKey(group){
+  function getDiscountKeyByGroup(group){
     return DISCOUNT_KEYS[group-1];
   }
 
   function isValidPackageRule(rule, details){
-    var isValidRule = _.find(details, function(detail){
+    var validRule = _.find(details, function(detail){
       if(detail.Product === rule.Product && detail.quantity === rule.quantity && !detail.validated){
         detail.validated = true;
         return true;
       }
       return false;
     });
-    return isValidRule;  
+    return validRule ? true : false;  
   }
 
   return {
-    getQuotationTotals: getQuotationTotals,
-    updateQuotationTotals: updateQuotationTotals
+    getQuotationTotals,
+    updateQuotationTotals,
+    sumProcessedDetails,
+    getQuotationDetailsPackagesIds,
+    getDetailPackageRule,
+    getDiscountKeyByGroup,
+    getPromotionOrPackageName,
+    getAllPackagesRules,
+    filterPromotionPackages,
+    isValidPackageRule,
+    isAStorePackage,
+    validatePackageRules,
+    isValidPromotionPackage,
+    calculateFinancingCostPercentage,
+    calculateAfterDiscount,    
+    setLoadedPackagesRules,
+    setLoadedActivePromotions,
+    setLoadedStorePackages
   };
 }
 
