@@ -4,7 +4,7 @@ var moment            = require('moment');
 
 module.exports = {
 
-  create: function(req, res){
+  async create(req, res){
     var form = req.params.all();
     var createdId;
     
@@ -18,52 +18,44 @@ module.exports = {
       currentStoreId: req.user.activeStore.id
     };
 
-    Quotation.create(form)
-      .then(function(created){
-        createdId = created.id;
-        var calculator = QuotationService.Calculator();
-        if(!form.Details || form.Details.length === 0){
-          opts.isEmptyQuotation = true;
-        }
+    try{
+      const createdQuotation = await Quotation.create(form);
+      const calculator = QuotationService.Calculator();
+      if(!form.Details || form.Details.length === 0){
+        opts.isEmptyQuotation = true;
+      }
 
-        return calculator.updateQuotationTotals(created.id, opts);
-      })
-      .then(function(updatedQuotation){
-        return Quotation.findOne({id:createdId});
-      })
-      .then(function(quotation){
-        res.json(quotation);
-      })
-      .catch(function(err){
-        console.log('err create quotation', err);
-        res.negotiate(err);
-      });
+      const updatedQuotation = await calculator.updateQuotationTotals(createdQuotation.id, opts);
+      const quotation = await Quotation.findOne({id:createdId});
+      return res.json(quotation);
+    }
+    catch(err){
+      console.log('err create quotation', err);
+      return res.negotiate(err);
+    }
   },
 
 
-  update: function(req, res){
-    var form = req.params.all();
+  async update(req, res){
+    var form = req.allParams();
     var id = form.id;
-
     form.Store =  req.user.activeStore.id;
-
     //Never update the quotation User
     if(form.User){
       delete form.User;
     }
 
-    Quotation.update({id:id}, form)
-      .then(function(updatedQuotation){
-        if(updatedQuotation && updatedQuotation.length > 0){
-          res.json(updatedQuotation[0]);
-        }else{
-          res.json(null);
-        }
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
+    try{
+      const updatedQuotations = await Quotation.update({id:id}, form)
+      if(updatedQuotations && updatedQuotations.length > 0){
+        return res.json(updatedQuotations[0]);
+      }else{
+        return res.json(null);
+      }
+    }catch(err){
+      console.log(err);
+      return res.negotiate(err);
+    }
   },
 
   async findByIdQuickRead(req, res){
@@ -231,39 +223,35 @@ module.exports = {
   },
 
 
-  addDetail: function(req, res){
-    var form = req.params.all();
+  async addDetail(req, res){
+    var form = req.allParams();
     var id = form.id;
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
 
     delete form.id;
+
     var opts = {
       paymentGroup:1,
       updateDetails: true,
       currentStoreId: req.user.activeStore.id
     };
     
-    QuotationDetail.create(form)
-      .then(function(created){
-         var calculator = QuotationService.Calculator();
-         return calculator.updateQuotationTotals(id, opts);
-      })
-      .then(function(updatedQuotation){
-        return Quotation.findOne({id: id});
-      })
-      .then(function(quotation){
-        res.json(quotation);
-      })
-      .catch(function(err){
-        console.log('err addDetail quotation', err);
-        res.negotiate(err);
-      });
+    try{
+      const createdDetails = await QuotationDetail.create(form);
+      const calculator = QuotationService.Calculator();
+      const updatedQuotation = await calculator.updateQuotationTotals(id, opts);
+      const quotation = await Quotation.findOne({id: id});  
+      return res.json(quotation);
+    }catch(err){
+      console.log('err addDetail quotation', err);
+      return res.negotiate(err);
+    }
 
   },
 
-  addMultipleDetails: function(req, res){
+  async addMultipleDetails(req, res){
     var form = req.params.all();
     var id = form.id;
     form.Quotation = id;
@@ -277,55 +265,45 @@ module.exports = {
     }
 
     delete form.id;
+
     var opts = {
       paymentGroup:1,
       updateDetails: true,
       currentStoreId: req.user.activeStore.id
     };
     
-    QuotationDetail.create(form.Details)
-      .then(function(created){
-         var calculator = QuotationService.Calculator();
-         return calculator.updateQuotationTotals(id, opts);
-      })
-      .then(function(updatedQuotation){
-        return Quotation.findOne({id: id});
-      })
-      .then(function(quotation){
-        res.json(quotation);
-      })
-      .catch(function(err){
-        console.log('err addDetail quotation', err);
-        res.negotiate(err);
-      });
-
+    try{
+      const createdDetails = await QuotationDetail.create(form.Details)
+      const calculator = QuotationService.Calculator();
+      const updatedQuotation = await calculator.updateQuotationTotals(id, opts);
+      const quotation = await Quotation.findOne({id: id});
+      return res.json(quotation);
+    }catch(err){
+      console.log('err addDetail quotation', err);
+      return res.negotiate(err);
+    }
   },  
 
-  removeDetailsGroup: function(req, res){
-    var form = req.params.all();
-    var detailsIds = form.detailsIds;
-    var quotationId = form.quotation;
+  async removeDetailsGroup(req, res){
+    const form = req.allParams();
+    const detailsIds = form.detailsIds;
+    const quotationId = form.quotation;
     var opts = {
       paymentGroup:1,
       updateDetails: true,
       currentStoreId: req.user.activeStore.id
     };
 
-    QuotationDetail.destroy({id:detailsIds})
-      .then(function(){
-        var calculator = QuotationService.Calculator();
-        return calculator.updateQuotationTotals(quotationId, opts);
-      })
-      .then(function(updatedQuotationResult){
-        return Quotation.findOne({id: quotationId}).populate('Details');
-      })
-      .then(function(quotation){
-        res.json(quotation);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
+    try{
+      await QuotationDetail.destroy({id:detailsIds});
+      const calculator = QuotationService.Calculator();
+      const updatedQuotationResult = await calculator.updateQuotationTotals(quotationId, opts);
+      const quotation = await Quotation.findOne({id: quotationId}).populate('Details');
+      return res.json(quotation);
+    }catch(err){
+      console.log(err);
+      res.negotiate(err);
+    }
   },
 
   findByClient: function(req, res){
@@ -384,26 +362,25 @@ module.exports = {
       });
   },
 
-  getQuotationTotals: function(req, res){
+  async getQuotationTotals(req, res){
     var form = req.params.all();
-    var id = form.id;
-    var paymentGroup = form.paymentGroup || 1;
+    const id = form.id;
+    const paymentGroup = form.paymentGroup || 1;
     var params = {
       update: false,
       paymentGroup: paymentGroup,
       currentStoreId: req.user.activeStore.id
     };
-    var calculator = QuotationService.Calculator();
+    const calculator = QuotationService.Calculator();
     console.log('params', params);
 
-    calculator.getQuotationTotals(id, params)
-      .then(function(totals){
-        res.json(totals);
-      })
-      .catch(function(err){
-        console.log('err getQuotationTotals', err);
-        res.negotiate(err);
-      });
+    try{
+      const totals = await calculator.getQuotationTotals(id, params);
+      return res.json(totals);
+    }catch(err){
+      console.log('err getQuotationTotals', err);
+      return res.negotiate(err);
+    }
   },
 
   getRecords: function(req, res){
@@ -624,19 +601,6 @@ function clientsIdSearch(term, searchFields){
       return clients.map(function(c){return c.id;});
     });
 }
-
-function tagImmediateDeliveriesDetails(details){
-  if(details && details.length > 0){
-    for(var i=0;i<details.length;i++){
-      if(Shipping.isDateImmediateDelivery(details[i].shipDate)){
-        details[i].immediateDelivery = true;
-      }
-    }
-    return details;
-  }
-  return [];
-}
-
 
 function formatProductsIds(details){
   var result = [];

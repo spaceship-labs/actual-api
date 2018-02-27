@@ -136,7 +136,7 @@ async function addPayment(params, req){
   };
 
   const exchangeRate = await getExchangeRate();
-  const quotationTotals = calculator.getQuotationTotals(params.Quotation ,calculatorParams);
+  const quotationTotals = await calculator.getQuotationTotals(params.Quotation ,calculatorParams);
   const quotationTotal = quotationTotals.total;
   
   if(typeof params.Client === 'string' && params.type === types.CLIENT_CREDIT){
