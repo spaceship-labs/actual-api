@@ -262,6 +262,7 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
   });
 
   var totalsByGroup = await Promise.all(getTotalsPromises);
+  //console.log('totalsByGroup', totalsByGroup);
   const exchangeRate = await getExchangeRate();
   const clientHasCredit = await checkIfClientHasCreditByQuotationId(quotationId);
 

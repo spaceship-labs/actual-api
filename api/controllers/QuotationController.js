@@ -76,7 +76,8 @@ module.exports = {
   async findById(req, res){
     const form = req.allParams();
     var userId = req.user.id;    
-    const {arePaymentsRequired, id} = form;
+    const {id} = form;
+    const arePaymentsRequired = form.payments;
     var quotation;
     try{
       const options = {
