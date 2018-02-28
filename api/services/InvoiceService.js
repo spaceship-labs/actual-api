@@ -296,7 +296,7 @@ function getPaymentMethodBasedOnPayments(payments){
 }
 
 function prepareClientParams(order, client, address){
-  const generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
+  var generic = !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
   var data;
   if (!generic) {
     data = {
@@ -319,7 +319,7 @@ function prepareClientParams(order, client, address){
   } else {
     data = {
       name: order.CardName,
-      identification: (RFCPUBLIC || "").toUpperCase(),
+      identification: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
       //email: order.E_Mail,
       address: {

@@ -118,6 +118,7 @@ module.exports = {
 		"EwalletService": true,
 		"CypherService": true,
 		"Files": true,
+		"FiscalAddressService": true,
 		"InvoiceService": true,
 		"Logger": true,
 		"OrderService": true,

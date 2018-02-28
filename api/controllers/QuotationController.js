@@ -25,8 +25,8 @@ module.exports = {
         opts.isEmptyQuotation = true;
       }
 
-      const updatedQuotation = await calculator.updateQuotationTotals(createdQuotation.id, opts);
-      const quotation = await Quotation.findOne({id:createdId});
+      await calculator.updateQuotationTotals(createdQuotation.id, opts);
+      const quotation = await Quotation.findOne({id:createdQuotation.id});
       return res.json(quotation);
     }
     catch(err){

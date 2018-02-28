@@ -165,6 +165,10 @@ function createFromQuotation(form, currentUser){
         );
       }
 
+      if(quotation.Client.LicTradNum && !ClientService.isValidRFC(quotation.Client.LicTradNum)){
+        throw new Error('El RFC del cliente no es valido');
+      }
+        
       return FiscalAddress.findOne({CardCode:quotation.Client.CardCode});
     })
     .then(function(fiscalAddress){
