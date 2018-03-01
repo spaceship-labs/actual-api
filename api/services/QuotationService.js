@@ -324,6 +324,7 @@ function Calculator(){
   }
 
   function calculateFinancingCostPercentage(totalPg1, total){
+    if(totalPg1 === 0 && total === 0) return 0;
     return (total - totalPg1) / totalPg1;
   }
 
