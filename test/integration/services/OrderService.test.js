@@ -1,5 +1,5 @@
 describe("OrderService", function(){
-  describe("isValidOrderCreated", function(){
+  describe("validateSapOrderCreated", function(){
     it("should return an object with a property error set to false when order response is valid", function(){
       const sapResponse = "{\"@odata.context\":\"http://sapnueve.homedns.org/$metadata#Edm.String\",\"value\":\"[{\\\"result\\\":\\\"13000012\\\",\\\"type\\\":\\\"Order\\\",\\\"Payments\\\":[{\\\"pay\\\":\\\"27000019\\\",\\\"reference\\\":\\\"5a8c60c9695af6237a238289\\\"}],\\\"series\\\":null},{\\\"result\\\":\\\"0\\\",\\\"type\\\":\\\"Balance\\\",\\\"Payments\\\":[],\\\"series\\\":null}]\"}";
       const sapResult = [
@@ -24,8 +24,8 @@ describe("OrderService", function(){
       const paymentsToCreate = [
         {type: 'cash', ammount: 1200}
       ];
-      expect(OrderService.isValidOrderCreated(sapResponse, sapResult, paymentsToCreate))
-        .to.deep.equal({error: false});
+      expect(OrderService.validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate))
+        .to.be.equal(true);
     });
 
     //TODO: checar este test
@@ -54,7 +54,7 @@ describe("OrderService", function(){
         {type: 'client-balance', ammount: 1200},
         {type: 'client-credit', ammount: 3000}
       ];
-      expect(OrderService.isValidOrderCreated(sapResponse, sapResult, paymentsToCreate))
+      expect(OrderService.validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate))
         .to.deep.equal({error: false});
     });
 
@@ -83,7 +83,7 @@ describe("OrderService", function(){
         {type: 'cash', ammount: 1200}
       ];
 
-      expect(OrderService.isValidOrderCreated(sapResponse, sapResult, paymentsToCreate))
+      expect(OrderService.validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate))
         .to.deep.equal({error: true});      
     });
 
@@ -112,7 +112,7 @@ describe("OrderService", function(){
         {type: 'cash', ammount: 1200}
       ];
 
-      expect(OrderService.isValidOrderCreated(sapResponse, sapResult, paymentsToCreate))
+      expect(OrderService.validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate))
         .to.deep.equal({error: false});      
     });
 
@@ -141,7 +141,7 @@ describe("OrderService", function(){
         {type: 'cash', ammount: 1200}
       ];
 
-      expect(OrderService.isValidOrderCreated(sapResponse, sapResult, paymentsToCreate))
+      expect(OrderService.validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate))
         .to.deep.equal({error: false});      
     });
 
@@ -171,7 +171,7 @@ describe("OrderService", function(){
         {type: 'cash', ammount: 1200}
       ];
 
-      expect(OrderService.isValidOrderCreated(sapResponse, sapResult, paymentsToCreate))
+      expect(OrderService.validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate))
         .to.deep.equal({error: "Generic.SAP.error"});      
     });
   });

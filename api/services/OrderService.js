@@ -10,7 +10,7 @@ module.exports = {
 	create,
 	getCountByUser,
   getTotalsByUser,
-  isValidOrderCreated,
+  validateSapOrderCreated,
   collectSapErrors,
   collectSapErrorsBySapOrder,
   checkIfSapOrderHasReference,
@@ -252,7 +252,7 @@ async function create(form, currentUser){
   const sapLog = await SapOrderConnectionLog.create(logToCreate);
 
   const sapResult = JSON.parse(sapResponse.value);
-  const isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
+  const isValidSapResponse = validateSapOrderCreated(sapResponse, sapResult, quotation.Payments);
   
   if( isValidSapResponse.error ){
     var defaultErrMsg = 'Error en la respuesta de SAP';
@@ -305,46 +305,37 @@ async function create(form, currentUser){
   return orderCreated;
 }
 
-function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
+function validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate){
   sapResult = sapResult || {};
   if( sapResponse && _.isArray(sapResult)){
 
     if(sapResult.length <= 0){
-      return {
-        error: 'No fue posible crear el pedido en SAP'
-      };
+      throw new Error('No fue posible crear el pedido en SAP');
     }
 
-    var sapResultWithBalance = _.clone(sapResult);
+    const sapResultWithBalance = _.clone(sapResult);
     sapResult = sapResult.filter(function(item){
       return item.type !== BALANCE_SAP_TYPE;
     });
 
     //If only balance was returned
     if(sapResult.length === 0){
-      return {
-        error: 'Documentos no generados en SAP'
-      };
+      throw new Error('Documentos no generados en SAP');
     }
 
-    var everyOrderHasPayments = sapResult.every(function(sapOrder){
+    const everyOrderHasPayments = sapResult.every(function(sapOrder){
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
     });
-
-    var everyOrderHasFolio = sapResult.every(checkIfSapOrderHasReference);
+    const everyOrderHasFolio = sapResult.every(checkIfSapOrderHasReference);
 
     sails.log.info('everyOrderHasFolio', everyOrderHasFolio);
     sails.log.info('everyOrderHasPayments', everyOrderHasPayments);
 
     if(!everyOrderHasFolio){
-      return {
-        error:collectSapErrors(sapResult) || true
-      };
+      throw new Error(collectSapErrors(sapResult) || true);
     }
     else if(everyOrderHasPayments && everyOrderHasFolio){
-      return {
-        error: false
-      };
+      return true;
     }
 
     var clientBalance = extractBalanceFromSapResult(sapResultWithBalance);
@@ -354,15 +345,12 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
     //with clientBalance having a value of 0
     //(!clientBalance) gives true
     if(clientBalance === false){
-      return {
-        error: 'Balance del cliente no definido en la respuesta'
-      };
+      throw new Error('Balance del cliente no definido en la respuesta');
     }
     
   }
-  return {
-    error: true
-  };
+
+  throw new Error('No fue posible crear el pedido en SAP');
 }
 
 function collectSapErrors(sapResult){
