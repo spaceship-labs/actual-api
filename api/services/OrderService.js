@@ -1,14 +1,13 @@
-var _ = require('underscore');
-var Promise = require('bluebird');
+const _ = require('underscore');
+const Promise = require('bluebird');
 
-var EWALLET_POSITIVE = 'positive';
-var INVOICE_SAP_TYPE = 'Invoice';
-var ORDER_SAP_TYPE = 'Order';
-var ERROR_SAP_TYPE = 'Error';
-var BALANCE_SAP_TYPE = 'Balance';
+const INVOICE_SAP_TYPE = 'Invoice';
+const ORDER_SAP_TYPE = 'Order';
+const ERROR_SAP_TYPE = 'Error';
+const BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
-	createFromQuotation,
+	create,
 	getCountByUser,
   getTotalsByUser,
   isValidOrderCreated,
@@ -94,273 +93,216 @@ function getTotalsByUser(form){
 
 }
 
-function createFromQuotation(form, currentUser){
-  var quotationId  = form.quotationId;
-  var opts         = {
+async function create(form, currentUser){
+  const {quotationId} = form; 
+  var opts = {
     //paymentGroup: form.paymentGroup || 1,
     updateDetails: true,
     currentStoreId: currentUser.activeStore.id
   };
-  var orderCreated = false;
-  var SlpCode      = -1;
-  var currentStore = false;
-  var sapResponse;
-  var quotation;
-  var orderParams;
-  var orderDetails;
-  var sapLog;
+  var SlpCode = -1;
+  const currentStore = currentUser.activeStore;
 
   //Validating if quotation doesnt have an order assigned
-  return Order.findOne({Quotation: quotationId})
-    .then(function(order){
-      if(order){
-        var frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
-        var orderUrl = frontUrl + '/checkout/order/' + order.id;
-        return Promise.reject(
-          new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
-        );
-      }
-      return [
-          StockService.validateQuotationStockById(quotationId, currentUser.activeStore),
-          Payment.find({Quotation: quotationId}).sort('createdAt ASC')
-        ];
-    })
-    .spread(function(isValidStock, quotationPayments){
-      if(!isValidStock){
-        return Promise.reject(
-          new Error('Inventario no suficiente para crear la orden')
-        );
-      }
-      opts.paymentGroup = QuotationService.getGroupByQuotationPayments(quotationPayments);
+  const previousOrder = await Order.findOne({Quotation: quotationId});
+  if(previousOrder){
+    const frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
+    const orderUrl = frontUrl + '/checkout/order/' + order.id;
+    throw new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl);
+  }
 
-      var calculator = QuotationService.Calculator();
-      return calculator.updateQuotationTotals(quotationId, opts);
-    })
-    .then(function(updatedQuotationResult){
-      return Quotation.findOne({id: quotationId})
-        .populate('Payments')
-        .populate('Details')
-        .populate('Address')
-        .populate('User')
-        .populate('Client')
-        .populate('Broker')
-        .populate('EwalletRecords');
-    })
-    .then(function(quotationFound){
-      quotation = quotationFound;
+  const isValidStock = await StockService.validateQuotationStockById(quotationId, currentUser.activeStore);
+  const quotationPayments = await Payment.find({Quotation: quotationId}).sort('createdAt ASC');    
+  if(!isValidStock){
+    throw new Error('Inventario no suficiente para crear la orden');
+  }
+  opts.paymentGroup = QuotationService.getGroupByQuotationPayments(quotationPayments);
 
-      if(!quotation.Client){
-        return Promise.reject(
-          new Error('No hay un cliente asociado a esta cotización')
-        );
-      }
+  const calculator = QuotationService.Calculator();
+  await calculator.updateQuotationTotals(quotationId, opts);
+  const quotation = await Quotation.findOne({id: quotationId})
+    .populate('Payments', {status: {'!':PaymentService.statusTypes.CANCELED}})
+    .populate('Details')
+    .populate('Address')
+    .populate('User')
+    .populate('Client')
+    .populate('Broker')
+    .populate('EwalletRecords');
 
-      if(quotation.Client.LicTradNum && !ClientService.isValidRFC(quotation.Client.LicTradNum)){
-        return Promise.reject(
-          new Error('El RFC del cliente no es valido')
-        ); 
-      }
+  console.log('quotation payments', quotation.Payments);
+
+  if(!quotation.Client){
+    throw new Error('No hay un cliente asociado a esta cotización')
+  }
+
+  if(quotation.Client.LicTradNum && !ClientService.isValidRFC(quotation.Client.LicTradNum)){
+    throw new Error('El RFC del cliente no es valido')
+  }
         
-      return FiscalAddress.findOne({CardCode:quotation.Client.CardCode});
-    })
-    .then(function(fiscalAddress){
+  const fiscalAddress = await FiscalAddress.findOne({CardCode:quotation.Client.CardCode});
 
-      if(!fiscalAddress){
-        return Promise.reject(
-          new Error('No hay una dirección fiscal asociada al cliente')
-        );
-      }
+  if(!fiscalAddress){
+    throw new Error('No hay una dirección fiscal asociada al cliente')
+  }
 
-      if(quotation.Order){
-        var frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
-        var orderUrl = frontUrl + '/checkout/order/' + quotation.Order;
-        return Promise.reject(
-          new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
-        );
-      }
+  if(quotation.Order){
+    const frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
+    const orderUrl = frontUrl + '/checkout/order/' + quotation.Order;
+    throw new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
+  }
 
-      if(!quotation.Details || quotation.Details.length === 0){
-        return Promise.reject(
-          new Error('No hay productos en esta cotización')
-        );
-      }
+  if(!quotation.Details || quotation.Details.length === 0){
+    throw new Error('No hay productos en esta cotización')
+  }
 
-      return User.findOne({id: quotation.User.id}).populate('Seller');
-    })
-    .then(function(user){
+  const user = await User.findOne({id: quotation.User.id}).populate('Seller');
 
-      if(!user){
-        return Promise.reject(
-          new Error("Esta cotización no tiene un vendedor asignado")
-        );
-      }
+  if(!user){
+    throw new Error("Esta cotización no tiene un vendedor asignado")
+  }
 
-      if(user.Seller){
-        SlpCode = user.Seller.SlpCode;
-      }
+  if(user.Seller){
+    SlpCode = user.Seller.SlpCode;
+  }
 
-      currentStore = currentUser.activeStore;
+  const paymentsIds = quotation.Payments.map(function(p){return p.id;});
+  var orderParams = {
+    source: quotation.source,
+    ammountPaid: quotation.ammountPaid,
+    total: quotation.total,
+    subtotal: quotation.subtotal,
+    discount: quotation.discount,
+    paymentGroup: opts.paymentGroup,
+    groupCode: currentStore.GroupCode,
+    totalProducts: quotation.totalProducts,
+    Client: quotation.Client.id,
+    CardName: quotation.Client.CardName,
+    Quotation: quotationId,
+    Payments: paymentsIds,
+    EwalletRecords: quotation.EwalletRecords,
+    ClientBalanceRecords: quotation.ClientBalanceRecords,
+    User: user.id,
+    CardCode: quotation.Client.CardCode,
+    SlpCode: SlpCode,
+    Store: opts.currentStoreId,
+    Manager: quotation.Manager
+  };
 
-      var paymentsIds = quotation.Payments.map(function(p){return p.id;});
-      orderParams = {
-        source: quotation.source,
-        ammountPaid: quotation.ammountPaid,
-        total: quotation.total,
-        subtotal: quotation.subtotal,
-        discount: quotation.discount,
-        paymentGroup: opts.paymentGroup,
-        groupCode: currentStore.GroupCode,
-        totalProducts: quotation.totalProducts,
-        Client: quotation.Client.id,
-        CardName: quotation.Client.CardName,
-        Quotation: quotationId,
-        Payments: paymentsIds,
-        EwalletRecords: quotation.EwalletRecords,
-        ClientBalanceRecords: quotation.ClientBalanceRecords,
-        User: user.id,
-        CardCode: quotation.Client.CardCode,
-        SlpCode: SlpCode,
-        Store: opts.currentStoreId,
-        Manager: quotation.Manager
-        //Store: user.activeStore
-      };
+  if(quotation.Broker){
+    orderParams.Broker = quotation.Broker.id;
+  }
 
-      if(quotation.Broker){
-        orderParams.Broker = quotation.Broker.id;
-      }
-
-      var minPaidPercentage = quotation.minPaidPercentage || 100;
+  const minPaidPercentage = quotation.minPaidPercentage || 100;
       
-      if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
-        return Promise.reject(
-          new Error('No se ha pagado la cantidad minima de la orden')
-        );
-      }
-      if(minPaidPercentage < 100){
-        orderParams.status = 'minimum-paid';
-      }else{
-        orderParams.status = 'paid';
-      }
+  if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
+    throw new Error('No se ha pagado la cantidad minima de la orden');
+  }
+  
+  if(minPaidPercentage < 100){
+    orderParams.status = 'minimum-paid';
+  }else{
+    orderParams.status = 'paid';
+  }
       
-      if(quotation.Address){
-        orderParams.Address = _.clone(quotation.Address.id);
-        orderParams.address = _.clone(quotation.Address.Address);
-        orderParams.CntctCode = _.clone(quotation.Address.CntctCode);
+  if(quotation.Address){
+    orderParams.Address = _.clone(quotation.Address.id);
+    orderParams.address = _.clone(quotation.Address.Address);
+    orderParams.CntctCode = _.clone(quotation.Address.CntctCode);
 
-        delete quotation.Address.id;
-        delete quotation.Address.Address; //Address field in person contact
-        delete quotation.Address.createdAt;
-        delete quotation.Address.updatedAt;
-        delete quotation.Address.CntctCode;
-        delete quotation.Address.CardCode;
-        orderParams = _.extend(orderParams,quotation.Address);
-      }
+    delete quotation.Address.id;
+    delete quotation.Address.Address; //Address field in person contact
+    delete quotation.Address.createdAt;
+    delete quotation.Address.updatedAt;
+    delete quotation.Address.CntctCode;
+    delete quotation.Address.CardCode;
+    orderParams = _.extend(orderParams,quotation.Address);
+  }
 
+  const quotationDetails = await QuotationDetail.find({Quotation: quotation.id}).populate('Product');
+  const site = await Site.findOne({handle:'actual-group'});
 
-      return [
-        QuotationDetail.find({Quotation: quotation.id})
-          .populate('Product'),
-        Site.findOne({handle:'actual-group'})
-      ];
-    })
-    .spread(function(quotationDetails, site){
-      var sapSaleOrderParams = {
-        quotationId:      quotationId,
-        groupCode:        orderParams.groupCode,
-        cardCode:         orderParams.CardCode,
-        slpCode:          SlpCode,
-        cntctCode:        orderParams.CntctCode,
-        payments:         quotation.Payments,
-        exchangeRate:     site.exchangeRate,
-        currentStore:     currentStore,
-        quotationDetails: quotationDetails,
-      };
+  var sapSaleOrderParams = {
+    quotationId:      quotationId,
+    groupCode:        orderParams.groupCode,
+    cardCode:         orderParams.CardCode,
+    slpCode:          SlpCode,
+    cntctCode:        orderParams.CntctCode,
+    payments:         quotation.Payments,
+    exchangeRate:     site.exchangeRate,
+    currentStore:     currentStore,
+    quotationDetails: quotationDetails,
+  };
 
-      if(quotation.Broker){
-        sapSaleOrderParams.brokerCode = quotation.Broker.Code;
-      }
+  if(quotation.Broker){ 
+    sapSaleOrderParams.brokerCode = quotation.Broker.Code;
+  }
 
-      return SapService.createSaleOrder(sapSaleOrderParams);
-    })
-    .then(function(sapResponseAux){
-      sapResponse = sapResponseAux.response;
-      var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
-      sails.log.info('createSaleOrder response', sapResponse);
-      var log = {
-        content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        User   : currentUser.id,
-        Store  : opts.currentStoreId,
-        Quotation: quotationId
-      };
-      return SapOrderConnectionLog.create(log);
-    })  
-    .then(function(sapLogCreated){
-      sapLog = sapLogCreated;
+  const {response, endPoint} = await SapService.createSaleOrder(sapSaleOrderParams);
+  const sapResponse = response;
+  const sapEndpoint = decodeURIComponent(endPoint);
+  sails.log.info('createSaleOrder response', sapResponse);
 
-      sapResult = JSON.parse(sapResponse.value);
-      var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
-      if( isValidSapResponse.error ){
-        var defaultErrMsg = 'Error en la respuesta de SAP';
-        var errorStr = isValidSapResponse.error || defaultErrMsg;
-        if(errorStr === true){
-          errorStr = defaultErrMsg;
-        }
-        return Promise.reject(new Error(errorStr));
-      }
-      orderParams.documents = sapResult;
-      orderParams.SapOrderConnectionLog = sapLog.id;
+  const logToCreate = {
+    content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
+    User: currentUser.id,
+    Store: opts.currentStoreId,
+    Quotation: quotationId
+  };
+  
+  const sapLog = await SapOrderConnectionLog.create(logToCreate);
 
-      return Order.create(orderParams);
-    })
-    .then(function(created){
-      orderCreated = created;
-      return Order.findOne({id:created.id}).populate('Details');
-    })
-    .then(function(orderFound){
-      //Cloning quotation details to order details
-      quotation.Details.forEach(function(d){
-        d.QuotationDetail = _.clone(d.id);
-        delete d.id;
-        orderFound.Details.add(d);
-      });
-      return orderFound.save();
-    })
-    .then(function(){
-      return OrderDetail.find({Order: orderCreated.id})
-        .populate('Product')
-        .populate('shipCompanyFrom');
-    })
-    .then(function(orderDetailsFound){
-      orderDetails = orderDetailsFound;
-      //return StockService.substractProductsStock(orderDetails);
+  const sapResult = JSON.parse(sapResponse.value);
+  const isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
+  
+  if( isValidSapResponse.error ){
+    var defaultErrMsg = 'Error en la respuesta de SAP';
+    var errorStr = isValidSapResponse.error || defaultErrMsg;
+    if(errorStr === true){
+      errorStr = defaultErrMsg;
+    }
+    throw new Error(errorStr);
+  }
+  orderParams.documents = sapResult;
+  orderParams.SapOrderConnectionLog = sapLog.id;
+
+  const orderCreated = await Order.create(orderParams);
+  const orderFound = await Order.findOne({id:orderCreated.id}).populate('Details');
+
+  //Cloning quotation details to order details
+  quotation.Details.forEach(function(detail){
+    detail.QuotationDetail = _.clone(detail.id);
+    delete detail.id;
+    orderFound.Details.add(detail);
+  });
+  await orderFound.save();
+  const orderDetails = await OrderDetail.find({Order: orderCreated.id})
+    .populate('Product')
+    .populate('shipCompanyFrom');
       
-      var updateFields = {
-        Order: orderCreated.id,
-        status: 'to-order',
-        isClosed: true,
-        isClosedReason: 'Order created'
-      };
-      return [
-        Quotation.update({id:quotation.id} , updateFields),
-        saveSapReferences(sapResult, orderCreated, orderDetails)
-      ];
-    })
-    .spread(function(quotationUpdated, sapOrdersReference){
-      var params = {
-        details: quotation.Details,
-        storeId: opts.currentStoreId,
-        orderId: orderCreated.id,
-        quotationId: quotation.id,
-        userId: quotation.User.id,
-        client: quotation.Client
-      };
-      return processEwalletBalance(params);
-    })	
-    .then(function(){
-      orderCreated = orderCreated.toObject();
-      orderCreated.Details = orderDetails;
-    	return orderCreated;
-    });
+  const updateFields = {
+    Order: orderCreated.id,
+    status: 'to-order',
+    isClosed: true,
+    isClosedReason: 'Order created'
+  };
+
+  const quotationUpdated = await Quotation.update({id:quotation.id} , updateFields);
+  const sapOrdersReference = await saveSapReferences(sapResult, orderCreated, orderDetails)
+
+  const ewalletProcessBalanceParams = {
+    details: quotation.Details,
+    storeId: opts.currentStoreId,
+    orderId: orderCreated.id,
+    quotationId: quotation.id,
+    userId: quotation.User.id,
+    client: quotation.Client
+  };
+  
+  await processEwalletBalance(ewalletProcessBalanceParams);
+
+  const order = orderCreated.toObject();
+  order.Details = orderDetails;
+  return orderCreated;
 }
 
 function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){

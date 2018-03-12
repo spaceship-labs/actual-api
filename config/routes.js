@@ -587,7 +587,7 @@ module.exports.routes = {
 
   '/order/createfromquotation/:quotationId': {
     controller: 'order',
-    action: 'createFromQuotation',
+    action: 'create',
     skipAssets: true,
   },
 
