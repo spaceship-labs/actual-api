@@ -176,17 +176,6 @@ describe("OrderService", function(){
     });
   });
 
-  describe("getGroupByQuotationPayments", function(){
-    it("should get the latest added payment group", function(){
-      const payments = [
-        {type:'cash', group: 1},        
-        {type:'debit-card', group: 1},
-        {type:'3-msi', group: 2}
-      ];
-      expect(OrderService.getGroupByQuotationPayments(payments)).to.be.equal(2);
-    });
-  });
-
   describe("collectSapErrors", function(){
     it("should concat errors from SAP response items", function(){
       const sapResult = [

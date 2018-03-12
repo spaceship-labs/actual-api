@@ -132,4 +132,16 @@ describe('Payment service', function(){
 
   });
 
+  describe('isCanceled', function(){
+    it('should return true if payment is canceled', function() {
+      var payment = { status: 'canceled' };
+      expect(PaymentService.isCanceled(payment)).to.be.equal(true);
+    });
+
+    it('should return false if payment is not canceled', function() {
+      var payment = { status: 'processed' };
+      expect(PaymentService.isCanceled(payment)).to.be.equal(false);
+    });
+  });
+
 });

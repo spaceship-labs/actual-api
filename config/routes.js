@@ -545,17 +545,17 @@ module.exports.routes = {
     action: 'getQuotationSapLogs',
   },
 
-  '/quotation/:id/payments': {
+  'GET /quotation/:id/payments': {
     controller: 'quotation',
     action: 'getQuotationPayments',
   },
 
-  '/payment/add/:quotationid': {
+  'POST /quotation/:quotationId/payments': {
     controller: 'payment',
     action: 'add',
   },
 
-  '/payment/cancel/:quotationId/:paymentId': {
+  '/payment/:id/cancel': {
     controller: 'payment',
     action: 'cancel',
   },

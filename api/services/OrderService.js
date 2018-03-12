@@ -12,7 +12,6 @@ module.exports = {
 	getCountByUser,
   getTotalsByUser,
   isValidOrderCreated,
-  getGroupByQuotationPayments,
   collectSapErrors,
   collectSapErrorsBySapOrder,
   checkIfSapOrderHasReference,
@@ -95,15 +94,6 @@ function getTotalsByUser(form){
 
 }
 
-function getGroupByQuotationPayments(payments){
-  var group = 1;
-  if(payments.length > 0){
-    var paymentsCount = payments.length;
-    group = payments[paymentsCount - 1].group;
-  }
-  return group;
-}
-
 function createFromQuotation(form, currentUser){
   var quotationId  = form.quotationId;
   var opts         = {
@@ -141,7 +131,7 @@ function createFromQuotation(form, currentUser){
           new Error('Inventario no suficiente para crear la orden')
         );
       }
-      opts.paymentGroup = getGroupByQuotationPayments(quotationPayments);
+      opts.paymentGroup = QuotationService.getGroupByQuotationPayments(quotationPayments);
 
       var calculator = QuotationService.Calculator();
       return calculator.updateQuotationTotals(quotationId, opts);

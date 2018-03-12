@@ -27,6 +27,10 @@ const LEGACY_METHODS_TYPES = [
   types.DEPOSIT,
 ];
 
+const statusTypes = {
+  CANCELED: 'canceled'
+};
+
 const VALID_STORES_CODES = [
   'actual_home_xcaret',
   'actual_studio_cumbres',
@@ -43,6 +47,7 @@ module.exports = {
   addDepositMethod,
   addLegacyMethods,
   addSinglePaymentTerminalMethod,
+  cancel,
   calculatePaymentsTotal,
   calculatePaymentsTotalPg1,
   calculateUSDPayment,
@@ -54,6 +59,7 @@ module.exports = {
   filterMethodsGroupsForDiscountClients,
   isCardPayment,
   isTransferPayment,
+  isCanceled,
   removeCreditMethod,
   EWALLET_TYPE,
   CASH_USD_TYPE,
@@ -62,8 +68,14 @@ module.exports = {
   CLIENT_BALANCE_TYPE,
   CURRENCY_USD,
   LEGACY_METHODS_TYPES,
-  types
+  types,
+  statusTypes
 };
+
+
+function isCanceled(payment) {
+  return payment.status === statusTypes.CANCELED;
+}
 
 function isCardPayment(payment){
   return payment.type === types.SINGLE_PAYMENT_TERMINAL
@@ -77,7 +89,7 @@ function isTransferPayment(payment){
 }
 
 async function addPayment(params, req){
-  const quotationId = params.quotationid;
+  const quotationId = params.quotationId;
   const paymentGroup = params.group || 1;
 
   if( (isCardPayment(params) || isTransferPayment(params) ) && !params.terminal){
@@ -86,7 +98,7 @@ async function addPayment(params, req){
 
   const storeCode = req.user.activeStore.code;
 
-  params.Quotation    = quotationId;
+  params.Quotation = quotationId;
   params.Store = req.user.activeStore.id;
   params.User = req.user.id;    
 
@@ -94,7 +106,7 @@ async function addPayment(params, req){
     throw new Error("La creación de pedidos para esta tienda esta deshabilitada");
   }
 
-  const isValidStock = await StockService.validateQuotationStockById(quotationId, req.user.activeStore)
+  const isValidStock = await StockService.validateQuotationStockById(quotationId, req.user.activeStore);
   if(!isValidStock){
     throw new Error('Inventario no suficiente');
   }
@@ -162,6 +174,7 @@ async function addPayment(params, req){
   }
 
   const paymentCreated = await Payment.create(params);
+  console.log('payment created', paymentCreated);
   const quotationPayments = quotation.Payments.concat([paymentCreated]);
 
   const ammountPaid = await calculatePaymentsTotal(quotationPayments, exchangeRate);
@@ -194,28 +207,49 @@ async function addPayment(params, req){
   };
   
   const findCriteria = {_id: new ObjectId(quotationId)};       
-  const resultUpdate = await Common.nativeUpdateOne(findCriteria, quotationUpdateParams, Quotation);
-  delete quotation.Payments;
-  quotation.ammountPaid = quotationUpdateParams.ammountPaid;
-  quotation.paymentGroup = quotationUpdateParams.paymentGroup;
-  
-  return quotation;
-  //var updatedQuotation = resultUpdate[0];
-  //res.json(updatedQuotation);
+  await Common.nativeUpdateOne(findCriteria, quotationUpdateParams, Quotation);
+
+  return paymentCreated;
+}
+
+async function cancel(paymentId){
+  const query = {id: paymentId, Order: null};
+  const updateParams = {status: statusTypes.CANCELED};
+  const updatedPayments = await Payment.update(query, updateParams);
+  if(updatedPayments){
+    const payment = _.findWhere(updatedPayments, {id: paymentId});
+    const quotationId = payment.Quotation;
+
+    const quotation = await Quotation.findOne({id: quotationId}).populate('Payments');
+    const exchangeRate = await getExchangeRate();
+    const ammountPaid = await calculatePaymentsTotal(quotation.Payments, exchangeRate);
+    const ammountPaidPg1 = await calculatePaymentsTotalPg1(quotation.Payments, exchangeRate);
+    const findCriteria = {_id: new ObjectId(quotationId)};
+    const updateQuotationParams = {
+      ammountPaid,
+      ammountPaidPg1
+    };
+    await Common.nativeUpdateOne(findCriteria, updateQuotationParams, Quotation);
+    return payment;
+
+  }
+  throw new Error("No es posible cancelar el pago");
 }
 
 function calculatePaymentsTotal(payments = [], exchangeRate){
   if(payments.length === 0) return 0;
-  const ammounts = payments.map(function(payment){
-    if(payment.currency === CURRENCY_USD) {
-      return calculateUSDPayment(payment, exchangeRate);
+  const total = payments.reduce(function(acum, payment){
+    if(!isCanceled(payment)){
+      if(payment.currency === CURRENCY_USD) {
+        acum += calculateUSDPayment(payment, exchangeRate);
+      }else { 
+        acum += payment.ammount;
+      }
     }
-    return payment.ammount;
-  });
-  const total = ammounts.reduce(function(paymentA, paymentB){
-    return paymentA + paymentB;
-  });
-  return total || 0;
+    return acum;
+  }, 0);
+
+  return total;
 }
 
 function calculatePaymentsTotalPg1(payments = [], exchangeRate){
@@ -223,18 +257,18 @@ function calculatePaymentsTotalPg1(payments = [], exchangeRate){
   if(!paymentsG1 || paymentsG1.length === 0){
     return 0;
   }
-  const ammounts = paymentsG1.map(function(payment){
-    if(payment.currency === CURRENCY_USD){
-     return calculateUSDPayment(payment, exchangeRate);
+  const totalG1 = paymentsG1.reduce(function(acum, payment){
+    if(!isCanceled(payment)){
+      if(payment.currency === CURRENCY_USD) {
+        acum += calculateUSDPayment(payment, exchangeRate);
+      }else { 
+        acum += payment.ammount;
+      }
     }
-    return payment.ammount;
-  });
-
-  const totalG1 = ammounts.reduce(function(paymentA, paymentB){
-    return paymentA + paymentB;
-  });
+    return acum;
+  }, 0);
   
-  return totalG1 || 0;
+  return totalG1;
 }
 
 function calculateUSDPayment(payment, exchangeRate){
