@@ -10,7 +10,6 @@ const TRANSFER_USD_TYPE = 'transfer-usd';
 const CLIENT_BALANCE_TYPE = 'client-balance';
 const EWALLET_GROUP_INDEX = 0;
 const DEFAULT_EXCHANGE_RATE   = 18.78;
-const CURRENCY_USD = 'usd';
 const types = {
   CREDIT_CARD: 'credit-card',
   DEBIT_CARD:'debit-card',
@@ -29,6 +28,10 @@ const LEGACY_METHODS_TYPES = [
 
 const statusTypes = {
   CANCELED: 'canceled'
+};
+
+const currencyTypes = {
+  USD: 'usd'
 };
 
 const VALID_STORES_CODES = [
@@ -66,10 +69,10 @@ module.exports = {
   TRANSFER_USD_TYPE,
   EWALLET_GROUP_INDEX,
   CLIENT_BALANCE_TYPE,
-  CURRENCY_USD,
   LEGACY_METHODS_TYPES,
   types,
-  statusTypes
+  statusTypes,
+  currencyTypes
 };
 
 
@@ -163,7 +166,7 @@ async function addPayment(params, req){
   const ROUNDING_AMOUNT = 1;
   const quotationRemainingAmount = (quotationTotal - previousAmountPaid) + ROUNDING_AMOUNT;
 
-  if(params.currency === CURRENCY_USD){
+  if(params.currency === currencyTypes.USD){
     newPaymentAmount = calculateUSDPayment(params, exchangeRate);
   }else{
     newPaymentAmount = params.ammount;
@@ -174,7 +177,6 @@ async function addPayment(params, req){
   }
 
   const paymentCreated = await Payment.create(params);
-  console.log('payment created', paymentCreated);
   const quotationPayments = quotation.Payments.concat([paymentCreated]);
 
   const ammountPaid = await calculatePaymentsTotal(quotationPayments, exchangeRate);
@@ -240,7 +242,7 @@ function calculatePaymentsTotal(payments = [], exchangeRate){
   if(payments.length === 0) return 0;
   const total = payments.reduce(function(acum, payment){
     if(!isCanceled(payment)){
-      if(payment.currency === CURRENCY_USD) {
+      if(payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
       }else { 
         acum += payment.ammount;
@@ -259,7 +261,7 @@ function calculatePaymentsTotalPg1(payments = [], exchangeRate){
   }
   const totalG1 = paymentsG1.reduce(function(acum, payment){
     if(!isCanceled(payment)){
-      if(payment.currency === CURRENCY_USD) {
+      if(payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
       }else { 
         acum += payment.ammount;

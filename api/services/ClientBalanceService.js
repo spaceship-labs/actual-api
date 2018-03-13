@@ -13,7 +13,8 @@ function getUnfinishedClientBalancePayments(clientId){
 		Client:clientId, 
 		type:CLIENT_BALANCE_TYPE, 
 		Order:null, 
-		select:['ammount']
+		select:['ammount'],
+		status: {'!': PaymentService.statusTypes.CANCELED}
 	};  
   return Payment.find(query);
 }

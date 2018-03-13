@@ -17,7 +17,8 @@ module.exports = {
   checkIfSapOrderHasPayments,
   everyPaymentIsClientBalanceOrCredit,
   extractBalanceFromSapResult,
-  getPaidPercentage
+  getPaidPercentage,
+  buildOrderCreateParams
 };
 
 function getCountByUser(form){
@@ -100,7 +101,6 @@ async function create(form, currentUser){
     updateDetails: true,
     currentStoreId: currentUser.activeStore.id
   };
-  var SlpCode = -1;
   const currentStore = currentUser.activeStore;
 
   //Validating if quotation doesnt have an order assigned
@@ -121,7 +121,7 @@ async function create(form, currentUser){
   const calculator = QuotationService.Calculator();
   await calculator.updateQuotationTotals(quotationId, opts);
   const quotation = await Quotation.findOne({id: quotationId})
-    .populate('Payments', {status: {'!':PaymentService.statusTypes.CANCELED}})
+    .populate('Payments')
     .populate('Details')
     .populate('Address')
     .populate('User')
@@ -129,113 +129,68 @@ async function create(form, currentUser){
     .populate('Broker')
     .populate('EwalletRecords');
 
-  console.log('quotation payments', quotation.Payments);
-
   if(!quotation.Client){
-    throw new Error('No hay un cliente asociado a esta cotización')
+    throw new Error('No hay un cliente asociado a esta cotización');
   }
 
   if(quotation.Client.LicTradNum && !ClientService.isValidRFC(quotation.Client.LicTradNum)){
-    throw new Error('El RFC del cliente no es valido')
+    throw new Error('El RFC del cliente no es valido');
   }
         
   const fiscalAddress = await FiscalAddress.findOne({CardCode:quotation.Client.CardCode});
 
   if(!fiscalAddress){
-    throw new Error('No hay una dirección fiscal asociada al cliente')
+    throw new Error('No hay una dirección fiscal asociada al cliente');
   }
 
   if(quotation.Order){
     const frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
     const orderUrl = frontUrl + '/checkout/order/' + quotation.Order;
-    throw new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
+    throw new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl);
   }
 
   if(!quotation.Details || quotation.Details.length === 0){
-    throw new Error('No hay productos en esta cotización')
+    throw new Error('No hay productos en esta cotización');
   }
+
+  const minPaidPercentage = quotation.minPaidPercentage || 100;
+  if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
+    throw new Error('No se ha pagado la cantidad minima de la orden');
+  }  
 
   const user = await User.findOne({id: quotation.User.id}).populate('Seller');
 
   if(!user){
-    throw new Error("Esta cotización no tiene un vendedor asignado")
+    throw new Error("Esta cotización no tiene un vendedor asignado");
   }
 
-  if(user.Seller){
-    SlpCode = user.Seller.SlpCode;
-  }
-
-  const paymentsIds = quotation.Payments.map(function(p){return p.id;});
-  var orderParams = {
-    source: quotation.source,
-    ammountPaid: quotation.ammountPaid,
-    total: quotation.total,
-    subtotal: quotation.subtotal,
-    discount: quotation.discount,
-    paymentGroup: opts.paymentGroup,
-    groupCode: currentStore.GroupCode,
-    totalProducts: quotation.totalProducts,
-    Client: quotation.Client.id,
-    CardName: quotation.Client.CardName,
-    Quotation: quotationId,
-    Payments: paymentsIds,
-    EwalletRecords: quotation.EwalletRecords,
-    ClientBalanceRecords: quotation.ClientBalanceRecords,
-    User: user.id,
-    CardCode: quotation.Client.CardCode,
-    SlpCode: SlpCode,
-    Store: opts.currentStoreId,
-    Manager: quotation.Manager
-  };
-
-  if(quotation.Broker){
-    orderParams.Broker = quotation.Broker.id;
-  }
-
-  const minPaidPercentage = quotation.minPaidPercentage || 100;
+  var orderParams = buildOrderCreateParams({
+    user,
+    quotation,
+    currentStore,
+    client: quotation.Client,
+    payments: quotation.Payments,
+    address: quotation.Address,
+    clientBalanceRecords: Quotation.ClientBalanceRecords,
+    ewalletRecords: quotation.EwalletRecords,
+    broker: quotation.Broker
+  });
       
-  if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
-    throw new Error('No se ha pagado la cantidad minima de la orden');
-  }
-  
-  if(minPaidPercentage < 100){
-    orderParams.status = 'minimum-paid';
-  }else{
-    orderParams.status = 'paid';
-  }
-      
-  if(quotation.Address){
-    orderParams.Address = _.clone(quotation.Address.id);
-    orderParams.address = _.clone(quotation.Address.Address);
-    orderParams.CntctCode = _.clone(quotation.Address.CntctCode);
-
-    delete quotation.Address.id;
-    delete quotation.Address.Address; //Address field in person contact
-    delete quotation.Address.createdAt;
-    delete quotation.Address.updatedAt;
-    delete quotation.Address.CntctCode;
-    delete quotation.Address.CardCode;
-    orderParams = _.extend(orderParams,quotation.Address);
-  }
-
   const quotationDetails = await QuotationDetail.find({Quotation: quotation.id}).populate('Product');
   const site = await Site.findOne({handle:'actual-group'});
 
-  var sapSaleOrderParams = {
-    quotationId:      quotationId,
-    groupCode:        orderParams.groupCode,
-    cardCode:         orderParams.CardCode,
-    slpCode:          SlpCode,
-    cntctCode:        orderParams.CntctCode,
-    payments:         quotation.Payments,
-    exchangeRate:     site.exchangeRate,
-    currentStore:     currentStore,
+  const sapSaleOrderParams = {
+    quotationId,
+    groupCode: orderParams.groupCode,
+    cardCode: orderParams.CardCode,
+    slpCode: orderParams.SlpCode,
+    cntctCode: orderParams.CntctCode,
+    payments: quotation.Payments,
+    exchangeRate: site.exchangeRate,
+    currentStore: currentStore,
     quotationDetails: quotationDetails,
+    brokerCode: quotation.Broker ? quotation.Broker.Code : null
   };
-
-  if(quotation.Broker){ 
-    sapSaleOrderParams.brokerCode = quotation.Broker.Code;
-  }
 
   const {response, endPoint} = await SapService.createSaleOrder(sapSaleOrderParams);
   const sapResponse = response;
@@ -252,16 +207,9 @@ async function create(form, currentUser){
   const sapLog = await SapOrderConnectionLog.create(logToCreate);
 
   const sapResult = JSON.parse(sapResponse.value);
-  const isValidSapResponse = validateSapOrderCreated(sapResponse, sapResult, quotation.Payments);
   
-  if( isValidSapResponse.error ){
-    var defaultErrMsg = 'Error en la respuesta de SAP';
-    var errorStr = isValidSapResponse.error || defaultErrMsg;
-    if(errorStr === true){
-      errorStr = defaultErrMsg;
-    }
-    throw new Error(errorStr);
-  }
+  validateSapOrderCreated(sapResponse, sapResult, quotation.Payments);
+  
   orderParams.documents = sapResult;
   orderParams.SapOrderConnectionLog = sapLog.id;
 
@@ -286,8 +234,8 @@ async function create(form, currentUser){
     isClosedReason: 'Order created'
   };
 
-  const quotationUpdated = await Quotation.update({id:quotation.id} , updateFields);
-  const sapOrdersReference = await saveSapReferences(sapResult, orderCreated, orderDetails)
+  await Quotation.update({id:quotation.id} , updateFields);
+  await saveSapReferences(sapResult, orderCreated, orderDetails);
 
   const ewalletProcessBalanceParams = {
     details: quotation.Details,
@@ -302,7 +250,56 @@ async function create(form, currentUser){
 
   const order = orderCreated.toObject();
   order.Details = orderDetails;
-  return orderCreated;
+  return order;
+}
+
+function buildOrderCreateParams({user, quotation, currentStore, client, payments, address, clientBalanceRecords ,ewalletRecords, broker}){
+  const paymentsIds = payments.map(function(p){return p.id;});
+  const SlpCode = user.Seller ? user.Seller.SlpCode : -1;
+
+  var createParams = {
+    source: quotation.source,
+    ammountPaid: quotation.ammountPaid,
+    total: quotation.total,
+    subtotal: quotation.subtotal,
+    discount: quotation.discount,
+    paymentGroup: quotation.paymentGroup,
+    groupCode: currentStore.GroupCode,
+    totalProducts: quotation.totalProducts,
+    Client: client.id,
+    CardName: client.CardName,
+    Quotation: quotation.id,
+    Payments: paymentsIds,
+    EwalletRecords: ewalletRecords,
+    ClientBalanceRecords: clientBalanceRecords,
+    User: user.id,
+    CardCode: quotation.Client.CardCode,
+    SlpCode: SlpCode,
+    Store: currentStore.id,
+    Manager: quotation.Manager
+  };  
+
+  if(broker){
+    createParams.Broker = broker.id;
+  }
+  
+  createParams.status = 'paid';
+      
+  if(address){
+    createParams.Address = _.clone(address.id);
+    createParams.address = _.clone(address.Address); //Address is the street field
+    createParams.CntctCode = _.clone(address.CntctCode);
+    
+    delete address.id;
+    delete address.Address; //Address field in person contact
+    delete address.createdAt;
+    delete address.updatedAt;
+    delete address.CntctCode;
+    delete address.CardCode;
+    createParams = _.extend(createParams, address);
+  }
+
+  return createParams;
 }
 
 function validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate){
@@ -339,7 +336,6 @@ function validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate){
     }
 
     var clientBalance = extractBalanceFromSapResult(sapResultWithBalance);
-    console.log('clientBalance', clientBalance);
     //Important to compare directly to false
     //When using an expression like !clientBalance 
     //with clientBalance having a value of 0
@@ -350,7 +346,7 @@ function validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate){
     
   }
 
-  throw new Error('No fue posible crear el pedido en SAP');
+  throw new Error('Error en la respuesta de SAP');
 }
 
 function collectSapErrors(sapResult){
@@ -510,7 +506,6 @@ function getPaidPercentage(amountPaid, total){
   if(amountPaid === total){
     percentage = 100;
   }
-
 
   return percentage;
 }
