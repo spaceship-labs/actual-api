@@ -31,7 +31,8 @@ const statusTypes = {
 };
 
 const currencyTypes = {
-  USD: 'usd'
+  USD: 'usd',
+  MXN: 'mxn'
 };
 
 const VALID_STORES_CODES = [
@@ -62,6 +63,7 @@ module.exports = {
   filterMethodsGroupsForDiscountClients,
   isCardPayment,
   isTransferPayment,
+  isTransferOrDeposit,
   isCanceled,
   removeCreditMethod,
   EWALLET_TYPE,
@@ -89,6 +91,14 @@ function isCardPayment(payment){
 
 function isTransferPayment(payment){
   return payment.type === types.TRANSFER || payment.type === types.TRANSFER_USD;
+}
+
+function isTransferOrDeposit(payment) {
+  return (
+    payment.type === types.TRANSFER ||
+    payment.type === types.TRANSFER_USD ||
+    payment.type === types.DEPOSIT
+  );
 }
 
 async function addPayment(params, req){

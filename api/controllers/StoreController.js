@@ -93,7 +93,6 @@ module.exports = {
   generateStoreCashReport: function(req, res){
     var form = req.params.all();
     var STORE_MANAGER_ROLE_NAME = 'store manager';
-    var ADMIN_ROLE_NAME = 'admin';
     form.populateOrders = true;
 
     if(req.user.role.name !== STORE_MANAGER_ROLE_NAME ){

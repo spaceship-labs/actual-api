@@ -623,7 +623,7 @@ module.exports.routes = {
 
   '/me/managercashreport': {
     controller: 'me',
-    action: 'generateManagerCashReport',
+    action: 'managerCashReport',
   },
 
   '/promotion/create': {
