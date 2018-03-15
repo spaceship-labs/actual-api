@@ -90,26 +90,7 @@ module.exports = {
       });
   },
 
-  generateStoreCashReport: function(req, res){
-    var form = req.params.all();
-    var STORE_MANAGER_ROLE_NAME = 'store manager';
-    form.populateOrders = true;
-
-    if(req.user.role.name !== STORE_MANAGER_ROLE_NAME ){
-      return res.negotiate(new Error('No autorizado'));
-    }
-
-    StoreService.generateStoreCashReportBySellers(form)
-      .then(function(report){
-        res.json(report);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },  
-
-  generatAllStoresCashReport: function(req, res){
+  generateGlobalCashReport: function(req, res){
     var form = req.params.all();
     var ADMIN_ROLE_NAME = 'admin';
 
@@ -117,7 +98,7 @@ module.exports = {
       return res.negotiate(new Error('No autorizado'));
     }
 
-    StoreService.generateStoresCashReport(form)
+    ReportService.buildGlobalCashReport(form)
       .then(function(report){
         res.json(report);
       })

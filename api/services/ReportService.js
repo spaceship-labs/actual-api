@@ -2,6 +2,7 @@ const Promise = require('bluebird');
 const _ = require('underscore');
 module.exports = {
   buildManagerCashReport,
+  buildGlobalCashReport,
   //For testing purposes
   buildPaymentDivisions
 };
@@ -44,12 +45,10 @@ async function buildManagerCashReport(params){
     store = store.toObject();
 
     if(store.web){
-      const divisions = await buildWebStoreCashReport(store, storeCashReportParams);
-      store.divisions = divisions;
-      store.total = getWebStoreTotal(store);
+      store.divisions = await buildWebStoreCashReport(store, storeCashReportParams);
+      store.total = getStoreTotal(store, {readDivisions:true});
     }else{
-      const storeSellers = await buildStoreCashReport(store,storeCashReportParams);
-      store.sellers = storeSellers;
+      store.sellers = await buildStoreCashReport(store,storeCashReportParams);
       store.total = getStoreTotal(store);
     }
     return store; 
@@ -60,6 +59,32 @@ async function buildManagerCashReport(params){
   };
   return managerCashReport;
 }
+
+async function buildGlobalCashReport(params){
+
+  const stores = await Store.find({});
+  const storesPoulated = await Promise.mapSeries(stores, async function (store){
+    const storeCashReportParams =  {
+      ...params
+    };
+    store = store.toObject();
+
+    if(store.web){
+      store.divisions = await buildWebStoreCashReport(store, storeCashReportParams);
+      store.total = getStoreTotal(store, {readDivisions: true});
+    }else{
+      store.divisions = await buildGeneralStoreCashReport(store,storeCashReportParams);
+      store.total = getStoreTotal(store, {readDivisions: true});
+    }
+    return store; 
+  });
+  const managerCashReport = {
+    stores: storesPoulated,
+    total: getMultipleStoresTotal(storesPoulated)
+  };
+  return managerCashReport;
+}
+
 
 async function buildStoreCashReport(store, params){
   const startDate = params.startDate || new Date();
@@ -86,6 +111,22 @@ async function buildStoreCashReport(store, params){
   
   return populatedSellers;
 }
+
+
+async function buildGeneralStoreCashReport(store, params){
+  const startDate = params.startDate || new Date();
+  const endDate = params.endDate || new Date();
+  const paymentsQuery = {
+    createdAt: { '>=': startDate, '<=': endDate },
+    Store: store.id
+  };  
+  var storePayments;
+
+  storePayments = await Payment.find(paymentsQuery);
+  const divisions = buildPaymentDivisions(storePayments);
+  return divisions;
+}
+
 
 async function buildWebStoreCashReport(store, params){
   const startDate = params.startDate || new Date();
@@ -201,11 +242,15 @@ function getArtificialSubDivisions(payments, groupNumber, methodType){
       groupNumber: artificialSubdivisionsAux[key][0].group,
       currency: artificialSubdivisionsAux[key][0].currency,
       isWeb: artificialSubdivisionsAux[key][0].QuotationWeb ? true : false,
+      card: artificialSubdivisionsAux[key][0].card,
       payments: artificialSubdivisionsAux[key]
     };
     
     if(artificialSubdivision.terminal && !artificialSubdivision.isWeb){
       artificialSubdivision.name = artificialSubdivision.name + ' TPV ' + Common.mapTerminalCode(artificialSubdivision.terminal);
+    }
+    else if(artificialSubdivision.isWeb && artificialSubdivision.card){
+      artificialSubdivision.name = artificialSubdivision.name + ' | ' + Common.mapTerminalCode(artificialSubdivision.card);
     }
     artificialSubdivision.total = getSubdivisionTotal(artificialSubdivision);
     artificialSubdivisions.push(artificialSubdivision);
@@ -286,25 +331,24 @@ function getSellerTotal(seller){
 }
 
 
-function getStoreTotal(store){
-  if(!store.sellers){
-    return 0;
+function getStoreTotal(store, options = {readDivisions: false}){
+  if(options.readDivisions){
+    if(!store.divisions){
+      return 0;
+    }
+    var storeTotal = store.divisions.reduce(function(acum, division){
+      acum += division.total;
+      return acum;
+    },0);
+  }else{
+    if(!store.sellers){
+      return 0;
+    }
+    var storeTotal = store.sellers.reduce(function(acum, seller){
+      acum += seller.total;
+      return acum;
+    },0);
   }
-  var storeTotal = store.sellers.reduce(function(acum, seller){
-    acum += seller.total;
-    return acum;
-  },0);
-  return storeTotal;
-}
-
-function getWebStoreTotal(store){
-  if(!store.divisions){
-    return 0;
-  }
-  var storeTotal = store.divisions.reduce(function(acum, division){
-    acum += division.total;
-    return acum;
-  },0);
   return storeTotal;
 }
 

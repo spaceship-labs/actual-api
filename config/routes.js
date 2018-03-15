@@ -616,11 +616,6 @@ module.exports.routes = {
     action: 'update',
   },
 
-  '/me/cashreport': {
-    controller: 'me',
-    action: 'generateCashReport',
-  },
-
   '/me/managercashreport': {
     controller: 'me',
     action: 'managerCashReport',
@@ -706,11 +701,6 @@ module.exports.routes = {
     action: 'find',
   },
 
-  '/sites/cashreport': {
-    controller: 'site',
-    action: 'generateSitesCashReport',
-  },
-
   '/store/find': {
     controller: 'store',
     action: 'find',
@@ -726,14 +716,9 @@ module.exports.routes = {
     action: 'getSellersByStore',
   },
 
-  '/store/:id/cashreport': {
+  '/stores/globalcashreport': {
     controller: 'store',
-    action: 'generateStoreCashReport',
-  },
-
-  '/stores/cashreport': {
-    controller: 'store',
-    action: 'generatAllStoresCashReport',
+    action: 'generateGlobalCashReport',
   },
 
   '/common/states': {
