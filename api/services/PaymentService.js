@@ -74,10 +74,16 @@ module.exports = {
   LEGACY_METHODS_TYPES,
   types,
   statusTypes,
-  currencyTypes
+  currencyTypes,
+  mapStatusType
 };
 
+function mapStatusType(status) {
+  var mapper = {};
+  mapper[statusTypes.CANCELED] = 'Cancelado';
 
+  return mapper[status] || status;
+}
 function isCanceled(payment) {
   return payment.status === statusTypes.CANCELED;
 }

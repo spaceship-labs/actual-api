@@ -144,4 +144,16 @@ describe('Payment service', function(){
     });
   });
 
+  describe('mapStatusType', function(){
+    it('should return the correct label for canceled status type', function(){
+      const payment = {status: 'canceled'};
+      expect(PaymentService.mapStatusType(payment.status)).to.be.equal('Cancelado');
+    });
+
+    it('should return the same status as label when it is not recognized', function(){
+      const payment = {status: 'not.recognized'};
+      expect(PaymentService.mapStatusType(payment.status)).to.be.equal('not.recognized');
+    });
+  });
+
 });
