@@ -19,6 +19,7 @@ module.exports = {
       type: 'string'
     },
     code:{type:'string'},
+    web: {type:'boolean'},
     
 
     //RELATIONS

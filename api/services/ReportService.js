@@ -41,10 +41,17 @@ async function buildManagerCashReport(params){
     const storeCashReportParams =  {
       ...params
     };
-    const storeSellers = await buildStoreCashReport(store.id,storeCashReportParams);
     store = store.toObject();
-    store.sellers = storeSellers;
-    store.total = getStoreTotal(store);
+
+    if(store.web){
+      const divisions = await buildWebStoreCashReport(store, storeCashReportParams);
+      store.divisions = divisions;
+      store.total = getWebStoreTotal(store);
+    }else{
+      const storeSellers = await buildStoreCashReport(store,storeCashReportParams);
+      store.sellers = storeSellers;
+      store.total = getStoreTotal(store);
+    }
     return store; 
   });
   const managerCashReport = {
@@ -54,32 +61,50 @@ async function buildManagerCashReport(params){
   return managerCashReport;
 }
 
-async function buildStoreCashReport(storeId, params){
+async function buildStoreCashReport(store, params){
   const startDate = params.startDate || new Date();
   const endDate = params.endDate || new Date();
-  const paymentsQuery = {};
   const {populateOrders} = params;
 
-  const storeSellers = await getStoreSellers(storeId);
+  const storeSellers = await getStoreSellers(store.id);
   
   const populatedSellers = await Promise.mapSeries(storeSellers, async function(seller){
     var options = {
       seller: seller, 
       startDate: startDate, 
       endDate: endDate, 
-      storeId: storeId, 
+      storeId: store.id, 
       populateOrders: populateOrders          
     };
 
     const sellerPayments = await getPaymentsBySeller(seller, options);
     seller = seller.toObject();
-    seller.Payments = sellerPayments;
     seller.divisions = buildPaymentDivisions(sellerPayments, seller.id);
     seller.total = getSellerTotal(seller);
     return seller;
   });
   
   return populatedSellers;
+}
+
+async function buildWebStoreCashReport(store, params){
+  const startDate = params.startDate || new Date();
+  const endDate = params.endDate || new Date();
+  const {populateOrders} = params;
+
+  const paymentsQuery = {
+    createdAt: { '>=': startDate, '<=': endDate },
+    Store: store.id
+  };  
+  var storePayments;
+
+  if(populateOrders){
+    storePayments = await PaymentWeb.find(paymentsQuery).populate('OrderWeb');
+  }else{
+    storePayments = await PaymentWeb.find(paymentsQuery);
+  }
+  const divisions = buildPaymentDivisions(storePayments, {isWeb: true});
+  return divisions;
 }
 
 function cleanUnusedDivisions(divisions){
@@ -95,12 +120,17 @@ function cleanUnusedDivisions(divisions){
   return result;
 }
 
-function buildPaymentDivisions(payments){
-  const config = {
-    readLegacyMethods: true,
-    readCredtiMethod: true
-  };
-  var paymentGroups = PaymentService.getPaymentGroups(config);
+function buildPaymentDivisions(payments, options = {isWeb: false}){
+  if(options.isWeb){
+    var paymentGroups = PaymentWebService.getPaymentGroups();
+  }else{
+    const config = {
+      readLegacyMethods: true,
+      readCredtiMethod: true
+    };
+    var paymentGroups = PaymentService.getPaymentGroups(config);
+  }
+
   var divisions = paymentGroups.reduce(function(acum, group){
     if(group.group == 1){
       var division = {};
@@ -108,6 +138,10 @@ function buildPaymentDivisions(payments){
      
       //Normal subdivisions
       division.subdivisions = group.methods.filter(function(method){
+        //Filter condition depending if web store or normal store
+        if(options.isWeb){
+          return true;
+        }
         return !method.terminals;
       }).map(function(method){
         const subdivision = {
@@ -154,7 +188,6 @@ function getArtificialSubDivisions(payments, groupNumber, methodType){
   const artificialSubdivisionsAux = _.groupBy(cardPayments, function(payment){
     return getPaymentHash(payment);
   });
-  //console.log('artificialSubdivisionsAux', artificialSubdivisionsAux);
 
   var artificialSubdivisions = [];
   for(var key in artificialSubdivisionsAux){
@@ -167,10 +200,11 @@ function getArtificialSubDivisions(payments, groupNumber, methodType){
       msi: artificialSubdivisionsAux[key][0].msi,
       groupNumber: artificialSubdivisionsAux[key][0].group,
       currency: artificialSubdivisionsAux[key][0].currency,
+      isWeb: artificialSubdivisionsAux[key][0].QuotationWeb ? true : false,
       payments: artificialSubdivisionsAux[key]
     };
     
-    if(artificialSubdivision.terminal){
+    if(artificialSubdivision.terminal && !artificialSubdivision.isWeb){
       artificialSubdivision.name = artificialSubdivision.name + ' TPV ' + Common.mapTerminalCode(artificialSubdivision.terminal);
     }
     artificialSubdivision.total = getSubdivisionTotal(artificialSubdivision);
@@ -262,6 +296,18 @@ function getStoreTotal(store){
   },0);
   return storeTotal;
 }
+
+function getWebStoreTotal(store){
+  if(!store.divisions){
+    return 0;
+  }
+  var storeTotal = store.divisions.reduce(function(acum, division){
+    acum += division.total;
+    return acum;
+  },0);
+  return storeTotal;
+}
+
 
 function getMultipleStoresTotal(stores){
   var storesTotal = stores.reduce(function(acum, store){

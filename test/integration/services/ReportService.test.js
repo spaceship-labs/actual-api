@@ -1,6 +1,7 @@
 const _ = require('underscore');
 
 describe("ReportService", function(){
+  /*
   describe("buildPaymentsDivisions", function(){
     it("should do something", function(){
       var PaymentService = require('../../../api/services/PaymentService');
@@ -31,4 +32,5 @@ describe("ReportService", function(){
       expect(result).to.deep.equal(expected);
     });
   });
+  */
 });
