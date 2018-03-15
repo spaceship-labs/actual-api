@@ -596,6 +596,11 @@ module.exports.routes = {
     action: 'findById',
   },
 
+  'POST /order/:id/cancel':{
+    controller: 'order',
+    action: 'cancel'
+  },
+
   '/order/user/:userId/totals': {
     controller: 'order',
     action: 'getTotalsByuser',

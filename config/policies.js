@@ -52,7 +52,8 @@ module.exports.policies = {
     //cancel: ['isAuthenticated', 'isAdmin']
   },
   OrderController:{
-    createFromQuotation: ['isAuthenticated', 'isSellerOrAdmin']
+    create: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isStoreManager']
   },
   ProductController:{
     find: ['isAuthenticated', 'isAllowed'],

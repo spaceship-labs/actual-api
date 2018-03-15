@@ -5,9 +5,14 @@ const INVOICE_SAP_TYPE = 'Invoice';
 const ORDER_SAP_TYPE = 'Order';
 const ERROR_SAP_TYPE = 'Error';
 const BALANCE_SAP_TYPE = 'Balance';
+const statusTypes = {
+  CANCELED: 'canceled',
+  PAID: 'paid'
+};
 
 module.exports = {
-	create,
+  create,
+  cancel,
 	getCountByUser,
   getTotalsByUser,
   validateSapOrderCreated,
@@ -18,7 +23,9 @@ module.exports = {
   everyPaymentIsClientBalanceOrCredit,
   extractBalanceFromSapResult,
   getPaidPercentage,
-  buildOrderCreateParams
+  buildOrderCreateParams,
+  statusTypes,
+  isCanceled
 };
 
 function getCountByUser(form){
@@ -510,4 +517,25 @@ function getPaidPercentage(amountPaid, total){
   return percentage;
 }
 
+async function cancel(orderId){
+  const findCriteria = {id: orderId};
+  const updateParams = {status: statusTypes.CANCELED};
+  const updatedOrders = await Order.update(findCriteria, updateParams);
+  const canceledOrder = updatedOrders[0];
 
+  const paymentsFindCriteria = {Order: orderId};
+  const paymentsUpdateParams = {status: PaymentService.statusTypes.CANCELED};
+  await Payment.update(paymentsFindCriteria, paymentsUpdateParams);
+
+  const quotationFindCriteria = {Order: orderId};
+  const quotationUpdateParams = {status: QuotationService.statusTypes.CANCELED};
+  await Quotation.update(quotationFindCriteria, quotationUpdateParams);
+
+  //TODO: Cancelar en SAP
+
+  return canceledOrder;
+}
+
+function isCanceled(order){
+  return order.status === statusTypes.CANCELED;
+}

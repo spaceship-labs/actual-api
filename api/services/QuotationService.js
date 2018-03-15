@@ -21,12 +21,17 @@ const DEFAULT_QUOTATION_TOTALS = {
   immediateDelivery: false
 };
 
+const statusTypes = {
+  CANCELED: 'canceled'
+}
+
 module.exports = {
   Calculator,
   updateQuotationToLatestData,
   getCountByUser,
   getTotalsByUser,
   getGroupByQuotationPayments,
+  statusTypes,
   DISCOUNT_KEYS  
 };
 
@@ -579,8 +584,8 @@ function getCountByUser(options){
   var queryAllByDateRange = _.clone(queryByDateRange);
 
   if(isClosed){
-    queryUntilToday.isClosed   = isClosed;
-    queryByDateRange.isClosed  = isClosed;
+    queryUntilToday.isClosed = isClosed;
+    queryByDateRange.isClosed = isClosed;
   }
 
   return Promise.props({

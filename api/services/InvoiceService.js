@@ -38,6 +38,12 @@ function createOrderInvoice(orderId) {
       .populate('Payments')
       .then(function(order) {
         orderFound = order;
+
+        if(OrderService.isCanceled(order)){
+          reject(new Error('No es posible crear una factura ya que la orden esta cancelada'));
+          return;
+        }
+
         var client = order.Client;
         var details = order.Details.map(function(d) { return d.id; });
         var payments = order.Payments;

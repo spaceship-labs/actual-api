@@ -103,7 +103,7 @@ module.exports = {
     var responseSent = false;
 
     try{
-      const orderCreated = await OrderService.create(form, req.user)
+      const orderCreated = await OrderService.create(form, req.user);
       //RESPONSE
       res.json(orderCreated);
       responseSent = true;
@@ -131,6 +131,17 @@ module.exports = {
       if(!responseSent){
         return res.negotiate(err);
       }    
+    }
+  },
+
+  async cancel(req, res){
+    const {id} = req.allParams();
+    try{
+      const canceledOrder = await OrderService.cancel(id);
+      return res.json(canceledOrder);
+    }catch(err){
+      console.log('err', err);
+      return res.negotiate(err);
     }
   },
 
