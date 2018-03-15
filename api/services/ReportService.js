@@ -293,11 +293,15 @@ function getSubdivisionTotal(subdivision, options = {currency: PaymentService.cu
   if(!subdivision.payments){
     return 0;
   }
-  var total = subdivision.payments.reduce(function(acum, current){
-    if(current.currency === PaymentService.currencyTypes.USD && options.currency === PaymentService.currencyTypes.MXN){
-      acum += PaymentService.calculateUSDPayment(current, current.exchangeRate);
+  var total = subdivision.payments.reduce(function(acum, payment){
+    if(PaymentService.isCanceled(payment)){
+      return acum;
+    }
+
+    if(payment.currency === PaymentService.currencyTypes.USD && options.currency === PaymentService.currencyTypes.MXN){
+      acum += PaymentService.calculateUSDPayment(payment, payment.exchangeRate);
     }else{
-      acum += current.ammount;
+      acum += payment.ammount;
     }
     return acum;
   },0);
