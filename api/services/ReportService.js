@@ -4,7 +4,10 @@ module.exports = {
   buildManagerCashReport,
   buildGlobalCashReport,
   //For testing purposes
-  buildPaymentDivisions
+  buildPaymentDivisions,
+  getMultipleStoresTotal,
+  getStoreTotal,
+  getSubdivisionTotal
 };
 
 /*
@@ -13,15 +16,46 @@ module.exports = {
       {
         id:"store.id",
         total: 19500,
-        startDate: date
-        endDate: date
-        Sellers: [
+        sellers: [
           {
             id:"seller.id1",
-            Payments:[
-              id: "payment.id1"
-              Order:{
-                id: "order.id1"
+            divisions:[
+              {
+                total: 25100
+                subdivisions:[
+                  {
+                    total: 12000,
+                    payments:[
+                      {
+                        id:"payment.id1",
+                        total: 12000,
+                        Order: {}
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "store.web.id",
+        total: 3600,
+        web: true,
+        divisions:[
+          {
+            total: 25100
+            subdivisions:[
+              {
+                total: 12000,
+                payments:[
+                  {
+                    id:"payment.id1",
+                    total: 12000,
+                    Order: {}
+                  }
+                ]
               }
             ]
           }
