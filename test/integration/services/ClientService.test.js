@@ -154,7 +154,25 @@ describe("Client service", function(){
       expect(result).to.be.equal(true);
     });
     
-    
+    it("should return true when using an ampersand in the first three chars", function(){
+      const validrfc = 'A&X040910HY2';
+      const result = ClientService.isValidRFC(validrfc);
+      expect(result).to.be.equal(true);
+    });
+
+    it("should return false when  ampersand is not in the first three chars", function(){
+      const validrfc = 'ABX040&10HY2';
+      const result = ClientService.isValidRFC(validrfc);
+      expect(result).to.be.equal(false);
+    });
+
+    it("should return false when digit is in the first 3 chars", function(){
+      const validrfc = 'A4X040510HY2';
+      const result = ClientService.isValidRFC(validrfc);
+      expect(result).to.be.equal(false);
+    });
+
+
   })
 
 });
