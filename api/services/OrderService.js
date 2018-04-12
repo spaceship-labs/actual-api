@@ -518,6 +518,12 @@ function getPaidPercentage(amountPaid, total){
 }
 
 async function cancel(orderId){
+
+  const quotationFindCriteria = {Order: orderId};
+  const quotation = await Quotation.findOne(quotationFindCriteria);
+  const resultCancel = await SapService.cancelOrder(quotation.id);
+  console.log('resultCacncel', resultCancel);
+
   const findCriteria = {id: orderId};
   const updateParams = {status: statusTypes.CANCELED};
   const updatedOrders = await Order.update(findCriteria, updateParams);
@@ -527,11 +533,8 @@ async function cancel(orderId){
   const paymentsUpdateParams = {status: PaymentService.statusTypes.CANCELED};
   await Payment.update(paymentsFindCriteria, paymentsUpdateParams);
 
-  const quotationFindCriteria = {Order: orderId};
   const quotationUpdateParams = {status: QuotationService.statusTypes.CANCELED};
   await Quotation.update(quotationFindCriteria, quotationUpdateParams);
-
-  //TODO: Cancelar en SAP
 
   return canceledOrder;
 }

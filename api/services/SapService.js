@@ -34,6 +34,7 @@ module.exports = {
   updateContact,
   updateFiscalAddress,
   buildSaleOrderRequestParams,
+  cancelOrder,
 
   //EXPOSED FOR TESTING PURPOSES
   mapPaymentsToSap,
@@ -401,9 +402,24 @@ function buildAddressContactEndpoint(fields, cardcode){
     U_Correos: fields.U_Correos,
     LicTradNum: fields.LicTradNum
   };
-  field = _.omit(fields, _.isUndefined);
+  fields = _.omit(fields, _.isUndefined);
   path += '?address=' + encodeURIComponent(JSON.stringify(fields));
   path += '&contact='+ encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
 }
 
+function cancelOrder(quotationId){
+  const requestParams = {
+    QuotationId: quotationId
+  };
+  const endPoint = buildUrl(baseUrl,{
+    path: 'SalesOrder',
+    queryParams: requestParams
+  });
+  sails.log.info('cancel order');
+  sails.log.info(decodeURIComponent(endPoint));
+  reqOptions.uri = endPoint;
+  reqOptions.method = 'DELETE';
+  return request(reqOptions);
+
+}
