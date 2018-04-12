@@ -101,7 +101,6 @@ function send(orderID) {
       if(process.env.MODE === 'production'){
         emails = [
           address.U_Correos,
-          'informatica@actualg.com',
           'facturamiactual@actualstudio.com',
           'facturacion@actualg.com'
         ];
