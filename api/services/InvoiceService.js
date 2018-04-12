@@ -102,7 +102,7 @@ function send(orderID) {
         emails = [
           address.U_Correos,
           'informatica@actualg.com',
-          'cgarcia@actualg.com',
+          'facturamiactual@actualstudio.com',
           'facturacion@actualg.com'
         ];
       }
