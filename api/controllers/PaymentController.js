@@ -25,7 +25,7 @@ module.exports = {
   async cancel(req, res){
     const {id} = req.allParams();
     try{
-      const canceledPayment = await PaymentService.quotationPaymentCancel(id);
+      const canceledPayment = await PaymentService.cancel(id);
       const calculator = QuotationService.Calculator();
       const quotationId = canceledPayment.Quotation;
       
