@@ -49,7 +49,7 @@ module.exports.policies = {
   },
   PaymentController:{
     add: ['isAuthenticated', 'isSellerOrAdmin'],
-    //cancel: ['isAuthenticated', 'isAdmin']
+    cancel: ['isAuthenticated', 'isStoreManager']
   },
   OrderController:{
     create: ['isAuthenticated', 'isSellerOrAdmin'],
