@@ -43,7 +43,7 @@ module.exports.policies = {
   },
   QuotationController:{
     addDetail: ['isAuthenticated', 'isSellerOrAdmin'],
-    update: ['isAuthenticated', 'isSellerOrAdmin'],
+    update: ['isAuthenticated', 'isAdminSellerOrManager'],
     create: ['isAuthenticated', 'isSellerOrAdmin'],
     removeDetailsGroup: ['isAuthenticated', 'isSellerOrAdmin'],
   },
