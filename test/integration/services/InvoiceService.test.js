@@ -62,32 +62,47 @@ describe("InvoiceService", function(){
   describe('getAlegraPaymentType', function(){
     it('should return PPD (pago en parcialidades o diferido) when alegra payment method is other', function(){
       const alegraPaymentMethod = 'other';
+      const order = {id: 'order.id1', total: 179000};
       const payments = [
-        {id:"payment.id1", type: 'client-credit', ammount: 15000},
+        {id:"payment.id1", type: 'client-credit', ammount: 150000},
         {id:"payment.id2", type: 'debit-card', ammount: 2000},
         {id:"payment.id3", type: '9-msi', ammount: 900},
       ];
-      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments)).to.equal('PPD');
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PPD');
     });
 
     it('should return PPD (pago en parcialidades o diferido) when payments match the special cash payment rule', function(){
       const alegraPaymentMethod = 'other';
+      const order = {id: 'order.id1', total: 179000};
       const payments = [
-        {id:"payment.id1", type: 'cash', ammount: 15000},
+        {id:"payment.id1", type: 'cash', ammount: 150000},
         {id:"payment.id2", type: 'debit-card', ammount: 2000},
         {id:"payment.id3", type: '9-msi', ammount: 900},
       ];
-      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments)).to.equal('PPD');
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PPD');
     });
+
+    it('should return PUE (pago en una sola exhibicion) when payments dont match the special cash payment rule', function(){
+      const alegraPaymentMethod = 'cash';
+      const order = {id: 'order.id1', total: 5000};
+      const payments = [
+        {id:"payment.id1", type: 'cash', ammount: 4000},
+        {id:"payment.id2", type: 'debit-card', ammount: 500},
+        {id:"payment.id3", type: '9-msi', ammount: 1500},
+      ];
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PUE');
+    });
+
 
     it('should return PUE (pago en una sola exhibición) when alegra payment method is credit-card', function(){
       const alegraPaymentMethod = 'credit-card';
+      const order = {id: 'order.id1', total: 179000};
       const payments = [
-        {id:"payment.id1", type: 'credit-credit', ammount: 15000},
+        {id:"payment.id1", type: 'credit-credit', ammount: 150000},
         {id:"payment.id2", type: 'debit-card', ammount: 2000},
         {id:"payment.id3", type: '9-msi', ammount: 900},
       ];
-      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments)).to.equal('PUE');
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PUE');
     });
 
   });

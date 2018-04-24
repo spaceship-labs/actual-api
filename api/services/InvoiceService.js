@@ -145,13 +145,13 @@ function prepareInvoice(order, payments, client, items) {
     orderObject: order,
   };
 
-  data.paymentType = getAlegraPaymentType(data.paymentMethod, payments);
+  data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
   
   return createInvoice(data);
 }
 
-function getAlegraPaymentType(alegraPaymentMethod, payments){
-  if(alegraPaymentMethod === 'other' || appliesForSpecialCashRule(payments)){
+function getAlegraPaymentType(alegraPaymentMethod, payments, order){
+  if(alegraPaymentMethod === 'other' || appliesForSpecialCashRule(payments, order)){
     return 'PPD';
   }
 
@@ -228,10 +228,15 @@ function getHighestPayment(payments){
   return highest;
 }
 
-function appliesForSpecialCashRule(payments){
+function appliesForSpecialCashRule(payments, order){
   //Rule 20th April 2018
   //When applying cash plus other payment method(except client balance or client credit)
-  if(payments.length > 1){
+  //If cash is the main payment method
+  //and the total is 100k or above
+  
+  const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
+
+  if(payments.length > 1 && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT){
     var highestPayment = getHighestPayment(payments);
     if(highestPayment.type === PaymentService.types.CASH || highestPayment.type === PaymentService.types.CASH_USD){
       return true;
@@ -263,10 +268,7 @@ function getPaymentMethodBasedOnPayments(payments, order){
     }
     uniquePaymentMethod = getHighestPayment(directPayments);
 
-    //If cash is the main payment method
-    //and the total is 100k or above, the payment type will be 'other'
-    var INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
-    if(appliesForSpecialCashRule(payments) && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT){
+    if(appliesForSpecialCashRule(payments, order)){
       return 'other';
     }
   }
