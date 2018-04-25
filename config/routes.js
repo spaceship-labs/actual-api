@@ -716,6 +716,11 @@ module.exports.routes = {
     action: 'find',
   },
 
+  'GET /stores/:id':{
+    controller: 'store',
+    action: 'getById'
+  },
+
   '/store/:id/packages': {
     controller: 'store',
     action: 'getPackagesByStore',
