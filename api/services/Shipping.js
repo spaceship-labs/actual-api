@@ -108,7 +108,7 @@ async function buildShippingItem(stockItem, deliveries, storeWarehouseId, pendin
     LOW_SEASON_DAYS = 10;
   }else{
     MAIN_SEASON_DAYS = 10;
-    LOW_SEASON_DAYS = 5;
+    LOW_SEASON_DAYS = 6;
   }
 
   if(season){
