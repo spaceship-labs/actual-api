@@ -804,6 +804,10 @@ module.exports.routes = {
     controller: 'featuredproduct',
     action: 'create',
   },
+  'POST /featuredproduct/:id': {
+    controller: 'featuredproduct',
+    action: 'remove',
+  },
 
   /***************************************************************************
    *                                                                          *

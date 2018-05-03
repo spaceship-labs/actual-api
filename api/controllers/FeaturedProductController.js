@@ -12,7 +12,6 @@ module.exports = {
       const featuredProducts = await FeaturedProduct.find({ site }).populate(
         'product'
       );
-      console.log(featuredProducts);
       res.ok(featuredProducts);
     } catch (err) {
       res.negotiate(err);
@@ -22,6 +21,15 @@ module.exports = {
     try {
       const featuredProduct = await FeaturedProduct.create(req.allParams());
       res.created(featuredProduct);
+    } catch (err) {
+      res.negotiate(err);
+    }
+  },
+  async remove(req, res) {
+    try {
+      const product = req.param('id');
+      const featuredProduct = await FeaturedProduct.destroy({ product });
+      res.ok(featuredProduct);
     } catch (err) {
       res.negotiate(err);
     }
