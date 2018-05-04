@@ -2,7 +2,7 @@ module.exports = {
   transfers: transfers,
 };
 
-function transfers(group) {
+function transfers(group, storeCode) {
   var studio = [
     {
       currency: 'Pesos',
@@ -87,5 +87,9 @@ function transfers(group) {
       swift: 'BNMXMXMM',
     },
   ];
-  return (group === 'studio' && studio) || noStudio;
+  if(group === 'studio' && storeCode !== 'actual_studio_merida'){
+    return studio;
+  }else{
+    return noStudio;
+  }
 }

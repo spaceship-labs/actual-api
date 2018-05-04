@@ -262,7 +262,7 @@ function quotation(quotationId, activeStore) {
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
-      var transfers = TransferService.transfers(store.group);
+      var transfers = TransferService.transfers(store.group, store.code);
       return [client, user,  quotation, details, payments, transfers, store];
     })
     .spread(function(client, user, quotation, details, payments, transfers, store) {
