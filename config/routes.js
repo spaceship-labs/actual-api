@@ -716,9 +716,9 @@ module.exports.routes = {
     action: 'find',
   },
 
-  'GET /stores/:id':{
+  'GET /stores/:id': {
     controller: 'store',
-    action: 'getById'
+    action: 'getById',
   },
 
   '/store/:id/packages': {
@@ -794,7 +794,20 @@ module.exports.routes = {
   '/zipcodestates/multipleupdate': {
     controller: 'zipcode',
     action: 'multipleUpdate',
-  }
+  },
+
+  'GET /featuredproduct/:site': {
+    controller: 'featuredproduct',
+    action: 'index',
+  },
+  'POST /featuredproduct': {
+    controller: 'featuredproduct',
+    action: 'create',
+  },
+  'POST /featuredproduct/:id': {
+    controller: 'featuredproduct',
+    action: 'remove',
+  },
 
   /***************************************************************************
    *                                                                          *
