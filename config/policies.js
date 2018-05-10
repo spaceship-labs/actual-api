@@ -54,6 +54,7 @@ module.exports.policies = {
   OrderController:{
     create: ['isAuthenticated', 'isSellerOrAdmin'],
     cancel: ['isAuthenticated', 'isStoreManager']
+    //cancel: ['isAuthenticated', 'isAccountingUser']
   },
   ProductController:{
     find: ['isAuthenticated', 'isAllowed'],
