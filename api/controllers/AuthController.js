@@ -76,6 +76,6 @@ module.exports = {
   homeStatus(req, res) {
     const status =
       process.env.MODE !== 'production' ? 'ok sandbox!' : 'ok production!';
-    res.ok({ status, branch: 'feature/3.' });
+    res.ok({ status, branch: 'feature/3. v1.01' });
   }
 };

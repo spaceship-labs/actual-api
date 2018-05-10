@@ -18,7 +18,9 @@ const types = {
   MSI_12: '12-msi',
   TRANSFER: 'transfer',
   TRANSFER_USD: 'transfer-usd',
-  DEPOSIT: 'deposit'
+  DEPOSIT: 'deposit',
+  CASH: 'cash',
+  CASH_USD: 'cash-usd'
 };
 
 const LEGACY_METHODS_TYPES = [

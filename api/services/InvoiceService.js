@@ -15,6 +15,7 @@ module.exports = {
   send,
   getHighestPayment,
   getPaymentMethodBasedOnPayments,
+  getAlegraPaymentType,
   prepareClient,
   prepareClientParams,
   getUnitTypeByProduct,
@@ -107,8 +108,7 @@ function send(orderID) {
       if(process.env.MODE === 'production'){
         emails = [
           address.U_Correos,
-          'informatica@actualg.com',
-          'cgarcia@actualg.com',
+          'facturamiactual@actualstudio.com',
           'facturacion@actualg.com'
         ];
       }
@@ -143,19 +143,25 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     cfdiUse: client.cfdiUse,
-    paymentMethod: getPaymentMethodBasedOnPayments(payments),
+    paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
     anotation: order.folio,
     stamp: {
       generateStamp: true,
     },
-    orderObject: order
+    orderObject: order,
   };
 
-  if(data.paymentMethod === 'other'){
-    data.paymentType = 'PPD';
-  }
+  data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
   
   return createInvoice(data);
+}
+
+function getAlegraPaymentType(alegraPaymentMethod, payments, order){
+  if(alegraPaymentMethod === 'other' || appliesForSpecialCashRule(payments, order)){
+    return 'PPD';
+  }
+
+  return 'PUE';
 }
 
 function createInvoice(data) {
@@ -182,7 +188,6 @@ function createInvoice(data) {
 
   var resultAlegra;
   var requestError;
-
 
   return new Promise(function(resolve, reject){
 
@@ -229,23 +234,49 @@ function getHighestPayment(payments){
   return highest;
 }
 
+function appliesForSpecialCashRule(payments, order){
+  //Rule 20th April 2018
+  //When applying cash plus other payment method(except client balance or client credit)
+  //If cash is the main payment method
+  //and the total is 100k or above
+  
+  const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
 
-function getPaymentMethodBasedOnPayments(payments){
+  if(payments.length > 1 && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT){
+    var highestPayment = getHighestPayment(payments);
+    if(highestPayment.type === PaymentService.types.CASH || highestPayment.type === PaymentService.types.CASH_USD){
+      return true;
+    }
+  }
+  return false;
+}
+
+//Excludes CLIENT BALANCE and CREDIT CLIENT payments
+function getDirectPayments(payments){
+  return payments.filter(function(p){
+    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && 
+      p.type !== PaymentService.types.CLIENT_CREDIT;
+  });
+}
+
+function getPaymentMethodBasedOnPayments(payments, order){
   var paymentMethod = 'other';
   var uniquePaymentMethod = payments[0];
-  
+  var directPayments = [];
+
   if(payments.length > 1){
     //Taking the highest payment as main, except the 
     //client-credit and client balance payment type
-    var auxPayments = payments.filter(function(p){
-      return p.type !== PaymentService.CLIENT_BALANCE_TYPE && 
-        p.type !== PaymentService.types.CLIENT_CREDIT;
-    });
+    directPayments = getDirectPayments(payments);
 
-    if(auxPayments.length === 0){
+    if(directPayments.length === 0){
       return 'other';
     }
-    uniquePaymentMethod = getHighestPayment(auxPayments);
+    uniquePaymentMethod = getHighestPayment(directPayments);
+
+    if(appliesForSpecialCashRule(payments, order)){
+      return 'other';
+    }
   }
 
   switch(uniquePaymentMethod.type){

@@ -13,24 +13,96 @@ describe("InvoiceService", function(){
 
   describe("getPaymentMethodBasedOnPayments", function(){
     it("should get the debit-card payment method, taking the highest", function(){
+      const order = {id: "order.id1", total: 23280};
       const payments = [
         {type: "cash", currency: "mxn", ammount: 2000},
         {type: "cash-usd", currency: "usd", ammount: 400, exchangeRate: 18.20},
         {type: "debit-card", currency: "mxn", ammount: 14000}
       ];
-      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments))
+      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments, order))
         .to.equal('debit-card');
     });
 
-    it("should get the cash payment method, taking the highest, ignoring client balance and client credit methods", function(){
+    it("should get the credit-card payment method(9-msi), taking the highest, ignoring client balance and client credit methods", function(){
+      const order = {id:"order.id1", total: 189280};
       const payments = [
         {type: "cash", currency: "mxn", ammount: 2000},
-        {type: "cash-usd", currency: "usd", ammount: 400, exchangeRate: 18.20},
+        {type: "9-msi", currency: "usd", ammount: 400, exchangeRate: 18.20},
         {type: "client-credit", currency: "mxn", ammount: 85000},
         {type: "client-balance", currency: "mxn", ammount: 95000}        
       ];
-      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments))
-        .to.equal('cash');
+      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments, order))
+        .to.equal('credit-card');
+    });
+
+    it("should get the 'other' payment method, when amount is 100k or higher applying a cash and other payment type(credit card, debit, deposit, etc except client balance and client credit)", function(){
+      const order = {id:"order.id1", total: 115000};
+      const payments = [
+        {type: "debit-card", currency: "mxn", ammount: 5000},
+        {type: "cash", currency: "mxn", ammount: 85000},
+        {type: "3-msi", currency: "mxn", ammount: 20000}
+      ];
+      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments, order))
+        .to.equal('other');      
+    });
+
+    it("should get the 'other' payment method, when amount is 100k or higher applying a cash and other payment type(credit card, debit, deposit, etc except client balance and client credit)", function(){
+      const order = {id:"order.id1", total: 171000};
+      const payments = [
+        {type: "debit-card", currency: "mxn", ammount: 15000},
+        {type: "cash", currency: "usd", ammount: 8000, exchangeRate: 17},
+        {type: "3-msi", currency: "mxn", ammount: 20000}
+      ];
+      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments, order))
+        .to.equal('other');      
+    });
+
+  });
+
+  describe('getAlegraPaymentType', function(){
+    it('should return PPD (pago en parcialidades o diferido) when alegra payment method is other', function(){
+      const alegraPaymentMethod = 'other';
+      const order = {id: 'order.id1', total: 179000};
+      const payments = [
+        {id:"payment.id1", type: 'client-credit', ammount: 150000},
+        {id:"payment.id2", type: 'debit-card', ammount: 2000},
+        {id:"payment.id3", type: '9-msi', ammount: 900},
+      ];
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PPD');
+    });
+
+    it('should return PPD (pago en parcialidades o diferido) when payments match the special cash payment rule', function(){
+      const alegraPaymentMethod = 'other';
+      const order = {id: 'order.id1', total: 179000};
+      const payments = [
+        {id:"payment.id1", type: 'cash', ammount: 150000},
+        {id:"payment.id2", type: 'debit-card', ammount: 2000},
+        {id:"payment.id3", type: '9-msi', ammount: 900},
+      ];
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PPD');
+    });
+
+    it('should return PUE (pago en una sola exhibicion) when payments dont match the special cash payment rule', function(){
+      const alegraPaymentMethod = 'cash';
+      const order = {id: 'order.id1', total: 5000};
+      const payments = [
+        {id:"payment.id1", type: 'cash', ammount: 4000},
+        {id:"payment.id2", type: 'debit-card', ammount: 500},
+        {id:"payment.id3", type: '9-msi', ammount: 1500},
+      ];
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PUE');
+    });
+
+
+    it('should return PUE (pago en una sola exhibición) when alegra payment method is credit-card', function(){
+      const alegraPaymentMethod = 'credit-card';
+      const order = {id: 'order.id1', total: 179000};
+      const payments = [
+        {id:"payment.id1", type: 'credit-credit', ammount: 150000},
+        {id:"payment.id2", type: 'debit-card', ammount: 2000},
+        {id:"payment.id3", type: '9-msi', ammount: 900},
+      ];
+      expect(InvoiceService.getAlegraPaymentType(alegraPaymentMethod, payments, order)).to.equal('PUE');
     });
 
   });

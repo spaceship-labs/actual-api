@@ -94,6 +94,7 @@ module.exports = {
 		"Promotion": true,
 		"PurchaseOrder": true,
 		"Quotation": true,
+		"FeaturedProduct": true,
 		"QuotationAddress": true,
 		"QuotationDetail": true,
 		"QuotationRecord": true,

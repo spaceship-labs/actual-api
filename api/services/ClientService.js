@@ -10,7 +10,7 @@ const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
 const DATE_REGEX = "(\\d{2}((01|03|05|07|08|10|12)(0[1-9]|[12]\\d|3[01])|02(0[1-9]|[12]\\d)|(04|06|09|11)(0[1-9]|[12]\\d|30)))";
-const RFC_VALIDATION_REGEX = new RegExp("^(([A-Z]{3,4})"+DATE_REGEX+"([A-Z|\\d]{3}))$");
+const RFC_VALIDATION_REGEX = new RegExp("^(([A-Z|\\&]{3,4})"+DATE_REGEX+"([A-Z|\\d]{3}))$");
 
 module.exports = {
 	ADDRESS_TYPE,

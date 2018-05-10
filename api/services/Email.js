@@ -200,6 +200,9 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       received: numeral(ewallet.earned).format('0,0.00'),
       paid: numeral(ewallet.spent).format('0,0.00'),
       balance: numeral(ewallet.balance).format('0,0.00'),
+    },
+    store: {
+      name: store.name
     }
   });
 
@@ -218,11 +221,12 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   personalization.addTo(toAux);
 
   var toAux2 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
-  personalization.addTo(toAux2);
+  //personalization.addTo(toAux2);
 
 
   if(process.env.MODE === 'production'){
     sails.log.info('sending email order ', order.folio);
+    personalization.addTo(toAux2);
     personalization.addTo(to);
     personalization.addTo(from);
   }
@@ -259,7 +263,7 @@ function quotation(quotationId, activeStore) {
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
-      var transfers = TransferService.transfers(store.group);
+      var transfers = TransferService.transfers(store.group, store.code);
       return [client, user,  quotation, details, payments, transfers, store];
     })
     .spread(function(client, user, quotation, details, payments, transfers, store) {
