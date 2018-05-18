@@ -9,7 +9,7 @@ function _onPassportAuth(req, res, error, user, info) {
   var form = req.allParams();
   var activeStoreId = form.activeStore || false;
   var updateParams = {
-    lastLogin: new Date()
+    lastLogin: new Date(),
   };
 
   if (activeStoreId) {
@@ -26,7 +26,7 @@ function _onPassportAuth(req, res, error, user, info) {
       var action = 'login';
       return [
         Logger.log(userUpdated.id, message, action),
-        Store.findOne({ id: activeStoreId })
+        Store.findOne({ id: activeStoreId }),
       ];
     })
     .spread(function(log, store) {
@@ -35,7 +35,7 @@ function _onPassportAuth(req, res, error, user, info) {
       }
       return res.ok({
         token: CipherService.createToken(user),
-        user: user
+        user: user,
       });
     })
     .catch(function(err) {
@@ -76,6 +76,6 @@ module.exports = {
   homeStatus(req, res) {
     const status =
       process.env.MODE !== 'production' ? 'ok sandbox!' : 'ok production!';
-    res.ok({ status, version: '1.1.9' });
-  }
+    res.ok({ status, version: '1.1.10' });
+  },
 };
