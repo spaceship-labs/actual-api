@@ -7,13 +7,19 @@
 
 module.exports = {
   attributes: {
-    alegraId: {
-      type:'integer'
+    invoice_uid: {
+      type: 'string',
     },
     order: {
       model: 'order',
       required: true,
-    }
+    },
+    folio: {
+      type: 'integer',
+    },
+    calcelled: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
   },
 };
-

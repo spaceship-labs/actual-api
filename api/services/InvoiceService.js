@@ -1,464 +1,245 @@
-const _ = require('underscore');
 const moment = require('moment');
-const request = require('request-promise');
-const Promise = require('bluebird');
-const ALEGRAUSER = process.env.ALEGRAUSER;
-const ALEGRATOKEN = process.env.ALEGRATOKEN;
-const token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
-const promiseDelay = require('promise-delay');
-const ALEGRA_IVA_ID = 2;
-const RFCPUBLIC = 'XAXX010101000';
-const DEFAULT_CFDI_USE = 'P01';
+const axiosD = require('axios');
+const axios = axiosD.create({
+  baseURL:
+    process.env.MODE === 'production'
+      ? process.env.FACTURA_URL_PRODUCTION
+      : process.env.FACTURA_URL_SANDOX,
+  headers: {
+    'Content-Type': 'application/json',
+    'F-API-KEY':
+      process.env.MODE === 'production'
+        ? process.env.FACTURA_KEY_PRODUCTION
+        : process.env.FACTURA_KEY_SANDBOX,
+    'F-SECRET-KEY':
+      process.env.MODE === 'production'
+        ? process.env.FACTURA_SECRET_KEY_PRODUCTION
+        : process.env.FACTURA_SECRET_KEY_SANDBOX,
+  },
+});
 
 module.exports = {
-  createOrderInvoice,
-  send,
-  getHighestPayment,
-  getPaymentMethodBasedOnPayments,
-  getAlegraPaymentType,
-  prepareClient,
-  prepareClientParams,
-  getUnitTypeByProduct,
-  RFCPUBLIC,
-  DEFAULT_CFDI_USE
+  async createInvoice(order, client, fiscalAddress, payments, details) {
+    const items = getItems(details);
+    console.log('ITEMS: ', items);
+    return await axios.post(
+      '/v3/cfdi33/create',
+      await formatInvoice(order, client, fiscalAddress, payments, details)
+    );
+  },
 };
 
-function createOrderInvoice(orderId) {
-  return new Promise(function(resolve, reject){
-    var orderFound;
-    var errInvoice;
+const formatInvoice = async (
+  order,
+  client,
+  fiscalAddress,
+  payments,
+  details
+) => ({
+  Receptor: {
+    UID: handleClient(await createClient(client, order.Client, fiscalAddress)),
+  },
+  TipoDocumento: 'factura',
+  Conceptos: getItems(details),
+  UsoCFDI: client.cfdiUse,
+  Serie: 88409,
+  FormaPago: getPaymentWay(payments, order),
+  MetodoPago: getPaymentMethod(
+    getPaymentWay(payments, order),
+    payments,
+    order,
+    '99'
+  ),
+  Moneda: 'MXN',
+  FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DD'),
+});
 
-    if(process.env.MODE !== 'production'){
-      resolve({});
-      return;
-    } 
+const handleClient = ({ data: client, error: error }) =>
+  !client.Data || !client.Data.UID || error
+    ? Promise.reject(new Error({ error }))
+    : client.Data.UID;
 
-    Order.findOne(orderId)
-      .populate('Client')
-      .populate('Details')
-      .populate('Payments')
-      .then(function(order) {
-        orderFound = order;
-        var client = order.Client;
-        var details = order.Details.map(function(d) { return d.id; });
-        var payments = order.Payments;
-        return [
-          order,
-          payments,
-          OrderDetail.find(details).populate('Product'),
-          FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
-          client,
-        ];
-      })
-      .spread(function(order, payments, details, address, client) {
-        return [
-          order,
-          payments,
-          prepareClient(order, client, address),
-          prepareItems(details)
-        ];
-      })
-      .spread(function(order, payments, client, items) {
-        return prepareInvoice(order, payments, client, items);
-      })
-      .then(function(alegraInvoice){
-        resolve(
-          Invoice.create({ alegraId: alegraInvoice.id, order: orderId })
-        );
-      })
-      .catch(function(err){
-        errInvoice = err;
+const createClient = async (client, data, fiscal) =>
+  !client ||
+  !data.E_Mail ||
+  !data.LicTradNum ||
+  !fiscal.companyName ||
+  !fiscal.Street ||
+  !fiscal.U_NumExt ||
+  !fiscal.ZipCode ||
+  !fiscal.Block ||
+  !fiscal.State ||
+  !fiscal.City
+    ? Promise.reject(new Error('Datos incompletos'))
+    : await axios.post('/v1/clients/create', formatClent(client, data, fiscal));
 
-        var log = {
-          User: orderFound ? orderFound.User : null,
-          Order: orderId,
-          Store: orderFound ? orderFound.Store : null,
-          responseData: JSON.stringify(errInvoice),
-          isError: true
-        };
+const formatClent = (client, data, fiscal) => ({
+  nombre: data.FirstName,
+  apellidos: data.LastName,
+  email: data.E_Mail,
+  telefono: data.Phone1,
+  razons: fiscal.companyName,
+  rfc: data.LicTradNum,
+  calle: fiscal.Street,
+  numero_exterior: fiscal.U_NumExt,
+  codpos: fiscal.ZipCode,
+  colonia: fiscal.Block,
+  estado: fiscal.State,
+  ciudad: fiscal.City,
+});
 
-        return AlegraLog.create(log);
-      })
-      .then(function(logCreated){
-        reject(errInvoice);        
-      });
-  });
-}
+const getItems = details => formatItems(details);
 
-function send(orderID) {
-  return Order
-    .findOne(orderID)
-    .populate('Client')
-    .then(function(order) {
-      return [
-        Invoice.findOne({ order: orderID }),
-        FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
-      ];
-    })
-    .spread(function(invoice, address) {
-      var emails = [];
-      sails.log.info('address', address.U_Correos);
+const getDetailsProducts = async ids =>
+  await OrderDetail.find(ids).populate('Product');
 
-      if(process.env.MODE === 'production'){
-        emails = [
-          address.U_Correos,
-          'facturamiactual@actualstudio.com',
-          'facturacion@actualg.com'
-        ];
-      }
+const formatItems = details =>
+  details.map(detail =>
+    structuredItems(
+      defineDiscount(detail.discountPercent),
+      detail,
+      detail.Product
+    )
+  );
 
-      var id = invoice.alegraId;
-      return { id: id, emails: emails };
-    })
-    .then(function(data) {
-      var options = {
-        method: 'POST',
-        uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
-        body: data,
-        headers: {
-          Authorization: 'Basic ' + token,
-        },
-        json: true,
-      };
-      return request(options);
-    });
-}
+const defineDiscount = discountPercent =>
+  discountPercent
+    ? parsingDiscount(Math.abs(discountPercent))
+    : parsingDiscount(Math.abs(0));
 
-function prepareInvoice(order, payments, client, items) {
-  var date = moment(order.createdAt)
-    .format('YYYY-MM-DD');
-  var dueDate = moment(order.createdAt)
-    .add(7, 'days')
-    .format('YYYY-MM-DD');
+const parsingDiscount = discount =>
+  discount < 1 ? parseFloat(discount.toFixed(4)) : discount;
 
-  var data = {
-    date: date,
-    dueDate: dueDate,
-    client: client,
-    items: items,
-    cfdiUse: client.cfdiUse,
-    paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
-    anotation: order.folio,
-    stamp: {
-      generateStamp: true,
-    },
-    orderObject: order,
+const structuredItems = (discount, detail, product) => {
+  console.log('PRODUCT: ', product);
+  return {
+    ClaveProdServ: product.U_ClaveProdServ,
+    Cantidad: detail.quantity,
+    U_ClaveUnidad: product.U_ClaveUnidad,
+    Unidad: getUnitTypeByProduct(product.Service, product.U_ClaveUnidad),
+    ValorUnitario: detail.unitPrice / 1.16,
+    Descripcion: product.ItemName,
+    Descuento: parseFloat(discount.toFixed(4)),
   };
+};
 
-  data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
-  
-  return createInvoice(data);
-}
+const getUnitTypeByProduct = (service, U_ClaveUnidad) =>
+  service === 'Y' ? 'Unidad de servicio' : getUnitType(U_ClaveUnidad);
 
-function getAlegraPaymentType(alegraPaymentMethod, payments, order){
-  if(alegraPaymentMethod === 'other' || appliesForSpecialCashRule(payments, order)){
-    return 'PPD';
-  }
+const executeIfFunction = f => (f instanceof Function ? f() : f);
 
-  return 'PUE';
-}
+const switchcase = cases => defaultCase => key =>
+  cases.hasOwnProperty(key) ? cases[key] : defaultCase;
 
-function createInvoice(data) {
-  var orderObject = _.clone(data.orderObject);
-  delete data.orderObject;
+const switchcaseF = cases => defaultCase => key =>
+  executeIfFunction(switchcase(cases)(defaultCase)(key));
 
-  var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/invoices',
-    body: data,
-    headers: {
-      Authorization: 'Basic ' + token,
-    },
-    json: true,
-  };
+const getUnitType = U_ClaveUnidad =>
+  switchcaseF({
+    H87: () => 'Pieza',
+    SET: () => 'Conjunto',
+    E48: () => 'Unidad de servicio',
+  })('Pieza')(U_ClaveUnidad);
 
-  var log = {
-    User: orderObject.User,
-    Order: orderObject.id,
-    Store: orderObject.Store,
-    requestData: JSON.stringify(data),
-    url: options.uri
-  };
-
-  var resultAlegra;
-  var requestError;
-
-  return new Promise(function(resolve, reject){
-
-    AlegraLog.create(log)
-      .then(function(logCreated){
-        log.id = logCreated.id;
-        return request(options);
-      })
-      .then(function(result){
-        resultAlegra = result;
-        return AlegraLog.update({id:log.id}, {responseData: JSON.stringify(result)});
-      })
-      .then(function(logUpdated){
-        resolve(resultAlegra);
-      })
-      .catch(function(err){
-        requestError = err;
-        return AlegraLog.update({id:log.id}, {
-          responseData: JSON.stringify(err),
-          isError: true
-        });
-
-      })
-      .then(function(logUpdated){
-        reject(requestError);
-      });
-
-  });
-}
-
-
-function getHighestPayment(payments){
-  var highest = payments.reduce(function(prev, current){
-
-    var prevAmount = prev.currency === PaymentService.CURRENCY_USD ? 
-      PaymentService.calculateUSDPayment(prev, prev.exchangeRate) : prev.ammount;
-
-    var currentAmount = current.currency === PaymentService.CURRENCY_USD ? 
-      PaymentService.calculateUSDPayment(current, current.exchangeRate) : current.ammount;
-
-    return (prevAmount > currentAmount) ? prev : current;
-  });
-
-  return highest;
-}
-
-function appliesForSpecialCashRule(payments, order){
-  //Rule 20th April 2018
-  //When applying cash plus other payment method(except client balance or client credit)
-  //If cash is the main payment method
-  //and the total is 100k or above
-  
-  const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
-
-  if(payments.length > 1 && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT){
-    var highestPayment = getHighestPayment(payments);
-    if(highestPayment.type === PaymentService.types.CASH || highestPayment.type === PaymentService.types.CASH_USD){
-      return true;
-    }
-  }
-  return false;
-}
+const getWay = (paymentMethod, type) =>
+  switchcaseF({
+    cash: () => (paymentMethod = '01'),
+    'cash-usd': () => (paymentMethod = '01'),
+    deposit: () => (paymentMethod = '01'),
+    cheque: () => (paymentMethod = '02'),
+    'transfer-usd': () => (paymentMethod = '03'),
+    transfer: () => (paymentMethod = '03'),
+    'single-payment-terminal': () => (paymentMethod = '04'),
+    'credit-card': () => (paymentMethod = '04'),
+    '3-msi': () => (paymentMethod = '04'),
+    '3-msi-banamex': () => (paymentMethod = '04'),
+    '6-msi': () => (paymentMethod = '04'),
+    '6-msi-banamex': () => (paymentMethod = '04'),
+    '9-msi': () => (paymentMethod = '04'),
+    '9-msi-banamex': () => (paymentMethod = '04'),
+    '12-msi': () => (paymentMethod = '04'),
+    '12-msi-banamex': () => (paymentMethod = '04'),
+    '13-msi': () => (paymentMethod = '04'),
+    '18-msi': () => (paymentMethod = '04'),
+    ewallet: () => (paymentMethod = '05'),
+    'debit-card': () => (paymentMethod = '28'),
+    'client-balance': () => (paymentMethod = '99'),
+    'client-credit': () => (paymentMethod = '99'),
+  })(paymentMethod)(type);
 
 //Excludes CLIENT BALANCE and CREDIT CLIENT payments
-function getDirectPayments(payments){
-  return payments.filter(function(p){
-    return p.type !== PaymentService.CLIENT_BALANCE_TYPE && 
-      p.type !== PaymentService.types.CLIENT_CREDIT;
-  });
-}
+const getDirectPayments = payments =>
+  payments.filter(
+    p =>
+      p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
+      p.type !== PaymentService.types.CLIENT_CREDIT
+  );
 
-function getPaymentMethodBasedOnPayments(payments, order){
-  var paymentMethod = 'other';
+const ammountCompare = (currency, payment, ammount, exchangeRate) =>
+  currency === PaymentService.CURRENCY_USD
+    ? PaymentService.calculateUSDPayment(payment, exchangeRate)
+    : ammount;
+
+const getHighestPayment = payments => {
+  payments.reduce(
+    (prev, current) =>
+      ammountCompare(prev.currency, prev, prev.ammount, prev.exchangeRate) >
+      ammountCompare(
+        current.currency,
+        current,
+        current.ammount,
+        current.exchangeRate
+      )
+        ? prev
+        : current
+  );
+};
+
+/*
+Rule 20th April 2018
+When applying cash plus other payment method(except client balance or client credit)
+If cash is the main payment method
+and the total is 100k or above
+*/
+const appliesForSpecialCashRule = (
+  payments,
+  order,
+  INVOICE_AMOUNT_LIMIT_CONSTRAINT
+) =>
+  payments.length > 1 && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT
+    ? validatePaymentType(getHighestPayment(payments))
+    : false;
+
+const validatePaymentType = highestPayment =>
+  highestPayment.type === PaymentService.types.CASH ||
+  highestPayment.type === PaymentService.types.CASH_USD
+    ? true
+    : false;
+
+const getPaymentWay = (payments, order) => {
+  var paymentMethod = '99';
   var uniquePaymentMethod = payments[0];
   var directPayments = [];
 
-  if(payments.length > 1){
-    //Taking the highest payment as main, except the 
+  if (payments.length > 1) {
+    //Taking the highest payment as main, except the
     //client-credit and client balance payment type
     directPayments = getDirectPayments(payments);
 
-    if(directPayments.length === 0){
-      return 'other';
+    if (directPayments.length === 0) {
+      return '99';
     }
     uniquePaymentMethod = getHighestPayment(directPayments);
 
-    if(appliesForSpecialCashRule(payments, order)){
-      return 'other';
+    if (appliesForSpecialCashRule(payments, order, 100000)) {
+      return '99';
     }
   }
 
-  switch(uniquePaymentMethod.type){
-    case 'cash':
-    case 'cash-usd':
-    case 'deposit':
-      paymentMethod = 'cash';
-      break;
+  return getWay('99', uniquePaymentMethod.type);
+};
 
-    case 'transfer-usd':
-    case 'transfer':
-      paymentMethod = 'transfer';
-      break;
-    
-    case 'ewallet':
-      paymentMethod = 'electronic-wallet';
-      break;
-
-    case 'single-payment-terminal':
-    case 'credit-card':
-    case '3-msi':
-    case '3-msi-banamex':    
-    case '6-msi':
-    case '6-msi-banamex':    
-    case '9-msi':
-    case '9-msi-banamex':    
-    case '12-msi':
-    case '12-msi-banamex':
-    case '13-msi':
-    case '18-msi':
-      paymentMethod = 'credit-card';
-      break;
-    
-    case 'debit-card':
-      paymentMethod = 'debit-card';
-      break;
-
-    case 'cheque':
-      paymentMethod = 'check';
-      break;
-
-    case 'client-balance':
-      paymentMethod = 'other';
-      break;
-    case 'client-credit':
-      paymentMethod = 'other';
-      break;      
-    default:
-      paymentMethod = 'other';
-      break;
-  }
-
-  return paymentMethod;
-}
-
-function prepareClientParams(order, client, address){
-  var generic = !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
-  var data;
-  if (!generic) {
-    data = {
-      name: address.companyName,
-      identification: (client.LicTradNum || "").toUpperCase(),
-      email: address.U_Correos,
-      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
-      address: {
-        street: address.Street,
-        exteriorNumber: address.U_NumExt,
-        interiorNumber: address.U_NumInt,
-        colony: address.Block,
-        country: 'México',
-        state: address.State,
-        municipality:  address.U_Localidad,
-        localitiy: address.City,
-        zipCode: address.ZipCode,
-      }
-    };
-  } else {
-    data = {
-      name: order.CardName,
-      identification: FiscalAddressService.GENERIC_RFC,
-      cfdiUse: DEFAULT_CFDI_USE,
-      //email: order.E_Mail,
-      address: {
-        country: 'México',
-        state: order.U_Estado || 'Quintana Roo'
-        //TODO; Check default Inovice data for GENERAL PUBLIC
-      }
-    };
-  }  
-  return data;
-}
-
-function prepareClient(order, client, address) {
-  const data =  prepareClientParams(order, client, address);
-  return createClient(data);
-}
-
-function createClient(client) {
-  var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/contacts',
-    body: client,
-    headers: {
-      Authorization: 'Basic ' + token,
-    },
-    json: true,
-  };
-  return request(options);
-}
-
-function getUnitTypeByProduct(product){
-  if(product.Service === 'Y'){
-    return 'service';
-  }
-  switch(product.U_ClaveUnidad){
-    case 'H87':
-      return 'piece';
-    case 'SET':
-      return 'piece';
-    case 'E48':
-      return 'service';
-    default: 
-      return 'piece';
-  }
-}
-
-function prepareItems(details) {
-  var items = details.map(function(detail) {
-    var discount = detail.discountPercent ? detail.discountPercent : 0;
-    discount = Math.abs(discount);
-    if(discount < 1){
-      discount = parseFloat( discount.toFixed(4) );
-    }
-    var product = detail.Product;
-    return {
-      id: detail.id,
-      name: product.ItemName,
-      price: detail.unitPrice / 1.16,
-      //discount: discount,
-      discount: parseFloat((discount).toFixed(4)),
-      tax: [ {id: ALEGRA_IVA_ID} ],
-      productKey: product.U_ClaveProdServ,
-      quantity: detail.quantity,
-      inventory: {
-        unit: getUnitTypeByProduct(product),
-        unitCost: detail.unitPrice,
-        initialQuantity: detail.quantity
-      }
-    };
-  });
-
-  return Promise.mapSeries(items, function(item){
-    return createItemWithDelay(item);
-  });
-
-  //Use to instant requests instead of delaying the requests
-  //return Promise.all(createItems(items));
-}
-
-function createItemWithDelay(item){
-  var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/items',
-    body: item,
-    headers: {
-      Authorization: 'Basic ' + token,
-    },
-    json: true,
-  };
-  return promiseDelay(600,request(options)).then(function(ic) {
-    //console.log('item delayed ' + item.name, new Date());
-    return _.assign({}, item, { id: ic.id});
-  });  
-}
-
-function createItems(items) {
-  return items.map(function(item) {
-    var options = {
-      method: 'POST',
-      uri: 'https://app.alegra.com/api/v1/items',
-      body: item,
-      headers: {
-        Authorization: 'Basic ' + token,
-      },
-      json: true,
-    };
-    return request(options).then(function(ic) {
-      return _.assign({}, item, { id: ic.id});
-    });
-  });
-}
+const getPaymentMethod = (paymentWay, payments, order, toDefine) =>
+  paymentWay === toDefine || appliesForSpecialCashRule(payments, order, 100000)
+    ? 'PPD'
+    : 'PUE';
