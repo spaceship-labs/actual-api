@@ -112,22 +112,21 @@ module.exports = {
       });
       // await Email.sendOrderConfirmation(order.id);
       await Email.sendFreesale(order.id);
-      // console.log('order: ', order);
-      // console.log('client: ', order.Client);
-      // console.log('fiscalAddress: ', fiscalAddress);
-      // console.log('payments: ', order.Payments);
-      const invoice = await InvoiceService.createInvoice(
+      const {
+        data: invoice,
+        error: error,
+      } = await InvoiceService.createInvoice(
         order,
         order.Client,
         fiscalAddress,
         order.Payments,
         order.Details
       );
-      // console.log('INVOICE MADAFACKA: ', invoice);
+      console.log('INVOICE MADAFACKA: ', invoice);
       const invoiceCreated = await Invoice.create({
-        invoice_uid: invoice.Data.invoice_uid,
+        invoice_uid: invoice.invoice_uid,
         order: order.id,
-        folio: invoice.Data.INV.Folio,
+        folio: invoice.INV.Folio,
       });
       await StockService.syncOrderDetailsProducts(orderDetails);
       console.log('Email de orden enviado: ' + order.folio);

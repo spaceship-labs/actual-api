@@ -20,8 +20,6 @@ const axios = axiosD.create({
 
 module.exports = {
   async createInvoice(order, client, fiscalAddress, payments, details) {
-    const items = getItems(details);
-    console.log('ITEMS: ', items);
     return await axios.post(
       '/v3/cfdi33/create',
       await formatInvoice(order, client, fiscalAddress, payments, details)
@@ -40,9 +38,9 @@ const formatInvoice = async (
     UID: handleClient(await createClient(client, order.Client, fiscalAddress)),
   },
   TipoDocumento: 'factura',
-  Conceptos: getItems(details),
+  Conceptos: await getItems(details),
   UsoCFDI: client.cfdiUse,
-  Serie: 88409,
+  Serie: 1486,
   FormaPago: getPaymentWay(payments, order),
   MetodoPago: getPaymentMethod(
     getPaymentWay(payments, order),
@@ -51,7 +49,7 @@ const formatInvoice = async (
     '99'
   ),
   Moneda: 'MXN',
-  FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DD'),
+  FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DDTHH:mm:ss'),
 });
 
 const handleClient = ({ data: client, error: error }) =>
@@ -88,7 +86,8 @@ const formatClent = (client, data, fiscal) => ({
   ciudad: fiscal.City,
 });
 
-const getItems = details => formatItems(details);
+const getItems = async details =>
+  formatItems(await getDetailsProducts(details.map(detail => detail.id)));
 
 const getDetailsProducts = async ids =>
   await OrderDetail.find(ids).populate('Product');
@@ -110,18 +109,15 @@ const defineDiscount = discountPercent =>
 const parsingDiscount = discount =>
   discount < 1 ? parseFloat(discount.toFixed(4)) : discount;
 
-const structuredItems = (discount, detail, product) => {
-  console.log('PRODUCT: ', product);
-  return {
-    ClaveProdServ: product.U_ClaveProdServ,
-    Cantidad: detail.quantity,
-    U_ClaveUnidad: product.U_ClaveUnidad,
-    Unidad: getUnitTypeByProduct(product.Service, product.U_ClaveUnidad),
-    ValorUnitario: detail.unitPrice / 1.16,
-    Descripcion: product.ItemName,
-    Descuento: parseFloat(discount.toFixed(4)),
-  };
-};
+const structuredItems = (discount, detail, product) => ({
+  ClaveProdServ: product.U_ClaveProdServ,
+  Cantidad: detail.quantity,
+  ClaveUnidad: product.U_ClaveUnidad,
+  Unidad: getUnitTypeByProduct(product.Service, product.U_ClaveUnidad),
+  ValorUnitario: detail.unitPrice / 1.16,
+  Descripcion: product.ItemName,
+  Descuento: parseFloat(discount.toFixed(4)),
+});
 
 const getUnitTypeByProduct = (service, U_ClaveUnidad) =>
   service === 'Y' ? 'Unidad de servicio' : getUnitType(U_ClaveUnidad);
