@@ -12,6 +12,9 @@ module.exports = {
     newTab: {
       type: 'boolean',
     },
+    secondBanner: {
+      type: 'boolean',
+    },
     Site: {
       model: 'site',
     },
