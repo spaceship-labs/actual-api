@@ -25,6 +25,9 @@ module.exports = {
       await formatInvoice(order, client, fiscalAddress, payments, details)
     );
   },
+  async removeInvoice(cfdi_uid) {
+    return await axios.post(`/v3/cfdi33/${cfdi_uid}/cancel`);
+  },
 };
 
 const formatInvoice = async (

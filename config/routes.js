@@ -163,6 +163,11 @@ module.exports.routes = {
     action: 'find',
   },
 
+  'DELETE /invoice/:id': { 
+    controller: 'invoice', 
+    action: 'remove' 
+  },
+
   '/productcategory/find/:page': {
     controller: 'productcategory',
     action: 'find',

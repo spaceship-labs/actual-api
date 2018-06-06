@@ -9,11 +9,10 @@ module.exports = {
   create: function(req, res) {
     var form = req.allParams();
     var order = form.order;
-    Invoice
-      .findOne({ order: order })
+    Invoice.findOne({ order: order })
       .then(function(exists) {
         if (exists) throw new Error('invoice already exists');
-        return  InvoiceService.createOrderInvoice(order);
+        return InvoiceService.createOrderInvoice(order);
       })
       .then(function(invoice) {
         return res.json(invoice);
@@ -24,11 +23,11 @@ module.exports = {
           err = new Error(err.error.message);
           return res.json(400, err);
         }
-        if (err.error && err.error.error)  {
+        if (err.error && err.error.error) {
           err = new Error(err.error.error.message);
           return res.json(400, err);
         }
-        if (err.error)  {
+        if (err.error) {
           err = new Error(err.error);
           return res.json(400, err);
         }
@@ -39,8 +38,7 @@ module.exports = {
   find: function(req, res) {
     var form = req.allParams();
     var order = form.order;
-    Invoice
-      .find({ order: order })
+    Invoice.find({ order: order })
       .then(function(order) {
         return res.json(order);
       })
@@ -52,8 +50,7 @@ module.exports = {
   send: function(req, res) {
     var form = req.allParams();
     var order = form.order;
-    InvoiceService
-      .send(order)
+    InvoiceService.send(order)
       .then(function(order) {
         return res.json(order);
       })
@@ -62,16 +59,27 @@ module.exports = {
           err = new Error(err.error.message);
           return res.negotiate(err);
         }
-        if (err.error && err.error.error)  {
+        if (err.error && err.error.error) {
           err = new Error(err.error.error.message);
           return res.negotiate(err);
         }
-        if (err.error)  {
+        if (err.error) {
           err = new Error(err.error);
           return res.negotiate(err);
         }
         return res.negotiate(err);
       });
-  }
+  },
+  async remove(req, res) {
+    try {
+      const id = req.param('id');
+      const { invoice_uid } = await Invoice.findOne({ Order: id });
+      const {
+        data: invoice,
+        error: error,
+      } = await InvoiceService.removeInvoice(invoice_iud);
+      await Invoice.update({ cancelled: true });
+      res.ok({ message: 'Factura cancelada' });
+    } catch (err) {}
+  },
 };
-

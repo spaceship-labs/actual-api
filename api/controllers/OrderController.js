@@ -128,7 +128,7 @@ module.exports = {
         order: order.id,
         folio: invoice.INV.Folio,
       });
-      await StockService.syncOrderDetailsProducts(orderDetails);
+      // await StockService.syncOrderDetailsProducts(orderDetails);
       console.log('Email de orden enviado: ' + order.folio);
       // console.log('productsSynced', productsSynced);
       console.log('generated invoice', invoiceCreated);
