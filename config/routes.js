@@ -213,6 +213,17 @@ module.exports.routes = {
     action: 'getCategoriesTree',
   },
 
+  '/productcategory/childsrelations/:handle': {
+    controller: 'productcategory',
+    action: 'getCategoryChildsRelations'
+  },
+
+
+  '/productcategory/setchildsrelations/:handle': {
+    controller: 'productcategory',
+    action: 'setCategoryChildsRelations'
+  },
+
   '/productfilter/find/:page': {
     controller: 'productfilter',
     action: 'find',

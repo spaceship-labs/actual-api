@@ -159,7 +159,28 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });    
+  },
+
+  async getCategoryChildsRelations(req, res){
+    const {handle} = req.allParams();
+    const category = await ProductCategory.findOne({Handle: handle});
+    const relations = await CategoryParent_CategoryChild.find({parent: category.id}).populate('child');
+    return res.json(relations);
+  },
+
+  setCategoryChildsRelations: function(req, res){
+    const {handle, relations} = req.allParams();
+    //console.log('relations', relations);
+    Promise.mapSeries(relations, (relation) => {
+      return CategoryParent_CategoryChild.update({id: relation.id}, {position: relation.position});
+    }).then(function(results){
+      //console.log('results', results);
+      res.json({ok: true});
+    })
+
   }
+
+
 
 };
 
