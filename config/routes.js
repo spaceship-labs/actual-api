@@ -819,7 +819,10 @@ module.exports.routes = {
     controller: 'featuredproduct',
     action: 'remove',
   },
-
+  'GET /ewallet/:cardNumber': {
+    controller: 'ewallet',
+    action: 'show',
+  }
   /***************************************************************************
    *                                                                          *
    * Custom routes here...                                                    *
