@@ -24,6 +24,9 @@ module.exports.policies = {
   AuthController:{
     '*': true
   },
+  EwalletController:{
+    '*': true
+  },
   SiteController:{
     '*': ['isAuthenticated'],
     'generateSitesCashReport': ['isAuthenticated','isAdmin']

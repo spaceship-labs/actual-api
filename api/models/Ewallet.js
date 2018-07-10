@@ -11,7 +11,7 @@ module.exports = {
   attributes: {
     cardNumber: {
       type: 'string',
-      requiered: true
+      required: true
     },
     movement: {
       type: 'string',
