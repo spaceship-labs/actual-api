@@ -556,17 +556,17 @@ module.exports.routes = {
     action: 'getQuotationSapLogs',
   },
 
-  '/quotation/:id/payments': {
+  'GET /quotation/:id/payments': {
     controller: 'quotation',
     action: 'getQuotationPayments',
   },
 
-  '/payment/add/:quotationid': {
+  'POST /quotation/:quotationId/payments': {
     controller: 'payment',
     action: 'add',
   },
 
-  '/payment/cancel/:quotationId/:paymentId': {
+  '/payment/:id/cancel': {
     controller: 'payment',
     action: 'cancel',
   },
@@ -596,15 +596,20 @@ module.exports.routes = {
     action: 'find',
   },
 
-  '/order/createfromquotation/:quotationId': {
+  'POST /order': {
     controller: 'order',
-    action: 'createFromQuotation',
+    action: 'create',
     skipAssets: true,
   },
 
   '/order/findbyid/:id': {
     controller: 'order',
     action: 'findById',
+  },
+
+  'POST /order/:id/cancel':{
+    controller: 'order',
+    action: 'cancel'
   },
 
   '/order/user/:userId/totals': {
@@ -627,14 +632,9 @@ module.exports.routes = {
     action: 'update',
   },
 
-  '/me/cashreport': {
-    controller: 'me',
-    action: 'generateCashReport',
-  },
-
   '/me/managercashreport': {
     controller: 'me',
-    action: 'generateManagerCashReport',
+    action: 'managerCashReport',
   },
 
   '/promotion/create': {
@@ -717,11 +717,6 @@ module.exports.routes = {
     action: 'find',
   },
 
-  '/sites/cashreport': {
-    controller: 'site',
-    action: 'generateSitesCashReport',
-  },
-
   '/store/find': {
     controller: 'store',
     action: 'find',
@@ -742,14 +737,9 @@ module.exports.routes = {
     action: 'getSellersByStore',
   },
 
-  '/store/:id/cashreport': {
+  '/stores/globalcashreport': {
     controller: 'store',
-    action: 'generateStoreCashReport',
-  },
-
-  '/stores/cashreport': {
-    controller: 'store',
-    action: 'generatAllStoresCashReport',
+    action: 'generateGlobalCashReport',
   },
 
   '/common/states': {

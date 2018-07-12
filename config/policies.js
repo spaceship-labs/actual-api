@@ -18,8 +18,6 @@
 
 
 module.exports.policies = {
-
-
   '*': ['isAuthenticated'],
   AuthController:{
     '*': true
@@ -48,15 +46,18 @@ module.exports.policies = {
   },
   QuotationController:{
     addDetail: ['isAuthenticated', 'isSellerOrAdmin'],
-    update: ['isAuthenticated', 'isSellerOrAdmin'],
+    update: ['isAuthenticated', 'isAdminSellerOrManager'],
     create: ['isAuthenticated', 'isSellerOrAdmin'],
     removeDetailsGroup: ['isAuthenticated', 'isSellerOrAdmin'],
   },
   PaymentController:{
-    add: ['isAuthenticated', 'isSellerOrAdmin']
+    add: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isStoreManager']
   },
   OrderController:{
-    createFromQuotation: ['isAuthenticated', 'isSellerOrAdmin']
+    create: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isStoreManager']
+    //cancel: ['isAuthenticated', 'isAccountingUser']
   },
   ProductController:{
     find: ['isAuthenticated', 'isAllowed'],
@@ -83,14 +84,6 @@ module.exports.policies = {
   ProductFilterValueController:{
     getProducts: true
   },
-  ProductSearchController:{
-    /*
-    advancedSearch: true,
-    searchByFilters: true,
-    searchByCategory: true,
-    searchByFilterValues: true
-    */
-  },
   LoggingController: {
     find: true,
     create: true
@@ -109,11 +102,6 @@ module.exports.policies = {
   LocalController:{
     '*':true
   }
-  */
-
-
-  //Por ahora
-  //SyncController:{'*':true}
 
   /***************************************************************************
   *                                                                          *

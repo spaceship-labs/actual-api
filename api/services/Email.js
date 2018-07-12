@@ -117,7 +117,8 @@ function orderEmail(orderId) {
           folio: payment.folio,
           type: paymentType(payment),
           ammount: numeral(ammount).format('0,0.00'),
-          currency: payment.currency
+          currency: payment.currency,
+          status: PaymentService.mapStatusType(payment.status)
         };
       });
       var bewallet = client.ewallet;

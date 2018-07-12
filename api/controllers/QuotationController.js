@@ -5,9 +5,7 @@ var moment            = require('moment');
 module.exports = {
 
   async create(req, res){
-    var form = req.params.all();
-    var createdId;
-    
+    var form = req.params.all();    
     form.Details = formatProductsIds(form.Details);
     form.Store = req.user.activeStore.id;
     form.User = req.user.id;

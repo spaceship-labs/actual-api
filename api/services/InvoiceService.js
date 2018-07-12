@@ -39,6 +39,12 @@ function createOrderInvoice(orderId) {
       .populate('Payments')
       .then(function(order) {
         orderFound = order;
+
+        if(OrderService.isCanceled(order)){
+          reject(new Error('No es posible crear una factura ya que la orden esta cancelada'));
+          return;
+        }
+
         var client = order.Client;
         var details = order.Details.map(function(d) { return d.id; });
         var payments = order.Payments;
@@ -216,10 +222,10 @@ function createInvoice(data) {
 function getHighestPayment(payments){
   var highest = payments.reduce(function(prev, current){
 
-    var prevAmount = prev.currency === PaymentService.CURRENCY_USD ? 
+    var prevAmount = prev.currency === PaymentService.currencyTypes.USD ? 
       PaymentService.calculateUSDPayment(prev, prev.exchangeRate) : prev.ammount;
 
-    var currentAmount = current.currency === PaymentService.CURRENCY_USD ? 
+    var currentAmount = current.currency === PaymentService.currencyTypes.USD ? 
       PaymentService.calculateUSDPayment(current, current.exchangeRate) : current.ammount;
 
     return (prevAmount > currentAmount) ? prev : current;

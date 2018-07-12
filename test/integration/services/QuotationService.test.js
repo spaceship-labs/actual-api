@@ -1,5 +1,32 @@
 describe("QuotationService", function(){
   
+  describe("getGroupByQuotationPayments", function(){
+    it("should get the latest added payment group", function(){
+      const payments = [
+        {type:'cash', group: 1},        
+        {type:'debit-card', group: 1},
+        {type:'3-msi', group: 2}
+      ];
+      expect(QuotationService.getGroupByQuotationPayments(payments)).to.be.equal(2);
+    });
+
+    it("should get the latest added payment group, ignoring the canceled ones", function(){
+      const payments = [
+        {type:'cash', group: 1},        
+        {type:'debit-card', group: 1},
+        {type: 'cash', group: 1, status: 'canceled'},
+        {type:'9-msi', group: 3},
+        {type: 'cash', group: 1, status: 'canceled'},        
+      ];
+      expect(QuotationService.getGroupByQuotationPayments(payments)).to.be.equal(3);
+    });
+
+    it("should get group 1 as default if there are no payments", function(){
+      expect(QuotationService.getGroupByQuotationPayments()).to.be.equal(1);
+    });
+
+  });
+
   describe("Calculator", function(){
     
     describe("calculateFinancingPercentage", function(){

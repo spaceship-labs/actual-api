@@ -132,4 +132,28 @@ describe('Payment service', function(){
 
   });
 
+  describe('isCanceled', function(){
+    it('should return true if payment is canceled', function() {
+      var payment = { status: 'canceled' };
+      expect(PaymentService.isCanceled(payment)).to.be.equal(true);
+    });
+
+    it('should return false if payment is not canceled', function() {
+      var payment = { status: 'processed' };
+      expect(PaymentService.isCanceled(payment)).to.be.equal(false);
+    });
+  });
+
+  describe('mapStatusType', function(){
+    it('should return the correct label for canceled status type', function(){
+      const payment = {status: 'canceled'};
+      expect(PaymentService.mapStatusType(payment.status)).to.be.equal('Cancelado');
+    });
+
+    it('should return the same status as label when it is not recognized', function(){
+      const payment = {status: 'not.recognized'};
+      expect(PaymentService.mapStatusType(payment.status)).to.be.equal('not.recognized');
+    });
+  });
+
 });

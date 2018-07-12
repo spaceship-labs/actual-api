@@ -6,8 +6,8 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 
-const SAP_DATE_FORMAT = 'YYYY-MM-DD';
-const CLIENT_CARD_TYPE = 1; //1.Client, 2.Proveedor, 3.Lead
+const SAP_DATE_FORMAT  = 'YYYY-MM-DD';
+const CLIENT_CARD_TYPE = 1;//1.Client, 2.Proveedor, 3.Lead
 const CREATE_CONTACT_ACTION = 0;
 const UPDATE_CONTACT_ACTION = 1;
 
@@ -27,13 +27,18 @@ var reqOptions = {
 };
 
 module.exports = {
-  createContact: createContact,
-  createSaleOrder: createSaleOrder,
-  createClient: createClient,
-  updateClient: updateClient,
-  updateContact: updateContact,
-  updateFiscalAddress: updateFiscalAddress,
-  buildSaleOrderRequestParams: buildSaleOrderRequestParams,
+  createContact,
+  createSaleOrder,
+  createClient,
+  updateClient,
+  updateContact,
+  updateFiscalAddress,
+  buildSaleOrderRequestParams,
+  cancelOrder,
+
+  //EXPOSED FOR TESTING PURPOSES
+  mapPaymentsToSap,
+  SAP_DATE_FORMAT
 };
 
 function createClient(params) {
@@ -275,32 +280,30 @@ function getCompanyCode(code, storeGroup) {
   return companyCode;
 }
 
-function mapPaymentsToSap(payments, exchangeRate) {
-  payments = payments.filter(function(p) {
-    return (
-      p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
-      p.type !== PaymentService.types.CLIENT_CREDIT
-    );
+
+function mapPaymentsToSap(payments, exchangeRate){
+
+  /*Payments not sent to SAP:
+    - Client balance
+    - Client credit
+    - Canceled payments
+  */
+  payments = payments.filter(function(payment){
+    return payment.type !== PaymentService.CLIENT_BALANCE_TYPE && payment.type !== PaymentService.types.CLIENT_CREDIT && !PaymentService.isCanceled(payment);
   });
 
-  var paymentsTopSap = payments.map(function(payment) {
-    var DEFAULT_TERMINAL = 'banamex';
+  const paymentsTopSap = payments.map(function(payment){
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
       amount: payment.ammount,
     };
-    if (payment.currency === 'usd') {
+    if(payment.currency === PaymentService.currencyTypes.USD){
       paymentSap.rate = exchangeRate;
     }
     if (PaymentService.isCardPayment(payment)) {
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
-      /*
-      if(!payment.terminal){
-        payment.terminal = DEFAULT_TERMINAL;
-      }
-      */
     }
     if (payment.terminal) {
       paymentSap.Terminal = payment.terminal;
@@ -408,8 +411,24 @@ function buildAddressContactEndpoint(fields, cardcode) {
     U_Correos: fields.U_Correos,
     LicTradNum: fields.LicTradNum,
   };
-  field = _.omit(fields, _.isUndefined);
+  fields = _.omit(fields, _.isUndefined);
   path += '?address=' + encodeURIComponent(JSON.stringify(fields));
   path += '&contact=' + encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
+}
+
+function cancelOrder(quotationId){
+  const requestParams = {
+    QuotationId: quotationId
+  };
+  const endPoint = buildUrl(baseUrl,{
+    path: 'SalesOrder',
+    queryParams: requestParams
+  });
+  sails.log.info('cancel order');
+  sails.log.info(decodeURIComponent(endPoint));
+  reqOptions.uri = endPoint;
+  reqOptions.method = 'DELETE';
+  return request(reqOptions);
+
 }
