@@ -66,9 +66,9 @@ module.exports.paymentGroups = [
           {label:'Santander', value:'santander'}
         ],
         needsVerification: true,
-        group: 1        
-      },      
-      /*
+        group: 1
+      },
+
       {
         label:'Monedero electrónico',
         name:'Monedero electrónico',
@@ -78,7 +78,7 @@ module.exports.paymentGroups = [
         needsVerification: false,
         group: 1
       },
-      */
+
       /*
       */
       {
@@ -243,7 +243,7 @@ module.exports.paymentGroups = [
           'Banjercito',
           'Banorte',
           'Banregio',
-          'HSBC',          
+          'HSBC',
           'Inbursa',
           'Itaucard',
           'Invex Banco',
@@ -308,7 +308,7 @@ module.exports.paymentGroups = [
         needsVerification: true,
         mainCard: 'banamex',
         group: 4
-      },  
+      },
       {
         label:'12',
         name:'12 meses sin intereses',
@@ -347,13 +347,13 @@ module.exports.paymentGroups = [
         min: 1200,
         needsVerification: true,
         group: 4
-      },                
+      },
     ]
   },
   {
     group:5,
     discountKey:'discountPg5',
-    methods: [    
+    methods: [
       {
         label:'12',
         name:'12 meses sin intereses con Banamex',
@@ -412,7 +412,7 @@ module.exports.paymentGroups = [
         ],
         cards: [
           'Banamex'
-        ],        
+        ],
         terminals:[
           {label:'Banamex', value:'banamex'},
           //{label:'American Express', value:'american-express'},
