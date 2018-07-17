@@ -24,7 +24,8 @@ module.exports = {
       type: 'integer'
     },
     amount: {
-      type: 'integer'
+      type: 'float',
+			required: true,
     },
     Store:{
       model:'store'
