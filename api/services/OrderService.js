@@ -10,14 +10,12 @@ const statusTypes = {
   PAID: 'paid',
 };
 
-const validateifOrderExists = async (orderId, previousOrder) => {
-  if (previousOrder) {
-    const frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
-    const orderUrl = frontUrl + '/checkout/order/' + orderId;
-    throw new Error(
-      'Ya se ha creado un pedido sobre esta cotización : ' + orderUrl
-    );
-  }
+const validateifOrderExists = orderId => {
+  const frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
+  const orderUrl = frontUrl + '/checkout/order/' + orderId;
+  throw new Error(
+    'Ya se ha creado un pedido sobre esta cotización : ' + orderUrl
+  );
 };
 
 module.exports = {
@@ -26,8 +24,9 @@ module.exports = {
 
     const previousOrder = await Order.findOne({ Quotation: quotationId });
     //Validating if quotation doesnt have an order assigned
-    await validateifOrderExists(order.id, previousOrder);
-
+    if (previousOrder) {
+      validateifOrderExists(previousOrder.id);
+    }
     const isValidStock = await StockService.validateQuotationStockById(
       quotationId,
       currentUser.activeStore
@@ -81,7 +80,9 @@ module.exports = {
     }
 
     //Validating if quotation doesnt have an order assigned
-    await validateifOrderExists(order.id, quotation.Order);
+    if (quotation.Order) {
+      await validateifOrderExists(quotation.Order.id);
+    }
 
     if (!quotation.Details || quotation.Details.length === 0) {
       throw new Error('No hay productos en esta cotización');
@@ -188,7 +189,7 @@ module.exports = {
       orderId: orderCreated.id,
       quotationId: quotation.id,
       userId: quotation.User.id,
-      client: quotation.Client,
+      ewalletId: ewallet,
     };
 
     await processEwalletBalance(ewalletProcessBalanceParams);
@@ -212,6 +213,48 @@ module.exports = {
   statusTypes,
   isCanceled,
 };
+
+const processEwalletBalance = async ({
+  storeId,
+  orderId,
+  quotationId,
+  details,
+  userId,
+  ewalletId,
+}) => {
+  let ewalletRecords = [];
+  let generated = 0;
+  for (let i = 0; i < details.length; i++) {
+    generated += details[i].ewallet || 0;
+    if ((details[i].ewallet || 0) > 0) {
+      ewalletRecords.push({
+        Store: storeId,
+        Order: orderId,
+        Quotation: quotationId,
+        QuotationDetail: details[i].id,
+        User: userId,
+        amount: details[i].ewallet,
+        movement: 'increase',
+      });
+    }
+  }
+
+  const ewalletRecordsCreated = await Promise.each(
+    ewalletRecords,
+    createEwalletRecord
+  );
+
+  const ewalletRecordsIds = ewalletRecordsCreated.map(
+    ewalletRecord => ewalletRecord.id
+  );
+
+  await Ewallet.update(
+    { id: ewalletId },
+    { EwalletRecord: ewalletRecordsIds, amount: generated }
+  );
+};
+
+const createEwalletRecord = async record => await EwalletRecord.create(record);
 
 function getCountByUser(form) {
   var userId = form.userId;
@@ -508,32 +551,6 @@ function extractBalanceFromSapResult(sapResult) {
     Client (object)
   }
 */
-function processEwalletBalance(params) {
-  var ewalletRecords = [];
-  var generated = 0;
-  for (var i = 0; i < params.details.length; i++) {
-    generated += params.details[i].ewallet || 0;
-    if ((params.details[i].ewallet || 0) > 0) {
-      ewalletRecords.push({
-        Store: params.storeId,
-        Order: params.orderId,
-        Quotation: params.quotationId,
-        QuotationDetail: params.details[i].id,
-        User: params.userId,
-        Client: params.Client.id,
-        amount: params.details[i].ewallet,
-        movement: params.movementType,
-      });
-    }
-  }
-  return Client.update({ id: params.clientId }, { ewallet: generated }).then(
-    function(clientUpdated) {
-      return Promise.each(ewalletRecords, createEwalletRecord);
-    }
-  );
-}
-
-const createEwalletRecord = async record => await EwalletRecord.create(record);
 
 function getPaidPercentage(amountPaid, total) {
   var percentage = amountPaid / (total / 100);

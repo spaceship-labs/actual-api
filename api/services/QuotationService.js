@@ -308,6 +308,15 @@ function Calculator() {
     return result;
   }
 
+
+  const calculateEwalletAmount = (group, total, promotion) => {
+    if (promotion[`ewalletTypePg${group}`] === 'ammount') {
+      return promotion[`ewalletPg${group}`];
+    } else if (promotion[`ewalletTypePg${group}`] === 'percentage'){
+      return total * (promotion[`ewalletPg${group}`] / 100);
+    }
+  }
+
   //@params: detail Object from model Detail
   async function getDetailTotals(detail, options = {}) {
     const productId = detail.Product;
@@ -315,9 +324,9 @@ function Calculator() {
     const quotationId = detail.Quotation;
     const product = await Product.findOne({ id: productId });
     const mainPromo = await getProductMainPromo(product, quantity, quotationId);
-
+    const {paymentGroup} = options;
     const unitPrice = product.Price;
-    const discountKey = getDiscountKeyByGroup(options.paymentGroup);
+    const discountKey = getDiscountKeyByGroup(paymentGroup);
     const discountPercent = mainPromo ? mainPromo[discountKey] : 0;
     const discountPercentPromos = discountPercent;
     const unitPriceWithDiscount = calculateAfterDiscount(
@@ -334,8 +343,7 @@ function Calculator() {
       : null;
     const discount = total - subtotal;
 
-    //TODO: Reactivate ewallet
-    const ewallet = 0;
+    const ewallet = calculateEwalletAmount(paymentGroup, total, mainPromo);
 
     //Calculate financing cost
     if (mainPromo) {
@@ -365,7 +373,7 @@ function Calculator() {
       discountName,
       ewallet,
       isFreeSale: StockService.isFreeSaleProduct(product),
-      paymentGroup: options.paymentGroup,
+      paymentGroup: paymentGroup,
       PromotionPackageApplied: null,
       quantity,
       subtotal,
