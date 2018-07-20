@@ -11,39 +11,15 @@ module.exports = {
   attributes: {
     cardNumber: {
       type: 'string',
-      required: true
-    },
-    movement: {
-      type: 'string',
-      enum: ['increase', 'decrease']
-    },
-    increase: {
-      type: 'integer'
-    },
-    decrease : {
-      type: 'integer'
+      required: true,
     },
     amount: {
       type: 'float',
-			required: true,
+      required: true,
     },
-    Store:{
-      model:'store'
-    },
-    Order:{
-      model:'Order'
-    },
-    Quotation:{
-      model:'Quotation'
-    },
-    QuotationDetail:{
-      model:'QuotationDetail'
-    },
-    User:{
-      model:'User'
-    },
-    Payment:{
-      model: 'Payment'
+    Records: {
+      collection:'EwalletRecord',
+      via:'Ewallet',
     }
   }
 };

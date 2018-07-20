@@ -1,15 +1,15 @@
 module.exports = {
 	schema: true,
   migrate:'alter',
-	attributes:{
-		type:{
-			type:'string',
-			enum:['positive', 'negative']
-		},
-		amount:{
-			type:'float',
-			required:true
-		},
+	attributes: {
+    movement: {
+      type: 'string',
+      enum: ['increase', 'decrease']
+    },
+    amount: {
+      type: 'float',
+			required: true,
+    },
     Store:{
       model:'store'
     },
@@ -25,11 +25,11 @@ module.exports = {
     User:{
       model:'User'
     },
-    Client:{
-    	model: 'Client'
-    },
     Payment:{
       model: 'Payment'
+    },
+    Ewallet: {
+      model: 'Ewallet'
     }
-	}
+  }
 }

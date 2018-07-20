@@ -65,11 +65,5 @@ module.exports = {
       via: 'Client',
     },
 
-    EwalletRecords: {
-      collection:'EwalletRecord',
-      via: 'Client',
-    }
-
-
   }
 };
