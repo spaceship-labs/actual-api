@@ -9,10 +9,10 @@ const CASH_USD_TYPE = 'cash-usd';
 const TRANSFER_USD_TYPE = 'transfer-usd';
 const CLIENT_BALANCE_TYPE = 'client-balance';
 const EWALLET_GROUP_INDEX = 0;
-const DEFAULT_EXCHANGE_RATE   = 18.78;
+const DEFAULT_EXCHANGE_RATE = 18.78;
 const types = {
   CREDIT_CARD: 'credit-card',
-  DEBIT_CARD:'debit-card',
+  DEBIT_CARD: 'debit-card',
   SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal',
   CLIENT_CREDIT: 'client-credit',
   MSI_12: '12-msi',
@@ -20,21 +20,18 @@ const types = {
   TRANSFER_USD: 'transfer-usd',
   DEPOSIT: 'deposit',
   CASH: 'cash',
-  CASH_USD: 'cash-usd'
+  CASH_USD: 'cash-usd',
 };
 
-const LEGACY_METHODS_TYPES = [
-  types.SINGLE_PAYMENT_TERMINAL,
-  types.DEPOSIT,
-];
+const LEGACY_METHODS_TYPES = [types.SINGLE_PAYMENT_TERMINAL, types.DEPOSIT];
 
 const statusTypes = {
-  CANCELED: 'canceled'
+  CANCELED: 'canceled',
 };
 
 const currencyTypes = {
   USD: 'usd',
-  MXN: 'mxn'
+  MXN: 'mxn',
 };
 
 const VALID_STORES_CODES = [
@@ -44,7 +41,7 @@ const VALID_STORES_CODES = [
   'actual_studio_playa_del_carmen',
   'actual_studio_merida',
   'actual_puerto_cancun',
-  'actual_proyect'
+  'actual_proyect',
 ];
 
 module.exports = {
@@ -77,7 +74,7 @@ module.exports = {
   types,
   statusTypes,
   currencyTypes,
-  mapStatusType
+  mapStatusType,
 };
 
 function mapStatusType(status) {
@@ -90,14 +87,16 @@ function isCanceled(payment) {
   return payment.status === statusTypes.CANCELED;
 }
 
-function isCardPayment(payment){
-  return payment.type === types.SINGLE_PAYMENT_TERMINAL
-   || payment.type === types.CREDIT_CARD
-   || payment.type === types.DEBIT_CARD
-   || payment.msi;
+function isCardPayment(payment) {
+  return (
+    payment.type === types.SINGLE_PAYMENT_TERMINAL ||
+    payment.type === types.CREDIT_CARD ||
+    payment.type === types.DEBIT_CARD ||
+    payment.msi
+  );
 }
 
-function isTransferPayment(payment){
+function isTransferPayment(payment) {
   return payment.type === types.TRANSFER || payment.type === types.TRANSFER_USD;
 }
 
@@ -109,33 +108,46 @@ function isTransferOrDeposit(payment) {
   );
 }
 
-async function addPayment(params, req){
+async function addPayment(params, req) {
   const quotationId = params.quotationId;
   const paymentGroup = params.group || 1;
 
-  if( (isCardPayment(params) || isTransferPayment(params) ) && !params.terminal){
-    throw new Error("Es necesario asignar una terminal a este tipo de pago");
+  if (
+    (isCardPayment(params) || isTransferPayment(params)) &&
+    !params.terminal
+  ) {
+    throw new Error('Es necesario asignar una terminal a este tipo de pago');
   }
 
   const storeCode = req.user.activeStore.code;
 
   params.Quotation = quotationId;
   params.Store = req.user.activeStore.id;
-  params.User = req.user.id;    
+  params.User = req.user.id;
 
-  if(VALID_STORES_CODES.indexOf(storeCode) === -1 && process.env.MODE === 'production'){
-    throw new Error("La creación de pedidos para esta tienda esta deshabilitada");
+  if (
+    VALID_STORES_CODES.indexOf(storeCode) === -1 &&
+    process.env.MODE === 'production'
+  ) {
+    throw new Error(
+      'La creación de pedidos para esta tienda esta deshabilitada'
+    );
   }
 
-  const isValidStock = await StockService.validateQuotationStockById(quotationId, req.user.activeStore);
-  if(!isValidStock){
+  const isValidStock = await StockService.validateQuotationStockById(
+    quotationId,
+    req.user.activeStore
+  );
+  if (!isValidStock) {
     throw new Error('Inventario no suficiente');
   }
 
   var quotation;
-  if(params.type === EWALLET_TYPE || params.type === CLIENT_BALANCE_TYPE){
-    quotation = await Quotation.findOne(params.Quotation).populate('Payments').populate('Client');
-  }else{
+  if (params.type === EWALLET_TYPE || params.type === CLIENT_BALANCE_TYPE) {
+    quotation = await Quotation.findOne(params.Quotation)
+      .populate('Payments')
+      .populate('Client');
+  } else {
     quotation = await Quotation.findOne(params.Quotation).populate('Payments');
   }
 
@@ -144,19 +156,31 @@ async function addPayment(params, req){
   const previousPayments = quotation.Payments;
   let hasEnoughFunds;
 
-  if(params.type === EWALLET_TYPE){
-    hasEnoughFunds = await EwalletService.isValidEwalletPayment(params, params.Client);
+
+  const ewalletId = params.ewallet;
+  const ewallet = await Ewallet.findOne({ id: ewalletId });
+  if (params.type === EWALLET_TYPE) {
+    console.log('params.ammount: ', params.ammount);
+    console.log('ewallet.amount: ', ewallet.amount);
+    hasEnoughFunds = await EwalletService.isValidEwalletPayment(
+      params.ammount,
+      ewallet.amount
+    );
+    console.log('QUE PEDO: ', hasEnoughFunds);
   }
 
-  if(params.type === CLIENT_BALANCE_TYPE){
-    hasEnoughFunds = await ClientBalanceService.isValidClientBalancePayment(params, params.Client);
+  if (params.type === CLIENT_BALANCE_TYPE) {
+    hasEnoughFunds = await ClientBalanceService.isValidClientBalancePayment(
+      params,
+      params.Client
+    );
   }
 
-  if(params.type === EWALLET_TYPE && !hasEnoughFunds){
+  if (params.type === EWALLET_TYPE && !hasEnoughFunds) {
     throw new Error('Fondos insuficientes en monedero electronico');
   }
 
-  if(params.type === CLIENT_BALANCE_TYPE && !hasEnoughFunds){
+  if (params.type === CLIENT_BALANCE_TYPE && !hasEnoughFunds) {
     throw new Error('Fondos insuficientes en balance de cliente');
   }
 
@@ -165,104 +189,144 @@ async function addPayment(params, req){
     currentStoreId: req.user.activeStore.id,
     paymentGroup: paymentGroup,
     update: false,
-    financingTotals: true
+    financingTotals: true,
   };
 
   const exchangeRate = await getExchangeRate();
-  const quotationTotals = await calculator.getQuotationTotals(params.Quotation ,calculatorParams);
+  const quotationTotals = await calculator.getQuotationTotals(
+    params.Quotation,
+    calculatorParams
+  );
   const quotationTotal = quotationTotals.total;
-  
-  if(typeof params.Client === 'string' && params.type === types.CLIENT_CREDIT){
+
+  if (
+    typeof params.Client === 'string' &&
+    params.type === types.CLIENT_CREDIT
+  ) {
     const hasCredit = await checkIfClientHasCreditById(params.Client);
-    if(!hasCredit){
+    if (!hasCredit) {
       throw new Error('Este cliente no cuenta con crédito como forma de pago');
     }
   }
 
   var newPaymentAmount;
-  const previousAmountPaid = await calculatePaymentsTotal(previousPayments, exchangeRate);
+  const previousAmountPaid = await calculatePaymentsTotal(
+    previousPayments,
+    exchangeRate
+  );
   const ROUNDING_AMOUNT = 1;
-  const quotationRemainingAmount = (quotationTotal - previousAmountPaid) + ROUNDING_AMOUNT;
+  const quotationRemainingAmount =
+    quotationTotal - previousAmountPaid + ROUNDING_AMOUNT;
 
-  if(params.currency === currencyTypes.USD){
+  if (params.currency === currencyTypes.USD) {
     newPaymentAmount = calculateUSDPayment(params, exchangeRate);
-  }else{
+  } else {
     newPaymentAmount = params.ammount;
   }
 
-  if(newPaymentAmount > quotationRemainingAmount){
+  if (newPaymentAmount > quotationRemainingAmount) {
     throw new Error('No es posible pagar mas del 100% del pedido');
   }
 
-  const paymentCreated = await Payment.create(params);
+  let paymentsParams = { ...params };
+  delete paymentsParams.ewallet;
+
+  console.log('paymentsParams: ', paymentsParams);
+
+  const paymentCreated = await Payment.create(paymentsParams);
   const quotationPayments = quotation.Payments.concat([paymentCreated]);
 
-  const ammountPaid = await calculatePaymentsTotal(quotationPayments, exchangeRate);
-  const ammountPaidPg1 = await calculatePaymentsTotalPg1(quotationPayments, exchangeRate);
+  const ammountPaid = await calculatePaymentsTotal(
+    quotationPayments,
+    exchangeRate
+  );
+  const ammountPaidPg1 = await calculatePaymentsTotalPg1(
+    quotationPayments,
+    exchangeRate
+  );
 
-  if(params.type === EWALLET_TYPE){
+  if (params.type === EWALLET_TYPE) {
     const ewalletConfig = {
       quotationId: quotationId,
       userId: req.user.id,
       client: client,
-      paymentId: paymentCreated.id
+      paymentId: paymentCreated.id,
     };
-    const appliedEwalletRecord = await EwalletService.applyEwalletRecord(params,ewalletConfig);
+    const appliedEwalletRecord = await EwalletService.applyEwalletRecord(
+      params,
+      ewalletConfig,
+      ewallet.amount,
+      ewallet.id
+    );
   }
 
-  if(params.type === CLIENT_BALANCE_TYPE){
+  if (params.type === CLIENT_BALANCE_TYPE) {
     const clientBalanceConfig = {
       quotationId: quotationId,
       userId: req.user.id,
       client: client,
-      paymentId: paymentCreated.id              
+      paymentId: paymentCreated.id,
     };
-    const appliedClientBalanceRecord = await ClientBalanceService.applyClientBalanceRecord(params, clientBalanceConfig)
-  }        
+    const appliedClientBalanceRecord = await ClientBalanceService.applyClientBalanceRecord(
+      params,
+      clientBalanceConfig
+    );
+  }
 
   const quotationUpdateParams = {
     ammountPaid: ammountPaid,
     ammountPaidPg1: ammountPaidPg1,
-    paymentGroup: paymentGroup
+    paymentGroup: paymentGroup,
   };
-  
-  const findCriteria = {_id: new ObjectId(quotationId)};       
+
+  const findCriteria = { _id: new ObjectId(quotationId) };
   await Common.nativeUpdateOne(findCriteria, quotationUpdateParams, Quotation);
 
   return paymentCreated;
 }
 
-async function cancel(paymentId){
-  const query = {id: paymentId, Order: null};
-  const updateParams = {status: statusTypes.CANCELED};
+async function cancel(paymentId) {
+  const query = { id: paymentId, Order: null };
+  const updateParams = { status: statusTypes.CANCELED };
   const updatedPayments = await Payment.update(query, updateParams);
-  if(updatedPayments){
-    const payment = _.findWhere(updatedPayments, {id: paymentId});
+  if (updatedPayments) {
+    const payment = _.findWhere(updatedPayments, { id: paymentId });
     const quotationId = payment.Quotation;
 
-    const quotation = await Quotation.findOne({id: quotationId}).populate('Payments');
+    const quotation = await Quotation.findOne({ id: quotationId }).populate(
+      'Payments'
+    );
     const exchangeRate = await getExchangeRate();
-    const ammountPaid = await calculatePaymentsTotal(quotation.Payments, exchangeRate);
-    const ammountPaidPg1 = await calculatePaymentsTotalPg1(quotation.Payments, exchangeRate);
-    const findCriteria = {_id: new ObjectId(quotationId)};
+    const ammountPaid = await calculatePaymentsTotal(
+      quotation.Payments,
+      exchangeRate
+    );
+    const ammountPaidPg1 = await calculatePaymentsTotalPg1(
+      quotation.Payments,
+      exchangeRate
+    );
+    const findCriteria = { _id: new ObjectId(quotationId) };
     const updateQuotationParams = {
       ammountPaid,
-      ammountPaidPg1
+      ammountPaidPg1,
     };
-    await Common.nativeUpdateOne(findCriteria, updateQuotationParams, Quotation);
+    await Common.nativeUpdateOne(
+      findCriteria,
+      updateQuotationParams,
+      Quotation
+    );
     return payment;
-
   }
-  throw new Error("No es posible cancelar el pago");
+  throw new Error('No es posible cancelar el pago');
 }
 
-function calculatePaymentsTotal(payments = [], exchangeRate){
-  if(payments.length === 0) return 0;
-  const total = payments.reduce(function(acum, payment){
-    if(!isCanceled(payment)){
-      if(payment.currency === currencyTypes.USD) {
+function calculatePaymentsTotal(payments = [], exchangeRate) {
+  if (payments.length === 0) return 0;
+  const total = payments.reduce(function(acum, payment) {
+    if (!isCanceled(payment)) {
+      if (payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
-      }else { 
+      } else {
         acum += payment.ammount;
       }
     }
@@ -272,35 +336,39 @@ function calculatePaymentsTotal(payments = [], exchangeRate){
   return total;
 }
 
-function calculatePaymentsTotalPg1(payments = [], exchangeRate){
-  const paymentsG1 = _.where(payments,{group: 1});
-  if(!paymentsG1 || paymentsG1.length === 0){
+function calculatePaymentsTotalPg1(payments = [], exchangeRate) {
+  const paymentsG1 = _.where(payments, { group: 1 });
+  if (!paymentsG1 || paymentsG1.length === 0) {
     return 0;
   }
-  const totalG1 = paymentsG1.reduce(function(acum, payment){
-    if(!isCanceled(payment)){
-      if(payment.currency === currencyTypes.USD) {
+  const totalG1 = paymentsG1.reduce(function(acum, payment) {
+    if (!isCanceled(payment)) {
+      if (payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
-      }else { 
+      } else {
         acum += payment.ammount;
       }
     }
     return acum;
   }, 0);
-  
+
   return totalG1;
 }
 
-function calculateUSDPayment(payment, exchangeRate){
+function calculateUSDPayment(payment, exchangeRate) {
   return payment.ammount * exchangeRate;
 }
 
-async function getExchangeRate(){
-  const site = await Common.nativeFindOne({handle:'actual-group'}, Site);
+async function getExchangeRate() {
+  const site = await Common.nativeFindOne({ handle: 'actual-group' }, Site);
   return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
 }
 
-async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}){
+async function getQuotationTotalsByMethod(
+  quotationId,
+  activeStore,
+  options = {}
+) {
   var paymentGroups = cloneDeep(sails.config.paymentGroups);
   const discountKeys = sails.config.discountKeys;
 
@@ -309,7 +377,7 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
       financingTotals: options.financingTotals,
       update: false,
       paymentGroup: paymentGroup.group,
-      currentStoreId: activeStore.id
+      currentStoreId: activeStore.id,
     };
     const calculator = QuotationService.Calculator();
     return calculator.getQuotationTotals(quotationId, params);
@@ -317,24 +385,26 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
 
   var totalsByGroup = await Promise.all(getTotalsPromises);
   const exchangeRate = await getExchangeRate();
-  const clientHasCredit = await checkIfClientHasCreditByQuotationId(quotationId);
+  const clientHasCredit = await checkIfClientHasCreditByQuotationId(
+    quotationId
+  );
 
-  if( isADiscountClient(totalsByGroup) || clientHasCredit){
+  if (isADiscountClient(totalsByGroup) || clientHasCredit) {
     totalsByGroup = filterPaymentTotalsForDiscountClients(totalsByGroup);
     paymentGroups = filterMethodsGroupsForDiscountClients(paymentGroups);
   }
 
-  if(clientHasCredit){
+  if (clientHasCredit) {
     paymentGroups = addCreditMethod(paymentGroups);
-  }else{
+  } else {
     paymentGroups = removeCreditMethod(paymentGroups);
   }
 
-  paymentGroups = paymentGroups.map(function(paymentGroup, index){
+  paymentGroups = paymentGroups.map(function(paymentGroup, index) {
     paymentGroup.total = totalsByGroup[index].total || 0;
     paymentGroup.subtotal = totalsByGroup[index].subtotal || 0;
     paymentGroup.discount = totalsByGroup[index].discount || 0;
-    paymentGroup.methods = paymentGroup.methods.map(function(method){
+    paymentGroup.methods = paymentGroup.methods.map(function(method) {
       const discountKey = discountKeys[paymentGroup.group - 1];
       method.discountKey = discountKey;
       method.total = paymentGroup.total;
@@ -342,11 +412,10 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
       method.discount = paymentGroup.discount;
       method.exchangeRate = exchangeRate;
 
-      if(method.type === CASH_USD_TYPE){
-        const exchangeRateString  = numeral(exchangeRate).format('0,0.00');
-        method.description = 'Tipo de cambio '+ exchangeRateString +' MXN';
-      }
-      else if(method.type === EWALLET_TYPE){
+      if (method.type === CASH_USD_TYPE) {
+        const exchangeRateString = numeral(exchangeRate).format('0,0.00');
+        method.description = 'Tipo de cambio ' + exchangeRateString + ' MXN';
+      } else if (method.type === EWALLET_TYPE) {
         //var balance = vm.quotation.Client.ewallet || 0;
         //m.description = getEwalletDescription(balance);
       }
@@ -355,11 +424,11 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
 
     return paymentGroup;
   });
-  
+
   const currentDate = new Date();
   const query = {
-    startDate: {'<=': currentDate},
-    endDate: {'>=': currentDate},
+    startDate: { '<=': currentDate },
+    endDate: { '>=': currentDate },
   };
   const validMethods = await PMPeriod.findOne(query);
   const activeKeys = sails.config.paymentGroupsKeys;
@@ -371,77 +440,89 @@ async function getQuotationTotalsByMethod(quotationId, activeStore, options = {}
   return paymentGroups;
 }
 
-function isADiscountClient(paymentTotals){
-  return _.some(paymentTotals, function(paymentTotal){
+function isADiscountClient(paymentTotals) {
+  return _.some(paymentTotals, function(paymentTotal) {
     return paymentTotal.appliesClientDiscount;
   });
 }
 
-async function checkIfClientHasCreditByQuotationId(quotationId){
-  const quotation = await Quotation.findOne({id: quotationId}).populate('Client');
-  if(!quotation || !quotation.Client){
+async function checkIfClientHasCreditByQuotationId(quotationId) {
+  const quotation = await Quotation.findOne({ id: quotationId }).populate(
+    'Client'
+  );
+  if (!quotation || !quotation.Client) {
     return false;
   }
   const currentDate = new Date();
   const creditQuery = {
     Name: quotation.Client.CardCode,
-    U_Vigencia: {'>=': currentDate}
+    U_Vigencia: { '>=': currentDate },
   };
   const credit = await ClientCredit.findOne(creditQuery);
-  if( credit && !_.isUndefined(credit) ){
+  if (credit && !_.isUndefined(credit)) {
     return credit;
   }
   return false;
 }
 
-async function checkIfClientHasCreditById(clientId){
-  const client = await Client.findOne({id: clientId});
-  if(!client){
+async function checkIfClientHasCreditById(clientId) {
+  const client = await Client.findOne({ id: clientId });
+  if (!client) {
     return false;
   }
   const currentDate = new Date();
   const creditQuery = {
     Name: client.CardCode,
-    U_Vigencia: {'>=': currentDate}
+    U_Vigencia: { '>=': currentDate },
   };
   const credit = await ClientCredit.findOne(creditQuery);
   sails.log.info('credit', credit);
-  if( credit && !_.isUndefined(credit) ){
+  if (credit && !_.isUndefined(credit)) {
     return credit;
-  }    
+  }
 
   return false;
 }
 
-function filterPaymentTotalsForDiscountClients(paymentTotals){
-  return paymentTotals.filter(function(paymentTotal){
+function filterPaymentTotalsForDiscountClients(paymentTotals) {
+  return paymentTotals.filter(function(paymentTotal) {
     return paymentTotal.paymentGroup === 1;
   });
 }
 
-function filterMethodsGroupsForDiscountClients(methodsGroups){
-  return methodsGroups.filter(function(mg){
+function filterMethodsGroupsForDiscountClients(methodsGroups) {
+  return methodsGroups.filter(function(mg) {
     return mg.group === 1;
   });
 }
 
 async function getPaymentGroupsForEmail(quotationId, activeStore) {
-  var paymentGroups = await getQuotationTotalsByMethod(quotationId, activeStore)
-  
-  const fixedMethods = [{
-    name: '1 pago de contado',
-    cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
-    total: numeral(paymentGroups[0].total).format('0,0.00'),
-  }];
+  var paymentGroups = await getQuotationTotalsByMethod(
+    quotationId,
+    activeStore
+  );
+
+  const fixedMethods = [
+    {
+      name: '1 pago de contado',
+      cards:
+        'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
+      total: numeral(paymentGroups[0].total).format('0,0.00'),
+    },
+  ];
   paymentGroups = paymentGroups.slice(1);
 
-  const methodsForEmail  = paymentGroups.reduce(function(acum, current) {
+  const methodsForEmail = paymentGroups.reduce(function(acum, current) {
     var grouped = _.groupBy(current.methods, 'mainCard');
     for (var k in grouped) {
-      var msi = _.every(grouped[k], function(method) { return method.msi; });
+      var msi = _.every(grouped[k], function(method) {
+        return method.msi;
+      });
       var merged = grouped[k].reduce(function(a, b) {
         return {
-          name:  msi ? [a.msi, b.msi].join(', ') + ' Meses sin intereses' : [a.name, b.name].join(', '),
+          name: msi
+            ? [a.msi, b.msi].join(', ') + ' Meses sin intereses'
+            : [a.name, b.name].join(', '),
           cards: a.cards,
           total: a.total,
         };
@@ -460,22 +541,24 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
   return fixedMethods.concat(methodsForEmailFormatted);
 }
 
-function getPaymentGroups(options = {}){
+function getPaymentGroups(options = {}) {
   let paymentGroups = cloneDeep(sails.config.paymentGroups);
-  if(options.readLegacyMethods){
+  if (options.readLegacyMethods) {
     paymentGroups = addLegacyMethods(paymentGroups);
   }
-  if(options.readCreditMethod){
+  if (options.readCreditMethod) {
     paymentGroups = addCreditMethod(paymentGroups);
   }
   return paymentGroups;
 }
 
-function addCreditMethod(methodsGroups){
-  return methodsGroups.map(function(mg){
-    if(mg.group === 1){
-      var isCreditMethodAdded = _.findWhere(mg.methods,{type: types.CLIENT_CREDIT});
-      if(!isCreditMethodAdded){
+function addCreditMethod(methodsGroups) {
+  return methodsGroups.map(function(mg) {
+    if (mg.group === 1) {
+      var isCreditMethodAdded = _.findWhere(mg.methods, {
+        type: types.CLIENT_CREDIT,
+      });
+      if (!isCreditMethodAdded) {
         mg.methods.unshift(CREDIT_METHOD);
       }
     }
@@ -483,11 +566,13 @@ function addCreditMethod(methodsGroups){
   });
 }
 
-function addSinglePaymentTerminalMethod(methodsGroups){
-  return methodsGroups.map(function(mg){
-    if(mg.group === 1){
-      var isSinglePaymentMethodADDED = _.findWhere(mg.methods,{type: types.SINGLE_PAYMENT_TERMINAL});
-      if(!isSinglePaymentMethodADDED){
+function addSinglePaymentTerminalMethod(methodsGroups) {
+  return methodsGroups.map(function(mg) {
+    if (mg.group === 1) {
+      var isSinglePaymentMethodADDED = _.findWhere(mg.methods, {
+        type: types.SINGLE_PAYMENT_TERMINAL,
+      });
+      if (!isSinglePaymentMethodADDED) {
         mg.methods.unshift(SINGLE_PAYMENT_TERMINAL_METHOD);
       }
     }
@@ -495,11 +580,13 @@ function addSinglePaymentTerminalMethod(methodsGroups){
   });
 }
 
-function addDepositMethod(methodsGroups){
-  return methodsGroups.map(function(mg){
-    if(mg.group === 1){
-      var isSinglePaymentMethodADDED = _.findWhere(mg.methods,{type: types.DEPOSIT});
-      if(!isSinglePaymentMethodADDED){
+function addDepositMethod(methodsGroups) {
+  return methodsGroups.map(function(mg) {
+    if (mg.group === 1) {
+      var isSinglePaymentMethodADDED = _.findWhere(mg.methods, {
+        type: types.DEPOSIT,
+      });
+      if (!isSinglePaymentMethodADDED) {
         mg.methods.unshift(DEPOSIT_METHOD);
       }
     }
@@ -507,18 +594,16 @@ function addDepositMethod(methodsGroups){
   });
 }
 
-
-function addLegacyMethods(methodsGroups){
-  methodsGroups = addSinglePaymentTerminalMethod(methodsGroups)
-  methodsGroups = addDepositMethod(methodsGroups);  
+function addLegacyMethods(methodsGroups) {
+  methodsGroups = addSinglePaymentTerminalMethod(methodsGroups);
+  methodsGroups = addDepositMethod(methodsGroups);
   return methodsGroups;
 }
 
-
-function removeCreditMethod(methodsGroups){
-  return methodsGroups.map(function(methodGroup){
-    if(methodGroup.group === 1){
-      methodGroup.methods = methodGroup.methods.filter(function(method){
+function removeCreditMethod(methodsGroups) {
+  return methodsGroups.map(function(methodGroup) {
+    if (methodGroup.group === 1) {
+      methodGroup.methods = methodGroup.methods.filter(function(method) {
         return method.type !== types.CLIENT_CREDIT;
       });
     }
@@ -527,41 +612,45 @@ function removeCreditMethod(methodsGroups){
 }
 
 const SINGLE_PAYMENT_TERMINAL_METHOD = {
-    label:'1 pago con',
-    name:'Una sola exhibición',
-    type:'single-payment-terminal',
-    description:'VISA, MasterCard, American Express',
-    cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
-    cards:['Visa','MasterCard','American Express'],
-    terminals:[
-      {label:'American Express', value:'american-express'},
-      {label:'Banamex', value:'banamex'}
-    ],
-    currency: 'mxn',
-    needsVerification: true,
-    min:0
+  label: '1 pago con',
+  name: 'Una sola exhibición',
+  type: 'single-payment-terminal',
+  description: 'VISA, MasterCard, American Express',
+  cardsImages: [
+    '/cards/visa.png',
+    '/cards/mastercard.png',
+    '/cards/american.png',
+  ],
+  cards: ['Visa', 'MasterCard', 'American Express'],
+  terminals: [
+    { label: 'American Express', value: 'american-express' },
+    { label: 'Banamex', value: 'banamex' },
+  ],
+  currency: 'mxn',
+  needsVerification: true,
+  min: 0,
 };
 
 const DEPOSIT_METHOD = {
-  label:'Deposito en ventanilla',
-  name:'Deposito en ventanilla',
-  type:'deposit',
-  description:'Sujeto a verificación contable',
-  currency:'mxn',
-  terminals:[
-    {label:'Banamex', value:'banamex'},
-    {label:'Bancomer', value:'bancomer'},
-    {label:'Banorte', value:'banorte'},
-    {label:'Santander', value:'santander'}
+  label: 'Deposito en ventanilla',
+  name: 'Deposito en ventanilla',
+  type: 'deposit',
+  description: 'Sujeto a verificación contable',
+  currency: 'mxn',
+  terminals: [
+    { label: 'Banamex', value: 'banamex' },
+    { label: 'Bancomer', value: 'bancomer' },
+    { label: 'Banorte', value: 'banorte' },
+    { label: 'Santander', value: 'santander' },
   ],
-  needsVerification: false
+  needsVerification: false,
 };
 
 const CREDIT_METHOD = {
-  label:'Credito',
+  label: 'Credito',
   name: 'Credito',
   type: 'client-credit',
   description: '',
   currency: 'mxn',
-  needsVerification: false
+  needsVerification: false,
 };

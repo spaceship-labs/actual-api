@@ -84,10 +84,9 @@ module.exports = {
   },
 
   async create(req, res) {
-    const { quotationId, ewallet } = req.allParams();
-    var responseSent = false;
-
     try {
+      const { quotationId, ewallet } = req.allParams();
+      var responseSent = false;
       const orderCreated = await OrderService.create(
         quotationId,
         ewallet,

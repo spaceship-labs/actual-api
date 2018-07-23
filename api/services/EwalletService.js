@@ -11,35 +11,38 @@ module.exports = {
   },
 };
 
-function isValidEwalletPayment(payment, client) {
-  if (client.ewallet < payment.ammount || !client.ewallet) {
+function isValidEwalletPayment(paymentAmount, ewalletAmount) {
+  if (ewalletAmount < paymentAmount || !ewalletAmount) {
     return false;
   }
   return true;
 }
 
-function applyEwalletRecord(payment, options) {
-  var client = options.client;
-  if (client.ewallet < payment.ammount || !client.ewallet) {
+async function applyEwalletRecord(payment, options, ewalletAmount, ewalletId) {
+  if (ewalletAmount < payment.ammount || !ewalletAmount) {
     return Promise.reject(
       new Error('Fondos insuficientes en monedero electronico')
     );
   }
-  var updateParams = { ewallet: client.ewallet - payment.ammount };
+  var updatedAmount = ewalletAmount - payment.ammount;
 
-  return Client.update(client.id, updateParams).then(function(clientUpdated) {
-    if (payment.type == EWALLET_TYPE) {
-      var ewalletRecord = {
-        Store: payment.Store,
-        Quotation: options.quotationId,
-        User: options.userId,
-        Client: options.client.id,
-        Payment: options.paymentId,
-        type: EWALLET_NEGATIVE,
-        amount: payment.ammount,
-      };
-      return EwalletRecord.create(ewalletRecord);
-    }
+  if (payment.type == EWALLET_TYPE) {
+    const ewalletRecordParams = {
+      Store: payment.Store,
+      Quotation: options.quotationId,
+      User: options.userId,
+      Payment: options.paymentId,
+      movement: 'decrease',
+      amount: payment.ammount,
+    };
+
+    const { id } = await EwalletRecord.create(ewalletRecordParams);
+
+     return await Ewallet.update(
+      { id: ewalletId },
+      { EwalletRecord: id, amount: updatedAmount }
+    );
+  } else {
     return null;
-  });
+  }
 }
