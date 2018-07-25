@@ -337,7 +337,7 @@ function prepareClientParams(order, client, address){
       cfdiUse: DEFAULT_CFDI_USE,
       email: "natalieroe@intercorpgrp.com",
       address: {
-        country: 'España',
+        country: 'ESP',
         colony: address.Block,
         state: 'Islas Baleares'
       }
