@@ -347,7 +347,22 @@ function prepareClientParams(order, client, address){
         zipCode: address.ZipCode,
       }
     };
-  } else {
+  } 
+  else if(order.folio === "013334"){
+    data = {
+      name: order.CardName,
+      identification: "XEXX010101000",
+      cfdiUse: DEFAULT_CFDI_USE,
+      email: "natalieroe@intercorpgrp.com",
+      address: {
+        country: 'España',
+        colony: address.Block,
+        state: 'Islas Baleares'
+      }
+    };
+    
+  }
+  else {
     data = {
       name: order.CardName,
       identification: FiscalAddressService.GENERIC_RFC,
