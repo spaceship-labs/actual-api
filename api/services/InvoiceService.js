@@ -339,7 +339,7 @@ function prepareClientParams(order, client, address){
       address: {
         country: 'ESP',
         colony: address.Block,
-        state: 'Islas Baleares'
+        state: 'San José'
       }
     };
     return data;
