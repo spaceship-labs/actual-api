@@ -329,6 +329,22 @@ function getPaymentMethodBasedOnPayments(payments, order){
 function prepareClientParams(order, client, address){
   var generic = !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
   var data;
+  
+  if(order.folio === "013334"){
+    data = {
+      name: order.CardName,
+      identification: "XEXX010101000",
+      cfdiUse: DEFAULT_CFDI_USE,
+      email: "natalieroe@intercorpgrp.com",
+      address: {
+        country: 'España',
+        colony: address.Block,
+        state: 'Islas Baleares'
+      }
+    };
+    return data;
+  }
+  
   if (!generic) {
     data = {
       name: address.companyName,
@@ -348,20 +364,6 @@ function prepareClientParams(order, client, address){
       }
     };
   } 
-  else if(order.folio === "013334"){
-    data = {
-      name: order.CardName,
-      identification: "XEXX010101000",
-      cfdiUse: DEFAULT_CFDI_USE,
-      email: "natalieroe@intercorpgrp.com",
-      address: {
-        country: 'España',
-        colony: address.Block,
-        state: 'Islas Baleares'
-      }
-    };
-    
-  }
   else {
     data = {
       name: order.CardName,
