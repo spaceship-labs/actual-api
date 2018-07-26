@@ -24,8 +24,11 @@ async function applyEwalletRecord(payment, options, ewalletAmount, ewalletId) {
       new Error('Fondos insuficientes en monedero electronico')
     );
   }
-  var updatedAmount = ewalletAmount - payment.ammount;
-
+  const updatedAmount = ewalletAmount - payment.ammount;
+  console.log('updatedAmount: ', updatedAmount);
+  console.log('ewalletAmount: ', ewalletAmount);
+  console.log('payment.ammount: ',  payment.ammount);
+  console.log('ewalletId: ',  ewalletId);
   if (payment.type == EWALLET_TYPE) {
     const ewalletRecordParams = {
       Store: payment.Store,
@@ -38,10 +41,11 @@ async function applyEwalletRecord(payment, options, ewalletAmount, ewalletId) {
 
     const { id } = await EwalletRecord.create(ewalletRecordParams);
 
-     return await Ewallet.update(
+     const ewallet = await Ewallet.update(
       { id: ewalletId },
       { EwalletRecord: id, amount: updatedAmount }
     );
+    console.log('EWALLET FINAL: ', ewallet);
   } else {
     return null;
   }

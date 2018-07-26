@@ -6,8 +6,8 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 
-const SAP_DATE_FORMAT  = 'YYYY-MM-DD';
-const CLIENT_CARD_TYPE = 1;//1.Client, 2.Proveedor, 3.Lead
+const SAP_DATE_FORMAT = 'YYYY-MM-DD';
+const CLIENT_CARD_TYPE = 1; //1.Client, 2.Proveedor, 3.Lead
 const CREATE_CONTACT_ACTION = 0;
 const UPDATE_CONTACT_ACTION = 1;
 
@@ -38,7 +38,7 @@ module.exports = {
 
   //EXPOSED FOR TESTING PURPOSES
   mapPaymentsToSap,
-  SAP_DATE_FORMAT
+  SAP_DATE_FORMAT,
 };
 
 function createClient(params) {
@@ -280,25 +280,28 @@ function getCompanyCode(code, storeGroup) {
   return companyCode;
 }
 
-
-function mapPaymentsToSap(payments, exchangeRate){
-
+function mapPaymentsToSap(payments, exchangeRate) {
   /*Payments not sent to SAP:
     - Client balance
     - Client credit
     - Canceled payments
   */
-  payments = payments.filter(function(payment){
-    return payment.type !== PaymentService.CLIENT_BALANCE_TYPE && payment.type !== PaymentService.types.CLIENT_CREDIT && !PaymentService.isCanceled(payment);
+  payments = payments.filter(function(payment) {
+    return (
+      payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
+      payment.type !== PaymentService.types.CLIENT_CREDIT &&
+      payment.type !== PaymentService.EWALLET_TYPE &&
+      !PaymentService.isCanceled(payment)
+    );
   });
 
-  const paymentsTopSap = payments.map(function(payment){
+  const paymentsTopSap = payments.map(function(payment) {
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
       amount: payment.ammount,
     };
-    if(payment.currency === PaymentService.currencyTypes.USD){
+    if (payment.currency === PaymentService.currencyTypes.USD) {
       paymentSap.rate = exchangeRate;
     }
     if (PaymentService.isCardPayment(payment)) {
@@ -342,7 +345,7 @@ function getFarthestShipDate(quotationDetails) {
 function calculateUsedEwalletByPayments(payments) {
   var ewallet = 0;
   ewallet = payments.reduce(function(amount, payment) {
-    if (payment.type === 'ewallet') {
+    if (payment.type === PaymentService.EWALLET_TYPE) {
       amount += payment.ammount;
     }
     return amount;
@@ -417,18 +420,17 @@ function buildAddressContactEndpoint(fields, cardcode) {
   return baseUrl + path;
 }
 
-function cancelOrder(quotationId){
+function cancelOrder(quotationId) {
   const requestParams = {
-    QuotationId: quotationId
+    QuotationId: quotationId,
   };
-  const endPoint = buildUrl(baseUrl,{
+  const endPoint = buildUrl(baseUrl, {
     path: 'SalesOrder',
-    queryParams: requestParams
+    queryParams: requestParams,
   });
   sails.log.info('cancel order');
   sails.log.info(decodeURIComponent(endPoint));
   reqOptions.uri = endPoint;
   reqOptions.method = 'DELETE';
   return request(reqOptions);
-
 }

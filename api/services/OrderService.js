@@ -248,9 +248,11 @@ const processEwalletBalance = async ({
     ewalletRecord => ewalletRecord.id
   );
 
+  const { amount } = await Ewallet.findOne({ id: ewalletId });
+
   await Ewallet.update(
     { id: ewalletId },
-    { EwalletRecord: ewalletRecordsIds, amount: generated }
+    { EwalletRecord: ewalletRecordsIds, amount: generated + amount }
   );
 };
 
@@ -459,7 +461,10 @@ function checkIfSapOrderHasReference(sapOrder) {
 function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate) {
   if (_.isArray(sapOrder.Payments)) {
     //No payments are returned when using only client balance or credit
-    if (everyPaymentIsClientBalanceOrCredit(paymentsToCreate)) {
+    if (
+      everyPaymentIsClientBalanceOrCredit(paymentsToCreate) ||
+      everyPaymentIsEwallet(paymentsToCreate)
+    ) {
       return true;
     }
 
@@ -482,6 +487,11 @@ function everyPaymentIsClientBalanceOrCredit(paymentsToCreate) {
   });
   return everyPaymentIsClientBalance;
 }
+
+const everyPaymentIsEwallet = paymentsToCreate =>
+  paymentsToCreate.every(
+    payment => payment.type === PaymentService.EWALLET_TYPE
+  );
 
 function saveSapReferences(sapResult, order, orderDetails) {
   var clientBalance = extractBalanceFromSapResult(sapResult);

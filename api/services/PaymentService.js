@@ -249,10 +249,9 @@ async function addPayment(params, req) {
     const ewalletConfig = {
       quotationId: quotationId,
       userId: req.user.id,
-      client: client,
       paymentId: paymentCreated.id,
     };
-    const appliedEwalletRecord = await EwalletService.applyEwalletRecord(
+    await EwalletService.applyEwalletRecord(
       params,
       ewalletConfig,
       ewallet.amount,
