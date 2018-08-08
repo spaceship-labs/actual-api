@@ -17,6 +17,9 @@ const axios = axiosD.create({
         : process.env.FACTURA_SECRET_KEY_SANDBOX,
   },
 });
+const SERIE = 1792;
+const DOCUMENT_TYPE = 'factura';
+const PAYMENT_METHOD_TO_DEFINE = '99';
 
 module.exports = {
   async createInvoice(order, client, fiscalAddress, payments, details) {
@@ -40,16 +43,16 @@ const formatInvoice = async (
   Receptor: {
     UID: handleClient(await createClient(client, order.Client, fiscalAddress)),
   },
-  TipoDocumento: 'factura',
+  TipoDocumento: DOCUMENT_TYPE,
   Conceptos: await getItems(details),
   UsoCFDI: client.cfdiUse,
-  Serie: 1486,
+  Serie: SERIE,
   FormaPago: getPaymentWay(payments, order),
   MetodoPago: getPaymentMethod(
     getPaymentWay(payments, order),
     payments,
     order,
-    '99'
+    PAYMENT_METHOD_TO_DEFINE
   ),
   Moneda: 'MXN',
   FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DDTHH:mm:ss'),
@@ -162,8 +165,8 @@ const getWay = (paymentMethod, type) =>
     '18-msi': () => (paymentMethod = '04'),
     ewallet: () => (paymentMethod = '05'),
     'debit-card': () => (paymentMethod = '28'),
-    'client-balance': () => (paymentMethod = '99'),
-    'client-credit': () => (paymentMethod = '99'),
+    'client-balance': () => (paymentMethod = PAYMENT_METHOD_TO_DEFINE),
+    'client-credit': () => (paymentMethod = PAYMENT_METHOD_TO_DEFINE),
   })(paymentMethod)(type);
 
 //Excludes CLIENT BALANCE and CREDIT CLIENT payments
@@ -216,7 +219,7 @@ const validatePaymentType = highestPayment =>
     : false;
 
 const getPaymentWay = (payments, order) => {
-  var paymentMethod = '99';
+  var paymentMethod = PAYMENT_METHOD_TO_DEFINE;
   var uniquePaymentMethod = payments[0];
   var directPayments = [];
 
@@ -226,16 +229,16 @@ const getPaymentWay = (payments, order) => {
     directPayments = getDirectPayments(payments);
 
     if (directPayments.length === 0) {
-      return '99';
+      return PAYMENT_METHOD_TO_DEFINE;
     }
     uniquePaymentMethod = getHighestPayment(directPayments);
 
     if (appliesForSpecialCashRule(payments, order, 100000)) {
-      return '99';
+      return PAYMENT_METHOD_TO_DEFINE;
     }
   }
 
-  return getWay('99', uniquePaymentMethod.type);
+  return getWay(PAYMENT_METHOD_TO_DEFINE, uniquePaymentMethod.type);
 };
 
 const getPaymentMethod = (paymentWay, payments, order, toDefine) =>
