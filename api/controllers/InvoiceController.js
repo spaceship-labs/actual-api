@@ -6,33 +6,57 @@
  */
 
 module.exports = {
-  create: function(req, res) {
-    var form = req.allParams();
-    var order = form.order;
-    Invoice.findOne({ order: order })
-      .then(function(exists) {
-        if (exists) throw new Error('invoice already exists');
-        return InvoiceService.createOrderInvoice(order);
-      })
-      .then(function(invoice) {
-        return res.json(invoice);
-      })
-      .catch(function(err) {
-        console.log('err invoice create', err);
-        if (err.error && err.error.message) {
-          err = new Error(err.error.message);
-          return res.json(400, err);
-        }
-        if (err.error && err.error.error) {
-          err = new Error(err.error.error.message);
-          return res.json(400, err);
-        }
-        if (err.error) {
-          err = new Error(err.error);
-          return res.json(400, err);
-        }
-        return res.negotiate(err);
+  async create(req, res) {
+    try {
+      const orderId = req.param('order');
+      const invoiceFound = await Invoice.findOne({ order: orderId });
+      if (invoiceFound) throw new Error('invoice already exists');
+      const order = await Order.findOne({ id: orderId })
+        .populate('User')
+        .populate('Client')
+        .populate('Payments')
+        .populate('EwalletRecords')
+        .populate('Address')
+        .populate('Details');
+      const fiscalAddress = await FiscalAddress.findOne({
+        CardCode: order.Client.CardCode,
+        AdresType: ClientService.ADDRESS_TYPE,
       });
+      const {
+        data: invoice,
+        error: error,
+      } = await InvoiceService.createInvoice(
+        order,
+        order.Client,
+        fiscalAddress,
+        order.Payments,
+        order.Details
+      );
+      console.log('INVOICE MADAFACKA: ', invoice);
+      const invoiceCreated = await Invoice.create({
+        invoice_uid: invoice.invoice_uid,
+        order: order.id,
+        folio: invoice.INV.Folio,
+      });
+      console.log('generated invoice', invoiceCreated);
+      res.ok(invoiceCreated);
+    } catch (error) {
+      console.log('err invoice create', error);
+      res.negotiate(error);
+    }
+
+    // if (err.error && err.error.message) {
+    //   err = new Error(err.error.message);
+    //   return res.json(400, err);
+    // }
+    // if (err.error && err.error.error) {
+    //   err = new Error(err.error.error.message);
+    //   return res.json(400, err);
+    // }
+    // if (err.error) {
+    //   err = new Error(err.error);
+    //   return res.json(400, err);
+    // }
   },
 
   find: function(req, res) {
@@ -77,7 +101,7 @@ module.exports = {
       const {
         data: invoice,
         error: error,
-      } = await InvoiceService.removeInvoice(invoice_iud);
+      } = await InvoiceService.removeInvoice(invoice_uid);
       await Invoice.update({ cancelled: true });
       res.ok({ message: 'Factura cancelada' });
     } catch (err) {}
