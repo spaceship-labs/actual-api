@@ -4,7 +4,7 @@ const axios = axiosD.create({
   baseURL:
     process.env.MODE === 'production'
       ? process.env.FACTURA_URL_PRODUCTION
-      : process.env.FACTURA_URL_SANDOX,
+      : process.env.FACTURA_URL_SANDBOX,
   headers: {
     'Content-Type': 'application/json',
     'F-API-KEY':
