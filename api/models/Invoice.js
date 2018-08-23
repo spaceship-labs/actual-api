@@ -7,15 +7,15 @@
 
 module.exports = {
   attributes: {
-    folioFiscalUUID: {
+    folio: {
       type: 'string',
     },
     order: {
       model: 'order',
       required: true,
     },
-    folio: {
-      type: 'string',
+    numeroReferencia: {
+      type: 'integer',
     },
     calcelled: {
       type: 'boolean',

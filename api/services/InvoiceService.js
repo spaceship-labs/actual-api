@@ -18,17 +18,13 @@ const TAXES_KEY = 'IVA';
 const TAXES_FACTOR_TYPE = 'tasa';
 const TAXES_VALUATION = '0.16';
 const PAYMENT_METHOD_TO_DEFINE = '99';
+const DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
   async createInvoice(order, client, fiscalAddress, payments, details) {
-    const format = await formatInvoice(
-      order,
-      client,
-      fiscalAddress,
-      payments,
-      await getItems(details)
-    );
-    console.log('REQUEST: ', format);
+    const genericClient =
+      client.LicTradNum ||
+      client.LicTradNum == FiscalAddressService.GENERIC_RFC;
     return await axios.post(
       '/generarCfdi',
       await formatInvoice(
@@ -36,7 +32,8 @@ module.exports = {
         client,
         fiscalAddress,
         payments,
-        await getItems(details)
+        await getItems(details),
+        genericClient
       )
     );
   },
@@ -60,10 +57,35 @@ module.exports = {
     );
   },
 
-  async removeInvoice(folio) {
+  async removeInvoice(id) {
+    const { folio } = await Invoice.findOne({ Order: id });
     return await axios.post('/cancelarCfdi', formatCancelInvoiceRequest(folio));
   },
+
+  async send(orderId) {
+    const { Client } = Order.findOne({ id: orderId }).populate('Client');
+    const { folio } = Invoice.findOne({ order: orderId });
+    const email = Client.E_Mail;
+    return await axios.post(
+      '/enviarCorreo',
+      formatSendMailRequest(folio, email)
+    );
+  },
 };
+
+const formatSendMailRequest = (folio, email) => ({
+  Solicitud: {
+    rfc: process.env.EMISOR_RFC,
+    accion: 'enviarCorreo',
+    CFDi: {
+      serie: 'FA',
+      folio,
+      EnviarCFDI: {
+        Correos: [email],
+      },
+    },
+  },
+});
 
 const formatElectronicPayment = (
   order,
@@ -126,7 +148,8 @@ const formatInvoice = async (
   client,
   fiscalAddress,
   payments,
-  Partidas
+  Partidas,
+  genericClient
 ) => ({
   CFDi: {
     modo: INVOICE_MODE,
@@ -152,7 +175,12 @@ const formatInvoice = async (
       ),
       formaDePago: getPaymentWay(payments, order),
     },
-    Receptor: await handleClient(client, order.Client, fiscalAddress),
+    Receptor: await handleClient(
+      client,
+      order.Client,
+      fiscalAddress,
+      genericClient
+    ),
     Partidas,
     Impuestos: {
       Totales: {
@@ -209,24 +237,7 @@ const getTaxesAmount = items =>
 const getTotalTaxesAmount = taxesAmount =>
   taxesAmount.reduce((total, amount) => total + amount, 0) / 100;
 
-// Receptor: {
-//   UID: handleClient(await createClient(client, order.Client, fiscalAddress)),
-// },
-// TipoDocumento: DOCUMENT_TYPE,
-// Conceptos: await getItems(details),
-// UsoCFDI: client.cfdiUse,
-// Serie: SERIE,
-// FormaPago: getPaymentWay(payments, order),
-// MetodoPago: getPaymentMethod(
-//   getPaymentWay(payments, order),
-//   payments,
-//   order,
-//   PAYMENT_METHOD_TO_DEFINE
-// ),
-// Moneda: 'MXN',
-// FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DDTHH:mm:ss'),
-
-const handleClient = async (client, data, fiscal) =>
+const handleClient = async (client, data, fiscal, genericClient) =>
   !client ||
   !data.E_Mail ||
   !data.LicTradNum ||
@@ -238,22 +249,35 @@ const handleClient = async (client, data, fiscal) =>
   !fiscal.State ||
   !fiscal.City
     ? Promise.reject(new Error('Datos incompletos'))
-    : formatClent(client, data, fiscal);
+    : formatClent(client, data, fiscal, genericClient);
 
-const formatClent = (client, orderClient, fiscalAddress) => ({
-  rfc: orderClient.LicTradNum,
-  nombre: orderClient.CardName,
-  usoCfdi: client.cfdiUse,
-  DomicilioFiscal: {
-    calle: fiscalAddress.Street,
-    noExterior: fiscalAddress.U_NumExt,
-    colonia: fiscalAddress.Block,
-    localidad: fiscalAddress.City,
-    estado: fiscalAddress.State,
-    pais: 'México',
-    cp: fiscalAddress.ZipCode,
-  },
-});
+const formatClent = (client, orderClient, fiscalAddress, genericClient) =>
+  genericClient
+    ? {
+        rfc: orderClient.LicTradNum,
+        nombre: orderClient.CardName,
+        usoCfdi: client.cfdiUse,
+        DomicilioFiscal: {
+          calle: fiscalAddress.Street,
+          noExterior: fiscalAddress.U_NumExt,
+          colonia: fiscalAddress.Block,
+          localidad: fiscalAddress.City,
+          estado: fiscalAddress.State,
+          pais: 'México',
+          cp: fiscalAddress.ZipCode,
+        },
+      }
+    : {
+        rfc: FiscalAddressService.GENERIC_RFC,
+        nombre: orderClient.CardName,
+        usoCfdi: DEFAULT_CFDI_USE,
+        DomicilioFiscal: {
+          calle: fiscalAddress.Street || 'Av Xcaret',
+          noExterior: fiscalAddress.U_NumExt || 'Lote 3',
+          estado: orderClient.U_Estado || 'Quintana Roo',
+          pais: 'México',
+        },
+      };
 
 const getItems = async details =>
   formatItems(await getDetailsProducts(details.map(detail => detail.id)));

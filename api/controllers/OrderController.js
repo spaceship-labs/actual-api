@@ -123,6 +123,10 @@ module.exports = {
         order.Details
       );
       console.log('INVOICE MADAFACKA: ', invoice);
+      console.log(
+        'Estatus documento: ',
+        invoice.AckEnlaceFiscal.estatusDocumento
+      );
       if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
         throw new Error(invoice.AckEnlaceFiscal.descripcionError);
       const invoiceCreated = await Invoice.create({
