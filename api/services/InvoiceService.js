@@ -1,69 +1,232 @@
 const moment = require('moment');
 const axiosD = require('axios');
 const axios = axiosD.create({
-  baseURL:
-    process.env.MODE === 'production'
-      ? process.env.FACTURA_URL_PRODUCTION
-      : process.env.FACTURA_URL_SANDOX,
+  baseURL: process.env.ENLACE_FISCAL_BASEURL,
   headers: {
     'Content-Type': 'application/json',
-    'F-API-KEY':
-      process.env.MODE === 'production'
-        ? process.env.FACTURA_KEY_PRODUCTION
-        : process.env.FACTURA_KEY_SANDBOX,
-    'F-SECRET-KEY':
-      process.env.MODE === 'production'
-        ? process.env.FACTURA_SECRET_KEY_PRODUCTION
-        : process.env.FACTURA_SECRET_KEY_SANDBOX,
+    'x-api-key': process.env.ENLACE_FISCAL_API_KEY,
+  },
+  auth: {
+    username: process.env.EMISOR_RFC,
+    password: process.env.ENLACE_FICAL_TOKEN,
   },
 });
-const SERIE = 1792;
-const DOCUMENT_TYPE = 'factura';
+const INVOICE_MODE = process.env.MODE === 'production' ? 'produccion' : 'debug';
+const ENLACE_FISCAL_VERSION = '6.0';
+const TAXES_TYPE = 'traslado';
+const TAXES_KEY = 'IVA';
+const TAXES_FACTOR_TYPE = 'tasa';
+const TAXES_VALUATION = '0.16';
 const PAYMENT_METHOD_TO_DEFINE = '99';
 
 module.exports = {
   async createInvoice(order, client, fiscalAddress, payments, details) {
+    const format = await formatInvoice(
+      order,
+      client,
+      fiscalAddress,
+      payments,
+      await getItems(details)
+    );
+    console.log('REQUEST: ', format);
     return await axios.post(
-      '/v3/cfdi33/create',
-      await formatInvoice(order, client, fiscalAddress, payments, details)
+      '/generarCfdi',
+      await formatInvoice(
+        order,
+        client,
+        fiscalAddress,
+        payments,
+        await getItems(details)
+      )
     );
   },
-  async removeInvoice(cfdi_uid) {
-    return await axios.post(`/v3/cfdi33/${cfdi_uid}/cancel`);
+
+  async createElectronicPayment(
+    order,
+    client,
+    fiscalAddress,
+    payments,
+    folioFiscalUUID
+  ) {
+    return await axios.post(
+      '/generarReciboElectronicoPago',
+      await formatElectronicPayment(
+        order,
+        client,
+        fiscalAddress,
+        payments,
+        folioFiscalUUID
+      )
+    );
+  },
+
+  async removeInvoice(folio) {
+    return await axios.post('/cancelarCfdi', formatCancelInvoiceRequest(folio));
   },
 };
+
+const formatElectronicPayment = (
+  order,
+  client,
+  fiscalAddress,
+  payments,
+  folioFiscalUUID
+) => ({
+  CFDi: {
+    modo: INVOICE_MODE,
+    versionEF: ENLACE_FISCAL_VERSION,
+    serie: 'RE',
+    folioInterno: order.folio,
+    fechaEmision: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+    rfc: process.env.EMISOR_RFC,
+    Receptor: handleClient(client, order.Client, fiscalAddress),
+    ComplementoPago: handlePaymentComplement(order, payments, folioFiscalUUID),
+  },
+});
+
+const handlePaymentComplement = (order, payments, folioFiscalUUID) => ({
+  Pago: {
+    fechaPago: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+    formaDePago: getPaymentWay(payments, order),
+    tipoMoneda: 'MXN',
+    monto: order.total,
+    DocumentosRelacionados: [
+      {
+        idDocumento: folioFiscalUUID,
+        serie: 'FA',
+        folioInterno: order.folio,
+        tipoMoneda: 'MXN',
+        metodoDePago: getPaymentMethod(
+          getPaymentWay(payments, order),
+          payments,
+          order,
+          PAYMENT_METHOD_TO_DEFINE
+        ),
+        importePagado: order.total,
+      },
+    ],
+  },
+});
+
+const formatCancelInvoiceRequest = folio => ({
+  Solicitud: {
+    modo: INVOICE_MODE,
+    rfc: process.env.EMISOR_RFC,
+    accion: 'cancelarCfdi',
+    CFDi: {
+      serie: 'FA',
+      folio: folio,
+      // justificacion: 'Error en descripción de producto',
+    },
+  },
+});
 
 const formatInvoice = async (
   order,
   client,
   fiscalAddress,
   payments,
-  details
+  Partidas
 ) => ({
-  Receptor: {
-    UID: handleClient(await createClient(client, order.Client, fiscalAddress)),
+  CFDi: {
+    modo: INVOICE_MODE,
+    versionEF: ENLACE_FISCAL_VERSION,
+    serie: 'FA',
+    folioInterno: parseInt(order.folio),
+    fechaEmision: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+    subTotal: getSubTotalFixed(Partidas),
+    descuentos: getDiscountFixed(Partidas),
+    total: getTotalFixed(
+      getSubTotalFixed(Partidas),
+      getDiscountFixed(Partidas),
+      getTaxesAmount(Partidas)
+    ),
+    tipoMoneda: 'MXN',
+    rfc: process.env.EMISOR_RFC,
+    DatosDePago: {
+      metodoDePago: getPaymentMethod(
+        getPaymentWay(payments, order),
+        payments,
+        order,
+        PAYMENT_METHOD_TO_DEFINE
+      ),
+      formaDePago: getPaymentWay(payments, order),
+    },
+    Receptor: await handleClient(client, order.Client, fiscalAddress),
+    Partidas,
+    Impuestos: {
+      Totales: {
+        traslados: getTaxesAmount(Partidas),
+      },
+      Impuestos: [
+        {
+          tipo: TAXES_TYPE,
+          claveImpuesto: TAXES_KEY,
+          tipoFactor: TAXES_FACTOR_TYPE,
+          tasaOCuota: TAXES_VALUATION,
+          importe: getTaxesAmount(Partidas),
+        },
+      ],
+    },
+    EnviarCFDI: {
+      Correos:
+        process.env.MODE === 'production'
+          ? [
+              fiscalAddress.U_Correos,
+              'facturamiactual@actualstudio.com',
+              'facturacion@actualg.com',
+            ]
+          : ['yupit@spaceshiplabs.com', 'luisperez@spaceshiplabs.com'],
+      mensajeCorreo: '',
+    },
   },
-  TipoDocumento: DOCUMENT_TYPE,
-  Conceptos: await getItems(details),
-  UsoCFDI: client.cfdiUse,
-  Serie: SERIE,
-  FormaPago: getPaymentWay(payments, order),
-  MetodoPago: getPaymentMethod(
-    getPaymentWay(payments, order),
-    payments,
-    order,
-    PAYMENT_METHOD_TO_DEFINE
-  ),
-  Moneda: 'MXN',
-  FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DDTHH:mm:ss'),
 });
 
-const handleClient = ({ data: client, error: error }) =>
-  !client.Data || !client.Data.UID || error
-    ? Promise.reject(new Error({ error }))
-    : client.Data.UID;
+const getTotalFixed = (subtotal, discount, taxes) => {
+  const total = subtotal * 100 - discount * 100 + taxes * 100;
+  return total / 100;
+};
 
-const createClient = async (client, data, fiscal) =>
+const getSubTotalFixed = items => {
+  const amounts = items.map(item => item.importe * 100);
+  const totalAmounts = amounts.reduce((total, amount) => total + amount, 0);
+  return totalAmounts / 100;
+};
+
+const getDiscountFixed = items => {
+  const discounts = items.map(item => item.descuento * 100);
+  const totalDiscount = discounts.reduce((total, amount) => total + amount, 0);
+  return totalDiscount / 100;
+};
+
+const getTwoDecimalsTaxesAmount = amount => parseFloat(amount.toFixed(2));
+
+const getTaxesAmount = items =>
+  getTwoDecimalsTaxesAmount(
+    getTotalTaxesAmount(items.map(item => item.Impuestos[0].importe * 100))
+  );
+
+const getTotalTaxesAmount = taxesAmount =>
+  taxesAmount.reduce((total, amount) => total + amount, 0) / 100;
+
+// Receptor: {
+//   UID: handleClient(await createClient(client, order.Client, fiscalAddress)),
+// },
+// TipoDocumento: DOCUMENT_TYPE,
+// Conceptos: await getItems(details),
+// UsoCFDI: client.cfdiUse,
+// Serie: SERIE,
+// FormaPago: getPaymentWay(payments, order),
+// MetodoPago: getPaymentMethod(
+//   getPaymentWay(payments, order),
+//   payments,
+//   order,
+//   PAYMENT_METHOD_TO_DEFINE
+// ),
+// Moneda: 'MXN',
+// FechaFromAPI: moment(order.createdAt).format('YYYY-MM-DDTHH:mm:ss'),
+
+const handleClient = async (client, data, fiscal) =>
   !client ||
   !data.E_Mail ||
   !data.LicTradNum ||
@@ -75,21 +238,21 @@ const createClient = async (client, data, fiscal) =>
   !fiscal.State ||
   !fiscal.City
     ? Promise.reject(new Error('Datos incompletos'))
-    : await axios.post('/v1/clients/create', formatClent(client, data, fiscal));
+    : formatClent(client, data, fiscal);
 
-const formatClent = (client, data, fiscal) => ({
-  nombre: data.FirstName,
-  apellidos: data.LastName,
-  email: data.E_Mail,
-  telefono: data.Phone1,
-  razons: fiscal.companyName,
-  rfc: data.LicTradNum,
-  calle: fiscal.Street,
-  numero_exterior: fiscal.U_NumExt,
-  codpos: fiscal.ZipCode,
-  colonia: fiscal.Block,
-  estado: fiscal.State,
-  ciudad: fiscal.City,
+const formatClent = (client, orderClient, fiscalAddress) => ({
+  rfc: orderClient.LicTradNum,
+  nombre: orderClient.CardName,
+  usoCfdi: client.cfdiUse,
+  DomicilioFiscal: {
+    calle: fiscalAddress.Street,
+    noExterior: fiscalAddress.U_NumExt,
+    colonia: fiscalAddress.Block,
+    localidad: fiscalAddress.City,
+    estado: fiscalAddress.State,
+    pais: 'México',
+    cp: fiscalAddress.ZipCode,
+  },
 });
 
 const getItems = async details =>
@@ -116,14 +279,43 @@ const parsingDiscount = discount =>
   discount < 1 ? parseFloat(discount.toFixed(4)) : discount;
 
 const structuredItems = (discount, detail, product) => ({
-  ClaveProdServ: product.U_ClaveProdServ,
-  Cantidad: detail.quantity,
-  ClaveUnidad: product.U_ClaveUnidad,
+  cantidad: detail.quantity,
+  claveUnidad: product.U_ClaveUnidad,
   Unidad: getUnitTypeByProduct(product.Service, product.U_ClaveUnidad),
-  ValorUnitario: detail.unitPrice / 1.16,
-  Descripcion: product.ItemName,
-  Descuento: parseFloat(discount.toFixed(4)),
+  claveProdServ: product.U_ClaveProdServ,
+  noIdentificacion: product.ItemCode,
+  descripcion: product.ItemName,
+  valorUnitario: detail.unitPrice / 1.16,
+  importe: getImportFixed(detail.quantity, detail.unitPrice),
+  descuento: parseFloat(discount.toFixed(2)),
+  Impuestos: [
+    {
+      tipo: TAXES_TYPE,
+      claveImpuesto: TAXES_KEY,
+      tipoFactor: TAXES_FACTOR_TYPE,
+      tasaOCuota: TAXES_VALUATION,
+      baseImpuesto:
+        detail.quantity * (detail.unitPrice / 1.16) -
+        parseFloat(discount.toFixed(4)),
+      importe: parseFloat(
+        getItemsAmountFixed(
+          detail.quantity,
+          detail.unitPrice,
+          discount
+        ).toFixed(2)
+      ),
+    },
+  ],
 });
+
+const getImportFixed = (quantity, unitPrice) => {
+  const amount = quantity * (unitPrice / 1.16);
+  const amountFixed = parseFloat(amount.toFixed(2));
+  return amountFixed;
+};
+
+const getItemsAmountFixed = (quantity, unitPrice, discount) =>
+  (quantity * (unitPrice / 1.16) - parseFloat(discount.toFixed(4))) * 0.16;
 
 const getUnitTypeByProduct = (service, U_ClaveUnidad) =>
   service === 'Y' ? 'Unidad de servicio' : getUnitType(U_ClaveUnidad);

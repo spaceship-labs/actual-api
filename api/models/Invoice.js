@@ -7,7 +7,7 @@
 
 module.exports = {
   attributes: {
-    invoice_uid: {
+    folioFiscalUUID: {
       type: 'string',
     },
     order: {
@@ -15,7 +15,7 @@ module.exports = {
       required: true,
     },
     folio: {
-      type: 'integer',
+      type: 'string',
     },
     calcelled: {
       type: 'boolean',

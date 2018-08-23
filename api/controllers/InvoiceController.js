@@ -33,10 +33,12 @@ module.exports = {
         order.Details
       );
       console.log('INVOICE MADAFACKA: ', invoice);
+      if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
+        throw new Error(invoice.AckEnlaceFiscal.descripcionError);
       const invoiceCreated = await Invoice.create({
-        invoice_uid: invoice.invoice_uid,
+        folioFiscalUUID: invoice.AckEnlaceFiscal.folioFiscalUUID,
         order: order.id,
-        folio: invoice.INV.Folio,
+        folio: invoice.AckEnlaceFiscal.numeroReferencia,
       });
       console.log('generated invoice', invoiceCreated);
       res.ok(invoiceCreated);
