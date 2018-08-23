@@ -123,10 +123,16 @@ module.exports = {
         order.Details
       );
       console.log('INVOICE MADAFACKA: ', invoice);
+      console.log(
+        'Estatus documento: ',
+        invoice.AckEnlaceFiscal.estatusDocumento
+      );
+      if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
+        throw new Error(invoice.AckEnlaceFiscal.descripcionError);
       const invoiceCreated = await Invoice.create({
-        invoice_uid: invoice.invoice_uid,
+        folio: invoice.AckEnlaceFiscal.folioInterno,
         order: order.id,
-        folio: invoice.INV.Folio,
+        numeroReferencia: invoice.AckEnlaceFiscal.numeroReferencia,
       });
       // await StockService.syncOrderDetailsProducts(orderDetails);
       console.log('Email de orden enviado: ' + order.folio);

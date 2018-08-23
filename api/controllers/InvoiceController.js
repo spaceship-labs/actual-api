@@ -33,10 +33,12 @@ module.exports = {
         order.Details
       );
       console.log('INVOICE MADAFACKA: ', invoice);
+      if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
+        throw new Error('Error al generar la orden');
       const invoiceCreated = await Invoice.create({
-        invoice_uid: invoice.invoice_uid,
+        folio: invoice.AckEnlaceFiscal.folioInterno,
         order: order.id,
-        folio: invoice.INV.Folio,
+        numeroReferencia: invoice.AckEnlaceFiscal.numeroReferencia,
       });
       console.log('generated invoice', invoiceCreated);
       res.ok(invoiceCreated);
@@ -94,16 +96,18 @@ module.exports = {
         return res.negotiate(err);
       });
   },
+
   async remove(req, res) {
     try {
       const id = req.param('id');
-      const { invoice_uid } = await Invoice.findOne({ Order: id });
       const {
         data: invoice,
         error: error,
-      } = await InvoiceService.removeInvoice(invoice_uid);
+      } = await InvoiceService.removeInvoice(id);
       await Invoice.update({ cancelled: true });
       res.ok({ message: 'Factura cancelada' });
-    } catch (err) {}
+    } catch (err) {
+      res.negotiate(err);
+    }
   },
 };

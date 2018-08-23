@@ -7,14 +7,14 @@
 
 module.exports = {
   attributes: {
-    invoice_uid: {
+    folio: {
       type: 'string',
     },
     order: {
       model: 'order',
       required: true,
     },
-    folio: {
+    numeroReferencia: {
       type: 'integer',
     },
     calcelled: {
