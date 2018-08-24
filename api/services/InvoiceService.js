@@ -25,6 +25,15 @@ module.exports = {
     const genericClient =
       client.LicTradNum ||
       client.LicTradNum == FiscalAddressService.GENERIC_RFC;
+    const request = await formatInvoice(
+      order,
+      client,
+      fiscalAddress,
+      payments,
+      await getItems(details),
+      genericClient
+    );
+    console.log('REQUEST: ', request);
     return await axios.post(
       '/generarCfdi',
       await formatInvoice(
@@ -162,7 +171,8 @@ const formatInvoice = async (
     total: getTotalFixed(
       getSubTotalFixed(Partidas),
       getDiscountFixed(Partidas),
-      getTaxesAmount(Partidas)
+      getTaxesAmount(Partidas),
+      order.subtotal
     ),
     tipoMoneda: 'MXN',
     rfc: process.env.EMISOR_RFC,
@@ -210,7 +220,11 @@ const formatInvoice = async (
   },
 });
 
-const getTotalFixed = (subtotal, discount, taxes) => {
+const getTotalFixed = (subtotal, discount, taxes, orderSubtotal) => {
+  console.log('subtotal: ', subtotal);
+  console.log('discount: ', discount);
+  console.log('taxes: ', taxes);
+  console.log('orderSubtotal: ', orderSubtotal);
   const total = subtotal * 100 - discount * 100 + taxes * 100;
   return total / 100;
 };
@@ -288,9 +302,10 @@ const getDetailsProducts = async ids =>
 const formatItems = details =>
   details.map(detail =>
     structuredItems(
-      defineDiscount(detail.discountPercent),
+      detail.discount * -1,
       detail,
-      detail.Product
+      detail.Product,
+      detail.discountPercent
     )
   );
 
@@ -302,7 +317,7 @@ const defineDiscount = discountPercent =>
 const parsingDiscount = discount =>
   discount < 1 ? parseFloat(discount.toFixed(4)) : discount;
 
-const structuredItems = (discount, detail, product) => ({
+const structuredItems = (discount, detail, product, discountPercent) => ({
   cantidad: detail.quantity,
   claveUnidad: product.U_ClaveUnidad,
   Unidad: getUnitTypeByProduct(product.Service, product.U_ClaveUnidad),
@@ -320,12 +335,12 @@ const structuredItems = (discount, detail, product) => ({
       tasaOCuota: TAXES_VALUATION,
       baseImpuesto:
         detail.quantity * (detail.unitPrice / 1.16) -
-        parseFloat(discount.toFixed(4)),
+        parseFloat(discountPercent.toFixed(4)),
       importe: parseFloat(
         getItemsAmountFixed(
           detail.quantity,
           detail.unitPrice,
-          discount
+          discountPercent
         ).toFixed(2)
       ),
     },
