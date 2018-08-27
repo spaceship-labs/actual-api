@@ -22,6 +22,7 @@ const PAYMENT_METHOD_TO_DEFINE = '99';
 const DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
+  structuredItems,
   async createInvoice(order, client, fiscalAddress, payments, details) {
     const genericClient =
       client.LicTradNum ||
