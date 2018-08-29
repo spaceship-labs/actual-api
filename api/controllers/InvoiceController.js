@@ -22,10 +22,7 @@ module.exports = {
         CardCode: order.Client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       });
-      const {
-        data: invoice,
-        error: error,
-      } = await InvoiceService.createInvoice(
+      const { data: invoice } = await InvoiceService.createInvoice(
         order,
         order.Client,
         fiscalAddress,
@@ -33,8 +30,13 @@ module.exports = {
         order.Details
       );
       console.log('INVOICE MADAFACKA: ', invoice);
+      console.log(
+        'Estatus documento: ',
+        invoice.AckEnlaceFiscal.estatusDocumento
+      );
+      const error = invoice.AckEnlaceFiscal.descripcionError;
       if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
-        throw new Error('Error al generar la orden');
+        throw new Error(error);
       const invoiceCreated = await Invoice.create({
         folio: invoice.AckEnlaceFiscal.folioInterno,
         order: order.id,

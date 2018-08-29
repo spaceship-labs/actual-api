@@ -112,10 +112,7 @@ module.exports = {
       });
       // await Email.sendOrderConfirmation(order.id);
       await Email.sendFreesale(order.id);
-      const {
-        data: invoice,
-        error: error,
-      } = await InvoiceService.createInvoice(
+      const { data: invoice } = await InvoiceService.createInvoice(
         order,
         order.Client,
         fiscalAddress,
@@ -127,8 +124,9 @@ module.exports = {
         'Estatus documento: ',
         invoice.AckEnlaceFiscal.estatusDocumento
       );
+      const error = invoice.AckEnlaceFiscal.descripcionError;
       if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
-        throw new Error(invoice.AckEnlaceFiscal.descripcionError);
+        throw new Error(error);
       const invoiceCreated = await Invoice.create({
         folio: invoice.AckEnlaceFiscal.folioInterno,
         order: order.id,
