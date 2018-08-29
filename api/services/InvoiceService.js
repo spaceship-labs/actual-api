@@ -104,74 +104,62 @@ const formatInvoice = async (
   payments,
   Partidas,
   genericClient
-) => {
-  const imp = getTaxesAmount(Partidas);
-  console.log('IMOUESTOS: ', imp);
-  return {
-    CFDi: {
-      modo: INVOICE_MODE,
-      versionEF: ENLACE_FISCAL_VERSION,
-      serie: 'FA',
-      folioInterno: parseInt(order.folio),
-      fechaEmision: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-      subTotal: getSubTotalFixed(Partidas),
-      descuentos: getDiscountFixed(Partidas),
-      total: getTotalFixed(
-        getSubTotalFixed(Partidas),
-        getDiscountFixed(Partidas),
-        getTaxesAmount(Partidas)
+) => ({
+  CFDi: {
+    modo: INVOICE_MODE,
+    versionEF: ENLACE_FISCAL_VERSION,
+    serie: 'FA',
+    folioInterno: parseInt(order.folio),
+    fechaEmision: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+    subTotal: getSubTotalFixed(Partidas),
+    descuentos: getDiscountFixed(Partidas),
+    total: getTotalFixed(
+      getSubTotalFixed(Partidas),
+      getDiscountFixed(Partidas),
+      getTaxesAmount(Partidas)
+    ),
+    tipoMoneda: 'MXN',
+    rfc: process.env.EMISOR_RFC,
+    DatosDePago: {
+      metodoDePago: getPaymentMethod(
+        getPaymentWay(payments, order),
+        payments,
+        order,
+        PAYMENT_METHOD_TO_DEFINE
       ),
-      tipoMoneda: 'MXN',
-      rfc: process.env.EMISOR_RFC,
-      DatosDePago: {
-        metodoDePago: getPaymentMethod(
-          getPaymentWay(payments, order),
-          payments,
-          order,
-          PAYMENT_METHOD_TO_DEFINE
-        ),
-        formaDePago: getPaymentWay(payments, order),
-      },
-      Receptor: handleClient(
-        client,
-        order.Client,
-        fiscalAddress,
-        genericClient
-      ),
-      Partidas,
-      Impuestos: {
-        Totales: {
-          traslados: getTaxesAmount(Partidas),
-        },
-        Impuestos: [
-          {
-            tipo: TAXES_TYPE,
-            claveImpuesto: TAXES_KEY,
-            tipoFactor: TAXES_FACTOR_TYPE,
-            tasaOCuota: TAXES_VALUATION,
-            importe: getTaxesAmount(Partidas),
-          },
-        ],
-      },
-      EnviarCFDI: {
-        Correos:
-          process.env.MODE === 'production'
-            ? [
-                fiscalAddress.U_Correos,
-                'facturamiactual@actualstudio.com',
-                'facturacion@actualg.com',
-              ]
-            : ['yupit@spaceshiplabs.com', 'luisperez@spaceshiplabs.com'],
-        mensajeCorreo: '',
-      },
+      formaDePago: getPaymentWay(payments, order),
     },
-  };
-};
+    Receptor: handleClient(client, order.Client, fiscalAddress, genericClient),
+    Partidas,
+    Impuestos: {
+      Totales: {
+        traslados: getTaxesAmount(Partidas),
+      },
+      Impuestos: [
+        {
+          tipo: TAXES_TYPE,
+          claveImpuesto: TAXES_KEY,
+          tipoFactor: TAXES_FACTOR_TYPE,
+          tasaOCuota: TAXES_VALUATION,
+          importe: getTaxesAmount(Partidas),
+        },
+      ],
+    },
+    EnviarCFDI: {
+      Correos:
+        process.env.MODE === 'production'
+          ? [
+              fiscalAddress.U_Correos,
+              'facturamiactual@actualstudio.com',
+              'facturacion@actualg.com',
+            ]
+          : ['yupit@spaceshiplabs.com', 'luisperez@spaceshiplabs.com'],
+      mensajeCorreo: '',
+    },
+  },
+});
 
 const getTotalFixed = (subtotal, discount, taxes) => {
-  console.log(subtotal);
-  console.log(discount);
-  console.log(taxes);
   return Dinero({
     amount: subtotal % 1 === 0 ? subtotal : subtotal * 100,
     currency: 'MXN',
@@ -193,8 +181,6 @@ const getTotalFixed = (subtotal, discount, taxes) => {
 
 const getSubTotalFixed = items => {
   const amounts = items.map(item => {
-    console.log('valorUnitario: ', item.valorUnitario);
-    console.log('item.importe: ', item.importe);
     const importe = Dinero({
       amount: item.importe % 1 === 0 ? item.importe : item.importe * 100,
       currency: 'MXN',
@@ -349,8 +335,6 @@ const getTaxBase = (itemAmount, discount) => {
 };
 
 const getItemDiscount = (itemAmount, discountPercent) => {
-  console.log('discountPercent: ', discountPercent);
-  console.log('itemAmount: ', itemAmount);
   const discount = Dinero({
     amount: itemAmount * 100,
     currency: 'MXN',
@@ -368,7 +352,6 @@ const getImportFixed = (quantity, unitPrice) => {
   });
   const unitPriceWithoutTaxes = fixedUnitPrice.divide(116).multiply(100);
   const amount = unitPriceWithoutTaxes.multiply(quantity);
-  console.log('importe de partida', amount.toUnit());
   return amount.toUnit();
 };
 
