@@ -21,69 +21,6 @@ const TAXES_VALUATION = '0.16';
 const PAYMENT_METHOD_TO_DEFINE = '99';
 const DEFAULT_CFDI_USE = 'P01';
 
-module.exports = {
-  structuredItems,
-  async createInvoice(order, client, fiscalAddress, payments, details) {
-    const genericClient =
-      client.LicTradNum ||
-      client.LicTradNum == FiscalAddressService.GENERIC_RFC;
-    const request = await formatInvoice(
-      order,
-      client,
-      fiscalAddress,
-      payments,
-      await getItems(details),
-      genericClient
-    );
-    console.log('REQUEST: ', request);
-    return await axios.post(
-      '/generarCfdi',
-      await formatInvoice(
-        order,
-        client,
-        fiscalAddress,
-        payments,
-        await getItems(details),
-        genericClient
-      )
-    );
-  },
-
-  async createElectronicPayment(
-    order,
-    client,
-    fiscalAddress,
-    payments,
-    folioFiscalUUID
-  ) {
-    return await axios.post(
-      '/generarReciboElectronicoPago',
-      await formatElectronicPayment(
-        order,
-        client,
-        fiscalAddress,
-        payments,
-        folioFiscalUUID
-      )
-    );
-  },
-
-  async removeInvoice(id) {
-    const { folio } = await Invoice.findOne({ Order: id });
-    return await axios.post('/cancelarCfdi', formatCancelInvoiceRequest(folio));
-  },
-
-  async send(orderId) {
-    const { Client } = Order.findOne({ id: orderId }).populate('Client');
-    const { folio } = Invoice.findOne({ order: orderId });
-    const email = Client.E_Mail;
-    return await axios.post(
-      '/enviarCorreo',
-      formatSendMailRequest(folio, email)
-    );
-  },
-};
-
 const formatSendMailRequest = (folio, email) => ({
   Solicitud: {
     rfc: process.env.EMISOR_RFC,
@@ -103,6 +40,7 @@ const formatSendMailRequest = (folio, email) => ({
 *
 *
 */
+/*
 const formatElectronicPayment = (
   order,
   client,
@@ -145,7 +83,7 @@ const handlePaymentComplement = (order, payments, folioFiscalUUID) => ({
     ],
   },
 });
-
+*/
 const formatCancelInvoiceRequest = folio => ({
   Solicitud: {
     modo: INVOICE_MODE,
@@ -194,7 +132,7 @@ const formatInvoice = async (
         ),
         formaDePago: getPaymentWay(payments, order),
       },
-      Receptor: await handleClient(
+      Receptor: handleClient(
         client,
         order.Client,
         fiscalAddress,
@@ -300,11 +238,9 @@ const getTaxesAmount = items => {
   return Dinero({ amount: taxes, currency: 'MXN' }).toUnit();
 };
 
-const handleClient = async (client, data, fiscal, genericClient) =>
+const handleClient = (client, data, fiscal, genericClient) =>
   !client ||
-  !data.E_Mail ||
   !data.LicTradNum ||
-  !fiscal.companyName ||
   !fiscal.Street ||
   !fiscal.U_NumExt ||
   !fiscal.ZipCode ||
@@ -317,6 +253,17 @@ const handleClient = async (client, data, fiscal, genericClient) =>
 const formatClent = (client, orderClient, fiscalAddress, genericClient) =>
   genericClient
     ? {
+        rfc: FiscalAddressService.GENERIC_RFC,
+        nombre: orderClient.CardName,
+        usoCfdi: DEFAULT_CFDI_USE,
+        DomicilioFiscal: {
+          calle: fiscalAddress.Street || 'Av Xcaret',
+          noExterior: fiscalAddress.U_NumExt || 'Lote 3',
+          estado: orderClient.U_Estado || 'Quintana Roo',
+          pais: 'México',
+        },
+      }
+    : {
         rfc: orderClient.LicTradNum,
         nombre: orderClient.CardName,
         usoCfdi: client.cfdiUse,
@@ -328,17 +275,6 @@ const formatClent = (client, orderClient, fiscalAddress, genericClient) =>
           estado: fiscalAddress.State,
           pais: 'México',
           cp: fiscalAddress.ZipCode,
-        },
-      }
-    : {
-        rfc: FiscalAddressService.GENERIC_RFC,
-        nombre: orderClient.CardName,
-        usoCfdi: DEFAULT_CFDI_USE,
-        DomicilioFiscal: {
-          calle: fiscalAddress.Street || 'Av Xcaret',
-          noExterior: fiscalAddress.U_NumExt || 'Lote 3',
-          estado: orderClient.U_Estado || 'Quintana Roo',
-          pais: 'México',
         },
       };
 
@@ -375,7 +311,10 @@ const structuredItems = (discount, detail, product, discountPercent) => ({
   descripcion: product.ItemName,
   valorUnitario: detail.unitPrice / 1.16,
   importe: getImportFixed(detail.quantity, detail.unitPrice),
-  descuento: getItemDiscount(discount),
+  descuento: getItemDiscount(
+    getImportFixed(detail.quantity, detail.unitPrice),
+    discountPercent
+  ),
   Impuestos: [
     {
       tipo: TAXES_TYPE,
@@ -383,42 +322,40 @@ const structuredItems = (discount, detail, product, discountPercent) => ({
       tipoFactor: TAXES_FACTOR_TYPE,
       tasaOCuota: TAXES_VALUATION,
       baseImpuesto: getTaxBase(
-        detail.quantity,
-        detail.unitPrice,
-        getItemDiscount(discount)
+        getImportFixed(detail.quantity, detail.unitPrice),
+        getItemDiscount(
+          getImportFixed(detail.quantity, detail.unitPrice),
+          discountPercent
+        )
       ),
       importe: getItemTaxAmount(
-        getTaxBase(detail.quantity, detail.unitPrice, getItemDiscount(discount))
+        getTaxBase(
+          getImportFixed(detail.quantity, detail.unitPrice),
+          getItemDiscount(
+            getImportFixed(detail.quantity, detail.unitPrice),
+            discountPercent
+          )
+        )
       ),
     },
   ],
 });
 
-const getTaxBase = (quantity, unitPrice, discount) => {
-  const fourDecimalsUnitPrice = parseInt(unitPrice * 10000);
-  const fixedUnitPrice = Dinero({
-    amount: fourDecimalsUnitPrice,
-    precision: 4,
-    currency: 'MXN',
-  });
-  const unitPriceWithoutTaxes = fixedUnitPrice.divide(116).multiply(100);
-  const taxes = unitPriceWithoutTaxes.multiply(quantity).subtract(
-    Dinero({
-      amount: discount % 1 === 0 ? discount : discount * 100,
-      currency: 'MXN',
-    })
-  );
-  console.log('base Impuesto: ', taxes.toUnit());
-  return taxes.toUnit();
+const getTaxBase = (itemAmount, discount) => {
+  const amount = Dinero({ amount: itemAmount * 100, currency: 'MXN' });
+  return amount
+    .subtract(Dinero({ amount: discount * 100, currency: 'MXN' }))
+    .toUnit();
 };
 
-const getItemDiscount = floatDiscount => {
-  const twoDecimalsDiscount =
-    floatDiscount % 1 === 0 ? floatDiscount : parseInt(floatDiscount * 100);
+const getItemDiscount = (itemAmount, discountPercent) => {
+  console.log('discountPercent: ', discountPercent);
+  console.log('itemAmount: ', itemAmount);
   const discount = Dinero({
-    amount: twoDecimalsDiscount,
+    amount: itemAmount * 100,
     currency: 'MXN',
-  });
+  }).percentage(discountPercent);
+
   return discount.toUnit();
 };
 
@@ -572,3 +509,68 @@ const getPaymentMethod = (paymentWay, payments, order, toDefine) =>
   paymentWay === toDefine || appliesForSpecialCashRule(payments, order, 100000)
     ? 'PPD'
     : 'PUE';
+
+module.exports = {
+  structuredItems,
+  handleClient,
+  formatInvoice,
+  async createInvoice(order, client, fiscalAddress, payments, details) {
+    const genericClient =
+      !client.LicTradNum ||
+      client.LicTradNum == FiscalAddressService.GENERIC_RFC;
+    const request = await formatInvoice(
+      order,
+      client,
+      fiscalAddress,
+      payments,
+      await getItems(details),
+      genericClient
+    );
+    console.log('REQUEST: ', JSON.stringify(request));
+    return await axios.post(
+      '/generarCfdi',
+      await formatInvoice(
+        order,
+        client,
+        fiscalAddress,
+        payments,
+        await getItems(details),
+        genericClient
+      )
+    );
+  },
+
+  async createElectronicPayment(
+    order,
+    client,
+    fiscalAddress,
+    payments,
+    folioFiscalUUID
+  ) {
+    return await axios.post(
+      '/generarReciboElectronicoPago',
+      await formatElectronicPayment(
+        order,
+        client,
+        fiscalAddress,
+        payments,
+        folioFiscalUUID
+      )
+    );
+  },
+
+  async removeInvoice(id) {
+    const { folio } = await Invoice.findOne({ Order: id });
+    return await axios.post('/cancelarCfdi', formatCancelInvoiceRequest(folio));
+  },
+
+  async send(orderId) {
+    const { Client } = Order.findOne({ id: orderId }).populate('Client');
+    const { folio } = Invoice.findOne({ order: orderId });
+    const email = Client.E_Mail;
+    return await axios.post(
+      '/enviarCorreo',
+      formatSendMailRequest(folio, email)
+    );
+  },
+};
