@@ -161,18 +161,18 @@ const formatInvoice = async (
 
 const getTotalFixed = (subtotal, discount, taxes) => {
   return Dinero({
-    amount: subtotal % 1 === 0 ? subtotal : subtotal * 100,
+    amount: subtotal * 100,
     currency: 'MXN',
   })
     .subtract(
       Dinero({
-        amount: discount % 1 === 0 ? discount : discount * 100,
+        amount: discount * 100,
         currency: 'MXN',
       })
     )
     .add(
       Dinero({
-        amount: taxes % 1 === 0 ? taxes : taxes * 100,
+        amount: taxes * 100,
         currency: 'MXN',
       })
     )
@@ -182,11 +182,12 @@ const getTotalFixed = (subtotal, discount, taxes) => {
 const getSubTotalFixed = items => {
   const amounts = items.map(item => {
     const importe = Dinero({
-      amount: item.importe % 1 === 0 ? item.importe : item.importe * 100,
+      amount: item.importe * 100,
       currency: 'MXN',
     });
     return importe.toObject();
   });
+  console.log('IMPORTES: ', amounts);
   const totalAmounts = amounts.reduce(
     (total, importe) => total + importe.amount,
     0
@@ -197,7 +198,7 @@ const getSubTotalFixed = items => {
 const getDiscountFixed = items => {
   const discounts = items.map(item => {
     const descuento = Dinero({
-      amount: item.descuento % 1 === 0 ? item.descuento : item.descuento * 100,
+      amount: item.descuento * 100,
       currency: 'MXN',
     });
     return descuento.toObject();
@@ -356,19 +357,11 @@ const getImportFixed = (quantity, unitPrice) => {
 };
 
 const getItemTaxAmount = amount => {
-  const twoDecimalsAmount = amount % 1 === 0 ? amount : parseInt(amount * 100);
+  const twoDecimalsAmount = parseInt(amount * 100);
   const taxAmount = Dinero({ amount: twoDecimalsAmount, currency: 'MXN' });
-  const discount = taxAmount
-    .multiply(84)
-    .divide(100)
-    .toUnit();
   return taxAmount
-    .subtract(
-      Dinero({
-        amount: discount % 1 === 0 ? discount : discount * 100,
-        currency: 'MXN',
-      })
-    )
+    .multiply(16)
+    .divide(100)
     .toUnit();
 };
 
