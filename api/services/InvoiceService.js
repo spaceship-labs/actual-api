@@ -213,7 +213,7 @@ const getDiscountFixed = items => {
 const getTaxesAmount = items => {
   const taxesAmount = items.map(item => {
     const impuesto = Dinero({
-      amount: item.Impuestos[0].importe * 100,
+      amount: parseInt(item.Impuestos[0].importe * 100),
       currency: 'MXN',
     });
     return impuesto.toObject();
