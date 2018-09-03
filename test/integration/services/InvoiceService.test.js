@@ -172,4 +172,104 @@ describe('InvoiceService migration', () => {
       expect(result.CFDi.modo).to.be.equal('debug');
     });
   });
+
+  describe('formatInvoice', () => {
+    it('should return the correct structured format for the invoice request with two products', async () => {
+      const order = {
+        ammountPaid: 18035.39,
+        total: 18035.38536,
+        subtotal: 30058.975599999998,
+        discount: 12023.59024,
+        paymentGroup: 1,
+        CardName: 'ROCIO PATIÑO LASTRA',
+        CardCode: 'C000005',
+        SlpCode: -1,
+        address:
+          'AV. 34 LOTE 14 MZN 165 COL. GONZALO GUERRERO PLAYA DEL CARMEN',
+        folio: '000358',
+        createdAt: '2018-08-27T18:50:17.275Z',
+        Client: {
+          CardCode: 'C000005',
+          CardName: 'ROCIO PATIÑO LASTRA',
+          CardType: 'C',
+          Phone1: null,
+          Phone2: null,
+          Cellular: '7774179291',
+          E_Mail: 'jpablofh@gmail.com',
+          LicTradNum: 'PALR671017T95',
+          U_Correos: null,
+          Series: 0,
+          Name: null,
+          cfdiUse: 'G01',
+        },
+      };
+      const client = {
+        CardCode: 'C000005',
+        CardName: 'ROCIO PATIÑO LASTRA',
+        CardType: 'C',
+        Phone1: null,
+        Phone2: null,
+        Cellular: '7774179291',
+        E_Mail: 'jpablofh@gmail.com',
+        LicTradNum: 'PALR671017T95',
+        U_Correos: null,
+        Series: 0,
+        Name: null,
+        cfdiUse: 'G01',
+      };
+      const fiscalAddress = {
+        Street: 'AV 34 SN COLONIA GONZALO GUERRERO',
+        U_NumExt: '445',
+        Block: 'Bonampak',
+        City: 'Cancun',
+        State: 'QR',
+        ZipCode: '77500',
+      };
+      const payments = [
+        {
+          name: 'Efectivo MXN',
+          type: 'cash',
+          currency: 'mxn',
+          exchangeRate: 18.58,
+          group: 1,
+          ammount: 18035.39,
+          folio: '000668',
+        },
+      ];
+      const partidas = [
+        {
+          cantidad: 1,
+          claveUnidad: 'H87',
+          Unidad: 'Pieza',
+          noIdentificacion: 'ST09978',
+          descripcion:
+            'SALA 95533 SOFA+CORNER+OTTOMAN KFC-216-33C14 GRIS CLARO',
+          valorUnitario: 17240.52,
+          importe: 17240.52,
+          descuento: 3448.1,
+          Impuestos: [
+            {
+              tipo: 'traslado',
+              claveImpuesto: 'IVA',
+              tipoFactor: 'tasa',
+              tasaOCuota: '0.16',
+              baseImpuesto: 13792.42,
+              importe: 2206.79,
+            },
+          ],
+        },
+      ];
+      const genericClient = false;
+      const result = await InvoiceService.formatInvoice(
+        order,
+        client,
+        fiscalAddress,
+        payments,
+        partidas,
+        genericClient
+      );
+      console.log('request', JSON.stringify(result));
+      expect(result.CFDi.modo).to.be.equal('debug');
+    });
+  });
 });
