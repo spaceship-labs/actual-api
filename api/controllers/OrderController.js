@@ -58,7 +58,7 @@ module.exports = {
       .populate('Broker')
       .populate('OrdersSap')
       .populate('SapOrderConnectionLog')
-      .populate('AlegraLogs')
+      .populate('InvoiceLogs')
       .then(function(foundOrder) {
         order = foundOrder.toObject();
         var sapReferencesIds = order.OrdersSap.map(function(ref) {
@@ -82,7 +82,7 @@ module.exports = {
     var form = req.params.all();
     var orderId = form.orderId;
 
-    AlegraLog.find({ Order: orderId })
+    InvoiceLog.find({ Order: orderId })
       .then(function(logs) {
         res.json(logs);
       })
@@ -110,32 +110,19 @@ module.exports = {
         CardCode: order.Client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       });
+      const user = req.user;
       // await Email.sendOrderConfirmation(order.id);
       await Email.sendFreesale(order.id);
-      const { data: invoice } = await InvoiceService.createInvoice(
+      await InvoiceService.createInvoice(
         order,
         order.Client,
         fiscalAddress,
         order.Payments,
-        order.Details
+        order.Details,
+        user
       );
-      console.log('INVOICE MADAFACKA: ', invoice);
-      console.log(
-        'Estatus documento: ',
-        invoice.AckEnlaceFiscal.estatusDocumento
-      );
-      const error = invoice.AckEnlaceFiscal.descripcionError;
-      if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado')
-        throw new Error(error);
-      const invoiceCreated = await Invoice.create({
-        folio: invoice.AckEnlaceFiscal.folioInterno,
-        order: order.id,
-        numeroReferencia: invoice.AckEnlaceFiscal.numeroReferencia,
-      });
       // await StockService.syncOrderDetailsProducts(orderDetails);
       console.log('Email de orden enviado: ' + order.folio);
-      // console.log('productsSynced', productsSynced);
-      console.log('generated invoice', invoiceCreated);
     } catch (err) {
       res.negotiate(err);
     }

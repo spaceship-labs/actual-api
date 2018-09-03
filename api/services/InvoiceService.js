@@ -1,6 +1,7 @@
 const moment = require('moment');
 const axiosD = require('axios');
 const Dinero = require('dinero.js');
+const BigNumber = require('bignumber.js');
 const axios = axiosD.create({
   baseURL: process.env.ENLACE_FISCAL_BASEURL,
   headers: {
@@ -160,13 +161,16 @@ const formatInvoice = async (
 });
 
 const getTotalFixed = (subtotal, discount, taxes) => {
+  console.log('TOTAL SUBTOTAL: ', subtotal * 100);
+  console.log('TOTAL DISCOUNT: ', parseInt(discount * 100));
+  console.log('TOTAL TAXES: ', taxes * 100);
   return Dinero({
     amount: subtotal * 100,
     currency: 'MXN',
   })
     .subtract(
       Dinero({
-        amount: discount * 100,
+        amount: parseInt(discount * 100),
         currency: 'MXN',
       })
     )
@@ -197,8 +201,9 @@ const getSubTotalFixed = items => {
 
 const getDiscountFixed = items => {
   const discounts = items.map(item => {
+    console.log('ITEM DISCOUNT DISCOUNT: ', parseInt(item.descuento * 100));
     const descuento = Dinero({
-      amount: item.descuento * 100,
+      amount: parseInt(item.descuento * 100),
       currency: 'MXN',
     });
     return descuento.toObject();
@@ -212,12 +217,21 @@ const getDiscountFixed = items => {
 
 const getTaxesAmount = items => {
   const taxesAmount = items.map(item => {
+    console.log('item.Impuestos[0].importe: ', item.Impuestos[0].importe);
+    console.log('after multiply: ', parseInt(item.Impuestos[0].importe) * 100);
+    console.log(
+      'using BigNumber',
+      new BigNumber(item.Impuestos[0].importe).multipliedBy(100).c[0]
+    );
     const impuesto = Dinero({
-      amount: parseInt(item.Impuestos[0].importe * 100),
+      amount: new BigNumber(item.Impuestos[0].importe)
+        .multipliedBy(100)
+        .toNumber(),
       currency: 'MXN',
     });
     return impuesto.toObject();
   });
+  console.log('taxesAmount: ', taxesAmount);
   const taxes = taxesAmount.reduce(
     (total, impuesto) => total + impuesto.amount,
     0
@@ -330,9 +344,11 @@ const structuredItems = (discount, detail, product, discountPercent) => ({
 
 const getTaxBase = (itemAmount, discount) => {
   const amount = Dinero({ amount: itemAmount * 100, currency: 'MXN' });
-  return amount
-    .subtract(Dinero({ amount: discount * 100, currency: 'MXN' }))
+  console.log('TAX BASE DISCOUNT: ', parseInt(discount * 100));
+  const taxBase = amount
+    .subtract(Dinero({ amount: parseInt(discount * 100), currency: 'MXN' }))
     .toUnit();
+  return taxBase.toFixed(2);
 };
 
 const getItemDiscount = (itemAmount, discountPercent) => {
@@ -359,10 +375,11 @@ const getImportFixed = (quantity, unitPrice) => {
 const getItemTaxAmount = amount => {
   const twoDecimalsAmount = parseInt(amount * 100);
   const taxAmount = Dinero({ amount: twoDecimalsAmount, currency: 'MXN' });
-  return taxAmount
+  const tax = taxAmount
     .multiply(16)
     .divide(100)
     .toUnit();
+  return tax.toFixed(2);
 };
 
 const getUnitTypeByProduct = (service, U_ClaveUnidad) =>
@@ -490,7 +507,7 @@ module.exports = {
   structuredItems,
   handleClient,
   formatInvoice,
-  async createInvoice(order, client, fiscalAddress, payments, details) {
+  async createInvoice(order, client, fiscalAddress, payments, details, user) {
     const genericClient =
       !client.LicTradNum ||
       client.LicTradNum == FiscalAddressService.GENERIC_RFC;
@@ -503,17 +520,43 @@ module.exports = {
       genericClient
     );
     console.log('REQUEST: ', JSON.stringify(request));
-    return await axios.post(
-      '/generarCfdi',
-      await formatInvoice(
-        order,
-        client,
-        fiscalAddress,
-        payments,
-        await getItems(details),
-        genericClient
-      )
-    );
+    const invoiceLog = await InvoiceLog.create({
+      User: user,
+      Order: order.id,
+      Store: order.Store,
+      url: `${process.env.ENLACE_FISCAL_BASEURL}/generarCfdi`,
+      requestData: JSON.stringify(request),
+    });
+    try {
+      const { data: invoice } = await axios.post('/generarCfdi', request);
+      console.log('INVOICE MADAFACKA: ', invoice);
+      if (invoice.AckEnlaceFiscal.estatusDocumento === 'rechazado') {
+        console.log('entro al error');
+        throw new Error(JSON.stringify(invoice));
+      }
+      if (invoice.AckEnlaceFiscal.estatusDocumento === 'aceptado') {
+        const invoiceCreated = await Invoice.create({
+          folio: invoice.AckEnlaceFiscal.folioInterno,
+          order: order.id,
+          numeroReferencia: invoice.AckEnlaceFiscal.numeroReferencia,
+        });
+        console.log('generated invoice', invoiceCreated);
+        await InvoiceLog.update(
+          { id: invoiceLog.id },
+          { responseData: JSON.stringify(invoice), isError: false }
+        );
+        return invoiceCreated;
+      }
+    } catch (err) {
+      await InvoiceLog.update(
+        { id: invoiceLog.id },
+        {
+          responseData: err,
+          isError: true,
+        }
+      );
+      throw new Error(err);
+    }
   },
 
   async createElectronicPayment(
