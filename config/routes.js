@@ -812,11 +812,11 @@ module.exports.routes = {
     controller: 'ewallet',
     action: 'show',
   },
-  '/ewalletconfiguration/:id': {
+  'GET /ewalletconfiguration/:id': {
     controller: 'ewalletconfiguration',
     action: 'show',
   },
-  '/ewalletconfiguration/:id': {
+  'POST /ewalletconfiguration/:id': {
     controller: 'ewalletconfiguration',
     action: 'update',
   },
