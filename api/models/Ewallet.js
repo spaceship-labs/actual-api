@@ -17,10 +17,13 @@ module.exports = {
       type: 'float',
       required: true,
     },
+    // RELATIONS
     Records: {
-      collection:'EwalletRecord',
-      via:'Ewallet',
-    }
-  }
+      collection: 'EwalletRecord',
+      via: 'Ewallet',
+    },
+    User: {
+      model: 'User',
+    },
+  },
 };
-
