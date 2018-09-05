@@ -215,13 +215,12 @@ module.exports.routes = {
 
   '/productcategory/childsrelations/:handle': {
     controller: 'productcategory',
-    action: 'getCategoryChildsRelations'
+    action: 'getCategoryChildsRelations',
   },
-
 
   '/productcategory/setchildsrelations/:handle': {
     controller: 'productcategory',
-    action: 'setCategoryChildsRelations'
+    action: 'setCategoryChildsRelations',
   },
 
   '/productfilter/find/:page': {
@@ -607,9 +606,9 @@ module.exports.routes = {
     action: 'findById',
   },
 
-  'POST /order/:id/cancel':{
+  'POST /order/:id/cancel': {
     controller: 'order',
-    action: 'cancel'
+    action: 'cancel',
   },
 
   '/order/user/:userId/totals': {
@@ -812,7 +811,15 @@ module.exports.routes = {
   '/ewallet/:cardNumber': {
     controller: 'ewallet',
     action: 'show',
-  }
+  },
+  '/ewalletconfiguration/:id': {
+    controller: 'ewalletconfiguration',
+    action: 'show',
+  },
+  '/ewalletconfiguration/:id': {
+    controller: 'ewalletconfiguration',
+    action: 'update',
+  },
   /***************************************************************************
    *                                                                          *
    * Custom routes here...                                                    *

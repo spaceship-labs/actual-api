@@ -8,7 +8,8 @@
 module.exports = {
   async show(req, res) {
     try {
-      const ewalletConfiguration = await EwalletConfiguration.find();
+      const id = req.param('id');
+      const ewalletConfiguration = await EwalletConfiguration.findOne({ id });
       res.ok(ewalletConfiguration);
     } catch (error) {
       res.negotiate(error);
@@ -23,7 +24,7 @@ module.exports = {
         expirationDate,
         minimumPercentageToGeneratePoints,
       } = req.allParams();
-      const ewalletConfiguration = await EwalletConfiguration.update(
+      const ewalletConfiguration = await EwalletConfiguration.findOrCreate(
         { id },
         { exchangeRate, expirationDate, minimumPercentageToGeneratePoints }
       );
