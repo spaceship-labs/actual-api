@@ -13,7 +13,7 @@ module.exports = {
     expirationDate: {
       type: 'datetime',
     },
-    minimumPercentageToGeneratePoints: {
+    maximumPercentageToGeneratePoints: {
       type: 'float',
     },
   },

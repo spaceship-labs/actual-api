@@ -22,11 +22,11 @@ module.exports = {
       const {
         exchangeRate,
         expirationDate,
-        minimumPercentageToGeneratePoints,
+        maximumPercentageToGeneratePoints,
       } = req.allParams();
       const ewalletConfiguration = await EwalletConfiguration.findOrCreate(
         { id },
-        { exchangeRate, expirationDate, minimumPercentageToGeneratePoints }
+        { exchangeRate, expirationDate, maximumPercentageToGeneratePoints }
       );
       res.ok(ewalletConfiguration);
     } catch (error) {
