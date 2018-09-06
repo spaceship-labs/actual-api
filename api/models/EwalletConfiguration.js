@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+  migrate: 'alter',
   attributes: {
     exchangeRate: {
       type: 'float',
