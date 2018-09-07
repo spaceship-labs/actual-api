@@ -22,8 +22,9 @@ module.exports = {
       collection: 'EwalletRecord',
       via: 'Ewallet',
     },
-    User: {
-      model: 'User',
+    Client: {
+      model: 'Client',
+      required: true,
     },
   },
 };

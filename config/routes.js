@@ -808,9 +808,9 @@ module.exports.routes = {
     controller: 'featuredproduct',
     action: 'remove',
   },
-  '/ewallet/:cardNumber': {
+  '/ewallet/:cardNumber/:client': {
     controller: 'ewallet',
-    action: 'show',
+    action: 'showOrCreate',
   },
   'GET /ewalletconfiguration': {
     controller: 'ewalletconfiguration',
