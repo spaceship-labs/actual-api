@@ -439,6 +439,10 @@ function prepareItems(details) {
       discount = parseFloat(discount.toFixed(4));
     }
     var product = detail.Product;
+    const productKey =
+      product.U_ClaveProdServ === 1010101
+        ? '01010101'
+        : product.U_ClaveProdServ;
     return {
       id: detail.id,
       name: product.ItemName,
@@ -446,10 +450,7 @@ function prepareItems(details) {
       //discount: discount,
       discount: parseFloat(discount.toFixed(4)),
       tax: [{ id: ALEGRA_IVA_ID }],
-      productKey:
-        product.U_ClaveProdServ === 1010101
-          ? '01010101'
-          : product.U_ClaveProdServ,
+      productKey,
       quantity: detail.quantity,
       inventory: {
         unit: getUnitTypeByProduct(product),
