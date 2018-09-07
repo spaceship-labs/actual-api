@@ -43,15 +43,24 @@ function saveFiles(req, opts, cb) {
       };
 
       if (process.env.CLOUDUSERNAME && !opts.disableCloud) {
-        var dirName = '/uploads/' + opts.dir + '/';
+        var dirName = 'uploads/' + opts.dir + '/';
 
         uploadOptions = _.extend(uploadOptions, {
           adapter: adapterPkgCloud,
+          provider: 'amazon',
+          keyId: process.env.AWS_KEY_ID,
+          key: process.env.AWS_KEY,
+          region: process.env.AWS_REGION,
+          container: process.env.AWS_BUCKET,
+          dirSave: dirName,
+          dirname: dirName,
+          /*
           dirname: dirName,
           username: process.env.CLOUDUSERNAME,
           apiKey: process.env.CLOUDAPIKEY,
           region: process.env.CLOUDREGION,
           container: process.env.CLOUDCONTAINER,
+          */
         });
 
         if (opts.avatar) {
@@ -70,46 +79,24 @@ function saveFiles(req, opts, cb) {
         }
       }
 
-      //TODO abstract in function
-      //In order to prevent rackspace 404, only upload crop images
-      if (
-        req._fileparser.form.bytesExpected >= bytesLimitRackspace &&
-        opts.profile === 'record'
-      ) {
-        req.file('file').upload({ maxBytes: maxBytes }, function(err, files) {
-          var fileStream = fs.createReadStream(files[0].fd);
-          opts.srcData = fileStream;
-          opts.filename = generateFileNameSync($files[0].stream);
-          files = files.map(function(file) {
-            var sizes = sails.config.images[opts.profile];
-            var largestSize = sizes[sizes.length - 1] || '';
-            file.fd = largestSize + opts.filename;
-            return file;
-          });
+      req.file('file').upload(uploadOptions, function(e, files) {
+        if (e) {
+          console.log('error saveFiles', e);
+          reject(e);
+        }
 
-          makeCropsStreams(uploadOptions, opts, function(e, result) {
-            if (e) {
-              console.log('error only crop files', e);
-              reject(e);
-            }
-            var uploadedFiles = mapUploadedFiles(files);
-            resolve(uploadedFiles);
-          });
-        });
-      } else {
-        req.file('file').upload(uploadOptions, function(e, files) {
+        console.log('filessss', files);
+        resolve(files);
+        return;
+        makeCropsStreams(uploadOptions, opts, function(e, result) {
           if (e) {
-            console.log('error saveFiles', e);
+            console.log('error only crop files', e);
             reject(e);
           }
           var uploadedFiles = mapUploadedFiles(files);
-          if (uploadedFiles.length === 0) {
-            reject('Error al subir imagenes');
-          }
-          sails.log.info('uploadedFiles', uploadedFiles);
           resolve(uploadedFiles);
         });
-      }
+      });
     } else {
       reject('No hay imagenes por subir');
     }
@@ -152,7 +139,7 @@ function generateFileNameSync(_stream) {
 function makeCropsStreams(uploadOptions, opts, cb) {
   var sizes = sails.config.images[opts.profile];
   var adapter = adapterPkgCloud(uploadOptions);
-  opts.dirSave = '/uploads/' + opts.dir + '/';
+  opts.dirSave = 'uploads/' + opts.dir + '/';
 
   if (!sizes || sizes.length === 0) return cb();
 
@@ -208,7 +195,9 @@ function removeFile(opts) {
   return new Promise(function(resolve, reject) {
     if (adapter) {
       //if remote
+      console.log('routes to delete', routes);
       async.each(routes, adapter.rm, function(err) {
+        console.log('delete err', err);
         if (err) reject(err);
         resolve();
       });
@@ -223,46 +212,32 @@ function removeFile(opts) {
 }
 
 function getAdapterConfig() {
-  if (process.env.CLOUDUSERNAME) {
+  if (process.env.AWS_KEY) {
     var uploadOptions = {
-      username: process.env.CLOUDUSERNAME,
-      apiKey: process.env.CLOUDAPIKEY,
-      region: process.env.CLOUDREGION,
-      container: process.env.CLOUDCONTAINER,
+      provider: 'amazon',
+      keyId: process.env.AWS_KEY_ID,
+      key: process.env.AWS_KEY,
+      region: process.env.AWS_REGION,
+      container: process.env.AWS_BUCKET,
     };
     return adapterPkgCloud(uploadOptions);
   }
   return false;
 }
 
-module.exports.containerCloudLink = '';
-
 //Runs in bootstrap
 //or '' if not setting
 module.exports.getContainerLink = function(next) {
-  if (module.exports.containerCloudLink) {
-    if (next) return next(null, containerCloudLink);
-    return containerCloudLink;
-  }
-
-  var adapter = getAdapterConfig();
-  if (adapter) {
-    adapter.getContainerLink(function(err, link) {
-      module.exports.containerCloudLink = link || '';
-      if (next) return next(err, module.exports.containerCloudLink);
-    });
-  } else {
-    module.exports.containerCloudLink = '';
-    if (next) return next(null, module.exports.containerCloudLink);
-    return module.exports.containerCloudLink;
+  if (next) {
+    return next(null, process.env.AWS_S3_BASE_URL);
   }
 };
 
 module.exports.middleware = function(req, res, next) {
-  if (req.url.indexOf('/uploads/') !== 0 || Files.containerCloudLink === '') {
+  if (req.url.indexOf('/uploads/') !== 0 || !process.env.AWS_S3_BASE_URL) {
     next();
   } else {
-    res.redirect(301, module.exports.containerCloudLink + req.url);
+    res.redirect(301, process.env.AWS_S3_BASE_URL + req.url);
   }
 };
 

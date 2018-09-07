@@ -44,7 +44,7 @@
     "sails-sqlserver": "^0.10.8",
     "sendgrid": "^3.0.8",
     "skipper": "^0.8.0",
-    "skipper-pkgcloud": "0.0.4",
+    "skipper-pkgcloud": "file:/var/www/skipper-pkgcloud/",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
