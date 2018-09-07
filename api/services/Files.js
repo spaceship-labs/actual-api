@@ -20,7 +20,29 @@ module.exports = {
   makeCrops: makeCrops,
 };
 
-function saveFiles(req, opts, cb) {
+function saveFiles(req, opts) {
+  const dirName = 'uploads/' + opts.dir + '/';
+  const uploadOptions = {
+    saveAs: generateFileName,
+    adapter: require('skipper-s3'),
+    key: process.env.AWS_KEY_ID,
+    secret: process.env.AWS_KEY,
+    bucket: process.env.AWS_BUCKET,
+    //dirSave: dirName,
+    dirname: dirName,
+  };
+
+  return new Promise((resolve, reject) => {
+    req.file('file').upload(uploadOptions, (err, filesUploaded) => {
+      console.log('err', err);
+      if (err) reject(err);
+      console.log('filesUploaded', filesUploaded);
+      resolve(filesUploaded);
+    });
+  });
+}
+
+function saveFiles2(req, opts, cb) {
   var directoryToSaveIn = __dirname + '/../../assets/uploads/' + opts.dir + '/';
   var $files = (req.file && req.file('file')._files) || [];
   var bytesLimitRackspace = 820096;
@@ -42,7 +64,8 @@ function saveFiles(req, opts, cb) {
         maxBytes: maxBytes,
       };
 
-      if (process.env.CLOUDUSERNAME && !opts.disableCloud) {
+      console.log('inicio upload');
+      if (process.env.AWS_KEY_ID && !opts.disableCloud) {
         var dirName = 'uploads/' + opts.dir + '/';
 
         uploadOptions = _.extend(uploadOptions, {
@@ -74,11 +97,14 @@ function saveFiles(req, opts, cb) {
 
             opts.srcData = stream;
             opts.filename = filename;
-            makeCropsStreams(uploadOptions, opts, next);
+            console.log('finished go to next()');
+            next();
+            //makeCropsStreams(uploadOptions, opts, next);
           };
         }
       }
 
+      console.log('uploadOptions', uploadOptions);
       req.file('file').upload(uploadOptions, function(e, files) {
         if (e) {
           console.log('error saveFiles', e);
@@ -86,6 +112,7 @@ function saveFiles(req, opts, cb) {
         }
 
         console.log('filessss', files);
+        console.log('end');
         resolve(files);
         return;
         makeCropsStreams(uploadOptions, opts, function(e, result) {
@@ -174,6 +201,7 @@ function makeCropsStreams(uploadOptions, opts, cb) {
 
 //Deletes a File and Crops if profile is specified;
 function removeFile(opts) {
+  console.log('running removeFile');
   var adapter = getAdapterConfig();
   var remoteSaveDir = '/uploads/' + opts.dir + '/';
   var localSaveDir = __dirname + '/../../assets/uploads/' + opts.dir + '/';
@@ -191,7 +219,7 @@ function removeFile(opts) {
   }
 
   //sails.log.info('files to remove', routes);
-
+  return Promise.resolve({ ok: true });
   return new Promise(function(resolve, reject) {
     if (adapter) {
       //if remote
