@@ -167,11 +167,6 @@ async function addPayment(params, req) {
       const ewalletAmount = new BigNumber(ewallet.amount)
         .dividedBy(ewalletConfiguration.exchangeRate)
         .toNumber();
-      // const amountExceeded = validatePromoPercentageAmount(
-      //   ewalletAmount,
-      //   params.total,
-      //   ewalletConfiguration
-      // );
     }
 
     hasEnoughFunds = await EwalletService.isValidEwalletPayment(
@@ -621,22 +616,6 @@ function removeCreditMethod(methodsGroups) {
     return methodGroup;
   });
 }
-
-const validatePromoPercentageAmount = async (
-  ewalletAmount,
-  total,
-  ewalletConfig
-) => {
-  const amount = new BigNumber(total)
-    .multipliedBy(ewalletConfig.maximumPercentageToGeneratePoints)
-    .dividedBy(100)
-    .toNumber();
-  if (ewalletAmount > amount) {
-    return true;
-  } else {
-    return false;
-  }
-};
 
 const SINGLE_PAYMENT_TERMINAL_METHOD = {
   label: '1 pago con',

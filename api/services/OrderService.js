@@ -1,6 +1,6 @@
 const _ = require('underscore');
 const Promise = require('bluebird');
-
+const BigNumber = require('bignumber.js');
 const INVOICE_SAP_TYPE = 'Invoice';
 const ORDER_SAP_TYPE = 'Order';
 const ERROR_SAP_TYPE = 'Error';
@@ -223,6 +223,57 @@ const processEwalletBalance = async ({
   userId,
   ewalletId,
 }) => {
+  const ewalletConfigurationFound = await EwalletConfiguration.find();
+  const ewalletConfiguration = ewalletConfigurationFound[0];
+  if (ewalletConfiguration) {
+    const { total, Payments } = await Order.FindOne({ id: orderId });
+    const payments = await Payment.find({ id: Payments });
+    const ewalletPayment = payments.map(payment => {
+      if (payment.type === 'ewalet') {
+        return amount;
+      }
+    });
+    const amountPayed = ewalletPayment.reduce(
+      (total, amount) => total + amount,
+      0
+    );
+    const amountExceeded = validatePromoPercentageAmount(
+      amountPayed,
+      total,
+      ewalletConfiguration
+    );
+    if (amountExceeded) {
+      return;
+    } else {
+      await generateEwalletBalanceAndRecords(
+        storeId,
+        orderId,
+        quotationId,
+        details,
+        userId,
+        ewalletId
+      );
+    }
+  } else {
+    await generateEwalletBalanceAndRecords(
+      storeId,
+      orderId,
+      quotationId,
+      details,
+      userId,
+      ewalletId
+    );
+  }
+};
+
+const generateEwalletBalanceAndRecords = async (
+  storeId,
+  orderId,
+  quotationId,
+  details,
+  userId,
+  ewalletId
+) => {
   let ewalletRecords = [];
   let generated = 0;
   for (let i = 0; i < details.length; i++) {
@@ -258,6 +309,18 @@ const processEwalletBalance = async ({
 };
 
 const createEwalletRecord = async record => await EwalletRecord.create(record);
+
+const validatePromoPercentageAmount = (ewalletAmount, total, ewalletConfig) => {
+  const amount = new BigNumber(total)
+    .multipliedBy(ewalletConfig.maximumPercentageToGeneratePoints)
+    .dividedBy(100)
+    .toNumber();
+  if (ewalletAmount > amount) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 function getCountByUser(form) {
   var userId = form.userId;
