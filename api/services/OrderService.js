@@ -182,17 +182,18 @@ module.exports = {
 
     await Quotation.update({ id: quotation.id }, updateFields);
     await saveSapReferences(sapResult, orderCreated, orderDetails);
+    if (ewallet) {
+      const ewalletProcessBalanceParams = {
+        details: quotation.Details,
+        storeId: opts.currentStoreId,
+        orderId: orderCreated.id,
+        quotationId: quotation.id,
+        userId: quotation.User.id,
+        ewalletId: ewallet,
+      };
 
-    const ewalletProcessBalanceParams = {
-      details: quotation.Details,
-      storeId: opts.currentStoreId,
-      orderId: orderCreated.id,
-      quotationId: quotation.id,
-      userId: quotation.User.id,
-      ewalletId: ewallet,
-    };
-
-    await processEwalletBalance(ewalletProcessBalanceParams);
+      await processEwalletBalance(ewalletProcessBalanceParams);
+    }
 
     const order = orderCreated.toObject();
     order.Details = orderDetails;

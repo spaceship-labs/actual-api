@@ -87,6 +87,7 @@ module.exports = {
     try {
       const { quotationId, ewallet } = req.allParams();
       var responseSent = false;
+      console.log('ORDER CREATE PARAMS: ', req.allParams());
       const orderCreated = await OrderService.create(
         quotationId,
         ewallet,

@@ -3,7 +3,7 @@ const numeral = require('numeral');
 const _ = require('underscore');
 const cloneDeep = require('lodash.clonedeep');
 const ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
-
+const BigNumber = require('bignumber.js');
 const EWALLET_TYPE = 'ewallet';
 const CASH_USD_TYPE = 'cash-usd';
 const TRANSFER_USD_TYPE = 'transfer-usd';
@@ -156,15 +156,27 @@ async function addPayment(params, req) {
   const previousPayments = quotation.Payments;
   let hasEnoughFunds;
 
-
   const ewalletId = params.ewallet;
   const ewallet = await Ewallet.findOne({ id: ewalletId });
   if (params.type === EWALLET_TYPE) {
-    console.log('params.ammount: ', params.ammount);
-    console.log('ewallet.amount: ', ewallet.amount);
+    console.log('params.ammount: ', params.total);
+    console.log('ewallet.amount: ', params.amount);
+    const ewalletConfigurationFound = await EwalletConfiguration.find();
+    const ewalletConfiguration = ewalletConfigurationFound[0];
+    if (ewalletConfiguration) {
+      const ewalletAmount = new BigNumber(ewallet.amount)
+        .dividedBy(ewalletConfiguration.exchangeRate)
+        .toNumber();
+      // const amountExceeded = validatePromoPercentageAmount(
+      //   ewalletAmount,
+      //   params.total,
+      //   ewalletConfiguration
+      // );
+    }
+
     hasEnoughFunds = await EwalletService.isValidEwalletPayment(
       params.ammount,
-      ewallet.amount
+      ewalletAmount ? ewalletAmount : ewallet.amount
     );
     console.log('QUE PEDO: ', hasEnoughFunds);
   }
@@ -609,6 +621,22 @@ function removeCreditMethod(methodsGroups) {
     return methodGroup;
   });
 }
+
+const validatePromoPercentageAmount = async (
+  ewalletAmount,
+  total,
+  ewalletConfig
+) => {
+  const amount = new BigNumber(total)
+    .multipliedBy(ewalletConfig.maximumPercentageToGeneratePoints)
+    .dividedBy(100)
+    .toNumber();
+  if (ewalletAmount > amount) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 const SINGLE_PAYMENT_TERMINAL_METHOD = {
   label: '1 pago con',
