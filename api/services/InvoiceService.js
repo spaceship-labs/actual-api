@@ -161,22 +161,32 @@ const formatInvoice = async (
 });
 
 const getTotalFixed = (subtotal, discount, taxes) => {
-  console.log('TOTAL SUBTOTAL: ', subtotal * 100);
-  console.log('TOTAL DISCOUNT: ', parseInt(discount * 100));
-  console.log('TOTAL TAXES: ', taxes * 100);
+  console.log(
+    'TOTAL SUBTOTAL: ',
+    new BigNumber(subtotal).multipliedBy(100).toNumber()
+  );
+  console.log(
+    'TOTAL DISCOUNT: ',
+    new BigNumber(discount).multipliedBy(100).toNumber()
+  );
+  console.log(
+    'TOTAL TAXES: ',
+    new BigNumber(taxes).multipliedBy(100).toNumber()
+  );
+
   return Dinero({
-    amount: subtotal * 100,
+    amount: new BigNumber(subtotal).multipliedBy(100).toNumber(),
     currency: 'MXN',
   })
     .subtract(
       Dinero({
-        amount: parseInt(discount * 100),
+        amount: new BigNumber(discount).multipliedBy(100).toNumber(),
         currency: 'MXN',
       })
     )
     .add(
       Dinero({
-        amount: taxes * 100,
+        amount: new BigNumber(taxes).multipliedBy(100).toNumber(),
         currency: 'MXN',
       })
     )
@@ -186,7 +196,7 @@ const getTotalFixed = (subtotal, discount, taxes) => {
 const getSubTotalFixed = items => {
   const amounts = items.map(item => {
     const importe = Dinero({
-      amount: item.importe * 100,
+      amount: new BigNumber(item.importe).multipliedBy(100).toNumber(),
       currency: 'MXN',
     });
     return importe.toObject();
@@ -201,9 +211,12 @@ const getSubTotalFixed = items => {
 
 const getDiscountFixed = items => {
   const discounts = items.map(item => {
-    console.log('ITEM DISCOUNT DISCOUNT: ', parseInt(item.descuento * 100));
+    console.log(
+      'ITEM DISCOUNT DISCOUNT: ',
+      new BigNumber(item.descuento).multipliedBy(100).toNumber()
+    );
     const descuento = Dinero({
-      amount: parseInt(item.descuento * 100),
+      amount: new BigNumber(item.descuento).multipliedBy(100).toNumber(),
       currency: 'MXN',
     });
     return descuento.toObject();
@@ -343,7 +356,10 @@ const structuredItems = (discount, detail, product, discountPercent) => ({
 });
 
 const getTaxBase = (itemAmount, discount) => {
-  const amount = Dinero({ amount: itemAmount * 100, currency: 'MXN' });
+  const amount = Dinero({
+    amount: new BigNumber(itemAmount).multipliedBy(100).toNumber(),
+    currency: 'MXN',
+  });
   console.log('TAX BASE DISCOUNT: ', parseInt(discount * 100));
   const taxBase = amount
     .subtract(Dinero({ amount: parseInt(discount * 100), currency: 'MXN' }))
@@ -353,7 +369,7 @@ const getTaxBase = (itemAmount, discount) => {
 
 const getItemDiscount = (itemAmount, discountPercent) => {
   const discount = Dinero({
-    amount: itemAmount * 100,
+    amount: new BigNumber(itemAmount).multipliedBy(100).toNumber(),
     currency: 'MXN',
   }).percentage(discountPercent);
 
