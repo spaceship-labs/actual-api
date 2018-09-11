@@ -46,7 +46,6 @@
     "sails-sqlserver": "^0.10.8",
     "sendgrid": "^3.0.8",
     "skipper": "^0.8.0",
-    "skipper-pkgcloud": "file:/var/www/skipper-pkgcloud/",
     "skipper-s3": "^0.5.11",
     "underscore": "^1.8.3"
   },
@@ -66,7 +65,8 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": "node app.js",
-    "test": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
+    "test":
+      "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
   },
   "main": "app.js",
   "repository": {
@@ -80,9 +80,6 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
   }
 }
