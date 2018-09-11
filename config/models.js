@@ -77,7 +77,7 @@ module.exports.models = {
       var object = this;
       opts.file = mapIconFields(object);
 
-      if (process.env.AWS_KEY_ID) {
+      if (process.env.AWS_ACCESS_KEY_ID) {
         //if remote
         opts.avatar = true;
         opts.filename = object.icon_filename ? object.icon_filename : null;
@@ -96,27 +96,6 @@ module.exports.models = {
             if (opts.file && opts.file.filename) {
               return Files.removeFile(opts);
             }
-            return object;
-          });
-      } else {
-        //If local save
-        Files.saveFiles(req, opts)
-          .then(function(files) {
-            object.icon_filename = files[0].filename;
-            object.icon_name = files[0].name;
-            object.icon_type = files[0].type;
-            object.icon_typebase = files[0].typebase;
-            object.icon_size = files[0].size;
-            opts.filename = object.icon_filename;
-            return Files.makeCrops(req, opts);
-          })
-          .then(function(crops) {
-            if (opts.file && opts.file.filename) {
-              return Files.removeFile(opts);
-            }
-            return object.save();
-          })
-          .then(function() {
             return object;
           });
       }
@@ -153,7 +132,7 @@ module.exports.models = {
         : [];
       req.onProgress = getOnProgress(req);
 
-      if (process.env.AWS_KEY_ID) {
+      if (process.env.AWS_ACCESS_KEY_ID) {
         opts.avatar = true;
       }
 
@@ -212,7 +191,7 @@ module.exports.models = {
     updateAvatarSap: function(internalFiles, opts, cb) {
       var object = this;
       opts.file = mapIconFields(object);
-      if (process.env.AWS_KEY_ID) {
+      if (process.env.AWS_ACCESS_KEY_ID) {
         opts.avatar = true;
         opts.filename = object.icon_filename ? object.icon_filename : null;
         Files.saveFilesSap(internalFiles, opts, function(err, files) {
