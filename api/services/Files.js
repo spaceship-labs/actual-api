@@ -31,7 +31,9 @@ function saveFiles(req, opts) {
 
 function generateFileName(_stream, callback) {
   var error = null;
-  var fileName = _stream.filename;
+  //Only allowing alphabet chars or numbers
+  var fileName = _stream.filename.replace(/[^a-zA-Z0-9]/g, '_');
+
   callback(error, fileName);
 }
 
