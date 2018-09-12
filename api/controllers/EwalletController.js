@@ -10,24 +10,8 @@ module.exports = {
     try {
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
-      if (cardNumber.length < 12) throw new Error('Formato no válido');
-      const ewallet = await Ewallet.findOne({ cardNumber });
-      if (ewallet) {
-        if (ewallet.Client === Client) {
-          res.ok(ewallet);
-        } else {
-          throw new Error(
-            'El monedero ingresado no pertenece al usuario de esta cotización'
-          );
-        }
-      } else {
-        const ewalletCreated = await Ewallet.create({
-          Client,
-          cardNumber,
-          amount: 0,
-        });
-        res.ok(ewalletCreated);
-      }
+      const ewallet = await EwalletService.showOrCreate(cardNumber, Client);
+      res.ok(ewallet);
     } catch (e) {
       res.negotiate(e);
     }
