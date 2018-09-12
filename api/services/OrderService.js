@@ -226,11 +226,11 @@ const processEwalletBalance = async ({
   const ewalletConfigurationFound = await EwalletConfiguration.find();
   const ewalletConfiguration = ewalletConfigurationFound[0];
   if (ewalletConfiguration) {
-    const { total, Payments } = await Order.FindOne({ id: orderId });
+    const { total, Payments } = await Order.findOne({ id: orderId });
     const payments = await Payment.find({ id: Payments });
     const ewalletPayment = payments.map(payment => {
       if (payment.type === 'ewalet') {
-        return amount;
+        return payment.amount;
       }
     });
     const amountPayed = ewalletPayment.reduce(
@@ -238,7 +238,7 @@ const processEwalletBalance = async ({
       0
     );
     const amountExceeded = validatePromoPercentageAmount(
-      amountPayed,
+      amountPayed >= 0 ? amountPayed : 0,
       total,
       ewalletConfiguration
     );

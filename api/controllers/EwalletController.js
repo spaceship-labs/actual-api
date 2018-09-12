@@ -10,8 +10,7 @@ module.exports = {
     try {
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
-      if (cardNumber.length < 12)
-        throw new Error({ message: 'Formato no válido' });
+      if (cardNumber.length < 12) throw new Error('Formato no válido');
       const ewallet = await Ewallet.findOne({ cardNumber });
       if (ewallet) {
         if (ewallet.Client === Client) {
@@ -31,6 +30,18 @@ module.exports = {
       }
     } catch (e) {
       res.negotiate(e);
+    }
+  },
+  async show(req, res) {
+    try {
+      const cardNumber = req.param('cardNumber');
+      if (cardNumber.length < 12) throw new Error('Formato no válido');
+      const ewallet = await Ewallet.findOne({ cardNumber });
+      if (!ewallet)
+        throw new Error('El monedero electrónico ingresado no existe ');
+      res.ok(ewallet);
+    } catch (error) {
+      res.negotiate(error);
     }
   },
 };
