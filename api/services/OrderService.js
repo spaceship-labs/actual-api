@@ -234,7 +234,7 @@ const processEwalletBalance = async ({
       }
     });
     const amountPayed = ewalletPayment.reduce(
-      (total, amount) => total + amount,
+      (total, amount) => (total + amount === undefined ? 0 : amount),
       0
     );
     const amountExceeded = validatePromoPercentageAmount(
