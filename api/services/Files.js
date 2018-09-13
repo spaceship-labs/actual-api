@@ -3,8 +3,9 @@ const S3 = require('aws-sdk/clients/s3');
 const s3 = new S3();
 
 module.exports = {
-  saveFiles: saveFiles,
-  removeFile: removeFile,
+  generateFileName,
+  saveFiles,
+  removeFile,
 };
 
 function saveFiles(req, opts) {
@@ -30,8 +31,11 @@ function saveFiles(req, opts) {
 }
 
 function generateFileName(_stream, callback) {
-  var error = null;
-  var fileName = _stream.filename;
+  const error = null;
+  const ext = _stream.filename.split('.').pop() || '';
+  const name = _stream.filename.replace('.' + ext, '');
+  const camelCaseName = name.replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = camelCaseName + '.' + ext;
   callback(error, fileName);
 }
 
