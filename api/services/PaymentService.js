@@ -163,15 +163,17 @@ async function addPayment(params, req) {
     console.log('ewallet.amount: ', params.amount);
     const ewalletConfigurationFound = await EwalletConfiguration.find();
     const ewalletConfiguration = ewalletConfigurationFound[0];
-    if (ewalletConfiguration) {
-      const ewalletAmount = new BigNumber(ewallet.amount)
+    let ewalletAmount = null;
+    if (ewalletConfiguration.id) {
+      ewalletAmount = new BigNumber(ewallet.amount)
         .dividedBy(ewalletConfiguration.exchangeRate)
         .toNumber();
     }
-
+    console.log('params.ammount: ', params.ammount);
+    console.log('ewalletAmount: ', ewalletAmount);
     hasEnoughFunds = await EwalletService.isValidEwalletPayment(
       params.ammount,
-      ewalletAmount ? ewalletAmount : ewallet.amount
+      ewalletAmount != null ? ewalletAmount : ewallet.amount
     );
     console.log('QUE PEDO: ', hasEnoughFunds);
   }
