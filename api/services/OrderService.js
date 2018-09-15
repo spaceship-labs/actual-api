@@ -582,7 +582,9 @@ function createEwalletRecord(record){
 
 function getPaidPercentage(amountPaid, total){
   var percentage = amountPaid / (total / 100);
-
+  console.log('total', total);
+  console.log('amountPaid', amountPaid);
+  console.log('percentage', percentage);
   //Floating point issue precision with JS
   //TODO find fix to precision
   //Problem: sometimes ammount paid and total is equal, but percentage throws: 99.99999999999999
