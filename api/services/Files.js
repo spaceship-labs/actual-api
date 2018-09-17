@@ -4,6 +4,7 @@ const s3 = new S3();
 
 module.exports = {
   generateFileName,
+  camelCaseFileName,
   saveFiles,
   removeFile,
 };
@@ -24,18 +25,28 @@ function saveFiles(req, opts) {
     req.file('file').upload(uploadOptions, (err, filesUploaded) => {
       console.log('err', err);
       if (err) reject(err);
-      console.log('filesUploaded', filesUploaded);
+      //console.log('filesUploaded', filesUploaded);
+      const mappedFilesUploaded = filesUploaded.map(file => {
+        return Object.assign(file, {
+          filename: camelCaseFileName(file.filename),
+        });
+      });
+      console.log('filesUploaded mapped', mappedFilesUploaded);
       resolve(filesUploaded);
     });
   });
 }
 
+function camelCaseFileName(fileName) {
+  const ext = fileName.split('.').pop() || '';
+  const name = fileName.replace('.' + ext, '');
+  const camelCaseName = name.replace(/[^a-zA-Z0-9]/g, '_');
+  return camelCaseName + '.' + ext;
+}
+
 function generateFileName(_stream, callback) {
   const error = null;
-  const ext = _stream.filename.split('.').pop() || '';
-  const name = _stream.filename.replace('.' + ext, '');
-  const camelCaseName = name.replace(/[^a-zA-Z0-9]/g, '_');
-  const fileName = camelCaseName + '.' + ext;
+  const fileName = camelCaseFileName(_stream.filename);
   callback(error, fileName);
 }
 
