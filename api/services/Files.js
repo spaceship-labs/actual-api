@@ -131,7 +131,7 @@ module.exports.middleware = function(req, res, next) {
     next();
   } else {
     var redirectUrl = replaceUrlImageSizes(req.url);
-    console.log('redirectUrl', redirectUrl);
+    //console.log('redirectUrl', redirectUrl);
     res.redirect(301, process.env.AWS_CLOUDFRONT_URL + redirectUrl);
   }
 };
