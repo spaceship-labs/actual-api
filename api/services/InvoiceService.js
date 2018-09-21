@@ -374,7 +374,7 @@ function prepareClientParams(order, client, address) {
         exteriorNumber: address.U_NumExt,
         interiorNumber: address.U_NumInt,
         colony: address.Block,
-        country: 'México',
+        country: client.CardCode === 'PL10003936' ? 'MEX' : 'México',
         state: address.State,
         municipality: address.U_Localidad,
         localitiy: address.City,
