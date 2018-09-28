@@ -253,16 +253,7 @@ const getTaxesAmount = items => {
 };
 
 const handleClient = (client, data, fiscal, genericClient) =>
-  !client ||
-  !data.LicTradNum ||
-  !fiscal.Street ||
-  !fiscal.U_NumExt ||
-  !fiscal.ZipCode ||
-  !fiscal.Block ||
-  !fiscal.State ||
-  !fiscal.City
-    ? Promise.reject(new Error('Datos incompletos'))
-    : formatClent(client, data, fiscal, genericClient);
+  formatClent(client, data, fiscal, genericClient);
 
 const formatClent = (client, orderClient, fiscalAddress, genericClient) =>
   genericClient
@@ -527,6 +518,7 @@ module.exports = {
     const genericClient =
       !client.LicTradNum ||
       client.LicTradNum == FiscalAddressService.GENERIC_RFC;
+    console.log('genericClient: ', genericClient);
     const request = await formatInvoice(
       order,
       client,
