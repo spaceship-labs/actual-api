@@ -180,6 +180,7 @@ function buildSaleOrderRequestParams(params) {
   var ACTUAL_STUDIO_MALECON_GROUPCODE = 1;
   var ACTUAL_STUDIO_PLAYA_GROUPCODE = 2;
   var ACTUAL_STUDIO_MERIDA_GROUPCODE = 3;
+  var MARKETPLACES_GROUPCODE = 11;
 
   if (
     params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
@@ -189,6 +190,7 @@ function buildSaleOrderRequestParams(params) {
     params.groupCode != ACTUAL_STUDIO_MALECON_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_PLAYA_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_MERIDA_GROUPCODE &&
+    params.groupCode != MARKETPLACES_GROUPCODE &&
     process.env.MODE === 'production'
   ) {
     return Promise.reject(
