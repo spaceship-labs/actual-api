@@ -1,48 +1,56 @@
-var baseURL               = process.env.baseURL;
-var baseURLFRONT          = process.env.baseURLFRONT;
-var surveyURL             = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
-var key                   = process.env.SENDGRIDAPIKEY;
-var Promise               = require('bluebird');
-var moment                = require('moment');
-var numeral               = require('numeral');
-var fs                    = require('fs');
-var ejs                   = require('ejs');
-var sendgrid              = require('sendgrid').SendGrid(key);
-var helper                = require('sendgrid').mail;
-var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password.html').toString();
-var orderTemplate         = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
-var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/quotation.html').toString();
-var freesaleTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/freesale.html').toString();
-passwordTemplate          = ejs.compile(passwordTemplate);
-orderTemplate             = ejs.compile(orderTemplate);
-quotationTemplate         = ejs.compile(quotationTemplate);
-freesaleTemplate          = ejs.compile(freesaleTemplate);
+var baseURL = process.env.baseURL;
+var baseURLFRONT = process.env.baseURLFRONT;
+var surveyURL = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
+var key = process.env.SENDGRIDAPIKEY;
+var Promise = require('bluebird');
+var moment = require('moment');
+var numeral = require('numeral');
+var fs = require('fs');
+var ejs = require('ejs');
+var sendgrid = require('sendgrid').SendGrid(key);
+var helper = require('sendgrid').mail;
+var passwordTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/password.html')
+  .toString();
+var orderTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/order.html')
+  .toString();
+var quotationTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/quotation.html')
+  .toString();
+var freesaleTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/freesale.html')
+  .toString();
+passwordTemplate = ejs.compile(passwordTemplate);
+orderTemplate = ejs.compile(orderTemplate);
+quotationTemplate = ejs.compile(quotationTemplate);
+freesaleTemplate = ejs.compile(freesaleTemplate);
 
 module.exports = {
   sendPasswordRecovery: password,
   sendOrderConfirmation: orderEmail,
   sendFreesale: freesaleEmail,
-  sendQuotation: quotation
+  sendQuotation: quotation,
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
-  var user_name       = userName;
-  var user_link       = recoveryUrl;
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var user_name = userName;
+  var user_link = recoveryUrl;
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
-  var to              = new helper.Email(userEmail, userName);
-  var subject         = 'recuperar contraseña';
-  var res             = passwordTemplate({
+  var from = new helper.Email('noreply@actualgroup.com', 'actualgroup');
+  var to = new helper.Email(userEmail, userName);
+  var subject = 'recuperar contraseña';
+  var res = passwordTemplate({
     user_name: user_name,
     user_link: user_link,
     company: {
       url: baseURL,
     },
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
@@ -52,7 +60,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -62,8 +70,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
 }
 
 function orderEmail(orderId) {
-  return Order
-    .findOne(orderId)
+  return Order.findOne(orderId)
     .populate('Client')
     .populate('User')
     .populate('Store')
@@ -71,26 +78,43 @@ function orderEmail(orderId) {
     .populate('Payments')
     .populate('EwalletRecords')
     .then(function(order) {
-      var client   = order.Client;
-      var user     = order.User;
-      var store    = order.Store;
-      var details  = order.Details.map(function(detail) { return detail.id; });
-      var payments = order.Payments.map(function(payment) { return payment.id; });
-      var ewallet  = order.EwalletRecords;
-      details      = OrderDetail.find(details).populate('Product').populate('Promotion');
-      payments     = Payment.find(payments);
-      return [client, user,  order, details, payments, ewallet, store];
+      var client = order.Client;
+      var user = order.User;
+      var store = order.Store;
+      var details = order.Details.map(function(detail) {
+        return detail.id;
+      });
+      var payments = order.Payments.map(function(payment) {
+        return payment.id;
+      });
+      var ewallet = order.EwalletRecords;
+      details = OrderDetail.find(details)
+        .populate('Product')
+        .populate('Promotion');
+      payments = Payment.find(payments);
+      var ewalletAmounts = order.EwalletRecords.map(function(ewalletRecord) {
+        if (ewalletRecord.movement === 'increase') {
+          return ewalletRecord.amount;
+        } else {
+          return 0;
+        }
+      });
+      order.ewalletAmount = ewalletAmounts.reduce(function(total, amount) {
+        return total + amount;
+      }, 0);
+      order.ewalletAmount = parseFloat(vm.order.ewalletAmount.toFixed(2));
+      return [client, user, order, details, payments, ewallet, store];
     })
     .spread(function(client, user, order, details, payments, ewallet, store) {
       var products = details.map(function(detail) {
-        var date  = moment(detail.shipDate);
+        var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
         return {
           id: detail.Product.id,
-          name:  detail.Product.ItemName,
-          code:  detail.Product.ItemCode,
+          name: detail.Product.ItemName,
+          code: detail.Product.ItemCode,
           color: (detail.Product.DetailedColor || '').split(' ')[0],
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -101,13 +125,16 @@ function orderEmail(orderId) {
           total: numeral(detail.total).format('0,0.00'),
           discount: numeral(detail.discountPercent).format('0,0.00'),
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
         };
       });
       var payments = payments.map(function(payment) {
-        var ammount =  payment.currency == 'usd' ? payment.ammount * payment.exchangeRate: payment.ammount;
+        var ammount =
+          payment.currency == 'usd'
+            ? payment.ammount * payment.exchangeRate
+            : payment.ammount;
         ammount = ammount.toFixed(2);
-        var date    = moment(payment.createdAt);
+        var date = moment(payment.createdAt);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
@@ -118,7 +145,7 @@ function orderEmail(orderId) {
           type: paymentType(payment),
           ammount: numeral(ammount).format('0,0.00'),
           currency: payment.currency,
-          status: PaymentService.mapStatusType(payment.status)
+          status: PaymentService.mapStatusType(payment.status),
         };
       });
       var bewallet = client.ewallet;
@@ -139,7 +166,6 @@ function orderEmail(orderId) {
           return acum + curr.amount;
         }
         return acum;
-
       }, 0);
       ewallet = {
         prev: numeral(pewallet).format('0,0.00'),
@@ -149,23 +175,43 @@ function orderEmail(orderId) {
       };
       return [client, user, order, products, payments, ewallet, store];
     })
-    .spread(function (client, user, order, products, payments, ewallet, store) {
+    .spread(function(client, user, order, products, payments, ewallet, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-          return sendOrder(client, user, order, products, payments, ewallet, store);
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+        return sendOrder(
+          client,
+          user,
+          order,
+          products,
+          payments,
+          ewallet,
+          store
+        );
+      });
     });
 }
 
 function sendOrder(client, user, order, products, payments, ewallet, store) {
-  var address = 'Número ' + order.U_Noexterior + ' Entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + ' colonia ' + order.U_Colonia + ', ' + order.U_Mpio + ', ' + order.U_Estado + ', ' + order.U_CP;
+  var address =
+    'Número ' +
+    order.U_Noexterior +
+    ' Entre calle ' +
+    order.U_Entrecalle +
+    ' y calle ' +
+    order.U_Ycalle +
+    ' colonia ' +
+    order.U_Colonia +
+    ', ' +
+    order.U_Mpio +
+    ', ' +
+    order.U_Estado +
+    ', ' +
+    order.U_CP;
   var emailBody = orderTemplate({
     client: {
       name: client.CardName,
@@ -178,7 +224,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
     user: {
       name: user.firstName + ' ' + user.lastName,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
     },
     order: {
       folio: order.folio,
@@ -187,6 +233,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       total: numeral(order.total).format('0,0.00'),
       paid: numeral(order.total).format('0,0.00'),
       pending: numeral(0).format('0,0.00'),
+      points: order.ewalletAmount || 0,
     },
     company: {
       url: baseURL,
@@ -202,29 +249,31 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       balance: numeral(ewallet.balance).format('0,0.00'),
     },
     store: {
-      name: store.name
-    }
+      name: store.name,
+    },
   });
 
   // mail stuff
-  var request          = sendgrid.emptyRequest();
-  var requestBody      = undefined;
-  var mail             = new helper.Mail();
-  var personalization  = new helper.Personalization();
-  var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var clientEmail      = client.E_Mail;
-  var to               = new helper.Email(clientEmail, client.CardName);
-  var subject          = 'Confirmación de compra | Folio #' + order.folio;
-  var content          = new helper.Content("text/html", emailBody);
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var clientEmail = client.E_Mail;
+  var to = new helper.Email(clientEmail, client.CardName);
+  var subject = 'Confirmación de compra | Folio #' + order.folio;
+  var content = new helper.Content('text/html', emailBody);
 
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
-  var toAux2 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
+  var toAux2 = new helper.Email(
+    'auditoria@actualg.com',
+    'Auditoria ActualGroup'
+  );
   //personalization.addTo(toAux2);
 
-
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(toAux2);
     personalization.addTo(to);
@@ -238,8 +287,8 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(order);
       } else {
@@ -250,32 +299,46 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
 }
 
 function quotation(quotationId, activeStore) {
-  return Quotation
-    .findOne(quotationId)
+  return Quotation.findOne(quotationId)
     .populate('Client')
     .populate('User')
     .populate('Store')
     .populate('Details')
     .then(function(quotation) {
-      var client   = quotation.Client;
-      var user     = quotation.User;
-      var store    = quotation.Store;
-      var details  = quotation.Details.map(function(detail) { return detail.id; });
-      details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
-      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
+      var client = quotation.Client;
+      var user = quotation.User;
+      var store = quotation.Store;
+      var details = quotation.Details.map(function(detail) {
+        return detail.id;
+      });
+      details = QuotationDetail.find(details)
+        .populate('Product')
+        .populate('Promotion');
+      var payments = PaymentService.getPaymentGroupsForEmail(
+        quotation.id,
+        activeStore
+      );
       var transfers = TransferService.transfers(store.group, store.code);
-      return [client, user,  quotation, details, payments, transfers, store];
+      return [client, user, quotation, details, payments, transfers, store];
     })
-    .spread(function(client, user, quotation, details, payments, transfers, store) {
+    .spread(function(
+      client,
+      user,
+      quotation,
+      details,
+      payments,
+      transfers,
+      store
+    ) {
       var products = details.map(function(detail) {
-        var date  = moment(detail.shipDate);
+        var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
         return {
           id: detail.Product.id,
-          name:  detail.Product.ItemName,
-          code:  detail.Product.ItemCode,
+          name: detail.Product.ItemName,
+          code: detail.Product.ItemCode,
           color: (detail.Product.DetailedColor || '').split(' ')[0],
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -286,27 +349,49 @@ function quotation(quotationId, activeStore) {
           total: numeral(detail.total).format('0,0.00'),
           discount: numeral(detail.discountPercent).format('0,0.00'),
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
         };
       });
       return [client, user, quotation, products, payments, transfers, store];
     })
-    .spread(function(client, user, quotation, products, payments, transfers, store) {
+    .spread(function(
+      client,
+      user,
+      quotation,
+      products,
+      payments,
+      transfers,
+      store
+    ) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-          return sendQuotation(client, user, quotation, products, payments, transfers, store);
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+        return sendQuotation(
+          client,
+          user,
+          quotation,
+          products,
+          payments,
+          transfers,
+          store
+        );
+      });
     });
 }
 
-function sendQuotation(client, user, quotation, products, payments, transfers, store) {
+function sendQuotation(
+  client,
+  user,
+  quotation,
+  products,
+  payments,
+  transfers,
+  store
+) {
   var date = moment(quotation.updatedAt);
   moment.locale('es');
   date.locale(false);
@@ -315,7 +400,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
       name: client.CardName,
       address: '',
       phone: client.Phone1,
-      cel: client.Cellular
+      cel: client.Cellular,
     },
     user: {
       name: user.firstName + ' ' + user.lastName,
@@ -333,30 +418,33 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
     },
     company: {
       url: baseURL,
-      image: store.logo
+      image: store.logo,
     },
     products: products,
     payments: payments,
     transfers: transfers,
     ewallet: {
-      balance: numeral(client.ewallet).format('0,0.00')
-    }
+      balance: numeral(client.ewallet).format('0,0.00'),
+    },
   });
 
   // mail stuff
-  var request          = sendgrid.emptyRequest();
-  var requestBody      = undefined;
-  var mail             = new helper.Mail();
-  var personalization  = new helper.Personalization();
-  var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var clientEmail      = client.E_Mail;
-  var to               = new helper.Email(clientEmail, client.CardName);
-  var subject          = 'Cotización | Folio #' + quotation.folio;
-  var content          = new helper.Content("text/html", emailBody);
-  var toAux = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var clientEmail = client.E_Mail;
+  var to = new helper.Email(clientEmail, client.CardName);
+  var subject = 'Cotización | Folio #' + quotation.folio;
+  var content = new helper.Content('text/html', emailBody);
+  var toAux = new helper.Email(
+    'auditoria@actualg.com',
+    'Auditoria ActualGroup'
+  );
   personalization.addTo(toAux);
 
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
     personalization.addTo(to);
     personalization.addTo(from);
@@ -370,8 +458,8 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(quotation);
       } else {
@@ -382,16 +470,17 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
 }
 
 function freesaleEmail(orderId) {
-  return Order
-    .findOne(orderId)
+  return Order.findOne(orderId)
     .populate('Store')
     .populate('Details')
     .then(function(order) {
-      var user     = User.findOne({email: 'tugorez@gmail.com'});
-      var store    = order.Store;
-      var details  = order.Details.map(function(detail) { return detail.id; });
-      details      = OrderDetail.find(details).populate('Product');
-      return [user,  order, details, store];
+      var user = User.findOne({ email: 'tugorez@gmail.com' });
+      var store = order.Store;
+      var details = order.Details.map(function(detail) {
+        return detail.id;
+      });
+      details = OrderDetail.find(details).populate('Product');
+      return [user, order, details, store];
     })
     .spread(function(user, order, details, store) {
       var products = details
@@ -399,14 +488,14 @@ function freesaleEmail(orderId) {
           return detail.isFreeSale;
         })
         .map(function(detail) {
-          var date  = moment(detail.shipDate);
+          var date = moment(detail.shipDate);
           moment.locale('es');
           date.locale(false);
           date = date.format('DD/MMM/YYYY');
           return {
             id: detail.Product.id,
-            name:  detail.Product.ItemName,
-            code:  detail.Product.ItemCode,
+            name: detail.Product.ItemName,
+            code: detail.Product.ItemCode,
             color: (detail.Product.DetailedColor || '').split(' ')[0],
             material: '',
             ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -414,34 +503,39 @@ function freesaleEmail(orderId) {
             qty: detail.quantity,
             ship: date,
             price: numeral(detail.total).format('0,0.00'),
-            image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+            image:
+              baseURL + '/uploads/products/' + detail.Product.icon_filename,
           };
         });
       return [user, order, products, store];
     })
-    .spread(function (user, order, products, store) {
+    .spread(function(user, order, products, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-          return sendFreesale(user, order, products, store);
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+        return sendFreesale(user, order, products, store);
+      });
     });
 }
 
 function sendFreesale(user, order, products, store) {
-  console.log('orden ', order.folio, ' tiene ', products.length, ' articulos con freesale');
+  console.log(
+    'orden ',
+    order.folio,
+    ' tiene ',
+    products.length,
+    ' articulos con freesale'
+  );
   if (!(products.length > 0)) return order;
   var emailBody = freesaleTemplate({
     user: {
       name: user.firstName + ' ' + user.lastName,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
     },
     order: {
       id: order.id,
@@ -455,26 +549,30 @@ function sendFreesale(user, order, products, store) {
     company: {
       url: baseURL,
       urlFront: baseURLFRONT,
-      image: store.logo
+      image: store.logo,
     },
     products: products,
   });
   // mail stuff
-  var request          = sendgrid.emptyRequest();
-  var requestBody      = undefined;
-  var mail             = new helper.Mail();
-  var personalization  = new helper.Personalization();
-  var from             = new helper.Email('no-reply@actualg.com', 'no-reply');
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email('no-reply@actualg.com', 'no-reply');
   //var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');
-  var subject          = 'Artículos freesale | Confirmación de compra Folio #' + order.folio;
-  var content          = new helper.Content("text/html", emailBody);
+  var to = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');
+  var subject =
+    'Artículos freesale | Confirmación de compra Folio #' + order.folio;
+  var content = new helper.Content('text/html', emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
 
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
-  var toAux2 = new helper.Email('informatica@actualg.com', 'Informatica ActualGroup');
+  var toAux2 = new helper.Email(
+    'informatica@actualg.com',
+    'Informatica ActualGroup'
+  );
   personalization.addTo(toAux2);
 
   mail.setFrom(from);
@@ -484,8 +582,8 @@ function sendFreesale(user, order, products, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(order);
       } else {
@@ -494,7 +592,6 @@ function sendFreesale(user, order, products, store) {
     });
   });
 }
-
 
 function paymentMethod(payment) {
   var payment_name;
@@ -521,11 +618,11 @@ function paymentMethod(payment) {
     case 'debit-card':
     case 'single-payment-terminal':
     case '3-msi':
-    case '3-msi-banamex':    
+    case '3-msi-banamex':
     case '6-msi':
-    case '6-msi-banamex':    
+    case '6-msi-banamex':
     case '9-msi':
-    case '9-msi-banamex':    
+    case '9-msi-banamex':
     case '12-msi':
     case '12-msi-banamex':
     case '13-msi':
@@ -540,7 +637,7 @@ function paymentMethod(payment) {
       break;
     case 'client-credit':
       payment_name = 'Crédito cliente';
-      break;      
+      break;
     default:
       payment_name = '';
       break;
@@ -577,9 +674,9 @@ function paymentType(payment) {
     case '3-msi':
     case '6-msi':
     case '9-msi':
-    case'12-msi':
-    case'13-msi':
-    case'18-msi':
+    case '12-msi':
+    case '13-msi':
+    case '18-msi':
       payment_name = payment.type + ' ' + payment.terminal;
       break;
 
@@ -597,7 +694,7 @@ function paymentType(payment) {
       break;
     case 'client-credit':
       payment_name = 'Crédito cliente';
-      break;        
+      break;
     default:
       payment_name = '';
       break;
@@ -607,20 +704,19 @@ function paymentType(payment) {
 
 function materials(product) {
   var material = 'Material';
-  var filter = ProductFilter
-    .findOne({Name: material})
+  var filter = ProductFilter.findOne({ Name: material })
     .populate('Values')
-    .then(function(filter){
-      return filter.Values.map(function(v) {return v.id});
+    .then(function(filter) {
+      return filter.Values.map(function(v) {
+        return v.id;
+      });
     });
-  var product = Product
-    .findOne(product)
+  var product = Product.findOne(product)
     .populate('FilterValues')
     .then(function(product) {
       return product.FilterValues;
     });
-  return Promise
-    .all([filter, product])
+  return Promise.all([filter, product])
     .spread(function(idfilters, pfilters) {
       return pfilters
         .filter(function(f) {
@@ -630,7 +726,7 @@ function materials(product) {
           return f.Name;
         });
     })
-    .then(function(filters){
+    .then(function(filters) {
       if (filters.length === 0) return;
       return filters[0].split(' ')[0];
     });
