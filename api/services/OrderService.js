@@ -226,22 +226,35 @@ const processEwalletBalance = async ({
   const ewalletConfigurationFound = await EwalletConfiguration.find();
   const ewalletConfiguration = ewalletConfigurationFound[0];
   if (ewalletConfiguration) {
-    const { total, Payments } = await Order.findOne({ id: orderId });
-    const payments = await Payment.find({ id: Payments });
+    console.log('ENTRA BALANCE ewalletConfiguration: ');
+    const { total, Payments } = await Order.findOne({ id: orderId }).populate(
+      'Payments'
+    );
+    console.log('ORDER PAYMENTS: ', Payments);
+    const paymentsIds = Payments.map(payment => payment.id);
+    const payments = await Payment.find({ id: paymentsIds });
+    console.log('EWALLET ORDER PAYMENT: ', payments);
     const ewalletPayment = payments.map(payment => {
-      if (payment.type === 'ewalet') {
-        return payment.amount;
+      console.log('PAYMENT IN MAP: ', payment);
+      console.log('TYPE PAYMENT IN MAP: ', payment.type);
+      if (payment.type === 'ewallet') {
+        return payment.ammount;
+      } else {
+        return 0;
       }
     });
+    console.log('ewalletPayment: ', ewalletPayment);
     const amountPayed = ewalletPayment.reduce(
-      (total, amount) => (total + amount === undefined ? 0 : amount),
+      (total, amount) => total + amount,
       0
     );
+    console.log('amountPayed: ', amountPayed);
     const amountExceeded = validatePromoPercentageAmount(
       amountPayed >= 0 ? amountPayed : 0,
       total,
       ewalletConfiguration
     );
+    console.log('amountExceeded: ', amountExceeded);
     if (amountExceeded) {
       return;
     } else {
