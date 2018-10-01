@@ -163,17 +163,18 @@ async function addPayment(params, req) {
     console.log('ewallet.amount: ', params.amount);
     const ewalletConfigurationFound = await EwalletConfiguration.find();
     const ewalletConfiguration = ewalletConfigurationFound[0];
-    let ewalletAmount = null;
     if (ewalletConfiguration.id) {
-      ewalletAmount = new BigNumber(ewallet.amount)
+      paymentAmountTransformed = new BigNumber(params.ammount)
         .dividedBy(ewalletConfiguration.exchangeRate)
         .toNumber();
     }
     console.log('params.ammount: ', params.ammount);
-    console.log('ewalletAmount: ', ewalletAmount);
+    console.log('paymentAmountTransformed: ', paymentAmountTransformed);
     hasEnoughFunds = await EwalletService.isValidEwalletPayment(
-      params.ammount,
-      ewalletAmount != null ? ewalletAmount : ewallet.amount
+      paymentAmountTransformed != null
+        ? paymentAmountTransformed
+        : params.ammount,
+      ewallet.amount
     );
     console.log('QUE PEDO: ', hasEnoughFunds);
   }
@@ -191,6 +192,13 @@ async function addPayment(params, req) {
 
   if (params.type === CLIENT_BALANCE_TYPE && !hasEnoughFunds) {
     throw new Error('Fondos insuficientes en balance de cliente');
+  }
+
+  if (params.type === EWALLET_TYPE && hasEnoughFunds) {
+    params.ammount =
+      paymentAmountTransformed != null
+        ? paymentAmountTransformed
+        : params.ammount;
   }
 
   const calculator = QuotationService.Calculator();
