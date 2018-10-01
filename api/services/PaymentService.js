@@ -193,7 +193,7 @@ async function addPayment(params, req) {
   if (params.type === CLIENT_BALANCE_TYPE && !hasEnoughFunds) {
     throw new Error('Fondos insuficientes en balance de cliente');
   }
-
+  const originalParamsAmount = params.ammount;
   if (params.type === EWALLET_TYPE && hasEnoughFunds) {
     params.ammount =
       paymentAmountTransformed != null
@@ -263,6 +263,7 @@ async function addPayment(params, req) {
   );
 
   if (params.type === EWALLET_TYPE) {
+    params.ammount = originalParamsAmount;
     const ewalletConfig = {
       quotationId: quotationId,
       userId: req.user.id,
