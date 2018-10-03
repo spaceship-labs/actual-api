@@ -29,13 +29,13 @@ const validateExpirationDate = async () => {
     if (today <= expirationDate) {
       const ewallets = await Ewallet.find();
       const ids = ewallets.map(ewallet => ewallet.id);
-      // await Ewallet.update({ id: ids }, { amount: 0 });
-      // await EwalletConfiguration.update(
-      //   { id: ewalletConfiguration.id },
-      //   { expirationDate: null }
-      // );
+      await Ewallet.update({ id: ids }, { amount: 0 });
+      await EwalletConfiguration.update(
+        { id: ewalletConfiguration.id },
+        { expirationDate: null }
+      );
     }
-    return { expirationDate, newEspirationDate };
+    return;
   }
 };
 
