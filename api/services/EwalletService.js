@@ -1,10 +1,48 @@
 var EWALLET_NEGATIVE = 'negative';
 var EWALLET_TYPE = 'ewallet';
 var Promise = require('bluebird');
+const moment = require('moment');
+
+const validateExpirationDate = async () => {
+  const ewalletConf = await EwalletConfiguration.find();
+  const ewalletConfiguration = ewalletConf[0];
+  if (!ewalletConfiguration) {
+    return;
+  } else if (ewalletConfiguration) {
+    const monthBeforeExpiration = moment(ewalletConfiguration.expirationDate)
+      .subtract(1, 'months')
+      .format('MM');
+    const currentMonth = moment(ewalletConfiguration.expirationDate).format(
+      'MM'
+    );
+    if (monthBeforeExpiration === currentMonth) {
+      Email.sendEwalletPointsWarning();
+    }
+    const expirationDate = moment(ewalletConfiguration.expirationDate).format(
+      'YYYY-MM-DD HH:mm'
+    );
+    const today = moment(new Date()).format('YYYY-MM-DD HH:mm');
+    const newEspirationDate = moment(ewalletConfiguration.expirationDate).add(
+      1,
+      'years'
+    );
+    if (today <= expirationDate) {
+      const ewallets = await Ewallet.find();
+      const ids = ewallets.map(ewallet => ewallet.id);
+      // await Ewallet.update({ id: ids }, { amount: 0 });
+      // await EwalletConfiguration.update(
+      //   { id: ewalletConfiguration.id },
+      //   { expirationDate: null }
+      // );
+    }
+    return { expirationDate, newEspirationDate };
+  }
+};
 
 module.exports = {
   applyEwalletRecord: applyEwalletRecord,
   isValidEwalletPayment: isValidEwalletPayment,
+  validateExpirationDate: validateExpirationDate,
   async showOrCreate(cardNumber, clientId) {
     if (cardNumber.length < 12) throw new Error('Formato no válido');
     const ewallet = await Ewallet.findOne({ cardNumber });
