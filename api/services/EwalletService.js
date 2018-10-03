@@ -22,10 +22,6 @@ const validateExpirationDate = async () => {
       'YYYY-MM-DD HH:mm'
     );
     const today = moment(new Date()).format('YYYY-MM-DD HH:mm');
-    const newEspirationDate = moment(ewalletConfiguration.expirationDate).add(
-      1,
-      'years'
-    );
     if (today <= expirationDate) {
       const ewallets = await Ewallet.find();
       const ids = ewallets.map(ewallet => ewallet.id);
