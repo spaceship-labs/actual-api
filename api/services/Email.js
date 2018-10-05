@@ -21,16 +21,21 @@ var quotationTemplate = fs
 var freesaleTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/freesale.html')
   .toString();
+var ewalletReminderTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/ewallet-reminder.html')
+  .toString();
 passwordTemplate = ejs.compile(passwordTemplate);
 orderTemplate = ejs.compile(orderTemplate);
 quotationTemplate = ejs.compile(quotationTemplate);
 freesaleTemplate = ejs.compile(freesaleTemplate);
+ewalletReminderTemplate = ejs.compile(ewalletReminderTemplate);
 
 module.exports = {
   sendPasswordRecovery: password,
   sendOrderConfirmation: orderEmail,
   sendFreesale: freesaleEmail,
   sendQuotation: quotation,
+  sendEwalletPointsWarning,
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -66,6 +71,40 @@ function password(userName, userEmail, recoveryUrl, cb) {
     } else {
       cb(response);
     }
+  });
+}
+
+function sendEwalletPointsWarning(emails) {
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email('noreply@actualgroup.com', 'actualgroup');
+  var to = new helper.Email('yupit@spaceshiplabs.com', 'Emmanuel Yupit');
+  var subject = 'Expiración de puntos del monedero';
+  var res = ewalletReminderTemplate({
+    company: {
+      url: baseURL,
+    },
+  });
+  var content = new helper.Content('text/html', res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  return new Promise((resolve, reject) => {
+    sendgrid.API(request, function(response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve();
+      } else {
+        resolve(response);
+      }
+    });
   });
 }
 

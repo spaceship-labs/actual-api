@@ -23,6 +23,8 @@ module.exports = {
       const ewallet = await Ewallet.findOne({ cardNumber });
       if (!ewallet)
         throw new Error('El monedero electrónico ingresado no existe ');
+      const ewalletConfiguration = await EwalletConfiguration.find();
+      ewallet.exchangeRate = ewalletConfiguration[0].exchangeRate;
       res.ok(ewallet);
     } catch (error) {
       res.negotiate(error);

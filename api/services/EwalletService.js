@@ -15,8 +15,21 @@ const validateExpirationDate = async () => {
     const currentMonth = moment(ewalletConfiguration.expirationDate).format(
       'MM'
     );
-    if (monthBeforeExpiration === currentMonth) {
-      Email.sendEwalletPointsWarning();
+    if (
+      monthBeforeExpiration === currentMonth &&
+      ewalletConfiguration.emailSent === false
+    ) {
+      const clients = await Client.find();
+      const clientsEmail = clients.map(client => {
+        if (client.Ewallet) {
+          return client.email;
+        }
+      });
+      Email.sendEwalletPointsWarning(clientsEmail);
+      await EwalletConfiguration.update(
+        { id: ewalletConfiguration.id },
+        { emailSend: true }
+      );
     }
     const expirationDate = moment(ewalletConfiguration.expirationDate).format(
       'YYYY-MM-DD HH:mm'

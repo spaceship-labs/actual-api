@@ -17,5 +17,9 @@ module.exports = {
     maximumPercentageToGeneratePoints: {
       type: 'float',
     },
+    emailSent: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
   },
 };
