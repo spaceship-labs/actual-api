@@ -26,6 +26,15 @@ const types = {
 
 const LEGACY_METHODS_TYPES = [types.SINGLE_PAYMENT_TERMINAL, types.DEPOSIT];
 
+const statusTypes = {
+  CANCELED: 'canceled',
+};
+
+const currencyTypes = {
+  USD: 'usd',
+  MXN: 'mxn',
+};
+
 const VALID_STORES_CODES = [
   'actual_home_xcaret',
   'actual_studio_cumbres',
@@ -43,9 +52,11 @@ module.exports = {
   addDepositMethod,
   addLegacyMethods,
   addSinglePaymentTerminalMethod,
+  cancel,
   calculatePaymentsTotal,
   calculatePaymentsTotalPg1,
   calculateUSDPayment,
+  currencyTypes,
   checkIfClientHasCreditById,
   getPaymentGroupsForEmail,
   getQuotationTotalsByMethod,
@@ -54,16 +65,30 @@ module.exports = {
   filterMethodsGroupsForDiscountClients,
   isCardPayment,
   isTransferPayment,
+  isTransferOrDeposit,
+  isCanceled,
   removeCreditMethod,
   EWALLET_TYPE,
   CASH_USD_TYPE,
   TRANSFER_USD_TYPE,
   EWALLET_GROUP_INDEX,
   CLIENT_BALANCE_TYPE,
-  CURRENCY_USD,
   LEGACY_METHODS_TYPES,
   types,
+  statusTypes,
+  currencyTypes,
+  mapStatusType,
 };
+
+function mapStatusType(status) {
+  var mapper = {};
+  mapper[statusTypes.CANCELED] = 'Cancelado';
+
+  return mapper[status] || status;
+}
+function isCanceled(payment) {
+  return payment.status === statusTypes.CANCELED;
+}
 
 function isCardPayment(payment) {
   return (
@@ -78,8 +103,16 @@ function isTransferPayment(payment) {
   return payment.type === types.TRANSFER || payment.type === types.TRANSFER_USD;
 }
 
+function isTransferOrDeposit(payment) {
+  return (
+    payment.type === types.TRANSFER ||
+    payment.type === types.TRANSFER_USD ||
+    payment.type === types.DEPOSIT
+  );
+}
+
 async function addPayment(params, req) {
-  const quotationId = params.quotationid;
+  const quotationId = params.quotationId;
   const paymentGroup = params.group || 1;
 
   if (
@@ -182,7 +215,7 @@ async function addPayment(params, req) {
   const quotationRemainingAmount =
     quotationTotal - previousAmountPaid + ROUNDING_AMOUNT;
 
-  if (params.currency === CURRENCY_USD) {
+  if (params.currency === currencyTypes.USD) {
     newPaymentAmount = calculateUSDPayment(params, exchangeRate);
   } else {
     newPaymentAmount = params.ammount;
@@ -237,32 +270,60 @@ async function addPayment(params, req) {
   };
 
   const findCriteria = { _id: new ObjectId(quotationId) };
-  const resultUpdate = await Common.nativeUpdateOne(
-    findCriteria,
-    quotationUpdateParams,
-    Quotation
-  );
-  delete quotation.Payments;
-  quotation.ammountPaid = quotationUpdateParams.ammountPaid;
-  quotation.paymentGroup = quotationUpdateParams.paymentGroup;
+  await Common.nativeUpdateOne(findCriteria, quotationUpdateParams, Quotation);
 
-  return quotation;
-  //var updatedQuotation = resultUpdate[0];
-  //res.json(updatedQuotation);
+  return paymentCreated;
+}
+
+async function cancel(paymentId) {
+  const query = { id: paymentId, Order: null };
+  const updateParams = { status: statusTypes.CANCELED };
+  const updatedPayments = await Payment.update(query, updateParams);
+  if (updatedPayments) {
+    const payment = _.findWhere(updatedPayments, { id: paymentId });
+    const quotationId = payment.Quotation;
+
+    const quotation = await Quotation.findOne({ id: quotationId }).populate(
+      'Payments'
+    );
+    const exchangeRate = await getExchangeRate();
+    const ammountPaid = await calculatePaymentsTotal(
+      quotation.Payments,
+      exchangeRate
+    );
+    const ammountPaidPg1 = await calculatePaymentsTotalPg1(
+      quotation.Payments,
+      exchangeRate
+    );
+    const findCriteria = { _id: new ObjectId(quotationId) };
+    const updateQuotationParams = {
+      ammountPaid,
+      ammountPaidPg1,
+    };
+    await Common.nativeUpdateOne(
+      findCriteria,
+      updateQuotationParams,
+      Quotation
+    );
+    return payment;
+  }
+  throw new Error('No es posible cancelar el pago');
 }
 
 function calculatePaymentsTotal(payments = [], exchangeRate) {
   if (payments.length === 0) return 0;
-  const ammounts = payments.map(function(payment) {
-    if (payment.currency === CURRENCY_USD) {
-      return calculateUSDPayment(payment, exchangeRate);
+  const total = payments.reduce(function(acum, payment) {
+    if (!isCanceled(payment)) {
+      if (payment.currency === currencyTypes.USD) {
+        acum += calculateUSDPayment(payment, exchangeRate);
+      } else {
+        acum += payment.ammount;
+      }
     }
-    return payment.ammount;
-  });
-  const total = ammounts.reduce(function(paymentA, paymentB) {
-    return paymentA + paymentB;
-  });
-  return total || 0;
+    return acum;
+  }, 0);
+
+  return total;
 }
 
 function calculatePaymentsTotalPg1(payments = [], exchangeRate) {
@@ -270,18 +331,18 @@ function calculatePaymentsTotalPg1(payments = [], exchangeRate) {
   if (!paymentsG1 || paymentsG1.length === 0) {
     return 0;
   }
-  const ammounts = paymentsG1.map(function(payment) {
-    if (payment.currency === CURRENCY_USD) {
-      return calculateUSDPayment(payment, exchangeRate);
+  const totalG1 = paymentsG1.reduce(function(acum, payment) {
+    if (!isCanceled(payment)) {
+      if (payment.currency === currencyTypes.USD) {
+        acum += calculateUSDPayment(payment, exchangeRate);
+      } else {
+        acum += payment.ammount;
+      }
     }
-    return payment.ammount;
-  });
+    return acum;
+  }, 0);
 
-  const totalG1 = ammounts.reduce(function(paymentA, paymentB) {
-    return paymentA + paymentB;
-  });
-
-  return totalG1 || 0;
+  return totalG1;
 }
 
 function calculateUSDPayment(payment, exchangeRate) {

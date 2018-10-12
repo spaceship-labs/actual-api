@@ -1,5 +1,5 @@
 var request = require('supertest');
-var sails = require('sails');
+var Sails = require('sails');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 //var fixtures = require('sails-fixtures');
@@ -8,7 +8,7 @@ before(function(done){
   // Increase the Mocha timeout so that Sails has enough time to lift.
   this.timeout(18000);
 
-  sails.lift({
+  Sails.lift({
     //config for testing purposes
     connections:{
       mongodb: {
@@ -28,7 +28,7 @@ before(function(done){
       Company: require('./fixtures/warehouses.json')
     }
     */
-  }, async function(err){
+  }, async function(err, sails){
     if(err) return done(err);
     global.app = request(sails.hooks.http.app);
 
@@ -36,6 +36,7 @@ before(function(done){
     global.assert = chai.assert;
     global.expect = chai.expect;
     global.should = chai.should();
+    global.sails = sails;
     
     global.loggedInData = false;
 
@@ -51,5 +52,5 @@ before(function(done){
 
 after(function(done){
 	//here you can clear fixtures, etc.
-	sails.lower(done);
+	Sails.lower(done);
 });

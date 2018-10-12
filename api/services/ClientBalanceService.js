@@ -13,16 +13,17 @@ function getUnfinishedClientBalancePayments(clientId){
 		Client:clientId, 
 		type:CLIENT_BALANCE_TYPE, 
 		Order:null, 
-		select:['ammount']
+		select:['ammount'],
+		status: {'!': PaymentService.statusTypes.CANCELED}
 	};  
   return Payment.find(query);
 }
 
 function getClientBalanceById(clientId){
   return Promise.all([
-	   getUnfinishedClientBalancePayments(clientId),
-	   Client.findOne({id:clientId, select:['Balance']})
-  	])
+			getUnfinishedClientBalancePayments(clientId),
+			Client.findOne({id:clientId, select:['Balance']})
+		])
 		.then(function(results){
 			var unfinishedPayments = results[0];
 			var client = results[1];
@@ -32,21 +33,21 @@ function getClientBalanceById(clientId){
 			}
 
 			var sapBalance = client.Balance;
-		  appliedBalance = unfinishedPayments.reduce(function(acum, payment){
-		    return acum += payment.ammount;
-		  },0);
-	  	var balance = sapBalance - appliedBalance;	
-	  	return balance;
-	  });
+			var appliedBalance = unfinishedPayments.reduce(function(acum, payment){
+				return acum += payment.ammount;
+			},0);
+			var balance = sapBalance - appliedBalance;	
+			return balance;
+		});
 }
 
 function isValidClientBalancePayment(payment, clientId){
 	return getClientBalanceById(clientId)
 		.then(function(clientBalance){
-		  if (clientBalance < payment.ammount || !clientBalance) {
-		  	return false;
-		  }
-		  return true;			
+			if (clientBalance < payment.ammount || !clientBalance) {
+				return false;
+			}
+			return true;			
 		});
 
 }

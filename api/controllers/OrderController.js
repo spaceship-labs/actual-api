@@ -1,13 +1,3 @@
-var _ = require('underscore');
-var Promise             = require('bluebird');
-var BALANCE_SAP_TYPE    = 'Balance';
-var CLIENT_BALANCE_TYPE = 'client-balance';
-var ERROR_SAP_TYPE      = 'Error';
-var EWALLET_POSITIVE    = 'positive';
-var INVOICE_SAP_TYPE    = 'Invoice';
-var ORDER_SAP_TYPE      = 'Order';
-
-
 module.exports = {
   sendOrderEmail: function(req, res){
     var form = req.params.all();
@@ -98,48 +88,51 @@ module.exports = {
       });
   },
 
-  createFromQuotation: function(req, res){
-    var form = req.params.all();
-    var order;
+  async create(req, res){
+    var form = req.allParams();
     var responseSent = false;
-    var orderDetails;
 
-    OrderService.createFromQuotation(form, req.user)
-      .then(function(orderCreated){
-        //RESPONSE
-        res.json(orderCreated);
-        responseSent = true;
-        order = orderCreated;
-        orderDetails = orderCreated.Details;
+    try{
+      const orderCreated = await OrderService.create(form, req.user);
+      //RESPONSE
+      res.json(orderCreated);
+      responseSent = true;
+      const orderDetails = orderCreated.Details;
 
-        //STARTS EMAIL SENDING PROCESS
-        return Order.findOne({id:orderCreated.id})
-          .populate('User')
-          .populate('Client')
-          .populate('Payments')
-          .populate('EwalletRecords')
-          .populate('Address');
-      })
-      .then(function(order){
-        return [
-          Email.sendOrderConfirmation(order.id),
-          Email.sendFreesale(order.id),
-          InvoiceService.createOrderInvoice(order.id),
-          StockService.syncOrderDetailsProducts(orderDetails)
-        ];
-      })
-      .spread(function(orderSent, freesaleSent, invoice, productsSynced){
-      //.spread(function(orderSent, freesaleSent){
+      //STARTS EMAIL SENDING PROCESS
+      const order = await Order.findOne({id:orderCreated.id})
+        .populate('User')
+        .populate('Client')
+        .populate('Payments')
+        .populate('EwalletRecords')
+        .populate('Address');
+
+        await Email.sendOrderConfirmation(order.id);
+        await Email.sendFreesale(order.id);
+        const invoice = await InvoiceService.createOrderInvoice(order.id);
+        const syncProducts = await StockService.syncOrderDetailsProducts(orderDetails)
+
         console.log('Email de orden enviado: ' + order.folio);
-        console.log('productsSynced', productsSynced);
+        console.log('productsSynced', syncProducts);
         console.log('generated invoice', invoice);
-      })
-      .catch(function(err){
-        console.log(err);
-        if(!responseSent){
-          res.negotiate(err);
-        }
-      });
+    }
+    catch(err){
+      console.log(err);
+      if(!responseSent){
+        return res.negotiate(err);
+      }    
+    }
+  },
+
+  async cancel(req, res){
+    const {id} = req.allParams();
+    try{
+      const canceledOrder = await OrderService.cancel(id);
+      return res.json(canceledOrder);
+    }catch(err){
+      console.log('err', err);
+      return res.negotiate(err);
+    }
   },
 
   getCountByUser: function(req, res){

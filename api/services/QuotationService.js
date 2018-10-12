@@ -21,13 +21,31 @@ const DEFAULT_QUOTATION_TOTALS = {
   immediateDelivery: false,
 };
 
+const statusTypes = {
+  CANCELED: 'canceled',
+};
+
 module.exports = {
   Calculator,
   updateQuotationToLatestData,
   getCountByUser,
   getTotalsByUser,
+  getGroupByQuotationPayments,
+  statusTypes,
   DISCOUNT_KEYS,
 };
+
+function getGroupByQuotationPayments(payments = []) {
+  var group = 1;
+  const auxPayments = payments.filter(function(payment) {
+    return !PaymentService.isCanceled(payment);
+  });
+
+  if (auxPayments.length > 0) {
+    group = _.last(auxPayments).group;
+  }
+  return group;
+}
 
 async function updateQuotationToLatestData(quotationId, userId, options) {
   var params = {
@@ -94,9 +112,9 @@ function Calculator() {
     const promos = await getActivePromos();
     setLoadedActivePromotions(promos);
 
-    const quotation = await Quotation.findOne({ id: quotationId }).populate(
-      'Details'
-    );
+    const quotation = await Quotation.findOne({ id: quotationId })
+      .populate('Details')
+      .populate('Payments');
     const details = quotation.Details;
     const packagesIds = getQuotationDetailsPackagesIds(details);
 
@@ -125,6 +143,11 @@ function Calculator() {
         await updateDetails(processedDetails);
       }
     }
+
+    totals = {
+      ...totals,
+      paymentGroup: getGroupByQuotationPayments(quotation.Payments),
+    };
 
     return totals;
   }

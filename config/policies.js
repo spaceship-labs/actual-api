@@ -16,101 +16,88 @@
  * http://sailsjs.org/#!/documentation/reference/sails.config/sails.config.policies.html
  */
 
-
 module.exports.policies = {
-
-
   '*': ['isAuthenticated'],
-  AuthController:{
-    '*': true
+  AuthController: {
+    '*': true,
   },
-  SiteController:{
+  SiteController: {
     '*': ['isAuthenticated'],
-    'generateSitesCashReport': ['isAuthenticated','isAdmin']
+    generateSitesCashReport: ['isAuthenticated', 'isAdmin'],
   },
-  UserController:{
+  UserController: {
     '*': ['isAuthenticated'],
     find: ['isAuthenticated', 'isAllowed'],
     create: ['isAuthenticated', 'isAllowed'],
     update: ['isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
-    stores: true
+    stores: true,
   },
-  UserWebController:{
+  UserWebController: {
     '*': ['isAuthenticated', 'isAdmin'],
   },
   MeController: {
     '*': ['isAuthenticated'],
   },
-  QuotationController:{
+  QuotationController: {
     addDetail: ['isAuthenticated', 'isSellerOrAdmin'],
-    update: ['isAuthenticated', 'isSellerOrAdmin'],
+    update: ['isAuthenticated', 'isAdminSellerOrManager'],
     create: ['isAuthenticated', 'isSellerOrAdmin'],
     removeDetailsGroup: ['isAuthenticated', 'isSellerOrAdmin'],
   },
-  PaymentController:{
-    add: ['isAuthenticated', 'isSellerOrAdmin']
+  PaymentController: {
+    add: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isStoreManager'],
   },
-  OrderController:{
-    createFromQuotation: ['isAuthenticated', 'isSellerOrAdmin']
+  OrderController: {
+    create: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isAdminOrManager'],
+    //cancel: ['isAuthenticated', 'isAccountingUser']
   },
-  ProductController:{
+  ProductController: {
     find: ['isAuthenticated', 'isAllowed'],
     update: ['isAuthenticated', 'isAllowed'],
     findById: true,
     search: true,
-    testSold: true
+    testSold: true,
   },
-  ProductCategoryController:{
+  ProductCategoryController: {
     getCategoriesGroups: true,
     getCategoriesTree: true,
-    findByHandle: true
+    findByHandle: true,
   },
-  ProductFilterController:{
-    list: true
+  ProductFilterController: {
+    list: true,
   },
-  ProductGroupController:{
+  ProductGroupController: {
     getGroupVariants: true,
-    getVariantGroupProducts: true
+    getVariantGroupProducts: true,
   },
-  ImportController:{
-    importImagesSap: ['isAdmin']
+  ImportController: {
+    importImagesSap: ['isAdmin'],
   },
-  ProductFilterValueController:{
-    getProducts: true
-  },
-  ProductSearchController:{
-    /*
-    advancedSearch: true,
-    searchByFilters: true,
-    searchByCategory: true,
-    searchByFilterValues: true
-    */
+  ProductFilterValueController: {
+    getProducts: true,
   },
   LoggingController: {
     find: true,
-    create: true
+    create: true,
   },
   PermissionController: {
-    find: true
+    find: true,
   },
   ShippingController: {
     list: ['isAdmin'],
-    product: true
+    product: true,
   },
-  ZipcodeController:{
+  ZipcodeController: {
     listZipcodeStates: ['isAdmin'],
-  }
+  },
   /*
   LocalController:{
     '*':true
   }
-  */
-
-
-  //Por ahora
-  //SyncController:{'*':true}
 
   /***************************************************************************
   *                                                                          *
@@ -122,23 +109,23 @@ module.exports.policies = {
   // '*': true,
 
   /***************************************************************************
-  *                                                                          *
-  * Here's an example of mapping some policies to run before a controller    *
-  * and its actions                                                          *
-  *                                                                          *
-  ***************************************************************************/
-	// RabbitController: {
+   *                                                                          *
+   * Here's an example of mapping some policies to run before a controller    *
+   * and its actions                                                          *
+   *                                                                          *
+   ***************************************************************************/
+  // RabbitController: {
 
-		// Apply the `false` policy as the default for all of RabbitController's actions
-		// (`false` prevents all access, which ensures that nothing bad happens to our rabbits)
-		// '*': false,
+  // Apply the `false` policy as the default for all of RabbitController's actions
+  // (`false` prevents all access, which ensures that nothing bad happens to our rabbits)
+  // '*': false,
 
-		// For the action `nurture`, apply the 'isRabbitMother' policy
-		// (this overrides `false` above)
-		// nurture	: 'isRabbitMother',
+  // For the action `nurture`, apply the 'isRabbitMother' policy
+  // (this overrides `false` above)
+  // nurture	: 'isRabbitMother',
 
-		// Apply the `isNiceToAnimals` AND `hasRabbitFood` policies
-		// before letting any users feed our rabbits
-		// feed : ['isNiceToAnimals', 'hasRabbitFood']
-	// }
+  // Apply the `isNiceToAnimals` AND `hasRabbitFood` policies
+  // before letting any users feed our rabbits
+  // feed : ['isNiceToAnimals', 'hasRabbitFood']
+  // }
 };
