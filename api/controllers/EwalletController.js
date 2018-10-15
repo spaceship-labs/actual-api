@@ -6,6 +6,20 @@
  */
 
 module.exports = {
+  async index(req, res) {
+    try {
+      const model = 'ewallet';
+      const extraParams = { searchFields: ['cardNumber'] };
+      const ewallets = await EwalletService.customFind(
+        req.allParams(),
+        extraParams,
+        model
+      );
+      res.ok(ewallets);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  },
   async showOrCreate(req, res) {
     try {
       const cardNumber = req.param('cardNumber');

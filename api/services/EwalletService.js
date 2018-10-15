@@ -1,7 +1,100 @@
+const _ = require('underscore');
 var EWALLET_NEGATIVE = 'negative';
 var EWALLET_TYPE = 'ewallet';
 var Promise = require('bluebird');
 const moment = require('moment');
+
+const customFind = async (params, extraParams, modelToFind) => {
+  const searchFields = extraParams.searchFields || [];
+  const selectedFields = extraParams.selectedFields || [];
+  const items = params.items || 10;
+  const page = params.page || 1;
+  const term = params.term;
+  const orderBy = params.orderby;
+  let query = {};
+  let querySearchAux = {};
+  let model = sails.models[modelToFind];
+  const filters = params.filters;
+  const selectObj = false;
+  let read = false;
+  const getAll = params.getAll;
+  const dateRange = params.dateRange;
+  const keywords = params.keywords;
+
+  if (term) {
+    if (searchFields.length > 0) {
+      query.or = [];
+      for (let i = 0; i < searchFields.length; i++) {
+        let field = searchFields[i];
+        let obj = {};
+        obj[field] = { contains: term };
+        query.or.push(obj);
+      }
+    }
+  }
+
+  if (keywords) {
+    if (searchFields.length > 0) {
+      query.or = [];
+      searchFields.forEach(field => {
+        keywords.forEach(keyword => {
+          let obj = {};
+          obj[field] = { contains: keyword };
+          query.or.push(obj);
+        });
+      });
+    }
+  }
+
+  if (filters) {
+    for (const key in filters) {
+      query[key] = filters[key];
+    }
+  }
+
+  if (dateRange) {
+    let startDate, endDate;
+    query[dateRange.field] = {};
+
+    if (dateRange.start) {
+      startDate = new Date(dateRange.start);
+      startDate.setHours(0, 0, 0, 0);
+      query[dateRange.field] = Object.assign(query[dateRange.field], {
+        '>=': new Date(startDate),
+      });
+    }
+    if (dateRange.end) {
+      endDate = new Date(dateRange.end);
+      endDate.setHours(23, 59, 59, 999);
+      query[dateRange.field] = Object.assign(query[dateRange.field], {
+        '<=': new Date(endDate),
+      });
+    }
+    if (_.isEmpty(query[dateRange.field])) {
+      delete query[dateRange.field];
+    }
+  }
+
+  querySearchAux = { ...query };
+
+  if (!getAll) {
+    query.skip = (page - 1) * items;
+    query.limit = items;
+  }
+
+  read = model.find(query);
+  read = read.populate(
+    modelToFind === 'ewallet' ? ['Client', 'Store'] : ['Store', 'Ewallet']
+  );
+
+  if (orderBy) {
+    read.sort(orderBy);
+  }
+  const results = await read;
+  const total = await model.count(querySearchAux);
+
+  return { data: results, total };
+};
 
 const validateExpirationDate = async () => {
   const ewalletConf = await EwalletConfiguration.find();
@@ -49,6 +142,7 @@ const validateExpirationDate = async () => {
 };
 
 module.exports = {
+  customFind: customFind,
   applyEwalletRecord: applyEwalletRecord,
   isValidEwalletPayment: isValidEwalletPayment,
   validateExpirationDate: validateExpirationDate,
@@ -114,6 +208,7 @@ async function applyEwalletRecord(payment, options, ewalletAmount, ewalletId) {
       Quotation: options.quotationId,
       User: options.userId,
       Payment: options.paymentId,
+      Ewallet: ewalletId,
       movement: 'decrease',
       amount: payment.ammount,
     };

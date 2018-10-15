@@ -808,6 +808,10 @@ module.exports.routes = {
     controller: 'featuredproduct',
     action: 'remove',
   },
+  'POST /ewallet/:page': {
+    controller: 'ewallet',
+    action: 'index',
+  },
   '/ewallet/:cardNumber/:client': {
     controller: 'ewallet',
     action: 'showOrCreate',
@@ -827,6 +831,10 @@ module.exports.routes = {
   'POST /ewalletconfiguration/:id': {
     controller: 'ewalletconfiguration',
     action: 'update',
+  },
+  'POST /ewalletrecord/:page': {
+    controller: 'ewalletrecord',
+    action: 'index',
   },
   /***************************************************************************
    *                                                                          *

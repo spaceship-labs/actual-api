@@ -26,5 +26,8 @@ module.exports = {
       model: 'Client',
       required: true,
     },
+    Store: {
+      model: 'Store',
+    },
   },
 };

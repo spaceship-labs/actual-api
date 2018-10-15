@@ -298,6 +298,7 @@ const generateEwalletBalanceAndRecords = async (
         Quotation: quotationId,
         QuotationDetail: details[i].id,
         User: userId,
+        Ewallet: ewalletId,
         amount: details[i].ewallet,
         movement: 'increase',
       });
