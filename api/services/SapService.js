@@ -1,6 +1,7 @@
 const baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
 //var baseUrl = 'http://189.149.131.100:8080';
 const request = require('request-promise');
+const qs = require('qs');
 const Promise = require('bluebird');
 const buildUrl = require('build-url');
 const _ = require('underscore');
@@ -33,7 +34,7 @@ module.exports = {
   updateClient: updateClient,
   updateContact: updateContact,
   updateFiscalAddress: updateFiscalAddress,
-  buildSaleOrderRequestParams: buildSaleOrderRequestParams,
+  buildOrderRequestParams: buildOrderRequestParams,
 };
 
 function createClient(params) {
@@ -154,24 +155,40 @@ function updateFiscalAddress(cardcode, form) {
 */
 function createSaleOrder(params) {
   var endPoint;
-  return buildSaleOrderRequestParams(params)
-    .then(function(requestParams) {
-      endPoint = baseUrl + requestParams;
-      sails.log.info('createSaleOrder');
-      sails.log.info(decodeURIComponent(endPoint));
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
+  var requestParams;
+  return buildOrderRequestParams(params)
+    .then(function(_requestParams) {
+      requestParams = _requestParams;
+      endPoint = baseUrl + '/SalesOrder';
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+      const preForm = {
+        contact: JSON.stringify(requestParams.contact),
+        products: JSON.stringify(requestParams.products),
+        payments: JSON.stringify(requestParams.payments),
+      };
+      const formDataStr = qs.stringify(preForm, { encode: true });
+      var options = {
+        json: true,
+        method: 'POST',
+        url: endPoint,
+        body: formDataStr,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        },
+      };
+      return request(options);
     })
     .then(function(response) {
       return {
+        requestParams,
         endPoint: endPoint,
         response: response,
       };
     });
 }
 
-function buildSaleOrderRequestParams(params) {
-  var requestParams = '/SalesOrder?sales=';
+function buildOrderRequestParams(params) {
   var products = [];
   var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
@@ -198,7 +215,7 @@ function buildSaleOrderRequestParams(params) {
     );
   }
 
-  var saleOrderRequest = {
+  var contactParams = {
     QuotationId: params.quotationId,
     GroupCode: params.groupCode,
     ContactPersonCode: params.cntctCode,
@@ -213,8 +230,8 @@ function buildSaleOrderRequestParams(params) {
     Broker: params.brokerCode,
   };
 
-  if (saleOrderRequest.SalesPersonCode === []) {
-    saleOrderRequest.SalesPersonCode = -1;
+  if (contactParams.SalesPersonCode === []) {
+    contactParams.SalesPersonCode = -1;
   }
 
   return getAllWarehouses().then(function(warehouses) {
@@ -241,21 +258,16 @@ function buildSaleOrderRequestParams(params) {
       return product;
     });
 
-    saleOrderRequest.WhsCode = getWhsCodeById(
+    contactParams.WhsCode = getWhsCodeById(
       params.currentStore.Warehouse,
       warehouses
     );
 
-    requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
-    requestParams +=
-      '&products=' + encodeURIComponent(JSON.stringify(products));
-    requestParams +=
-      '&payments=' +
-      encodeURIComponent(
-        JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate))
-      );
-
-    return requestParams;
+    return {
+      products,
+      contact: contactParams,
+      payments: mapPaymentsToSap(params.payments, params.exchangeRate),
+    };
   });
 }
 
