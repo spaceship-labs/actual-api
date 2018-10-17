@@ -266,7 +266,11 @@ function buildOrderRequestParams(params) {
     return {
       products,
       contact: contactParams,
-      payments: mapPaymentsToSap(params.payments, params.exchangeRate),
+      payments: mapPaymentsToSap(
+        params.payments,
+        params.exchangeRate,
+        params.currentStore
+      ),
     };
   });
 }
@@ -289,7 +293,8 @@ function getCompanyCode(code, storeGroup) {
   return companyCode;
 }
 
-function mapPaymentsToSap(payments, exchangeRate) {
+function mapPaymentsToSap(payments, exchangeRate, currentStore) {
+  console.log('currentStore', currentStore);
   payments = payments.filter(function(p) {
     return (
       p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
@@ -304,6 +309,14 @@ function mapPaymentsToSap(payments, exchangeRate) {
       PaymentAppId: payment.id,
       amount: payment.ammount,
     };
+
+    if (
+      currentStore.marketplace &&
+      payment.type === PaymentService.types.TRANSFER
+    ) {
+      paymentSap.TypePay = PaymentService.types.TRANSFER_ECOMMERCE;
+    }
+
     if (payment.currency === 'usd') {
       paymentSap.rate = exchangeRate;
     }

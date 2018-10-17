@@ -22,6 +22,7 @@ const types = {
   DEPOSIT: 'deposit',
   CASH: 'cash',
   CASH_USD: 'cash-usd',
+  TRANSFER_ECOMMERCE: 'transfer-ecommerce',
 };
 
 const LEGACY_METHODS_TYPES = [types.SINGLE_PAYMENT_TERMINAL, types.DEPOSIT];
