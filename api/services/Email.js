@@ -141,7 +141,7 @@ function orderEmail(orderId) {
       order.ewalletAmount = ewalletAmounts.reduce(function(total, amount) {
         return total + amount;
       }, 0);
-      order.ewalletAmount = parseFloat(vm.order.ewalletAmount.toFixed(2));
+      order.ewalletAmount = parseFloat(order.ewalletAmount.toFixed(2));
       return [client, user, order, details, payments, ewallet, store];
     })
     .spread(function(client, user, order, details, payments, ewallet, store) {

@@ -134,15 +134,22 @@ module.exports = {
       brokerCode: quotation.Broker ? quotation.Broker.Code : null,
     };
 
-    const { response, endPoint } = await SapService.createSaleOrder(
-      sapSaleOrderParams
-    );
+    const {
+      response,
+      endPoint,
+      requestParams,
+    } = await SapService.createSaleOrder(sapSaleOrderParams);
     const sapResponse = response;
     const sapEndpoint = decodeURIComponent(endPoint);
     sails.log.info('createSaleOrder response', sapResponse);
 
     const logToCreate = {
-      content: sapEndpoint + '\n' + JSON.stringify(sapResponse),
+      content:
+        sapEndpoint +
+        '\n' +
+        JSON.stringify(requestParams) +
+        '\n' +
+        JSON.stringify(sapResponse),
       User: currentUser.id,
       Store: opts.currentStoreId,
       Quotation: quotationId,
