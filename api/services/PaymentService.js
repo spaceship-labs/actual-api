@@ -76,7 +76,6 @@ module.exports = {
   LEGACY_METHODS_TYPES,
   types,
   statusTypes,
-  currencyTypes,
   mapStatusType,
 };
 

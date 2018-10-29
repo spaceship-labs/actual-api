@@ -33,7 +33,7 @@ module.exports = {
   updateClient,
   updateContact,
   updateFiscalAddress,
-  buildSaleOrderRequestParams,
+  buildOrderRequestParams,
   cancelOrder,
 
   //EXPOSED FOR TESTING PURPOSES
@@ -159,24 +159,40 @@ function updateFiscalAddress(cardcode, form) {
 */
 function createSaleOrder(params) {
   var endPoint;
-  return buildSaleOrderRequestParams(params)
-    .then(function(requestParams) {
-      endPoint = baseUrl + requestParams;
-      sails.log.info('createSaleOrder');
-      sails.log.info(decodeURIComponent(endPoint));
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
+  var requestParams;
+  return buildOrderRequestParams(params)
+    .then(function(_requestParams) {
+      requestParams = _requestParams;
+      endPoint = baseUrl + '/SalesOrder';
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+      const preForm = {
+        contact: JSON.stringify(requestParams.contact),
+        products: JSON.stringify(requestParams.products),
+        payments: JSON.stringify(requestParams.payments),
+      };
+      const formDataStr = qs.stringify(preForm, { encode: true });
+      var options = {
+        json: true,
+        method: 'POST',
+        url: endPoint,
+        body: formDataStr,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        },
+      };
+      return request(options);
     })
     .then(function(response) {
       return {
+        requestParams,
         endPoint: endPoint,
         response: response,
       };
     });
 }
 
-function buildSaleOrderRequestParams(params) {
-  var requestParams = '/SalesOrder?sales=';
+function buildOrderRequestParams(params) {
   var products = [];
   var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
@@ -203,7 +219,7 @@ function buildSaleOrderRequestParams(params) {
     );
   }
 
-  var saleOrderRequest = {
+  var contactParams = {
     QuotationId: params.quotationId,
     GroupCode: params.groupCode,
     ContactPersonCode: params.cntctCode,
@@ -218,8 +234,8 @@ function buildSaleOrderRequestParams(params) {
     Broker: params.brokerCode,
   };
 
-  if (saleOrderRequest.SalesPersonCode === []) {
-    saleOrderRequest.SalesPersonCode = -1;
+  if (contactParams.SalesPersonCode === []) {
+    contactParams.SalesPersonCode = -1;
   }
 
   return getAllWarehouses().then(function(warehouses) {
@@ -246,21 +262,20 @@ function buildSaleOrderRequestParams(params) {
       return product;
     });
 
-    saleOrderRequest.WhsCode = getWhsCodeById(
+    contactParams.WhsCode = getWhsCodeById(
       params.currentStore.Warehouse,
       warehouses
     );
 
-    requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
-    requestParams +=
-      '&products=' + encodeURIComponent(JSON.stringify(products));
-    requestParams +=
-      '&payments=' +
-      encodeURIComponent(
-        JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate))
-      );
-
-    return requestParams;
+    return {
+      products,
+      contact: contactParams,
+      payments: mapPaymentsToSap(
+        params.payments,
+        params.exchangeRate,
+        params.currentStore
+      ),
+    };
   });
 }
 
@@ -282,28 +297,32 @@ function getCompanyCode(code, storeGroup) {
   return companyCode;
 }
 
-function mapPaymentsToSap(payments, exchangeRate) {
-  /*Payments not sent to SAP:
-    - Client balance
-    - Client credit
-    - Canceled payments
-  */
+function mapPaymentsToSap(payments, exchangeRate, currentStore) {
+  console.log('currentStore', currentStore);
   payments = payments.filter(function(payment) {
     return (
       payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
       payment.type !== PaymentService.types.CLIENT_CREDIT &&
+      payment.type !== PaymentService.EWALLET_TYPE &&
       !PaymentService.isCanceled(payment)
     );
   });
 
   var paymentsTopSap = payments.map(function(payment) {
-    var DEFAULT_TERMINAL = 'banamex';
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
       amount: payment.ammount,
     };
-    if (payment.currency === PaymentService.currencyTypes.USD) {
+
+    if (
+      currentStore.marketplace &&
+      payment.type === PaymentService.types.TRANSFER
+    ) {
+      paymentSap.TypePay = PaymentService.types.TRANSFER_ECOMMERCE;
+    }
+
+    if (payment.currency === 'usd') {
       paymentSap.rate = exchangeRate;
     }
     if (PaymentService.isCardPayment(payment)) {
@@ -315,7 +334,6 @@ function mapPaymentsToSap(payments, exchangeRate) {
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-
     return paymentSap;
   });
 
