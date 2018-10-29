@@ -5,6 +5,7 @@ const Promise = require('bluebird');
 const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
+const qs = require('qs');
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
 const CLIENT_CARD_TYPE = 1; //1.Client, 2.Proveedor, 3.Lead

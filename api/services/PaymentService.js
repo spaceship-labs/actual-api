@@ -618,6 +618,7 @@ const SINGLE_PAYMENT_TERMINAL_METHOD = {
   currency: 'mxn',
   needsVerification: true,
   min: 0,
+  group: 1,
 };
 
 const DEPOSIT_METHOD = {
@@ -633,6 +634,7 @@ const DEPOSIT_METHOD = {
     { label: 'Santander', value: 'santander' },
   ],
   needsVerification: false,
+  group: 1,
 };
 
 const CREDIT_METHOD = {
@@ -642,4 +644,5 @@ const CREDIT_METHOD = {
   description: '',
   currency: 'mxn',
   needsVerification: false,
+  group: 1,
 };
