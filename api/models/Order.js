@@ -22,7 +22,7 @@ module.exports = {
     brokerCode: {type:'string'},
     status:{
       type:'string',
-      enum:['lost','pending','on-delivery','minimum-paid','paid']
+      enum:['paid', 'canceled']
     },
     Quotation:{
       model:'Quotation',

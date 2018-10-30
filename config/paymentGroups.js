@@ -10,6 +10,7 @@ module.exports.paymentGroups = [
         description: '',
         currency: 'mxn',
         needsVerification: false,
+        group: 1,
       },
       {
         label: 'Efectivo MXN',
@@ -17,6 +18,7 @@ module.exports.paymentGroups = [
         type: 'cash',
         currency: 'mxn',
         needsVerification: false,
+        group: 1,
       },
       {
         label: 'Efectivo USD',
@@ -25,6 +27,7 @@ module.exports.paymentGroups = [
         currency: 'usd',
         description: 'Tipo de cambio $18.76 MXN',
         needsVerification: false,
+        group: 1,
       },
       {
         label: 'Cheque',
@@ -33,6 +36,7 @@ module.exports.paymentGroups = [
         description: 'Sujeto a verificación contable',
         currency: 'mxn',
         needsVerification: false,
+        group: 1,
       },
       {
         label: 'Transferencia MXN',
@@ -47,6 +51,7 @@ module.exports.paymentGroups = [
           { label: 'Santander', value: 'santander' },
         ],
         needsVerification: true,
+        group: 1,
       },
       {
         label: 'Transferencia USD',
@@ -61,6 +66,7 @@ module.exports.paymentGroups = [
           { label: 'Santander', value: 'santander' },
         ],
         needsVerification: true,
+        group: 1,
       },
       /*
       {
@@ -69,7 +75,8 @@ module.exports.paymentGroups = [
         type:'ewallet',
         description:'Sujeto a verificación contable',
         currency: 'mxn',
-        needsVerification: false
+        needsVerification: false,
+        group: 1
       },
       */
       /*
@@ -92,6 +99,7 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         needsVerification: true,
         min: 0,
+        group: 1,
       },
       {
         label: 'Tarjeta de crédito',
@@ -111,6 +119,7 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         needsVerification: true,
         min: 0,
+        group: 1,
       },
     ],
   },
@@ -152,6 +161,7 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min: 300,
         needsVerification: true,
+        group: 2,
       },
     ],
   },
@@ -171,6 +181,7 @@ module.exports.paymentGroups = [
         min: 300,
         needsVerification: true,
         mainCard: 'banamex',
+        group: 3,
       },
       {
         label: '6',
@@ -206,6 +217,7 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min: 600,
         needsVerification: true,
+        group: 3,
       },
       {
         label: '9',
@@ -241,6 +253,7 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min: 900,
         needsVerification: true,
+        group: 3,
       },
     ],
   },
@@ -260,6 +273,7 @@ module.exports.paymentGroups = [
         min: 600,
         needsVerification: true,
         mainCard: 'banamex',
+        group: 4,
       },
       {
         label: '9',
@@ -273,6 +287,7 @@ module.exports.paymentGroups = [
         min: 900,
         needsVerification: true,
         mainCard: 'banamex',
+        group: 4,
       },
       {
         label: '12',
@@ -308,6 +323,7 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min: 1200,
         needsVerification: true,
+        group: 4,
       },
     ],
   },
@@ -327,6 +343,7 @@ module.exports.paymentGroups = [
         min: 1200,
         needsVerification: true,
         mainCard: 'banamex',
+        group: 5,
       },
       /*
       {
@@ -346,7 +363,8 @@ module.exports.paymentGroups = [
         currency: 'mxn',
         min: 1300,
         needsVerification: true,
-        mainCard: 'banamex'
+        mainCard: 'banamex',
+        group: 5
       },
       */
       /*
@@ -373,7 +391,8 @@ module.exports.paymentGroups = [
         ],
         currency: 'mxn',
         needsVerification: true,
-        min:2000
+        min:2000,
+        group: 5
       },
       */
     ],

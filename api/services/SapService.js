@@ -28,13 +28,18 @@ var reqOptions = {
 };
 
 module.exports = {
-  createContact: createContact,
-  createSaleOrder: createSaleOrder,
-  createClient: createClient,
-  updateClient: updateClient,
-  updateContact: updateContact,
-  updateFiscalAddress: updateFiscalAddress,
-  buildOrderRequestParams: buildOrderRequestParams,
+  createContact,
+  createSaleOrder,
+  createClient,
+  updateClient,
+  updateContact,
+  updateFiscalAddress,
+  buildOrderRequestParams,
+  cancelOrder,
+
+  //EXPOSED FOR TESTING PURPOSES
+  mapPaymentsToSap,
+  SAP_DATE_FORMAT,
 };
 
 function createClient(params) {
@@ -295,15 +300,16 @@ function getCompanyCode(code, storeGroup) {
 
 function mapPaymentsToSap(payments, exchangeRate, currentStore) {
   console.log('currentStore', currentStore);
-  payments = payments.filter(function(p) {
+  payments = payments.filter(function(payment) {
     return (
-      p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
-      p.type !== PaymentService.types.CLIENT_CREDIT
+      payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
+      payment.type !== PaymentService.types.CLIENT_CREDIT &&
+      payment.type !== PaymentService.EWALLET_TYPE &&
+      !PaymentService.isCanceled(payment)
     );
   });
 
   var paymentsTopSap = payments.map(function(payment) {
-    var DEFAULT_TERMINAL = 'banamex';
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
@@ -323,18 +329,12 @@ function mapPaymentsToSap(payments, exchangeRate, currentStore) {
     if (PaymentService.isCardPayment(payment)) {
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
-      /*
-      if(!payment.terminal){
-        payment.terminal = DEFAULT_TERMINAL;
-      }
-      */
     }
     if (payment.terminal) {
       paymentSap.Terminal = payment.terminal;
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-
     return paymentSap;
   });
 
@@ -435,8 +435,23 @@ function buildAddressContactEndpoint(fields, cardcode) {
     U_Correos: fields.U_Correos,
     LicTradNum: fields.LicTradNum,
   };
-  field = _.omit(fields, _.isUndefined);
+  fields = _.omit(fields, _.isUndefined);
   path += '?address=' + encodeURIComponent(JSON.stringify(fields));
   path += '&contact=' + encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
+}
+
+function cancelOrder(quotationId) {
+  const requestParams = {
+    QuotationId: quotationId,
+  };
+  const endPoint = buildUrl(baseUrl, {
+    path: 'SalesOrder',
+    queryParams: requestParams,
+  });
+  sails.log.info('cancel order');
+  sails.log.info(decodeURIComponent(endPoint));
+  reqOptions.uri = endPoint;
+  reqOptions.method = 'DELETE';
+  return request(reqOptions);
 }
