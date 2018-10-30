@@ -77,6 +77,7 @@ module.exports = {
   types,
   statusTypes,
   mapStatusType,
+  isTransferMethod,
 };
 
 function mapStatusType(status) {
@@ -96,6 +97,10 @@ function isCardPayment(payment) {
     payment.type === types.DEBIT_CARD ||
     payment.msi
   );
+}
+
+function isTransferMethod(method) {
+  return method.type === types.TRANSFER || method.type === types.TRANSFER_USD;
 }
 
 function isTransferPayment(payment) {

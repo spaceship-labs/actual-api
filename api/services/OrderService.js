@@ -561,9 +561,6 @@ function getPaidPercentage(amountPaid, total) {
 
 async function cancel(orderId) {
   const quotationFindCriteria = { Order: orderId };
-  const quotation = await Quotation.findOne(quotationFindCriteria);
-  const resultCancel = await SapService.cancelOrder(quotation.id);
-  console.log('resultCacncel', resultCancel);
 
   const findCriteria = { id: orderId };
   const updateParams = { status: statusTypes.CANCELED };
