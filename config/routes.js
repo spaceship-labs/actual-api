@@ -836,6 +836,10 @@ module.exports.routes = {
     controller: 'ewalletrecord',
     action: 'index',
   },
+  'GET /ewallet/replacement': {
+    controller: 'ewalletreplacement',
+    action: 'index',
+  },
   /***************************************************************************
    *                                                                          *
    * Custom routes here...                                                    *

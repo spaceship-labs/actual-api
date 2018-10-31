@@ -17,6 +17,9 @@ module.exports = {
       type: 'float',
       required: true,
     },
+    active: {
+      type: 'boolean',
+    },
     // RELATIONS
     Records: {
       collection: 'EwalletRecord',
@@ -24,7 +27,6 @@ module.exports = {
     },
     Client: {
       model: 'Client',
-      required: true,
     },
     Store: {
       model: 'Store',
