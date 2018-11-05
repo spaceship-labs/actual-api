@@ -22,7 +22,7 @@ module.exports.policies = {
     '*': true,
   },
   EwalletController: {
-    '*': true,
+    '*': ['isAuthenticated'],
   },
   EwalletConfigurationController: {
     '*': true,

@@ -146,7 +146,7 @@ module.exports = {
   applyEwalletRecord: applyEwalletRecord,
   isValidEwalletPayment: isValidEwalletPayment,
   validateExpirationDate: validateExpirationDate,
-  async showOrCreate(cardNumber, clientId) {
+  async showOrCreate(cardNumber, clientId, storeId) {
     if (cardNumber.length < 12) throw new Error('Formato no válido');
     const ewallet = await Ewallet.findOne({ cardNumber });
     const client = await Client.findOne({ id: clientId });
@@ -170,6 +170,7 @@ module.exports = {
       console.log('entra else');
       const ewalletCreated = await Ewallet.create({
         Client: clientId,
+        Store: storeId,
         cardNumber,
         amount: 0,
       });
