@@ -14,7 +14,6 @@ module.exports = {
     },
     note: {
       type: 'text',
-      requiered: true,
     },
     approvedAt: {
       type: 'datetime',
@@ -22,7 +21,6 @@ module.exports = {
     // Relations
     Client: {
       model: 'Client',
-      requiered: true,
     },
     Store: {
       model: 'Store',

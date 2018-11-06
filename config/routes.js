@@ -836,9 +836,13 @@ module.exports.routes = {
     controller: 'ewalletrecord',
     action: 'index',
   },
-  'GET /ewallet/replacement': {
+  'POST /ewalletreplacement/:page': {
     controller: 'ewalletreplacement',
     action: 'index',
+  },
+  'POST /replacementupdate/:id': {
+    controller: 'ewalletreplacement',
+    action: 'update',
   },
   /***************************************************************************
    *                                                                          *
