@@ -125,9 +125,10 @@ module.exports = {
   },
 
   async cancel(req, res) {
-    const { id } = req.allParams();
     try {
-      const canceledOrder = await OrderService.cancel(id);
+      const id = req.param('id');
+      const details = req.param('details');
+      const canceledOrder = await OrderService.cancel(id, details);
       return res.json(canceledOrder);
     } catch (err) {
       console.log('err', err);

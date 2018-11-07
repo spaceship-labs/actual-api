@@ -1,6 +1,6 @@
 //APP COLLECTION
 module.exports = {
-  schema:true,
+  schema: true,
   migrate: 'alter',
   attributes: {
     quantity: 'integer',
@@ -10,66 +10,74 @@ module.exports = {
     total: 'float',
     totalPg1: 'float',
     financingCostPercentage: 'float',
-    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)    
+    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
     discountPercent: 'float', //by unit (includes big ticket discount)
-    discountName: 'string',    
-    originalDiscountPercent: 'float',    
+    discountName: 'string',
+    originalDiscountPercent: 'float',
     clientDiscountReference: 'string',
     bigticketDiscountPercentage: {
       type: 'integer',
-      enum:[0,1,2,3,4,5]
-    },    
+      enum: [0, 1, 2, 3, 4, 5],
+    },
     paymentGroup: 'integer',
     unitPrice: 'float',
-    unitPriceWithDiscount: 'float',    
+    unitPriceWithDiscount: 'float',
     ewallet: 'float',
     immediateDelivery: 'boolean',
     isSRService: 'boolean',
-    isFreeSale: 'boolean',    
-    Promotion:{
-      model:'Promotion'
+    isFreeSale: 'boolean',
+    status: {
+      type: 'string',
+      enum: ['paid', 'canceled'],
     },
-    PromotionPackage:{
-      model:'ProductGroup'
+    quantityToCancel: {
+      type: 'integer',
     },
-    PromotionPackageApplied:{
-      model:'ProductGroup'
+    quantityCanceled: {
+      type: 'integer',
     },
-    Order:{
-      model:'Order',
+    Promotion: {
+      model: 'Promotion',
+    },
+    PromotionPackage: {
+      model: 'ProductGroup',
+    },
+    PromotionPackageApplied: {
+      model: 'ProductGroup',
+    },
+    Order: {
+      model: 'Order',
     },
     Product: {
-      model:'Product'
+      model: 'Product',
     },
-    QuotationDetail:{
-      model: 'QuotationDetail'
-    },    
+    QuotationDetail: {
+      model: 'QuotationDetail',
+    },
 
     //ship
     shipDate: {
       type: 'date',
-      required: true
+      required: true,
     },
     originalShipDate: {
       type: 'date',
-      required: true
-    },    
+      required: true,
+    },
     productDate: {
       type: 'date',
-      required: true
+      required: true,
     },
     shipCompany: {
       model: 'company',
-      required: true
+      required: true,
     },
     shipCompanyFrom: {
       model: 'company',
-      required: true
+      required: true,
     },
 
-    PurchaseAfter: {type:'boolean'},
-    PurchaseDocument: {type:'string'},    
-
+    PurchaseAfter: { type: 'boolean' },
+    PurchaseDocument: { type: 'string' },
   },
-
 };

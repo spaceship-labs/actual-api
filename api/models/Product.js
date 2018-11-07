@@ -158,11 +158,6 @@ module.exports = {
 
     excludeWeb: { type: 'boolean' },
 
-    status: {
-      type: 'string',
-      enum: ['paid', 'canceled'],
-    },
-
     //CACHE DISCOUNT PRICES BY STORE
     discountPrice_actual_studio_merida: { type: 'float' },
     discountPrice_actual_studio_malecon: { type: 'float' },

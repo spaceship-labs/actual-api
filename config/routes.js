@@ -606,7 +606,7 @@ module.exports.routes = {
     action: 'findById',
   },
 
-  'POST /order/:id/cancel': {
+  'POST /order/:id/cancel/:details': {
     controller: 'order',
     action: 'cancel',
   },
@@ -844,6 +844,7 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'update',
   },
+
   /***************************************************************************
    *                                                                          *
    * Custom routes here...                                                    *

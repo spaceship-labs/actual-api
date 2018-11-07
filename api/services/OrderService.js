@@ -661,7 +661,7 @@ function getPaidPercentage(amountPaid, total) {
   return percentage;
 }
 
-async function cancel(orderId) {
+async function cancel(orderId, details, cancelAll) {
   const quotationFindCriteria = { Order: orderId };
   const quotation = await Quotation.findOne(quotationFindCriteria);
   const resultCancel = await SapService.cancelOrder(quotation.id);
@@ -680,6 +680,23 @@ async function cancel(orderId) {
     status: QuotationService.statusTypes.CANCELED,
   };
   await Quotation.update(quotationFindCriteria, quotationUpdateParams);
+
+  // NEW THNIGS
+  if (cancelAll) {
+    await Order.update({ id: orderId }, { status: statusTypes.CANCELED });
+  }
+  if (!cancelAll) {
+    details.map(async detail => {
+      const orderDetail = await OrderDetail.findOne({ id: detail.id });
+      await OrderDetail.update(
+        { id: orderDetail.id },
+        {
+          quantityCanceled: detail.quantity,
+          quantity: orderDetail.quantity - detail.quantity,
+        }
+      );
+    });
+  }
 
   return canceledOrder;
 }
