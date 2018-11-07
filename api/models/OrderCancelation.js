@@ -14,10 +14,10 @@ module.exports = {
       type: 'text',
     },
     // Relations
-    Details: {
-      collection: 'OrderDetail',
-      via: 'Cancelation',
-    },
+    // Details: {
+    //   collection: 'OrderDetail',
+    //   via: 'Cancelation',
+    // },
     Order: {
       model: 'Order',
     },
