@@ -12,9 +12,6 @@ module.exports = {
       enum: ['pending', 'approved'],
       defaultsTo: 'pending',
     },
-    note: {
-      type: 'text',
-    },
     approvedAt: {
       type: 'datetime',
     },

@@ -84,9 +84,11 @@ const customFind = async (params, extraParams, modelToFind) => {
 
   read = model.find(query);
   read = read.populate(
-    modelToFind === 'ewallet' || modelToFind === 'ewalletreplacement'
+    modelToFind === 'ewallet'
       ? ['Client', 'Store']
-      : ['Store', 'Ewallet']
+      : modelToFind === 'ewalletreplacement'
+        ? ['Client', 'Store', 'requestedBy']
+        : ['Store', 'Ewallet']
   );
 
   if (orderBy) {
