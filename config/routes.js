@@ -840,9 +840,9 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'index',
   },
-  'POST /replacementupdate/:id': {
+  'POST /replacementupdate/:clientId': {
     controller: 'ewalletreplacement',
-    action: 'update',
+    action: 'add',
   },
   /***************************************************************************
    *                                                                          *

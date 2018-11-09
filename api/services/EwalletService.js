@@ -184,9 +184,6 @@ module.exports = {
   },
 };
 
-const validateBarcodeFormat = cardNumber => {
-  if (cardNumber.length < 12) throw new Error('Formato no válido');
-};
 function isValidEwalletPayment(paymentAmount, ewalletAmount) {
   console.log('COMPARITION EWALLET AMOUNT: ', ewalletAmount);
   console.log('COMPARITION PAYMENT AMOUNT: ', paymentAmount);

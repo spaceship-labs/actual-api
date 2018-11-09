@@ -24,7 +24,6 @@ module.exports = {
     try {
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
-      console.log('req.user', req.user);
       const storeId = req.user.activeStore.id;
       const ewallet = await EwalletService.showOrCreate(
         cardNumber,

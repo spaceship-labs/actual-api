@@ -6,6 +6,7 @@
   "keywords": [],
   "dependencies": {
     "async": "^2.1.4",
+    "aws-sdk": "^2.352.0",
     "bcrypt": "^0.8.x",
     "bcrypt-nodejs": "0.0.3",
     "bignumber.js": "^7.2.1",
@@ -46,6 +47,7 @@
     "sendgrid": "^3.0.8",
     "skipper": "^0.8.0",
     "skipper-pkgcloud": "0.0.4",
+    "skipper-s3": "^0.5.11",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
@@ -65,8 +67,7 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": "node app.js",
-    "test-ewallet-service":
-      "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/services/EwalletService.test.js"
+    "test-ewallet-service": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/services/EwalletService.test.js"
   },
   "main": "app.js",
   "repository": {
@@ -80,6 +81,9 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+    "**/*.{js,jsx,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

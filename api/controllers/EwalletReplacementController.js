@@ -21,7 +21,6 @@ module.exports = {
       res.negotiate(error);
     }
   },
-
   async update(req, res) {
     try {
       console.log('req.user', req.user);
@@ -31,6 +30,26 @@ module.exports = {
         { id },
         { approvedAt, approvedBy: req.user, status: 'approved' }
       );
+      res.ok(replacement);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  },
+  async add(req, res) {
+    try {
+      const clientId = req.param('clientId');
+      const storeId = req.user.activeStore.id;
+      const options = {
+        dir: 'ewallet/replacement',
+      };
+      const files = await Files.saveFiles(req, options);
+      console.log('files', files);
+      const replacement = await EwalletReplacement.create({
+        Client: clientId,
+        Store: storeId,
+        requestedBy: req.user,
+        fileUrl: files[0],
+      });
       res.ok(replacement);
     } catch (error) {
       res.negotiate(error);

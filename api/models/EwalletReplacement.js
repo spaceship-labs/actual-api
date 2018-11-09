@@ -15,6 +15,9 @@ module.exports = {
     approvedAt: {
       type: 'datetime',
     },
+    fileUrl: {
+      type: 'string',
+    },
     // Relations
     Client: {
       model: 'Client',
