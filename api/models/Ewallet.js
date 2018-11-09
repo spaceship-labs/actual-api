@@ -19,6 +19,7 @@ module.exports = {
     },
     active: {
       type: 'boolean',
+      defaultsTo: true,
     },
     // RELATIONS
     Records: {

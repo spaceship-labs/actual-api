@@ -19,11 +19,18 @@ module.exports = {
       type: 'string',
     },
     // Relations
+    Ewallet: {
+      model: 'Ewallet',
+    },
     Client: {
       model: 'Client',
     },
     Store: {
       model: 'Store',
+    },
+    Files: {
+      collection: 'replacementfile',
+      via: 'Replacement',
     },
     requestedBy: {
       model: 'User',

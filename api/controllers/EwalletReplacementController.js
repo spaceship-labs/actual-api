@@ -15,7 +15,6 @@ module.exports = {
         extraParams,
         model
       );
-      console.log(('replacements', replacements));
       res.ok(replacements);
     } catch (error) {
       res.negotiate(error);
@@ -23,9 +22,9 @@ module.exports = {
   },
   async update(req, res) {
     try {
-      console.log('req.user', req.user);
       const id = req.param('id');
       const approvedAt = new Date();
+      // const amount =
       const replacement = await EwalletReplacement.update(
         { id },
         { approvedAt, approvedBy: req.user, status: 'approved' }
@@ -44,12 +43,17 @@ module.exports = {
       };
       const files = await Files.saveFiles(req, options);
       console.log('files', files);
+      const fileLoaded = await ReplacementFile.create({ filename: files[0] });
+      const ewallet = await Ewallet.findOne({ Client: clientId });
       const replacement = await EwalletReplacement.create({
+        Ewallet: ewallet.id,
         Client: clientId,
         Store: storeId,
         requestedBy: req.user,
-        fileUrl: files[0],
+        Files: [fileLoaded.id],
       });
+      await Client.update({ id: clientId }, { Ewallet: null });
+      await Ewallet.update({ id: ewallet.id }, { Client: null, active: false });
       res.ok(replacement);
     } catch (error) {
       res.negotiate(error);
