@@ -15,8 +15,8 @@ module.exports = {
     approvedAt: {
       type: 'datetime',
     },
-    fileUrl: {
-      type: 'string',
+    amount: {
+      type: 'float',
     },
     // Relations
     Ewallet: {

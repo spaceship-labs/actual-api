@@ -45,16 +45,29 @@ module.exports = {
       console.log('files', files);
       const fileLoaded = await ReplacementFile.create({ filename: files[0] });
       const ewallet = await Ewallet.findOne({ Client: clientId });
-      const replacement = await EwalletReplacement.create({
+      const replacementFound = await EwalletReplacement.findOne({
         Ewallet: ewallet.id,
-        Client: clientId,
-        Store: storeId,
-        requestedBy: req.user,
-        Files: [fileLoaded.id],
-      });
-      await Client.update({ id: clientId }, { Ewallet: null });
-      await Ewallet.update({ id: ewallet.id }, { Client: null, active: false });
-      res.ok(replacement);
+      }).populate('Files');
+      if (replacementFound) {
+        replacementFound.Files.add(fileLoaded.id);
+        await replacementFound.save();
+        res.ok(replacementFound);
+      } else if (!replacementFound) {
+        const replacement = await EwalletReplacement.create({
+          amount: ewallet.amount,
+          Ewallet: ewallet.id,
+          Client: clientId,
+          Store: storeId,
+          requestedBy: req.user,
+          Files: [fileLoaded.id],
+        });
+        await Client.update({ id: clientId }, { Ewallet: null });
+        await Ewallet.update(
+          { id: ewallet.id },
+          { Client: null, active: false, amount: 0 }
+        );
+        res.ok(replacement);
+      }
     } catch (error) {
       res.negotiate(error);
     }
