@@ -24,11 +24,14 @@ module.exports = {
     try {
       const id = req.param('id');
       const approvedAt = new Date();
-      // const amount =
+      const { amount, Client } = await EwalletReplacement.findOne({
+        id,
+      }).populate('Client');
       const replacement = await EwalletReplacement.update(
         { id },
         { approvedAt, approvedBy: req.user, status: 'approved' }
       );
+      await Ewallet.update({ Client: Client.id }, { amount });
       res.ok(replacement);
     } catch (error) {
       res.negotiate(error);
