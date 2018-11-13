@@ -844,6 +844,10 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'add',
   },
+  'POST /replacementaccepted/:id': {
+    controller: 'ewalletreplacement',
+    action: 'update',
+  },
   /***************************************************************************
    *                                                                          *
    * Custom routes here...                                                    *
