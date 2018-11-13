@@ -10,6 +10,9 @@ module.exports = {
     filename: {
       type: 'string',
     },
+    filepath: {
+      type: 'string',
+    },
     Replacement: {
       model: 'EwalletReplacement',
     },

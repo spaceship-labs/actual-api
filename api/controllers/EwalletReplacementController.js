@@ -46,11 +46,22 @@ module.exports = {
       };
       const files = await Files.saveFiles(req, options);
       console.log('files', files);
-      const fileLoaded = await ReplacementFile.create({ filename: files[0] });
+      const fileLoaded = await ReplacementFile.create({
+        filename: files[0].filename,
+        filepath: files[0].fd,
+      });
       const ewallet = await Ewallet.findOne({ Client: clientId });
-      const replacementFound = await EwalletReplacement.findOne({
-        Ewallet: ewallet.id,
-      }).populate('Files');
+      const replacementFound = await EwalletReplacement.findOne(
+        ewallet
+          ? {
+              Ewallet: ewallet.id,
+            }
+          : {
+              Client: clientId,
+            }
+      )
+        .populate('Files')
+        .populate('Ewallet');
       if (replacementFound) {
         replacementFound.Files.add(fileLoaded.id);
         await replacementFound.save();

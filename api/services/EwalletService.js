@@ -87,7 +87,7 @@ const customFind = async (params, extraParams, modelToFind) => {
     modelToFind === 'ewallet'
       ? ['Client', 'Store']
       : modelToFind === 'ewalletreplacement'
-        ? ['Client', 'Store', 'requestedBy']
+        ? ['Client', 'Store', 'requestedBy', 'Files']
         : ['Store', 'Ewallet']
   );
 
