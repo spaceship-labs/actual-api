@@ -309,14 +309,15 @@ function getArtificialSubDivisions(payments, groupNumber, methodType) {
         artificialSubdivision.name +
         ' TPV ' +
         Common.mapTerminalCode(artificialSubdivision.terminal);
-    } else if (artificialSubdivision.isWeb && artificialSubdivision.card) {
-      artificialSubdivision.name =
-        artificialSubdivision.name +
-        ' | ' +
-        Common.mapTerminalCode(artificialSubdivision.card);
     }
-    artificialSubdivision.total = getSubdivisionTotal(artificialSubdivision);
-    artificialSubdivisions.push(artificialSubdivision);
+
+    if (
+      !artificialSubdivision.isWeb ||
+      artificialSubdivision.groupNumber !== 1
+    ) {
+      artificialSubdivision.total = getSubdivisionTotal(artificialSubdivision);
+      artificialSubdivisions.push(artificialSubdivision);
+    }
   }
   return artificialSubdivisions;
 }
