@@ -383,7 +383,8 @@ module.exports.paymentGroups = [
         cards: ['Banamex'],
         terminals: [
           { label: 'Banamex', value: 'banamex' },
-          //{label:'American Express', value:'american-express'},
+          { label: 'American Express', value: 'american-express' },
+          { label: 'Banorte', value: 'banorte' },
         ],
         currency: 'mxn',
         needsVerification: true,
