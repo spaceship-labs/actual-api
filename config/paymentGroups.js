@@ -367,34 +367,29 @@ module.exports.paymentGroups = [
         group: 5
       },
       */
-      /*
+
       {
-        label:'18',
-        name:'18 meses sin intereses',
-        type:'18-msi',
-        msi:18,
+        label: '18',
+        name: '18 meses sin intereses',
+        type: '18-msi',
+        msi: 18,
         //cardsImages:[
         //  '/cards/amexcard.png',
         //],
         //cards: [
         //  'American Express',
         //],
-        cardsImages:[
-          '/cards/banamex.png',
-        ],
-        cards: [
-          'Banamex'
-        ],        
-        terminals:[
-          {label:'Banamex', value:'banamex'},
+        cardsImages: ['/cards/banamex.png'],
+        cards: ['Banamex'],
+        terminals: [
+          { label: 'Banamex', value: 'banamex' },
           //{label:'American Express', value:'american-express'},
         ],
         currency: 'mxn',
         needsVerification: true,
-        min:2000,
-        group: 5
+        min: 2000,
+        group: 5,
       },
-      */
     ],
   },
 ];
