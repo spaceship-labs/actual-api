@@ -379,11 +379,13 @@ module.exports.paymentGroups = [
         //cards: [
         //  'American Express',
         //],
-        cardsImages: ['/cards/banamex.png'],
+        cardsImages: ['/cards/amexcard.png'],
+        moreCards: true,
         cards: ['Banamex'],
         terminals: [
           { label: 'Banamex', value: 'banamex' },
-          //{label:'American Express', value:'american-express'},
+          { label: 'American Express', value: 'american-express' },
+          { label: 'Banorte', value: 'banorte' },
         ],
         currency: 'mxn',
         needsVerification: true,
