@@ -1,7 +1,9 @@
 const cdnUrl = process.env.AWS_CLOUDFRONT_URL;
 var baseURL = process.env.baseURL;
 var baseURLFRONT = process.env.baseURLFRONT;
-var surveyURL = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
+var surveyURL =
+  process.env.surveyURL ||
+  'https://form.jotform.co/ActualMkt/evalua_nuestro_servicio';
 var key = process.env.SENDGRIDAPIKEY;
 var Promise = require('bluebird');
 var moment = require('moment');
