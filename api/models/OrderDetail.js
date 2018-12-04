@@ -28,13 +28,19 @@ module.exports = {
     isFreeSale: 'boolean',
     status: {
       type: 'string',
-      enum: ['paid', 'canceled'],
+      enum: ['paid', 'partiallyCanceled', 'canceled'],
     },
     quantityToCancel: {
       type: 'integer',
     },
     quantityCanceled: {
       type: 'integer',
+    },
+    cancelationStatus: {
+      type: 'boolean',
+    },
+    CancelationOrder: {
+      model: 'OrderCancelation',
     },
     Promotion: {
       model: 'Promotion',

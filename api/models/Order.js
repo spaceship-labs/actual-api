@@ -1,129 +1,152 @@
 //APP COLLECTION
 module.exports = {
-  migrate:'alter',
+  migrate: 'alter',
   schema: true,
-  attributes:{
-    DocEntry:{type:'integer'},
-    folio:{type:'string'},
-    documents:{
-      type:'array'
+  attributes: {
+    DocEntry: { type: 'integer' },
+    folio: { type: 'string' },
+    documents: {
+      type: 'array',
     },
-    immediateDelivery:{type:'boolean'},
-    isSRService:{type:'boolean'},
-    ammountPaid: {type:'float'},
-    ammountPaidPg1: {type:'float'},
-    total:{type:'float'},
-    subtotal:{type:'float'},
-    discount:{type:'float'},
-    currency:{type:'string'},
-    paymentGroup:{type:'integer'},
-    appliesClientDiscount: {type:'boolean'},
-    WhsCode:{type:'string'},
-    brokerCode: {type:'string'},
-    status:{
-      type:'string',
-      enum:['paid', 'canceled']
+    immediateDelivery: {
+      type: 'boolean',
     },
-    Quotation:{
-      model:'Quotation',
-      unique:true
+    isSRService: {
+      type: 'boolean',
     },
-    Client:{
-      model: 'Client'
+    ammountPaid: {
+      type: 'float',
+    },
+    ammountPaidPg1: {
+      type: 'float',
+    },
+    total: {
+      type: 'float',
+    },
+    subtotal: {
+      type: 'float',
+    },
+    discount: {
+      type: 'float',
+    },
+    currency: {
+      type: 'string',
+    },
+    paymentGroup: {
+      type: 'integer',
+    },
+    appliesClientDiscount: {
+      type: 'boolean',
+    },
+    WhsCode: {
+      type: 'string',
+    },
+    brokerCode: {
+      type: 'string',
+    },
+    status: {
+      type: 'string',
+      enum: ['paid', 'partiallyCanceled', 'canceled'],
+    },
+    Quotation: {
+      model: 'Quotation',
+      unique: true,
+    },
+    Client: {
+      model: 'Client',
     },
     Details: {
-      collection:'OrderDetail',
-      via:'Order'
+      collection: 'OrderDetail',
+      via: 'Order',
     },
     Payments: {
-      collection:'Payment',
-      via:'Order'
+      collection: 'Payment',
+      via: 'Order',
     },
-    EwalletRecords:{
-      collection:'EwalletRecord',
-      via:'Order'
+    EwalletRecords: {
+      collection: 'EwalletRecord',
+      via: 'Order',
     },
-    ClientBalanceRecords:{
-      collection:'ClientBalanceRecord',
-      via:'Order'
+    ClientBalanceRecords: {
+      collection: 'ClientBalanceRecord',
+      via: 'Order',
     },
-    User:{
+    User: {
       model: 'User',
     },
-    Broker:{
+    Broker: {
       model: 'BrokerSAP',
     },
-    Address:{
-      model:'ClientContact',
+    Address: {
+      model: 'ClientContact',
     },
-    Store:{
-      model:'store'
+    Store: {
+      model: 'store',
       //model:'company',
       //required: 'true'
     },
-    PaymentsSap:{
-      collection:'PaymentSap',
-      via:'Order'
+    PaymentsSap: {
+      collection: 'PaymentSap',
+      via: 'Order',
     },
-    OrdersSap:{
-      collection:'OrderSap',
-      via:'Order'
+    OrdersSap: {
+      collection: 'OrderSap',
+      via: 'Order',
     },
-    SapOrderConnectionLog:{
-      model: 'SapOrderConnectionLog'
+    SapOrderConnectionLog: {
+      model: 'SapOrderConnectionLog',
     },
     AlegraLogs: {
       collection: 'AlegraLog',
-      via: 'Order'
+      via: 'Order',
     },
 
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
 
-
     //SAP FIELDS
-    CntCtCode:{type:'integer'},
-    SlpCode: {type:'integer'},
-    CardCode: {type:'string'},
-    CardName: {type:'string'},
+    CntCtCode: { type: 'integer' },
+    SlpCode: { type: 'integer' },
+    CardCode: { type: 'string' },
+    CardName: { type: 'string' },
 
     //ADDRESS FIELDS SNAPSHOT
-    E_Mail:{type:'string'},
-    FirstName:{type:'string'},
-    LastName:{type:'string'},
+    E_Mail: { type: 'string' },
+    FirstName: { type: 'string' },
+    LastName: { type: 'string' },
 
-    CntctCode:{type:'integer'},
-    Tel1:{type:'string'},
-    Cellolar:{type:'string'},
-    address:{type:'string'},
-    U_Noexterior: {type:'string'},
-    U_Nointerior: {type:'string'},
-    U_Colonia: {type:'string'},
-    U_Mpio: {type:'string'},
-    U_Ciudad: {type:'string'},
-    U_Estado: {type:'string'},
-    U_CP: {type:'string'},
-    U_Entrecalle: {type:'string'},
-    U_Ycalle: {type:'string'},
-    U_Notes1: {type:'string'},
-    U_Latitud: {type:'string'},
-    U_Longitud: {type:'string'},
+    CntctCode: { type: 'integer' },
+    Tel1: { type: 'string' },
+    Cellolar: { type: 'string' },
+    address: { type: 'string' },
+    U_Noexterior: { type: 'string' },
+    U_Nointerior: { type: 'string' },
+    U_Colonia: { type: 'string' },
+    U_Mpio: { type: 'string' },
+    U_Ciudad: { type: 'string' },
+    U_Estado: { type: 'string' },
+    U_CP: { type: 'string' },
+    U_Entrecalle: { type: 'string' },
+    U_Ycalle: { type: 'string' },
+    U_Notes1: { type: 'string' },
+    U_Latitud: { type: 'string' },
+    U_Longitud: { type: 'string' },
 
     //APP FIELDS
 
     minPaidPercentage: {
-      type:'float',
-      defaultsTo: 60
+      type: 'float',
+      defaultsTo: 60,
       //defaultsTo: 100
     },
     invoice: {
       //factura sat
       model: 'invoice',
-    }
+    },
   },
 
-  beforeCreate: function(val,cb){
-    Common.orderCustomAI(val, 'orderFolio',function(val){
+  beforeCreate: function(val, cb) {
+    Common.orderCustomAI(val, 'orderFolio', function(val) {
       cb();
     });
   },
@@ -142,4 +165,4 @@ module.exports = {
       });
   }
   */
-}
+};

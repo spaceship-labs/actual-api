@@ -13,11 +13,15 @@ module.exports = {
     reason: {
       type: 'text',
     },
+    status: {
+      type: 'string',
+      enum: ['requested', 'reviewed'],
+    },
     // Relations
-    // Details: {
-    //   collection: 'OrderDetail',
-    //   via: 'Cancelation',
-    // },
+    Details: {
+      collection: 'OrderDetail',
+      via: 'CancelationOrder',
+    },
     Order: {
       model: 'Order',
     },
