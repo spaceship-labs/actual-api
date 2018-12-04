@@ -616,6 +616,35 @@ module.exports.routes = {
     action: 'getTotalsByuser',
   },
 
+  // CANCELATIONS
+
+  'GET /order': {
+    controller: 'order',
+    action: 'index',
+  },
+
+  'GET /cancel/:id/order': {
+    controller: 'ordercancelation',
+    action: 'show',
+  },
+
+  'GET /cancel': {
+    controller: 'ordercancelation',
+    action: 'index',
+  },
+
+  'POST /cancel/:orderId/order': {
+    controller: 'ordercancelation',
+    action: 'add',
+  },
+
+  'PUT /cancel/:id/order': {
+    controller: 'ordercancelation',
+    action: 'update',
+  },
+
+  // CANCELATIONS
+
   '/order/user/:userId/count': {
     controller: 'order',
     action: 'getCountByUser',

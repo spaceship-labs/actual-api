@@ -6,6 +6,29 @@
  */
 
 module.exports = {
+  async index(req, res) {
+    try {
+      const { page = 1, limit = 10 } = req.allParams();
+      const orderCancelations = await OrderCancelation.find().paginate({
+        page,
+        limit,
+      });
+      res.ok(orderCancelations);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  },
+  async show(req, res) {
+    try {
+      const id = req.param('id');
+      const cancelationOrder = await OrderCancelation.findOne({ id })
+        .populate('Order')
+        .populate('Details');
+      res.ok(cancelationOrder);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  },
   async add(req, res) {
     try {
       const orderId = req.params('orderId');

@@ -43,6 +43,15 @@ const updateRequest = async (
         }
       );
     }
+    if (detailApprovement.authorized === false) {
+      const detail = await OrderDetail.findOne({ id: detailApprovement.id });
+      await OrderDetail.update(
+        { id: detail.id },
+        {
+          cancelationStatus: false,
+        }
+      );
+    }
   });
   await Order.update(
     { id: orderCancelation.Order.id },

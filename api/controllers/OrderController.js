@@ -1,4 +1,16 @@
 module.exports = {
+  async index(req, res) {
+    try {
+      const { page = 1, limit = 10 } = req.allParams();
+      const orders = await Order.find().paginate({
+        page,
+        limit,
+      });
+      res.ok(orders);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  },
   sendOrderEmail: function(req, res) {
     var form = req.params.all();
     var orderId = form.id;
