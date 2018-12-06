@@ -55,7 +55,7 @@ const updateRequest = async (
   });
   await Order.update(
     { id: orderCancelation.Order.id },
-    orderCancelation.cancelAll === true
+    orderCancelation.cancelAll === true && requestStatus === 'authorized'
       ? {
           status: 'canceled',
           ammountPaid: 0,
