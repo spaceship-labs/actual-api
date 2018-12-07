@@ -7,16 +7,18 @@
 
 module.exports = {
   attributes: {
+    subject: {
+      type: 'string',
+    },
     message: {
       type: 'text',
     },
-
-    // Relations
-    userFrom: {
-      model: 'User',
+    userCode: {
+      type: 'integer',
+      enum: [1, 2, 3, 4],
     },
-    userTo: {
-      model: 'User',
+    notificationID: {
+      type: 'string',
     },
   },
 };

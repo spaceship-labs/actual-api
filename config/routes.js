@@ -873,6 +873,10 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'update',
   },
+  'GET /alert': {
+    controller: 'alert',
+    action: 'index',
+  },
 
   /***************************************************************************
    *                                                                          *
