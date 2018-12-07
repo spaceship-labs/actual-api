@@ -15,7 +15,8 @@ module.exports = {
     },
     status: {
       type: 'string',
-      enum: ['requested', 'reviewed'],
+      enum: ['pending', 'reviewed'],
+      defaultsTo: 'pending',
     },
     // Relations
     Details: {

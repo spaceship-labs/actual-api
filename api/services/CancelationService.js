@@ -3,25 +3,23 @@ const updateRequest = async (
   detailsApprovement,
   requestStatus
 ) => {
-  const orderCancelation = await orderCancelation
-    .findOne({ id: cancelationId })
+  const { id, Details, Order, cancelAll } = await OrderCancelation.findOne({
+    id: cancelationId,
+  })
     .populate('Details')
     .populate('Order');
   if (requestStatus === 'rejected') {
-    orderCancelation.Details.map(
+    Details.map(
       async detail =>
         await OrderDetail.update(
           { id: detail.id },
           { cancelationStatus: false }
         )
     );
-    return await orderCancelation.update(
-      { id: orderCancelation.id },
-      { status: 'reviewed' }
-    );
+    return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
   if (requestStatus === 'authorized') {
-    orderCancelation.Details.map(
+    Details.map(
       async detail =>
         await OrderDetail.update(
           { id: detail.id },
@@ -54,8 +52,8 @@ const updateRequest = async (
     }
   });
   await Order.update(
-    { id: orderCancelation.Order.id },
-    orderCancelation.cancelAll === true && requestStatus === 'authorized'
+    { id: Order.id },
+    cancelAll === true && requestStatus === 'authorized'
       ? {
           status: 'canceled',
           ammountPaid: 0,
@@ -64,10 +62,7 @@ const updateRequest = async (
           status: 'partiallyCanceled',
         }
   );
-  return await orderCancelation.update(
-    { id: orderCancelation.id },
-    { status: 'reviewed' }
-  );
+  return await OrderCancelation.update({ id }, { status: 'reviewed' });
 };
 module.exports = {
   updateRequest: updateRequest,
