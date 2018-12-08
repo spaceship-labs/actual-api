@@ -48,6 +48,7 @@ module.exports = {
         Details: detailsIds,
         Order: orderId,
       });
+      await SapService.throwAlert(params);
       res.ok(orderCancelation);
     } catch (error) {
       res.negotiate(error);

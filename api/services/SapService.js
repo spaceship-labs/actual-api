@@ -6,6 +6,9 @@ const Promise = require('bluebird');
 const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
+const axios = require('axios');
+const API_BASE = 'sapnueve.homedns.org';
+axios.defaults.baseURL = API_BASE;
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
 const CLIENT_CARD_TYPE = 1; //1.Client, 2.Proveedor, 3.Lead
@@ -22,9 +25,30 @@ const HOME_GROUP = 'home';
 const KIDS_GROUP = 'kids';
 const PROJECTS_GROUP = 'proyectos';
 
+const SUBJECTS = ['Cancelación mayor a 36 horas'];
+const MESSAGES = ['Cancelación solicitada por el cliente'];
+const USER_CODE_ADMINISTRADOR = 1;
+const USER_CODE_CONTABILIDAD = 2;
+const USER_CODE_COMPRAS = 3;
+
 var reqOptions = {
   method: 'POST',
   json: true,
+};
+
+const throwAlert = async ({ subject, message, userCode }) => {
+  let params = {
+    subject: SUBJECTS[subject],
+    message: MESSAGES[message],
+    userCode:
+      userCode === 1
+        ? USER_CODE_ADMINISTRADOR
+        : userCode === 2 ? USER_CODE_CONTABILIDAD : USER_CODE_COMPRAS,
+  };
+  const { value } = await axios.post('/Notification', params);
+  params.notificationID = value;
+  const alert = await Alert.create(params);
+  return alert;
 };
 
 module.exports = {
@@ -36,6 +60,7 @@ module.exports = {
   updateFiscalAddress: updateFiscalAddress,
   buildOrderRequestParams: buildOrderRequestParams,
   cancelOrder,
+  throwAlert,
 };
 
 function createClient(params) {

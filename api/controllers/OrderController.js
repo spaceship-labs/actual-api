@@ -2,10 +2,14 @@ module.exports = {
   async index(req, res) {
     try {
       const { page = 1, limit = 10 } = req.allParams();
-      const orders = await Order.find().paginate({
-        page,
-        limit,
-      });
+      const orders = await Order.find()
+        .populate('Client')
+        .populate('Broker')
+        .paginate({
+          page,
+          limit,
+        });
+
       res.ok(orders);
     } catch (error) {
       res.negotiate(error);

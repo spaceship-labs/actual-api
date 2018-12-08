@@ -16,6 +16,7 @@ const updateRequest = async (
           { cancelationStatus: false }
         )
     );
+    await SapService.throwAlert(params);
     return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
   if (requestStatus === 'authorized') {
@@ -62,6 +63,7 @@ const updateRequest = async (
           status: 'partiallyCanceled',
         }
   );
+  await SapService.throwAlert(params);
   return await OrderCancelation.update({ id }, { status: 'reviewed' });
 };
 module.exports = {
