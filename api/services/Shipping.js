@@ -117,11 +117,11 @@ async function buildShippingItem(
   let seasonDays;
 
   if (isMeridaWhsCode(stockItem.whsCode)) {
-    MAIN_SEASON_DAYS = 12; //ORIGINAL 11
-    LOW_SEASON_DAYS = 12; // ORIGINAL 10
+    MAIN_SEASON_DAYS = 18; //ORIGINAL 11
+    LOW_SEASON_DAYS = 18; // ORIGINAL 10
   } else {
-    MAIN_SEASON_DAYS = 12; //10 // ORIGINAL 6
-    LOW_SEASON_DAYS = 12; // ORIGINAL 5
+    MAIN_SEASON_DAYS = 10; //10 // ORIGINAL 6
+    LOW_SEASON_DAYS = 10; // ORIGINAL 5
   }
 
   if (season) {
