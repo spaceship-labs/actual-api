@@ -61,19 +61,16 @@ const updateRequest = async (
     return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
   if (requestStatus === 'authorized') {
-    CancelationDetails.map(async detail => {
-      const { id, quantityCanceled } = await OrderDetail.findOne(detail.Detail);
-      await OrderDetailCancelation.update(
-        { id: detail.id },
-        { status: 'authorized' }
+    CancelationDetails.map(async ({ id, quantity }) => {
+      const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
+        detail.Detail
       );
+      await OrderDetailCancelation.update({ id: id }, { status: 'authorized' });
       await OrderDetail.update(
-        { id },
+        { id: OrderDetailId },
         {
           quantityCanceled:
-            quantityCanceled > 0
-              ? quantityCanceled + detail.quantity
-              : detail.quantity,
+            quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
         }
       );
     });
