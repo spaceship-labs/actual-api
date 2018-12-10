@@ -30,14 +30,9 @@ module.exports = {
       type: 'string',
       enum: ['paid', 'partiallyCanceled', 'canceled'],
     },
-    quantityToCancel: {
-      type: 'integer',
-    },
     quantityCanceled: {
       type: 'integer',
-    },
-    cancelationStatus: {
-      type: 'boolean',
+      defaultsTo: 0,
     },
     CancelationOrder: {
       model: 'OrderCancelation',

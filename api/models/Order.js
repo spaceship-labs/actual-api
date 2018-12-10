@@ -101,6 +101,11 @@ module.exports = {
       via: 'Order',
     },
 
+    OrderCancelations: {
+      collection: 'OrderCancelation',
+      via: 'Order',
+    },
+
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
 

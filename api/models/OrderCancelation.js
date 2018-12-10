@@ -19,12 +19,16 @@ module.exports = {
       defaultsTo: 'pending',
     },
     // Relations
+    Order: {
+      model: 'Order',
+    },
     Details: {
       collection: 'OrderDetail',
       via: 'CancelationOrder',
     },
-    Order: {
-      model: 'Order',
+    CancelationDetails: {
+      collection: 'OrderDetailCancelation',
+      via: 'Cancelation',
     },
   },
 };

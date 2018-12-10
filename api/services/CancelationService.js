@@ -1,56 +1,109 @@
+const addCancelation = async (orderId, cancelAll, details, reason) => {
+  let detailsIds;
+  if (cancelAll === true) {
+    const { Details } = await Order.findOne({ id: orderId }).populate(
+      'Details'
+    );
+    detailsIds = Details.map(detail => detail.id);
+    await createCancelationDetails(Details);
+  } else if (cancelAll === false) {
+    detailsIds = details.map(detail => detail.id);
+    await createCancelationDetails(details);
+  }
+
+  const cancelationDetails = await OrderDetailCancelation.find({
+    Order: orderId,
+  });
+  const cancelationDetailsIds = cancelationDetails.map(detail => detail.id);
+  const orderCancelation = await OrderCancelation.create({
+    cancelAll,
+    reason,
+    Details: detailsIds,
+    Order: orderId,
+    CancelationDetails: cancelationDetailsIds,
+  });
+  return orderCancelation;
+};
+
+const createCancelationDetails = async details =>
+  details.map(async detail => {
+    await OrderDetailCancelation.create({
+      quantity: detail.quantity,
+      Order: orderId,
+      Detail: detail.id,
+    });
+  });
+
 const updateRequest = async (
   cancelationId,
   detailsApprovement,
   requestStatus
 ) => {
-  const { id, Details, Order, cancelAll } = await OrderCancelation.findOne({
+  const {
+    id,
+    Details,
+    Order,
+    cancelAll,
+    CancelationDetails,
+  } = await OrderCancelation.findOne({
     id: cancelationId,
   })
     .populate('Details')
-    .populate('Order');
+    .populate('Order')
+    .populate('CancelationDetails');
   if (requestStatus === 'rejected') {
-    Details.map(
-      async detail =>
-        await OrderDetail.update(
-          { id: detail.id },
-          { cancelationStatus: false }
-        )
-    );
-    await SapService.throwAlert(params);
+    CancelationDetails.map(async detail => {
+      await OrderDetailCancelation.update(
+        { id: detail.id },
+        { status: 'rejected' }
+      );
+    });
     return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
   if (requestStatus === 'authorized') {
-    Details.map(
-      async detail =>
-        await OrderDetail.update(
-          { id: detail.id },
-          {
-            cancelationStatus: true,
-            quantityCanceled: detail.quantityToCancel,
+    CancelationDetails.map(async detail => {
+      const { id, quantityCanceled } = await OrderDetail.findOne(detail.Detail);
+      await OrderDetailCancelation.update(
+        { id: detail.id },
+        { status: 'authorized' }
+      );
+      await OrderDetail.update(
+        { id },
+        {
+          quantityCanceled:
+            quantityCanceled > 0
+              ? quantityCanceled + detail.quantity
+              : detail.quantity,
+        }
+      );
+    });
+    await Order.update(
+      { id: Order.id },
+      cancelAll === true && requestStatus === 'authorized'
+        ? {
+            status: 'canceled',
+            ammountPaid: 0,
           }
-        )
+        : {
+            status: 'partiallyCanceled',
+          }
     );
+
+    return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
-  detailsApprovement.map(async detailApprovement => {
-    if (detailApprovement.authorized === true) {
-      const detail = await OrderDetail.findOne({ id: detailApprovement.id });
-      await OrderDetail.update(
-        { id: detail.id },
-        {
-          cancelationStatus: true,
-          quantityCanceled: detail.quantityToCancel,
-        }
-      );
-    }
-    if (detailApprovement.authorized === false) {
-      const detail = await OrderDetail.findOne({ id: detailApprovement.id });
-      await OrderDetail.update(
-        { id: detail.id },
-        {
-          cancelationStatus: false,
-        }
-      );
-    }
+  detailsApprovement.map(async ({ id, status }) => {
+    const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
+    const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
+      Detail
+    );
+    await OrderDetailCancelation.update({ id }, { status });
+    await OrderDetail.update(
+      { id: OrderDetailId },
+      {
+        quantityCanceled:
+          quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
+      }
+    );
   });
   await Order.update(
     { id: Order.id },
@@ -63,9 +116,12 @@ const updateRequest = async (
           status: 'partiallyCanceled',
         }
   );
-  await SapService.throwAlert(params);
+
   return await OrderCancelation.update({ id }, { status: 'reviewed' });
 };
+
 module.exports = {
+  addCancelation: addCancelation,
   updateRequest: updateRequest,
+  createCancelationDetails: createCancelationDetails,
 };
