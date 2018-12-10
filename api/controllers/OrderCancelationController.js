@@ -9,10 +9,12 @@ module.exports = {
   async index(req, res) {
     try {
       const { page = 1, limit = 10 } = req.allParams();
-      const orderCancelations = await OrderCancelation.find().paginate({
-        page,
-        limit,
-      });
+      const orderCancelations = await OrderCancelation.find()
+        .populate('Order')
+        .paginate({
+          page,
+          limit,
+        });
       res.ok(orderCancelations);
     } catch (error) {
       res.negotiate(error);
@@ -31,7 +33,7 @@ module.exports = {
   },
   async add(req, res) {
     try {
-      const orderId = req.params('orderId');
+      const orderId = req.param('orderId');
       const { cancelAll, details, reason } = req.allParams();
       const detailsIds = details.map(detail => detail.id);
       details.map(async detail => {
