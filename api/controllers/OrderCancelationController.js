@@ -15,7 +15,9 @@ module.exports = {
           page,
           limit,
         });
-      res.ok(orderCancelations);
+      const total = await OrderCancelation.count();
+      const results = { orderCancelations, total };
+      res.ok(results);
     } catch (error) {
       res.negotiate(error);
     }

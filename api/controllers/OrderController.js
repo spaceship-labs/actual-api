@@ -9,8 +9,7 @@ module.exports = {
           page,
           limit,
         });
-
-      res.ok(orders);
+      res.ok(re);
     } catch (error) {
       res.negotiate(error);
     }
