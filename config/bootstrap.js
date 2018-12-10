@@ -16,7 +16,9 @@ module.exports.bootstrap = function(cb) {
   // It's very important to trigger this callback method when you are finished
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
   CronJobs.init();
-  Files.getContainerLink();
+  if (process.env.MODE === 'production') {
+    Files.getContainerLink();
+  }
 
   var msgMode = 'sandbox/dev';
   if (process.env.MODE === 'production') {
