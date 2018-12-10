@@ -35,22 +35,36 @@ module.exports = {
     try {
       const orderId = req.param('orderId');
       const { cancelAll, details, reason } = req.allParams();
-      const detailsIds = details.map(detail => detail.id);
-      details.map(async detail => {
-        const orderDetail = await OrderDetail.findOne({ id: detail.id });
-        await OrderDetail.update(
-          { id: orderDetail },
-          { quantityToCancel: detail.quantity }
+      if (cancelAll === true) {
+        const { Details } = await Order.findOne({ id: orderId }).populate(
+          'Details'
         );
-      });
+        const detailsIds = Details.map(detail => detail.id);
+        Details.map(async detail => {
+          const orderDetail = await OrderDetail.findOne({ id: detail.id });
+          await OrderDetail.update(
+            { id: orderDetail.id },
+            { quantityToCancel: orderDetail.quantity }
+          );
+        });
+      } else if (cancelAll === false) {
+        const detailsIds = details.map(detail => detail.id);
+        details.map(async detail => {
+          const orderDetail = await OrderDetail.findOne({ id: detail.id });
+          await OrderDetail.update(
+            { id: orderDetail.id },
+            { quantityToCancel: detail.quantity }
+          );
+        });
+      }
       const orderCancelation = await OrderCancelation.create({
         cancelAll,
         reason,
-        status: 'requested',
+        status: 'pending',
         Details: detailsIds,
         Order: orderId,
       });
-      await SapService.throwAlert(params);
+      // await SapService.throwAlert(params);
       res.ok(orderCancelation);
     } catch (error) {
       res.negotiate(error);
