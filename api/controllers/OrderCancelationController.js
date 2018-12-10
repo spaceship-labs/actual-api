@@ -35,11 +35,12 @@ module.exports = {
     try {
       const orderId = req.param('orderId');
       const { cancelAll, details, reason } = req.allParams();
+      let detailsIds;
       if (cancelAll === true) {
         const { Details } = await Order.findOne({ id: orderId }).populate(
           'Details'
         );
-        const detailsIds = Details.map(detail => detail.id);
+        detailsIds = Details.map(detail => detail.id);
         Details.map(async detail => {
           const orderDetail = await OrderDetail.findOne({ id: detail.id });
           await OrderDetail.update(
@@ -48,7 +49,7 @@ module.exports = {
           );
         });
       } else if (cancelAll === false) {
-        const detailsIds = details.map(detail => detail.id);
+        detailsIds = details.map(detail => detail.id);
         details.map(async detail => {
           const orderDetail = await OrderDetail.findOne({ id: detail.id });
           await OrderDetail.update(
