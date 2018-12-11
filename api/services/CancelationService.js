@@ -1,6 +1,8 @@
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
-  if (cancelAll === ('true' || true)) {
+  console.log('cancelAll: ', cancelAll);
+  if (cancelAll === true || cancelAll === 'true') {
+    sails.log('HERE');
     const { Details } = await Order.findOne({ id: orderId }).populate(
       'Details'
     );
@@ -25,7 +27,7 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
     detailsIds = details.map(({ id }) => id);
   }
   const orderCancelation = await OrderCancelation.create({
-    cancelAll: cancelAll === 'true' ? true : false,
+    cancelAll: cancelAll,
     reason,
     Details: detailsIds,
     Order: orderId,
