@@ -38,7 +38,6 @@ module.exports = {
     try {
       const orderId = req.param('orderId');
       const { cancelAll, details, reason } = req.allParams();
-      console.log('cancelAll: ', typeof cancelAll);
       const orderCancelation = await CancelationService.addCancelation(
         orderId,
         cancelAll,

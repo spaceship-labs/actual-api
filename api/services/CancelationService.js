@@ -70,20 +70,17 @@ const updateRequest = async (
     .populate('Order')
     .populate('CancelationDetails');
   if (requestStatus === 'rejected') {
-    CancelationDetails.map(async detail => {
-      await OrderDetailCancelation.update(
-        { id: detail.id },
-        { status: 'rejected' }
-      );
+    CancelationDetails.map(async ({ id }) => {
+      await OrderDetailCancelation.update({ id }, { status: 'rejected' });
     });
     return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
   if (requestStatus === 'authorized') {
-    CancelationDetails.map(async ({ id, quantity }) => {
+    CancelationDetails.map(async ({ id, quantity, Detail }) => {
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
-        detail.Detail
+        Detail
       );
-      await OrderDetailCancelation.update({ id: id }, { status: 'authorized' });
+      await OrderDetailCancelation.update({ id }, { status: 'authorized' });
       await OrderDetail.update(
         { id: OrderDetailId },
         {
