@@ -7,18 +7,20 @@
 
 module.exports = {
   attributes: {
-    subject: {
-      type: 'string',
+    notificationType: {
+      type: 'integer',
     },
-    message: {
+    folio: {
       type: 'text',
     },
-    userCode: {
-      type: 'integer',
-      enum: [1, 2, 3, 4],
+    link: {
+      type: 'string',
     },
     notificationID: {
       type: 'string',
+    },
+    Order: {
+      model: 'Order',
     },
   },
 };

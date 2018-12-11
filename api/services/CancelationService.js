@@ -5,10 +5,24 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
       'Details'
     );
     detailsIds = Details.map(detail => detail.id);
-    await createCancelationDetails(Details);
+    Details.map(
+      async ({ id, quantity }) =>
+        await OrderDetailCancelation.create({
+          quantity: quantity,
+          Order: orderId,
+          Detail: id,
+        })
+    );
   } else if (cancelAll === false) {
     detailsIds = details.map(detail => detail.id);
-    await createCancelationDetails(details);
+    details.map(
+      async ({ id, quantity }) =>
+        await OrderDetailCancelation.create({
+          quantity: quantity,
+          Order: orderId,
+          Detail: id,
+        })
+    );
   }
 
   const cancelationDetails = await OrderDetailCancelation.find({
