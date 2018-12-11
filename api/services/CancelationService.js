@@ -1,10 +1,9 @@
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
-  if (cancelAll === true) {
+  if (cancelAll === ('true' || true)) {
     const { Details } = await Order.findOne({ id: orderId }).populate(
       'Details'
     );
-    detailsIds = Details.map(detail => detail.id);
     Details.map(
       async ({ id, quantity }) =>
         await OrderDetailCancelation.create({
@@ -13,8 +12,8 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
           Detail: id,
         })
     );
-  } else if (cancelAll === false) {
-    detailsIds = details.map(detail => detail.id);
+    detailsIds = Details.map(({ id }) => id);
+  } else {
     details.map(
       async ({ id, quantity }) =>
         await OrderDetailCancelation.create({
@@ -23,20 +22,25 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
           Detail: id,
         })
     );
+    detailsIds = details.map(({ id }) => id);
   }
-
-  const cancelationDetails = await OrderDetailCancelation.find({
-    Order: orderId,
-  });
-  const cancelationDetailsIds = cancelationDetails.map(detail => detail.id);
   const orderCancelation = await OrderCancelation.create({
-    cancelAll,
+    cancelAll: cancelAll === 'true' ? true : false,
     reason,
     Details: detailsIds,
     Order: orderId,
-    CancelationDetails: cancelationDetailsIds,
   });
-  return orderCancelation;
+  const cancelationDetails = await OrderDetailCancelation.find({
+    Order: orderId,
+  });
+  const cancelationDetailsIds = cancelationDetails.map(({ id }) => id);
+  const orderCancelationWithDetails = await OrderCancelation.update(
+    { id: orderCancelation.id },
+    {
+      CancelationDetails: cancelationDetailsIds,
+    }
+  );
+  return orderCancelationWithDetails;
 };
 
 const createCancelationDetails = async details =>
