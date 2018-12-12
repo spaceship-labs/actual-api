@@ -52,15 +52,17 @@ module.exports = {
   async update(req, res) {
     try {
       const cancelationId = req.param('id');
-      const { detailsApprovement, requestStatus } = req.allParams();
+      const { detailApprovement, requestStatus } = req.allParams();
+      console.log('detailApprovement: ', detailApprovement);
+      console.log('requestStatus: ', requestStatus);
       const orderCancelationUpdated = await CancelationService.updateRequest(
         cancelationId,
-        detailsApprovement,
+        detailApprovement,
         requestStatus
       );
       res.ok(orderCancelationUpdated);
     } catch (error) {
-      res.nogotiate(error);
+      res.negotiate(error);
     }
   },
 };

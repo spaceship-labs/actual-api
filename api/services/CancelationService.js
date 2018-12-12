@@ -62,7 +62,7 @@ const updateRequest = async (
   const {
     id,
     Details,
-    Order,
+    Order: orderCancel,
     cancelAll,
     CancelationDetails,
   } = await OrderCancelation.findOne({
@@ -92,7 +92,7 @@ const updateRequest = async (
       );
     });
     await Order.update(
-      { id: Order.id },
+      { id: orderCancel.id },
       cancelAll === true && requestStatus === 'authorized'
         ? {
             status: 'canceled',
@@ -105,33 +105,30 @@ const updateRequest = async (
 
     return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
-  detailsApprovement.map(async ({ id, status }) => {
-    const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
-    const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
-      Detail
-    );
-    await OrderDetailCancelation.update({ id }, { status });
-    await OrderDetail.update(
-      { id: OrderDetailId },
+  if (requestStatus === 'partially') {
+    detailsApprovement.map(async ({ id, status }) => {
+      const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
+      const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
+        Detail
+      );
+      await OrderDetailCancelation.update({ id }, { status });
+      await OrderDetail.update(
+        { id: OrderDetailId },
+        {
+          quantityCanceled:
+            quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
+        }
+      );
+    });
+    await Order.update(
+      { id: orderCancel.id },
       {
-        quantityCanceled:
-          quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
+        status: 'partiallyCanceled',
       }
     );
-  });
-  await Order.update(
-    { id: Order.id },
-    cancelAll === true && requestStatus === 'authorized'
-      ? {
-          status: 'canceled',
-          ammountPaid: 0,
-        }
-      : {
-          status: 'partiallyCanceled',
-        }
-  );
 
-  return await OrderCancelation.update({ id }, { status: 'reviewed' });
+    return await OrderCancelation.update({ id }, { status: 'reviewed' });
+  }
 };
 
 module.exports = {
