@@ -14,9 +14,7 @@ const createCancelationDetails = async ({ id, quantity }, orderId) => {
 
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
-  console.log('cancelAll: ', cancelAll);
   if (cancelAll === true || cancelAll === 'true') {
-    sails.log('HERE');
     const { Details } = await Order.findOne({ id: orderId }).populate(
       'Details'
     );

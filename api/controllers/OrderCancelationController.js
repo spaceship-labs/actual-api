@@ -14,7 +14,8 @@ module.exports = {
         .paginate({
           page,
           limit,
-        });
+        })
+        .sort('createdAt DESC');
       const total = await OrderCancelation.count();
       const results = { orderCancelations, total };
       res.ok(results);
@@ -29,7 +30,6 @@ module.exports = {
         .populate('Order')
         .populate('Details')
         .populate('CancelationDetails');
-      sails.log(cancelationOrder);
       res.ok(cancelationOrder);
     } catch (error) {
       res.negotiate(error);
@@ -54,8 +54,6 @@ module.exports = {
     try {
       const cancelationId = req.param('id');
       const { detailApprovement, requestStatus } = req.allParams();
-      console.log('detailApprovement: ', detailApprovement);
-      console.log('requestStatus: ', requestStatus);
       const orderCancelationUpdated = await CancelationService.updateRequest(
         cancelationId,
         detailApprovement,

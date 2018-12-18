@@ -2,14 +2,19 @@ module.exports = {
   async index(req, res) {
     try {
       const { page = 1, limit = 10 } = req.allParams();
+      console.log('HOLAAAA');
       const orders = await Order.find()
         .populate('Client')
         .populate('Broker')
         .paginate({
           page,
           limit,
-        });
-      res.ok(re);
+        })
+        .sort('createdAt DESC');
+      const total = await Order.count();
+      const results = { orders, total };
+      sails.log(results);
+      res.ok(results);
     } catch (error) {
       res.negotiate(error);
     }
