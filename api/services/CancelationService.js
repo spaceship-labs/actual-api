@@ -1,3 +1,17 @@
+const createCancelationDetails = async ({ id, quantity }, orderId) => {
+  const detail = await OrderDetailCancelation.findOne({ Detail: id });
+  sails.log('detail: ', detail);
+  if (detail) {
+    return;
+  } else if (!detail) {
+    return await OrderDetailCancelation.create({
+      quantity: quantity,
+      Order: orderId,
+      Detail: id,
+    });
+  }
+};
+
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
   console.log('cancelAll: ', cancelAll);
@@ -7,22 +21,12 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
       'Details'
     );
     Details.map(
-      async ({ id, quantity }) =>
-        await OrderDetailCancelation.create({
-          quantity: quantity,
-          Order: orderId,
-          Detail: id,
-        })
+      async detail => await createCancelationDetails(detail, orderId)
     );
     detailsIds = Details.map(({ id }) => id);
   } else {
     details.map(
-      async ({ id, quantity }) =>
-        await OrderDetailCancelation.create({
-          quantity: quantity,
-          Order: orderId,
-          Detail: id,
-        })
+      async detail => await createCancelationDetails(detail, orderId)
     );
     detailsIds = details.map(({ id }) => id);
   }
@@ -44,15 +48,6 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
   );
   return orderCancelationWithDetails;
 };
-
-const createCancelationDetails = async details =>
-  details.map(async detail => {
-    await OrderDetailCancelation.create({
-      quantity: detail.quantity,
-      Order: orderId,
-      Detail: detail.id,
-    });
-  });
 
 const updateRequest = async (
   cancelationId,

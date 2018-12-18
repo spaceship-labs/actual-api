@@ -24,11 +24,11 @@ module.exports = {
     },
     Details: {
       collection: 'OrderDetail',
-      via: 'CancelationOrder',
+      via: 'CancelationOrders',
     },
     CancelationDetails: {
       collection: 'OrderDetailCancelation',
-      via: 'Cancelation',
+      via: 'Cancelations',
     },
   },
 };

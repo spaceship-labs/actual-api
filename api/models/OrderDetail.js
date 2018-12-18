@@ -34,8 +34,9 @@ module.exports = {
       type: 'integer',
       defaultsTo: 0,
     },
-    CancelationOrder: {
-      model: 'OrderCancelation',
+    CancelationOrders: {
+      collection: 'OrderCancelation',
+      via: 'Details',
     },
     Promotion: {
       model: 'Promotion',

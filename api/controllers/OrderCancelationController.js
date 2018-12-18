@@ -29,6 +29,7 @@ module.exports = {
         .populate('Order')
         .populate('Details')
         .populate('CancelationDetails');
+      sails.log(cancelationOrder);
       res.ok(cancelationOrder);
     } catch (error) {
       res.negotiate(error);
