@@ -21,6 +21,7 @@ module.exports = {
   getUnitTypeByProduct,
   RFCPUBLIC,
   DEFAULT_CFDI_USE,
+  hasClientBalancePayment,
 };
 
 function createOrderInvoice(orderId) {
@@ -164,8 +165,16 @@ function prepareInvoice(order, payments, client, items) {
   return createInvoice(data);
 }
 
+function hasClientBalancePayment(payments) {
+  return payments.some(function(payment) {
+    return payment.type === PaymentService.types.CLIENT_BALANCE;
+  });
+}
+
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
-  if (
+  if (hasClientBalancePayment(payments)) {
+    return 'PUE';
+  } else if (
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
