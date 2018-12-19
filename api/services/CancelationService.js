@@ -1,3 +1,5 @@
+const BigNumber = require('bignumber.js');
+
 const createCancelationDetails = async ({ id, quantity }, orderId) => {
   const detail = await OrderDetailCancelation.findOne({ Detail: id });
   sails.log('detail: ', detail);
@@ -11,6 +13,29 @@ const createCancelationDetails = async ({ id, quantity }, orderId) => {
     });
   }
 };
+
+const getCanceledAmount = async details =>
+  details.reduce(
+    (
+      total,
+      {
+        quantityCanceled: quantityCancelDetail,
+        total: totalCancelDetail,
+        quantity: quantityDetail,
+      }
+    ) => {
+      const quantityCanceled = new BigNumber(quantityCancelDetail);
+      const quantity = new BigNumber(quantityDetail);
+      const totalCancel = new BigNumber(totalCancelDetail);
+      const amount = totalCancel
+        .dividedBy(quantity)
+        .multipliedBy(quantityCanceled)
+        .toNumber();
+      console.log('amount: ', amount);
+      return total + amount ? parseFloat(amount) : 0;
+    },
+    0
+  );
 
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
@@ -64,6 +89,9 @@ const updateRequest = async (
     .populate('Details')
     .populate('Order')
     .populate('CancelationDetails');
+  const { amountCanceled: amountCanceledBefore, ammountPaid } = orderCancel;
+  const amountCanceled = await getCanceledAmount(Details);
+  sails.log('amountCanceled: ', amountCanceled);
   if (requestStatus === 'rejected') {
     CancelationDetails.map(async ({ id }) => {
       await OrderDetailCancelation.update({ id }, { status: 'rejected' });
@@ -92,6 +120,14 @@ const updateRequest = async (
             ammountPaid: 0,
           }
         : {
+            amountCanceled:
+              amountCanceledBefore > 0
+                ? amountCanceledBefore + amountCanceled
+                : amountCanceled,
+            ammountPaid:
+              amountCanceledBefore > 0
+                ? ammountPaid - (amountCanceledBefore + amountCanceled)
+                : ammountPaid - amountCanceled,
             status: 'partiallyCanceled',
           }
     );
@@ -116,6 +152,14 @@ const updateRequest = async (
     await Order.update(
       { id: orderCancel.id },
       {
+        amountCanceled:
+          amountCanceledBefore > 0
+            ? amountCanceledBefore + amountCanceled
+            : amountCanceled,
+        ammountPaid:
+          amountCanceledBefore > 0
+            ? ammountPaid - (amountCanceledBefore + amountCanceled)
+            : ammountPaid - amountCanceled,
         status: 'partiallyCanceled',
       }
     );
@@ -128,4 +172,5 @@ module.exports = {
   addCancelation: addCancelation,
   updateRequest: updateRequest,
   createCancelationDetails: createCancelationDetails,
+  getCanceledAmount: getCanceledAmount,
 };

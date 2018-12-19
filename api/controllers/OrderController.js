@@ -13,7 +13,6 @@ module.exports = {
         .sort('createdAt DESC');
       const total = await Order.count();
       const results = { orders, total };
-      sails.log(results);
       res.ok(results);
     } catch (error) {
       res.negotiate(error);

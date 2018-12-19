@@ -17,6 +17,10 @@ module.exports = {
     ammountPaid: {
       type: 'float',
     },
+    amountCanceled: {
+      type: 'float',
+      defaultsTo: 0,
+    },
     ammountPaidPg1: {
       type: 'float',
     },
