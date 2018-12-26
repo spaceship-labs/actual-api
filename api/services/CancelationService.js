@@ -1,16 +1,23 @@
 const BigNumber = require('bignumber.js');
 
 const createCancelationDetails = async ({ id, quantity }, orderId) => {
-  const detail = await OrderDetailCancelation.findOne({ Detail: id });
-  sails.log('detail: ', detail);
-  if (detail) {
+  const { id: cancelDetailID } = await OrderDetailCancelation.findOne({
+    Detail: id,
+  });
+  const detail = await OrderDetail.findOne({ id }).populate(
+    'CancelationDetails'
+  );
+  sails.log('detail: ', cancelDetailID);
+  if (cancelDetailID) {
     return;
-  } else if (!detail) {
-    return await OrderDetailCancelation.create({
+  } else if (!cancelDetailID) {
+    const { id: newCancelDetailID } = await OrderDetailCancelation.create({
       quantity: quantity,
       Order: orderId,
       Detail: id,
     });
+    detail.CancelationDetails.add(newCancelDetailID);
+    await detail.save();
   }
 };
 
