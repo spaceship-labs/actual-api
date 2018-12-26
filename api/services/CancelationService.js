@@ -14,6 +14,38 @@ const createCancelationDetails = async ({ id, quantity }, orderId) => {
   }
 };
 
+const validateCancelDetailStatus = ({ status, quantity }) =>
+  status === 'pending' || status === 'authorized' ? quantity : 0;
+
+const add = (total, number) => total + number;
+
+const getCanceledQuantity = details =>
+  details.map(validateCancelDetailStatus).reduce(add, 0);
+
+const updateDetailAvailableQuantity = async ({
+  id,
+  quantity,
+  quantityCanceled,
+  detailsCanceled,
+}) =>
+  await OrderDetail.update(
+    { id },
+    { quantityAvailable: quantity - quantityCanceled - detailsCanceled }
+  );
+
+const compareDetailsQuantity = async details =>
+  details.map(async ({ id, quantity, quantityCanceled }) => {
+    const {
+      CancelationDetails: cancelationDetails,
+    } = await OrderDetail.findOne({ id }).populate('CancelationDetails');
+    await updateDetailAvailableQuantity({
+      id,
+      quantity,
+      quantityCanceled,
+      detailsCanceled: getCanceledQuantity(cancelationDetails),
+    });
+  });
+
 const getCanceledAmount = async details =>
   details.reduce(
     (
@@ -40,9 +72,9 @@ const getCanceledAmount = async details =>
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
   if (cancelAll === true || cancelAll === 'true') {
-    const { Details } = await Order.findOne({ id: orderId }).populate(
-      'Details'
-    );
+    const { Details, totalProducts } = await Order.findOne({
+      id: orderId,
+    }).populate('Details');
     Details.map(
       async detail => await createCancelationDetails(detail, orderId)
     );
@@ -91,7 +123,6 @@ const updateRequest = async (
     .populate('CancelationDetails');
   const { amountCanceled: amountCanceledBefore, ammountPaid } = orderCancel;
   const amountCanceled = await getCanceledAmount(Details);
-  sails.log('amountCanceled: ', amountCanceled);
   if (requestStatus === 'rejected') {
     CancelationDetails.map(async ({ id }) => {
       await OrderDetailCancelation.update({ id }, { status: 'rejected' });
@@ -173,4 +204,5 @@ module.exports = {
   updateRequest: updateRequest,
   createCancelationDetails: createCancelationDetails,
   getCanceledAmount: getCanceledAmount,
+  compareDetailsQuantity: compareDetailsQuantity,
 };

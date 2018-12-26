@@ -30,6 +30,9 @@ module.exports = {
     subtotal: {
       type: 'float',
     },
+    totalProducts: {
+      type: 'integer',
+    },
     discount: {
       type: 'float',
     },

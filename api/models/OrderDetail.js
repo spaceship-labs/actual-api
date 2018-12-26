@@ -34,6 +34,10 @@ module.exports = {
       type: 'integer',
       defaultsTo: 0,
     },
+    quantityAvailable: {
+      type: 'integer',
+      defaultsTo: 0,
+    },
     CancelationOrders: {
       collection: 'OrderCancelation',
       via: 'Details',
@@ -55,6 +59,10 @@ module.exports = {
     },
     QuotationDetail: {
       model: 'QuotationDetail',
+    },
+    CancelationDetails: {
+      collection: 'OrderDetailCancelation',
+      via: 'Detail',
     },
 
     //ship

@@ -50,43 +50,72 @@ module.exports = {
       });
   },
 
-  findById: function(req, res) {
-    var form = req.params.all();
-    var id = form.id;
-    var order;
-    if (!isNaN(id)) {
-      //id = parseInt(id);
+  async findById(req, res) {
+    try {
+      const { id } = req.allParams();
+      const { Details } = await Order.findOne({ id }).populate('Details');
+      await CancelationService.compareDetailsQuantity(Details);
+      const orderFound = await Order.findOne({ id })
+        .populate('Details')
+        .populate('User')
+        .populate('Client')
+        .populate('Address')
+        .populate('Payments')
+        .populate('Store')
+        .populate('EwalletRecords')
+        .populate('Broker')
+        .populate('OrdersSap')
+        .populate('SapOrderConnectionLog')
+        .populate('AlegraLogs');
+      const sapReferencesIds = order.OrdersSap.map(({ id }) => id);
+      const ordersSap = await OrderSap.find(sapReferencesIds)
+        .populate('PaymentsSap')
+        .populate('ProductSeries');
+      let order = orderFound.toObject();
+      order.OrdersSap = ordersSap;
+      res.json(order);
+    } catch (error) {
+      res.negotiate(error);
     }
-    Order.findOne({ id: id })
-      .populate('Details')
-      .populate('User')
-      .populate('Client')
-      .populate('Address')
-      .populate('Payments')
-      .populate('Store')
-      .populate('EwalletRecords')
-      .populate('Broker')
-      .populate('OrdersSap')
-      .populate('SapOrderConnectionLog')
-      .populate('AlegraLogs')
-      .then(function(foundOrder) {
-        order = foundOrder.toObject();
-        var sapReferencesIds = order.OrdersSap.map(function(ref) {
-          return ref.id;
-        });
-        return OrderSap.find(sapReferencesIds)
-          .populate('PaymentsSap')
-          .populate('ProductSeries');
-      })
-      .then(function(ordersSap) {
-        order.OrdersSap = ordersSap;
-        res.json(order);
-      })
-      .catch(function(err) {
-        console.log(err);
-        res.negotiate(err);
-      });
   },
+
+  // findById: function(req, res) {
+  //   var form = req.params.all();
+  //   var id = form.id;
+  //   var order;
+  //   if (!isNaN(id)) {
+  //     //id = parseInt(id);
+  //   }
+  //   Order.findOne({ id: id })
+  //     .populate('Details')
+  //     .populate('User')
+  //     .populate('Client')
+  //     .populate('Address')
+  //     .populate('Payments')
+  //     .populate('Store')
+  //     .populate('EwalletRecords')
+  //     .populate('Broker')
+  //     .populate('OrdersSap')
+  //     .populate('SapOrderConnectionLog')
+  //     .populate('AlegraLogs')
+  //     .then(function(foundOrder) {
+  //       order = foundOrder.toObject();
+  //       var sapReferencesIds = order.OrdersSap.map(function(ref) {
+  //         return ref.id;
+  //       });
+  //       return OrderSap.find(sapReferencesIds)
+  //         .populate('PaymentsSap')
+  //         .populate('ProductSeries');
+  //     })
+  //     .then(function(ordersSap) {
+  //       order.OrdersSap = ordersSap;
+  //       res.json(order);
+  //     })
+  //     .catch(function(err) {
+  //       console.log(err);
+  //       res.negotiate(err);
+  //     });
+  // },
 
   getInvoicesLogs: function(req, res) {
     var form = req.params.all();
