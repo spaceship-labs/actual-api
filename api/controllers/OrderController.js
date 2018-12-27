@@ -2,7 +2,6 @@ module.exports = {
   async index(req, res) {
     try {
       const { page = 1, limit = 10 } = req.allParams();
-      console.log('HOLAAAA');
       const orders = await Order.find()
         .populate('Client')
         .populate('Broker')
