@@ -67,7 +67,6 @@ const getCanceledAmount = async details =>
         .dividedBy(quantity)
         .multipliedBy(quantityCanceled)
         .toNumber();
-      console.log('amount: ', amount);
       return total + amount ? parseFloat(amount) : 0;
     },
     0
