@@ -23,7 +23,7 @@ const types = {
   CASH: 'cash',
   CASH_USD: 'cash-usd',
   TRANSFER_ECOMMERCE: 'transfer-ecommerce',
-  CLIENT_BALANCE: 'client-balance'
+  CLIENT_BALANCE: 'client-balance',
 };
 
 const LEGACY_METHODS_TYPES = [types.SINGLE_PAYMENT_TERMINAL, types.DEPOSIT];
@@ -45,7 +45,7 @@ const VALID_STORES_CODES = [
   'actual_studio_merida',
   'actual_puerto_cancun',
   'actual_proyect',
-  'actual_studio', //FOR MARKET_PLACES
+  'actual_marketplace', //FOR MARKET_PLACES
 ];
 
 module.exports = {
