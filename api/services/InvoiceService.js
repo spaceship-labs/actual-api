@@ -349,7 +349,8 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       break;
 
     case 'client-balance':
-      paymentMethod = 'other';
+      //paymentMethod = 'other';
+      paymentMethod = 'transfer';
       break;
     case 'client-credit':
       paymentMethod = 'other';
