@@ -26,6 +26,11 @@ module.exports = {
   async show(req, res) {
     try {
       const id = req.param('id');
+      const { Details } = await OrderCancelation.findOne({ id }).populate(
+        'Details'
+      );
+      console.log('lol');
+      await CancelationService.compareDetailsQuantity(Details);
       const cancelationOrder = await OrderCancelation.findOne({ id })
         .populate('Order')
         .populate('Details')

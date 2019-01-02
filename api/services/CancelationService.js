@@ -34,14 +34,20 @@ const updateDetailAvailableQuantity = async ({
 }) =>
   await OrderDetail.update(
     { id },
-    { quantityAvailable: quantity - quantityCanceled - detailsCanceled }
+    {
+      quantityAvailable:
+        quantity - quantityCanceled - detailsCanceled <= 0
+          ? 0
+          : quantity - quantityCanceled - detailsCanceled,
+    }
   );
 
 const compareDetailsQuantity = async details =>
-  details.map(async ({ id, quantity, quantityCanceled }) => {
+  details.map(async ({ id, quantity, quantityCanceled = 0 }) => {
     const {
       CancelationDetails: cancelationDetails,
     } = await OrderDetail.findOne({ id }).populate('CancelationDetails');
+    console.log(quantityCanceled);
     await updateDetailAvailableQuantity({
       id,
       quantity,
