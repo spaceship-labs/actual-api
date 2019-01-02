@@ -18,7 +18,7 @@ module.exports = {
     Order: {
       model: 'Order',
     },
-    Cancelations: {
+    Cancelation: {
       model: 'OrderCancelation',
     },
     Detail: {

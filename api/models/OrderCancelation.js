@@ -28,7 +28,7 @@ module.exports = {
     },
     CancelationDetails: {
       collection: 'OrderDetailCancelation',
-      via: 'Cancelations',
+      via: 'Cancelation',
     },
   },
 };
