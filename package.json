@@ -51,7 +51,6 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "bcrypt": "^0.8.x",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "eslint": "^3.19.0",
@@ -67,7 +66,9 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": "node app.js",
-    "test-ewallet-service": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/services/EwalletService.test.js"
+    "test": "mocha",
+    "test:coverage": "nyc --reporter=text npm run test",
+    "test:all": "npm run lint && npm run test:coverage"
   },
   "main": "app.js",
   "repository": {
@@ -77,7 +78,7 @@
   "author": "luis",
   "license": "",
   "engines": {
-    "node": "8.9.4",
+    "node": ">=8",
     "npm": "5.6.0"
   },
   "lint-staged": {
