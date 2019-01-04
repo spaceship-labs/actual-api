@@ -33,7 +33,7 @@ module.exports.connections = {
 
   mongodb: {
     adapter: 'sails-mongo',
-    url: process.env.MONGODB_URL || 'YOUR_MONGODB_URL',
+    url: process.env.MONGODB_URL,
   },
 
   testMongo: {
