@@ -1,9 +1,4 @@
-const user = async ({
-  password = 'user.name.1',
-  email = 'user1@email.com',
-  firstName = 'user.firstName.1',
-  lasteName = 'user.lastName.1',
-}) =>
+const user = async ({ password, email, firstName, lasteName }) =>
   await User.create({
     password,
     email,
