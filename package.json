@@ -66,7 +66,7 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": "node app.js",
-    "test": "NODE_ENV='test' mocha",
+    "test": "NODE_ENV='test' source .env && mocha",
     "test:coverage": "nyc --reporter=text npm run test",
     "test:all": "npm run lint && npm run test:coverage"
   },
