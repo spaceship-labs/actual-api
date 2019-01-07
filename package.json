@@ -66,8 +66,9 @@
   "scripts": {
     "precommit": "lint-staged",
     "debug": "node debug app.js",
-    "start": "node app.js",
-    "test-ewallet-service": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/services/EwalletService.test.js"
+    "start": "source .env && node app.js",
+    "test-ewallet-service":
+      "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/services/EwalletService.test.js"
   },
   "main": "app.js",
   "repository": {
@@ -81,9 +82,6 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
   }
 }
