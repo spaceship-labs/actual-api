@@ -1,1 +1,4 @@
+--exit
+--recursive
+--timeout 18s
 --require test/mocha.env.js

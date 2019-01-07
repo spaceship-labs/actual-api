@@ -1,34 +1,35 @@
-describe('Auth controller', function(){
+describe('AuthController', () => {
+  let email = null;
+  let password = null;
 
-	describe('api status', function(){
-		it('should return a valid response', async function(){
-			var url = '/';
-			try{
-				const {body, status} = await app.get(url);
-				expect(body.status).to.contain("ok");
-				expect(status).to.equal(200);
-			}catch(e){
-				console.log('e', e);
-			}
-		});
-	});
+  before(async () => {
+    await User.destroy();
+    email = 'user1@email.com';
+    password = 'user.name.1';
+    user = await CreateService.user({
+      password,
+      email,
+      firstName: 'user.firstName.1',
+      lasteName: 'user.lastName.1',
+    });
+  });
 
-	describe('login process', function(){
-		it('should return a token after a valid login', async function(){
-			var url = '/auth/signin';
-			try{
-				const {body} = await app.post(url)
-					.send({
-						email: process.env.SAMPLE_ADMIN_USER_EMAIL,
-						password: process.env.SAMPLE_ADMIN_USER_PASSWORD,
-					})
-					.set('accept', 'json');
-				expect(body).to.have.property("token");
-			}catch(e){
-				console.log('e', e);
-			}
-		});
+  describe('homeStatus', () => {
+    it('should return a valid response', async () => {
+      const url = '/';
+      const { status } = await app.get(url);
+      expect(status).to.equal(200);
+    });
+  });
 
-	});
-
+  describe('login process', () => {
+    it('should return a token after a valid login', async () => {
+      const url = '/auth/signin';
+      const { body } = await app.post(url).send({
+        email,
+        password,
+      });
+      expect(body).to.have.property('token');
+    });
+  });
 });
