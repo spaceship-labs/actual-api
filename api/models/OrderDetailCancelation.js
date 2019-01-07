@@ -15,6 +15,9 @@ module.exports = {
     quantity: {
       type: 'integer',
     },
+    total: {
+      type: 'float',
+    },
     Order: {
       model: 'Order',
     },

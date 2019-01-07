@@ -8,11 +8,16 @@ const createCancelationDetails = async (
   const detail = await OrderDetail.findOne({ id }).populate(
     'CancelationDetails'
   );
+  const total = new BigNumber(detail.total)
+    .dividedBy(detail.quantity)
+    .multipliedBy(quantity)
+    .toNumber();
   const { id: newCancelDetailID } = await OrderDetailCancelation.create({
     quantity: quantity,
     Order: orderId,
     Detail: id,
     Cancelation: cancelID,
+    total,
   });
   detail.CancelationDetails.add(newCancelDetailID);
   await detail.save();
@@ -80,39 +85,39 @@ const getCanceledAmount = async details =>
 
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
-  const orderCancelation = await OrderCancelation.create({
+  const { id: orderCancelationID } = await OrderCancelation.create({
     cancelAll: cancelAll,
     reason,
     Order: orderId,
   });
   if (cancelAll === true || cancelAll === 'true') {
-    const { Details, totalProducts } = await Order.findOne({
+    const { Details } = await Order.findOne({
       id: orderId,
     }).populate('Details');
     Details.map(
       async detail =>
-        await createCancelationDetails(detail, orderId, orderCancelation.id)
+        await createCancelationDetails(detail, orderId, orderCancelationID)
     );
     detailsIds = Details.map(({ id }) => id);
   } else {
     details.map(
       async detail =>
-        await createCancelationDetails(detail, orderId, orderCancelation.id)
+        await createCancelationDetails(detail, orderId, orderCancelationID)
     );
     detailsIds = details.map(({ id }) => id);
   }
   const cancelationDetails = await OrderDetailCancelation.find({
-    Cancelation: orderCancelation.id,
+    Cancelation: orderCancelationID,
   });
   const cancelationDetailsIds = cancelationDetails.map(({ id }) => id);
-  const cancel = await OrderCancelation.findOne({ id: orderCancelation.id })
+  const cancel = await OrderCancelation.findOne({ id: orderCancelationID })
     .populate('CancelationDetails')
     .populate('Details');
   cancel.CancelationDetails.add(cancelationDetailsIds);
   await cancel.save();
   cancel.Details.add(detailsIds);
   await cancel.save();
-  return await OrderCancelation.findOne({ id: orderCancelation.id });
+  return await OrderCancelation.findOne({ id: orderCancelationID });
 };
 
 const updateRequest = async (
