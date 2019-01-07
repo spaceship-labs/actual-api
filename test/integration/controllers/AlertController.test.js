@@ -3,6 +3,7 @@ describe('AlertController', () => {
   let alerts = null;
 
   before(async () => {
+    token = await CreateService.token();
     alerts = [
       await Alert.create({
         notificationType: 1,
@@ -17,5 +18,14 @@ describe('AlertController', () => {
         notificationID: 'alert.notificationID.2',
       }),
     ];
+  });
+
+  describe('index', () => {
+    it('should find alerts', async () => {
+      const url = '/alert';
+      const { body, status } = await app.get(url).set('Authorization', token);
+      expect(status).to.equal(200);
+      expect(body.length).to.equal(2);
+    });
   });
 });

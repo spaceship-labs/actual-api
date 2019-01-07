@@ -24,7 +24,7 @@ describe('AuthController', () => {
 
   describe('login process', () => {
     it('should return a token after a valid login', async () => {
-      var url = '/auth/signin';
+      const url = '/auth/signin';
       const { body } = await app.post(url).send({
         email,
         password,
