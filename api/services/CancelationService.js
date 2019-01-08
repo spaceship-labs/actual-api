@@ -143,7 +143,11 @@ const updateRequest = async (
     CancelationDetails.map(async ({ id }) => {
       await OrderDetailCancelation.update({ id }, { status: 'rejected' });
     });
-    return await OrderCancelation.update({ id }, { status: 'reviewed' });
+    await OrderCancelation.update({ id }, { status: 'reviewed' });
+    return await OrderCancelation.findOne({ id })
+      .populate('Order')
+      .populate('Details')
+      .populate('CancelationDetails');
   }
   if (requestStatus === 'authorized') {
     CancelationDetails.map(async ({ id, quantity, Detail }) => {
@@ -179,10 +183,13 @@ const updateRequest = async (
           }
     );
 
-    return await OrderCancelation.update({ id }, { status: 'reviewed' });
+    await OrderCancelation.update({ id }, { status: 'reviewed' });
+    return await OrderCancelation.findOne({ id })
+      .populate('Order')
+      .populate('Details')
+      .populate('CancelationDetails');
   }
   if (requestStatus === 'partially') {
-    console.log('WEA PARCIAL');
     detailsApprovement.map(async ({ id, status }) => {
       const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
