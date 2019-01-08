@@ -182,6 +182,7 @@ const updateRequest = async (
     return await OrderCancelation.update({ id }, { status: 'reviewed' });
   }
   if (requestStatus === 'partially') {
+    console.log('WEA PARCIAL');
     detailsApprovement.map(async ({ id, status }) => {
       const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
@@ -211,7 +212,11 @@ const updateRequest = async (
       }
     );
 
-    return await OrderCancelation.update({ id }, { status: 'reviewed' });
+    await OrderCancelation.update({ id }, { status: 'reviewed' });
+    return await OrderCancelation.findOne({ id })
+      .populate('Order')
+      .populate('Details')
+      .populate('CancelationDetails');
   }
 };
 
