@@ -227,10 +227,17 @@ const updateRequest = async (
   }
 };
 
+const getCancelDetails = async id => {
+  const { CancelationDetails } = await OrderCancelation.findOne({
+    id,
+  }).populate('CancelationDetails');
+};
+
 module.exports = {
   addCancelation: addCancelation,
   updateRequest: updateRequest,
   createCancelationDetails: createCancelationDetails,
   getCanceledAmount: getCanceledAmount,
   compareDetailsQuantity: compareDetailsQuantity,
+  getCancelDetails,
 };

@@ -65,7 +65,8 @@ module.exports = {
         .populate('Broker')
         .populate('OrdersSap')
         .populate('SapOrderConnectionLog')
-        .populate('AlegraLogs');
+        .populate('AlegraLogs')
+        .populate('OrderCancelations');
       const sapReferencesIds = orderFound.OrdersSap.map(({ id }) => id);
       const ordersSap = await OrderSap.find(sapReferencesIds)
         .populate('PaymentsSap')
