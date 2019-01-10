@@ -1,4 +1,5 @@
 const BigNumber = require('bignumber.js');
+const _ = require('underscore');
 
 const createCancelationDetails = async (
   { id, quantity },
@@ -227,17 +228,30 @@ const updateRequest = async (
   }
 };
 
-const getCancelDetails = async id => {
-  const { CancelationDetails } = await OrderCancelation.findOne({
-    id,
+const getCancelDetails = async ids => {
+  const orderCancelations = await OrderCancelation.find({
+    id: ids,
   }).populate('CancelationDetails');
+
+  const cancelationDetails = orderCancelations.map(
+    ({ CancelationDetails }) => CancelationDetails
+  );
+  let details = cancelationDetails.map(Detail =>
+    Detail.map(({ Detail, quantity, status }) => ({
+      Detail,
+      quantity,
+      status,
+    }))
+  );
+  details = details[0];
+  return _.union(details);
 };
 
 module.exports = {
-  addCancelation: addCancelation,
-  updateRequest: updateRequest,
-  createCancelationDetails: createCancelationDetails,
-  getCanceledAmount: getCanceledAmount,
-  compareDetailsQuantity: compareDetailsQuantity,
+  addCancelation,
+  updateRequest,
+  createCancelationDetails,
+  getCanceledAmount,
+  compareDetailsQuantity,
   getCancelDetails,
 };

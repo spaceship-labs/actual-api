@@ -71,8 +71,15 @@ module.exports = {
       const ordersSap = await OrderSap.find(sapReferencesIds)
         .populate('PaymentsSap')
         .populate('ProductSeries');
+      const CancelationDetails =
+        orderFound.OrderCancelations.length > 0
+          ? await CancelationService.getCancelDetails(
+              orderFound.OrderCancelations.map(({ id }) => id)
+            )
+          : [];
       let order = orderFound.toObject();
       order.OrdersSap = ordersSap;
+      order.CancelationDetails = CancelationDetails;
       res.json(order);
     } catch (error) {
       res.negotiate(error);
