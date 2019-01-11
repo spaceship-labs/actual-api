@@ -55,6 +55,14 @@ const formatCancelParams = async id => {
   const { Quotation: IdQuotation, Details } = await Order.findOne({
     id,
   }).populate('Details');
+  const details = Details.map(({ id }) => id);
+  console.log('details?: ', details);
+};
+
+const constuctObjectArray = (arr, obj) => {
+  console.log(arr.contact([obj], []));
+  console.log(obj);
+  return arr.push(obj);
 };
 
 const cancelOrder = async orderId => {
