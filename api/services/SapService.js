@@ -51,6 +51,19 @@ const throwAlert = async ({ subject, message, userCode }) => {
   return alert;
 };
 
+const formatCancelParams = async id => {
+  const { Quotation: IdQuotation, Details } = await Order.findOne({
+    id,
+  }).populate('Details');
+};
+
+const cancelOrder = async orderId => {
+  console.log('ENTRA');
+  await formatCancelParams(orderId);
+  return 1;
+  // return axios.delete('/SalesOrder', { IdQuotation, Product });
+};
+
 module.exports = {
   createContact: createContact,
   createSaleOrder: createSaleOrder,
@@ -61,6 +74,7 @@ module.exports = {
   buildOrderRequestParams: buildOrderRequestParams,
   cancelOrder,
   throwAlert,
+  formatCancelParams,
 };
 
 function createClient(params) {
@@ -473,17 +487,17 @@ function buildAddressContactEndpoint(fields, cardcode) {
   return baseUrl + path;
 }
 
-function cancelOrder(quotationId) {
-  const requestParams = {
-    QuotationId: quotationId,
-  };
-  const endPoint = buildUrl(baseUrl, {
-    path: 'SalesOrder',
-    queryParams: requestParams,
-  });
-  sails.log.info('cancel order');
-  sails.log.info(decodeURIComponent(endPoint));
-  reqOptions.uri = endPoint;
-  reqOptions.method = 'DELETE';
-  return request(reqOptions);
-}
+// function cancelOrder(quotationId) {
+//   const requestParams = {
+//     QuotationId: quotationId,
+//   };
+//   const endPoint = buildUrl(baseUrl, {
+//     path: 'SalesOrder',
+//     queryParams: requestParams,
+//   });
+//   sails.log.info('cancel order');
+//   sails.log.info(decodeURIComponent(endPoint));
+//   reqOptions.uri = endPoint;
+//   reqOptions.method = 'DELETE';
+//   return request(reqOptions);
+// }
