@@ -53,6 +53,7 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "cross-env": "^5.2.0",
     "eslint": "^3.19.0",
     "lint-staged": "^6.1.0",
     "mocha": "^5.0.0",
@@ -66,7 +67,7 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": " source .env && node app.js",
-    "test": "NODE_ENV='test' source .env && mocha",
+    "test": "cross-env mocha",
     "test:coverage": "nyc --reporter=text npm run test",
     "test:all": "npm run lint && npm run test:coverage"
   },

@@ -61,7 +61,7 @@ describe('SapService', () => {
       }),
       await OrderDetail.create({
         quantity: 1,
-        Product: products[0],
+        Product: products[1],
         shipDate: new Date(),
         originalShipDate: new Date(),
         productDate: new Date(),

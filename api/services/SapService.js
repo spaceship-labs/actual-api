@@ -51,25 +51,48 @@ const throwAlert = async ({ subject, message, userCode }) => {
   return alert;
 };
 
-const formatCancelParams = async id => {
-  const { Quotation: IdQuotation, Details } = await Order.findOne({
-    id,
-  }).populate('Details');
-  const details = Details.map(({ id }) => id);
-  console.log('details?: ', details);
+const formatCancelParams = async (id, action) => {
+  const { Quotation: IdQuotation, Details: orderDetails } = await Order.findOne(
+    {
+      id,
+    }
+  ).populate('Details');
+  const detailsBeforeFormat = orderDetails.map(
+    ({
+      id,
+      quantity,
+      shipDate,
+      shipCompanyFrom: companyId,
+      Product: productId,
+    }) => ({
+      id,
+      quantity,
+      shipDate,
+      companyId,
+      productId,
+    })
+  );
+  const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
+  const companies = await Company.find({ id: companiesIds });
+  const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
+  const products = await Product.find({ id: productsIds });
+  console.log('products', products);
+  const whsCodes = companies.map(({ WhsCode }) => WhsCode);
+  const itemCodes = products.map(({ ItemCode }) => ItemCode);
+  const formatedParams = detailsBeforeFormat.map(
+    ({ quantity, shipDate }, index) => ({
+      ItemCode: itemCodes[index],
+      OpenCreQty: quantity,
+      ShipDate: shipDate,
+      WhsCode: whsCodes[index],
+    })
+  );
+  return { IdQuotation, Product: formatedParams, action };
 };
 
-const constuctObjectArray = (arr, obj) => {
-  console.log(arr.contact([obj], []));
-  console.log(obj);
-  return arr.push(obj);
-};
-
-const cancelOrder = async orderId => {
-  console.log('ENTRA');
-  await formatCancelParams(orderId);
-  return 1;
-  // return axios.delete('/SalesOrder', { IdQuotation, Product });
+const cancelOrder = async (orderId, action) => {
+  const params = await formatCancelParams(orderId, action);
+  return await axios.delete('/SalesOrder', params);
 };
 
 module.exports = {
