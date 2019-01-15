@@ -4,7 +4,6 @@ module.exports = {
       const { page = 1, limit = 10 } = req.allParams();
       const orders = await Order.find()
         .populate('Client')
-        .populate('Broker')
         .paginate({
           page,
           limit,
