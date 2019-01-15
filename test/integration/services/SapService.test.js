@@ -80,7 +80,7 @@ describe('SapService', () => {
 
   describe('cancelOrder', () => {
     it('should return Sap Cancelations documents', async () => {
-      const result = await SapService.cancelOrder(order.id);
+      const result = await SapService.cancelOrder(order.id, 'delete');
       expect(result).to.equal(1);
     });
   });

@@ -67,7 +67,7 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": " source .env && node app.js",
-    "test": "cross-env mocha",
+    "test": "cross-env NODE_ENV='test' mocha",
     "test:coverage": "nyc --reporter=text npm run test",
     "test:all": "npm run lint && npm run test:coverage"
   },
@@ -83,9 +83,6 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
   }
 }

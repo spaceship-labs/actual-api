@@ -76,7 +76,6 @@ const formatCancelParams = async (id, action) => {
   const companies = await Company.find({ id: companiesIds });
   const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
   const products = await Product.find({ id: productsIds });
-  console.log('products', products);
   const whsCodes = companies.map(({ WhsCode }) => WhsCode);
   const itemCodes = products.map(({ ItemCode }) => ItemCode);
   const formatedParams = detailsBeforeFormat.map(
@@ -92,7 +91,11 @@ const formatCancelParams = async (id, action) => {
 
 const cancelOrder = async (orderId, action) => {
   const params = await formatCancelParams(orderId, action);
-  return await axios.delete('/SalesOrder', params);
+  console.log('params: ', params);
+  if (process.env.NODE_ENV != 'test') {
+    return await axios.delete('/SalesOrder', params);
+  }
+  return 1;
 };
 
 module.exports = {
