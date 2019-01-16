@@ -35,6 +35,22 @@ const getOrdersToCancel = async (page, limit, key, field) => {
   }
 };
 
+const formatFolioSAPQuery = async field => {
+  const { OrdersSap: ordersSap } = await Order.find().populate('OrdersSap');
+  const orderId = ordersSap
+    .map(orderSap => mapSAPDocuments(orderSap, field))
+    .filter(filterArrayDiferentToNull);
+  return orderId[0];
+};
+
+const mapSAPDocuments = ({ Order: id, document, invoiceSap }, field) =>
+  document === field ? id : validateCondition(invoiceSap, field, id);
+
+const validateCondition = (condition, valueToValidate, valueToReturn) =>
+  condition === valueToValidate ? valueToReturn : null;
+
+const filterArrayDiferentToNull = value => value != null;
+
 module.exports = {
   applyBrandsQuery,
   applyDiscountsQuery,
@@ -66,22 +82,6 @@ module.exports = {
   validateCondition,
   filterArrayDiferentToNull,
 };
-
-const formatFolioSAPQuery = async field => {
-  const { OrdersSap: ordersSap } = await Order.find().populate('OrdersSap');
-  const orderId = ordersSap
-    .map(orderSap => mapSAPDocuments(orderSap, field))
-    .filter(filterArrayDiferentToNull);
-  return orderId[0];
-};
-
-const mapSAPDocuments = ({ Order: id, document, invoiceSap }, field) =>
-  document === field ? id : validateCondition(invoiceSap, field, id);
-
-const validateCondition = (condition, valueToValidate, valueToReturn) =>
-  condition === valueToValidate ? valueToReturn : null;
-
-const filterArrayDiferentToNull = value => value != null;
 
 function applySlowMovementQuery(query) {
   query.slowMovement = true;
