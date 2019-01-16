@@ -594,6 +594,10 @@ module.exports.routes = {
     controller: 'order',
     action: 'find',
   },
+  'GET /order/findbyfilter': {
+    controller: 'order',
+    action: 'findbyfilter',
+  },
 
   'POST /order': {
     controller: 'order',
