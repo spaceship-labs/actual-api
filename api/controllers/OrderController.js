@@ -88,8 +88,16 @@ module.exports = {
 
   async findbyfilter(req, res) {
     try {
-      const { page = 1, limit = 10, key, keyword } = req.allParams();
-      const result = await Search.getOrdersToCancel(page, limit, key, keyword);
+      const { page = 1, limit = 10, category, keyword } = req.allParams();
+      sails.log('category: ', category);
+      sails.log('keyword: ', keyword);
+      const result = await Search.getOrdersToCancel(
+        page,
+        limit,
+        category,
+        keyword
+      );
+      sails.log('result: ', result);
       res.ok(result);
     } catch (error) {
       res.negotiate(error);

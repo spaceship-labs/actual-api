@@ -3,44 +3,54 @@ const _ = require('underscore');
 const Promise = require('bluebird');
 
 const getOrdersToCancel = async (page, limit, key, field) => {
-  if (key === 'folio') {
-    return await Order.findOne({ folio: field })
-      .populate('Client')
-      .populate('OrdersSap')
-      .paginate({
-        page,
-        limit,
-      })
-      .sort('createdAt DESC');
+  if (key === 'folioActual') {
+    console.log('folio NE: ', field);
+    return {
+      orders: [
+        await Order.findOne({ folio: field })
+          .populate('Client')
+          .populate('OrdersSap'),
+      ],
+      total: 1,
+    };
   }
   if (key === 'cardName') {
-    return await Order.find({ CardName: field })
-      .populate('Client')
-      .populate('OrdersSap')
-      .paginate({
-        page,
-        limit,
-      })
-      .sort('createdAt DESC');
+    return {
+      orders: await Order.find({ CardName: field })
+        .populate('Client')
+        .populate('OrdersSap')
+        .paginate({
+          page,
+          limit,
+        })
+        .sort('createdAt DESC'),
+      total: await Order.count({ CardName: field }),
+    };
   }
   if (key === 'folioSap') {
-    return await Order.findOne({ folio: await formatFolioSAPQuery(field) })
-      .populate('Client')
-      .populate('OrdersSap')
-      .paginate({
-        page,
-        limit,
-      })
-      .sort('createdAt DESC');
+    return {
+      orders: [
+        await Order.findOne({ id: await formatFolioSAPQuery(field) })
+          .populate('Client')
+          .populate('OrdersSap'),
+      ],
+      total: 1,
+    };
   }
 };
 
 const formatFolioSAPQuery = async field => {
-  const { OrdersSap: ordersSap } = await Order.find().populate('OrdersSap');
-  const orderId = ordersSap
-    .map(orderSap => mapSAPDocuments(orderSap, field))
-    .filter(filterArrayDiferentToNull);
-  return orderId[0];
+  const { Order: orderFromFolio = undefined } = await OrderSap.findOne({
+    document: field,
+  });
+  console.log('orderFromFolio: ', orderFromFolio);
+  if (orderFromFolio === undefined) {
+    const { Order: orderFromInvoice = undefined } = await OrderSap.findOne({
+      invoiceSap: field,
+    });
+    console.log('orderFromInvoice: ', orderFromInvoice);
+  }
+  return orderFromFolio === undefined ? orderFromInvoice : orderFromFolio;
 };
 
 const mapSAPDocuments = ({ Order: id, document, invoiceSap }, field) =>
