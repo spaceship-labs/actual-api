@@ -19,6 +19,9 @@ module.exports = {
       defaultsTo: 'pending',
     },
     // Relations
+    CardName: {
+      type: 'string',
+    },
     Order: {
       model: 'Order',
     },

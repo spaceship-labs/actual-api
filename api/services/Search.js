@@ -2,9 +2,10 @@ const assign = require('object-assign');
 const _ = require('underscore');
 const Promise = require('bluebird');
 
-const getOrdersToCancel = async (page, limit, key, field) => {
+const getOrdersToCancel = async params => {
+  const { page, limit, key, field, modelName, populateFields } = params;
+  let model = sails.models[modelName];
   if (key === 'folioActual') {
-    console.log('folio NE: ', field);
     return {
       orders: [
         await Order.findOne({ folio: field })
@@ -43,12 +44,10 @@ const formatFolioSAPQuery = async field => {
   const { Order: orderFromFolio = undefined } = await OrderSap.findOne({
     document: field,
   });
-  console.log('orderFromFolio: ', orderFromFolio);
   if (orderFromFolio === undefined) {
     const { Order: orderFromInvoice = undefined } = await OrderSap.findOne({
       invoiceSap: field,
     });
-    console.log('orderFromInvoice: ', orderFromInvoice);
   }
   return orderFromFolio === undefined ? orderFromInvoice : orderFromFolio;
 };
