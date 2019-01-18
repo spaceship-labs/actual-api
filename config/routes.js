@@ -841,7 +841,7 @@ module.exports.routes = {
     controller: 'ewallet',
     action: 'index',
   },
-  '/ewallet/:cardNumber/:client': {
+  '/ewallet/:client/:cardNumber': {
     controller: 'ewallet',
     action: 'showOrCreate',
   },
