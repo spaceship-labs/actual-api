@@ -162,7 +162,7 @@ async function addPayment(params, req) {
   if (params.type === EWALLET_TYPE) {
     console.log('params.total: ', params.total);
     console.log('params.ammount: ', params.ammount);
-    console.log('ewallet.amount: ', ewallet.amount);
+    console.log('ewallet.amount: ', ewallet);
 
     const ewalletConfigurationFound = await EwalletConfiguration.find();
     const ewalletConfiguration = ewalletConfigurationFound[0];
