@@ -24,6 +24,7 @@ module.exports = {
     try {
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
+      console.log('cardNumber: ', cardNumber);
       console.log('req.user', req.user);
       console.log('Client: ', Client);
       const storeId = req.user.activeStore.id;
