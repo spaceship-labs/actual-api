@@ -160,8 +160,10 @@ async function addPayment(params, req) {
   const ewalletId = params.ewallet;
   const ewallet = await Ewallet.findOne({ id: ewalletId });
   if (params.type === EWALLET_TYPE) {
-    console.log('params.ammount: ', params.total);
-    console.log('ewallet.amount: ', params.amount);
+    console.log('params.total: ', params.total);
+    console.log('params.ammount: ', params.ammount);
+    console.log('ewallet.amount: ', ewallet.amount);
+
     const ewalletConfigurationFound = await EwalletConfiguration.find();
     const ewalletConfiguration = ewalletConfigurationFound[0];
     if (ewalletConfiguration.id) {
