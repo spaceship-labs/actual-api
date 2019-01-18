@@ -130,13 +130,17 @@ const validateExpirationDate = async () => {
       'YYYY-MM-DD HH:mm'
     );
     const today = moment(new Date()).format('YYYY-MM-DD HH:mm');
-    if (today <= expirationDate) {
+    if (today >= expirationDate) {
       const ewallets = await Ewallet.find();
       const ids = ewallets.map(ewallet => ewallet.id);
+      const newExpirationDate = moment(ewalletConfiguration.expirationDate).add(
+        1,
+        'y'
+      );
       await Ewallet.update({ id: ids }, { amount: 0 });
       await EwalletConfiguration.update(
         { id: ewalletConfiguration.id },
-        { expirationDate: null }
+        { expirationDate: newExpirationDate }
       );
     }
     return;
