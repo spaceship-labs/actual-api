@@ -2,42 +2,136 @@ const assign = require('object-assign');
 const _ = require('underscore');
 const Promise = require('bluebird');
 
+const executeIfFunction = f => (f instanceof Function ? f() : f);
+
+const switchcase = cases => defaultCase => key =>
+  cases.hasOwnProperty(key) ? cases[key] : defaultCase;
+
+const switchcaseF = cases => defaultCase => key =>
+  executeIfFunction(switchcase(cases)(defaultCase)(key));
+
+const errorHandling = type =>
+  switchcaseF({
+    undefined: () => {
+      throw new Error('Valor de búsqueda no válido');
+    },
+  })('Unknown error')(type);
+
+const getModelQuery = ({
+  model,
+  field,
+  key,
+  populateFields,
+  page,
+  limit,
+  type,
+  findType,
+}) =>
+  switchcaseF({
+    folioActual: () => {
+      model = model.findOne({ folio: field });
+      return concatPopulateFields(
+        model,
+        populateFields,
+        page,
+        limit,
+        type,
+        findType
+      );
+    },
+    cardName: () =>
+      concatPopulateFields(
+        model.find({ CardName: field }),
+        populateFields,
+        page,
+        limit,
+        type,
+        findType
+      ),
+    folioSap: async () =>
+      concatPopulateFields(
+        model.findOne({ id: await formatFolioSAPQuery(field) }),
+        populateFields,
+        page,
+        limit,
+        type,
+        findType
+      ),
+  })('Unknown error')(key);
+
+const formatSingleData = async (model, type) =>
+  switchcaseF({
+    order: async () => ({
+      orders: [await model],
+      total: 1,
+    }),
+    orderCancelation: async () => ({
+      orderCancelations: [await model],
+      total: 1,
+    }),
+  })('Unknown error')(type);
+
+const concatPopulateFields = (
+  model,
+  populateFields,
+  page,
+  limit,
+  type,
+  findType
+) => {
+  console.log('MODEL: ', model);
+  populateFields.forEach(populateField => {
+    model = model.populate(populateField);
+  });
+  model =
+    findType === 'ploural'
+      ? model
+          .paginate({
+            page,
+            limit,
+          })
+          .sort('createdAt DESC')
+      : model;
+  return formatReturnData(model, type, findType);
+};
+
+const formatMultipleData = async (model, type) =>
+  switchcaseF({
+    order: async () => ({
+      orders: await model,
+      total: await count,
+    }),
+    orderCancelation: async () => ({
+      orderCancelations: await model,
+      total: await count,
+    }),
+  })('Unknown error')(type);
+
+const formatReturnData = (model, type, findType) =>
+  switchcaseF({
+    single: async () => await formatSingleData(model, type),
+    plural: async () => await formatMultipleData(model, type),
+  })()(findType);
+
 const getOrdersToCancel = async params => {
   const { page, limit, key, field, modelName, populateFields } = params;
+  console.log('KEY: ', key);
   let model = sails.models[modelName];
-  if (key === 'folioActual') {
-    return {
-      orders: [
-        await Order.findOne({ folio: field })
-          .populate('Client')
-          .populate('OrdersSap'),
-      ],
-      total: 1,
-    };
-  }
-  if (key === 'cardName') {
-    return {
-      orders: await Order.find({ CardName: field })
-        .populate('Client')
-        .populate('OrdersSap')
-        .paginate({
-          page,
-          limit,
-        })
-        .sort('createdAt DESC'),
-      total: await Order.count({ CardName: field }),
-    };
-  }
-  if (key === 'folioSap') {
-    return {
-      orders: [
-        await Order.findOne({ id: await formatFolioSAPQuery(field) })
-          .populate('Client')
-          .populate('OrdersSap'),
-      ],
-      total: 1,
-    };
-  }
+  const result = getModelQuery({
+    model,
+    field,
+    key,
+    populateFields,
+    page,
+    limit,
+    type: modelName === 'order' ? 'order' : 'orderCancelation',
+    findType: field === 'cardName' ? 'plural' : 'single',
+  });
+  console.log('JIJI: ', result);
+  errorHandling(
+    modelName === 'order' ? result.orders[0] : result.orderCancelations[0]
+  );
+  return result;
 };
 
 const formatFolioSAPQuery = async field => {
@@ -51,14 +145,6 @@ const formatFolioSAPQuery = async field => {
   }
   return orderFromFolio === undefined ? orderFromInvoice : orderFromFolio;
 };
-
-const mapSAPDocuments = ({ Order: id, document, invoiceSap }, field) =>
-  document === field ? id : validateCondition(invoiceSap, field, id);
-
-const validateCondition = (condition, valueToValidate, valueToReturn) =>
-  condition === valueToValidate ? valueToReturn : null;
-
-const filterArrayDiferentToNull = value => value != null;
 
 module.exports = {
   applyBrandsQuery,
@@ -87,9 +173,7 @@ module.exports = {
   relatePromotionsToProducts,
   getOrdersToCancel,
   formatFolioSAPQuery,
-  mapSAPDocuments,
-  validateCondition,
-  filterArrayDiferentToNull,
+  formatReturnData,
 };
 
 function applySlowMovementQuery(query) {

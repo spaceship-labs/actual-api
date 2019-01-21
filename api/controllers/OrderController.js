@@ -91,15 +91,18 @@ module.exports = {
       const { page = 1, limit = 10, category, keyword } = req.allParams();
       sails.log('category: ', category);
       sails.log('keyword: ', keyword);
-      const result = await Search.getOrdersToCancel(
+      const result = await Search.getOrdersToCancel({
         page,
         limit,
-        category,
-        keyword
-      );
+        key: category,
+        keyword,
+        modelName: 'order',
+        populateFields: ['Client', 'OrdersSap'],
+      });
       sails.log('result: ', result);
       res.ok(result);
     } catch (error) {
+      console.log('err: ', error);
       res.negotiate(error);
     }
   },
