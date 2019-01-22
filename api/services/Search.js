@@ -17,36 +17,6 @@ const errorHandling = type =>
     },
   })('Unknown error')(type);
 
-const formatSingleData = async (model, type) =>
-  switchcaseF({
-    order: async () => ({
-      orders: [await model],
-      total: 1,
-    }),
-    orderCancelation: async () => ({
-      orderCancelations: [await model],
-      total: 1,
-    }),
-  })('Unknown error')(type);
-
-const formatMultipleData = async (model, type) =>
-  switchcaseF({
-    order: async () => ({
-      orders: await model,
-      total: await count,
-    }),
-    orderCancelation: async () => ({
-      orderCancelations: await model,
-      total: await count,
-    }),
-  })('Unknown error')(type);
-
-const formatReturnData = (model, type, findType) =>
-  switchcaseF({
-    single: async () => await formatSingleData(model, type),
-    plural: async () => await formatMultipleData(model, type),
-  })()(findType);
-
 const getOrdersToCancel = async params => {
   const { page, limit, key, field, modelName, populateFields } = params;
   console.log('modelName: ', modelName);
