@@ -17,48 +17,6 @@ const errorHandling = type =>
     },
   })('Unknown error')(type);
 
-const getModelQuery = ({
-  model,
-  field,
-  key,
-  populateFields,
-  page,
-  limit,
-  type,
-  findType,
-}) =>
-  switchcaseF({
-    folioActual: () => {
-      model = model.findOne({ folio: field });
-      return concatPopulateFields(
-        model,
-        populateFields,
-        page,
-        limit,
-        type,
-        findType
-      );
-    },
-    cardName: () =>
-      concatPopulateFields(
-        model.find({ CardName: field }),
-        populateFields,
-        page,
-        limit,
-        type,
-        findType
-      ),
-    folioSap: async () =>
-      concatPopulateFields(
-        model.findOne({ id: await formatFolioSAPQuery(field) }),
-        populateFields,
-        page,
-        limit,
-        type,
-        findType
-      ),
-  })('Unknown error')(key);
-
 const formatSingleData = async (model, type) =>
   switchcaseF({
     order: async () => ({
@@ -70,30 +28,6 @@ const formatSingleData = async (model, type) =>
       total: 1,
     }),
   })('Unknown error')(type);
-
-const concatPopulateFields = (
-  model,
-  populateFields,
-  page,
-  limit,
-  type,
-  findType
-) => {
-  console.log('MODEL: ', model);
-  populateFields.forEach(populateField => {
-    model = model.populate(populateField);
-  });
-  model =
-    findType === 'ploural'
-      ? model
-          .paginate({
-            page,
-            limit,
-          })
-          .sort('createdAt DESC')
-      : model;
-  return formatReturnData(model, type, findType);
-};
 
 const formatMultipleData = async (model, type) =>
   switchcaseF({
@@ -115,19 +49,61 @@ const formatReturnData = (model, type, findType) =>
 
 const getOrdersToCancel = async params => {
   const { page, limit, key, field, modelName, populateFields } = params;
-  console.log('KEY: ', key);
+  console.log('modelName: ', modelName);
   let model = sails.models[modelName];
-  const result = getModelQuery({
-    model,
-    field,
-    key,
-    populateFields,
-    page,
-    limit,
-    type: modelName === 'order' ? 'order' : 'orderCancelation',
-    findType: field === 'cardName' ? 'plural' : 'single',
+  let result;
+  populateFields.forEach(populateField => {
+    model = model.populate(populateField);
   });
-  console.log('JIJI: ', result);
+  if (key === 'folioActual') {
+    if (modelName === 'order') {
+      result = {
+        orders: [await model.findOne({ folio: field })],
+        total: 1,
+      };
+    }
+    const { id } = await Order.findOne({ folio: field });
+    result = {
+      orderCancelations: [await model.findOne({ Order: id })],
+      total: 1,
+    };
+  }
+  if (key === 'cardName') {
+    if (modelName === 'order') {
+      result = {
+        orders: await model
+          .find({ CardName: field })
+          .paginate({
+            page,
+            limit,
+          })
+          .sort('createdAt DESC'),
+        total: await model.count({ CardName: field }),
+      };
+    }
+    const orders = await model.find({ CardName: field });
+    const ids = orders.map(({ id }) => id);
+    result = {
+      orderCancelations: await model.find({ Order: ids }),
+      total: await model.count({ Order: ids }),
+    };
+  }
+  if (key === 'folioSap') {
+    if (modelName === 'order') {
+      result = {
+        orders: [await model.findOne({ id: await formatFolioSAPQuery(field) })],
+        total: 1,
+      };
+    }
+    const { id } = await Order.findOne({
+      id: await formatFolioSAPQuery(field),
+    });
+    result = {
+      orderCancelations: [await model.findOne({ Order: id })],
+      total: 1,
+    };
+  }
+  console.log('Result: ', result);
   errorHandling(
     modelName === 'order' ? result.orders[0] : result.orderCancelations[0]
   );
