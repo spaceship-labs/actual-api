@@ -76,6 +76,6 @@ module.exports = {
   homeStatus(req, res) {
     const status =
       process.env.MODE !== 'production' ? 'ok sandbox!' : 'ok production!';
-    res.ok({ status, version: '1.2.12' });
+    res.ok({ status, version: '1.2.13' });
   },
 };
