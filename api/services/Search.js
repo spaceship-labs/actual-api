@@ -84,7 +84,6 @@ const getOrdersToCancel = async params => {
       };
     }
   }
-  console.log('Result: ', result);
   errorHandling(
     modelName === 'order' ? result.orders[0] : result.orderCancelations[0]
   );
