@@ -106,7 +106,6 @@ module.exports = {
       sails.log('result: ', result);
       res.ok(result);
     } catch (error) {
-      console.log('err: ', error);
       res.negotiate(error);
     }
   },

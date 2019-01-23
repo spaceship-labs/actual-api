@@ -51,6 +51,53 @@ const throwAlert = async ({ subject, message, userCode }) => {
   return alert;
 };
 
+const formatCancelParams = async (id, action) => {
+  const { Quotation: IdQuotation, Details: orderDetails } = await Order.findOne(
+    {
+      id,
+    }
+  ).populate('Details');
+  const detailsBeforeFormat = orderDetails.map(
+    ({
+      id,
+      quantity,
+      shipDate,
+      shipCompanyFrom: companyId,
+      Product: productId,
+    }) => ({
+      id,
+      quantity,
+      shipDate,
+      companyId,
+      productId,
+    })
+  );
+  const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
+  const companies = await Company.find({ id: companiesIds });
+  const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
+  const products = await Product.find({ id: productsIds });
+  const whsCodes = companies.map(({ WhsCode }) => WhsCode);
+  const itemCodes = products.map(({ ItemCode }) => ItemCode);
+  const formatedParams = detailsBeforeFormat.map(
+    ({ quantity, shipDate }, index) => ({
+      ItemCode: itemCodes[index],
+      OpenCreQty: quantity,
+      ShipDate: shipDate,
+      WhsCode: whsCodes[index],
+    })
+  );
+  return { IdQuotation, Product: formatedParams, action };
+};
+
+const cancelOrder = async (orderId, action) => {
+  const params = await formatCancelParams(orderId, action);
+  console.log('params: ', params);
+  if (process.env.NODE_ENV != 'test') {
+    return await axios.delete('/SalesOrder', params);
+  }
+  return 1;
+};
+
 module.exports = {
   createContact: createContact,
   createSaleOrder: createSaleOrder,
@@ -61,6 +108,7 @@ module.exports = {
   buildOrderRequestParams: buildOrderRequestParams,
   cancelOrder,
   throwAlert,
+  formatCancelParams,
 };
 
 function createClient(params) {
@@ -473,17 +521,17 @@ function buildAddressContactEndpoint(fields, cardcode) {
   return baseUrl + path;
 }
 
-function cancelOrder(quotationId) {
-  const requestParams = {
-    QuotationId: quotationId,
-  };
-  const endPoint = buildUrl(baseUrl, {
-    path: 'SalesOrder',
-    queryParams: requestParams,
-  });
-  sails.log.info('cancel order');
-  sails.log.info(decodeURIComponent(endPoint));
-  reqOptions.uri = endPoint;
-  reqOptions.method = 'DELETE';
-  return request(reqOptions);
-}
+// function cancelOrder(quotationId) {
+//   const requestParams = {
+//     QuotationId: quotationId,
+//   };
+//   const endPoint = buildUrl(baseUrl, {
+//     path: 'SalesOrder',
+//     queryParams: requestParams,
+//   });
+//   sails.log.info('cancel order');
+//   sails.log.info(decodeURIComponent(endPoint));
+//   reqOptions.uri = endPoint;
+//   reqOptions.method = 'DELETE';
+//   return request(reqOptions);
+// }

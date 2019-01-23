@@ -158,9 +158,10 @@ module.exports = {
   },
 
   beforeCreate: function(val, cb) {
-    Common.orderCustomAI(val, 'orderFolio', function(val) {
-      cb();
-    });
+    if (process.env.NODE_ENV != 'test') {
+      Common.orderCustomAI(val, 'orderFolio', function(val) {});
+    }
+    cb();
   },
   /*
   afterCreate: function(val, cb) {
