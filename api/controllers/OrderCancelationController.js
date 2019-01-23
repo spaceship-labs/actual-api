@@ -66,14 +66,17 @@ module.exports = {
   },
   async findbyfilter(req, res) {
     try {
-      const { page = 1, limit = 10, category, keyword } = req.allParams();
+      const {
+        page = 1,
+        limit = 10,
+        category: key,
+        keyword: field,
+      } = req.allParams();
       const results = await Search.getOrdersToCancel({
         page,
         limit,
-        key: category,
-        keyword,
-        modelName: 'ordercancelation',
-        populateFields: ['Order'],
+        key,
+        field,
       });
       res.ok(results);
     } catch (error) {

@@ -18,31 +18,35 @@ const errorHandling = type =>
   })('Unknown error')(type);
 
 const getOrdersToCancel = async params => {
-  const { page, limit, key, field, modelName, populateFields } = params;
-  console.log('modelName: ', modelName);
+  const { page, limit, key, field, modelName } = params;
   let model = sails.models[modelName];
   let result;
-  populateFields.forEach(populateField => {
-    model = model.populate(populateField);
-  });
   if (key === 'folioActual') {
     if (modelName === 'order') {
       result = {
-        orders: [await model.findOne({ folio: field })],
+        orders: [
+          await model
+            .findOne({ folio: field })
+            .populate('Client')
+            .populate('OrdersSap'),
+        ],
+        total: 1,
+      };
+    } else {
+      const { id } = await Order.findOne({ folio: field });
+      result = {
+        orderCancelations: await model.find({ Order: id }).populate('Order'),
         total: 1,
       };
     }
-    const { id } = await Order.findOne({ folio: field });
-    result = {
-      orderCancelations: [await model.findOne({ Order: id })],
-      total: 1,
-    };
   }
   if (key === 'cardName') {
     if (modelName === 'order') {
       result = {
         orders: await model
           .find({ CardName: field })
+          .populate('Client')
+          .populate('OrdersSap')
           .paginate({
             page,
             limit,
@@ -50,28 +54,35 @@ const getOrdersToCancel = async params => {
           .sort('createdAt DESC'),
         total: await model.count({ CardName: field }),
       };
+    } else {
+      const orders = await model.find({ CardName: field });
+      const ids = orders.map(({ id }) => id);
+      result = {
+        orderCancelations: await model.find({ Order: ids }).populate('Order'),
+        total: await model.count({ Order: ids }),
+      };
     }
-    const orders = await model.find({ CardName: field });
-    const ids = orders.map(({ id }) => id);
-    result = {
-      orderCancelations: await model.find({ Order: ids }),
-      total: await model.count({ Order: ids }),
-    };
   }
   if (key === 'folioSap') {
     if (modelName === 'order') {
       result = {
-        orders: [await model.findOne({ id: await formatFolioSAPQuery(field) })],
+        orders: [
+          await model
+            .findOne({ id: await formatFolioSAPQuery(field) })
+            .populate('Client')
+            .populate('OrdersSap'),
+        ],
+        total: 1,
+      };
+    } else {
+      const { id } = await Order.findOne({
+        id: await formatFolioSAPQuery(field),
+      });
+      result = {
+        orderCancelations: await model.find({ Order: id }).populate('Order'),
         total: 1,
       };
     }
-    const { id } = await Order.findOne({
-      id: await formatFolioSAPQuery(field),
-    });
-    result = {
-      orderCancelations: [await model.findOne({ Order: id })],
-      total: 1,
-    };
   }
   console.log('Result: ', result);
   errorHandling(
@@ -119,7 +130,6 @@ module.exports = {
   relatePromotionsToProducts,
   getOrdersToCancel,
   formatFolioSAPQuery,
-  formatReturnData,
 };
 
 function applySlowMovementQuery(query) {

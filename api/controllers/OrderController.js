@@ -88,16 +88,20 @@ module.exports = {
 
   async findbyfilter(req, res) {
     try {
-      const { page = 1, limit = 10, category, keyword } = req.allParams();
-      sails.log('category: ', category);
-      sails.log('keyword: ', keyword);
+      const {
+        page = 1,
+        limit = 10,
+        category: key,
+        keyword: field,
+      } = req.allParams();
+      sails.log('category: ', key);
+      sails.log('keyword: ', field);
       const result = await Search.getOrdersToCancel({
         page,
         limit,
-        key: category,
-        keyword,
+        key,
+        field,
         modelName: 'order',
-        populateFields: ['Client', 'OrdersSap'],
       });
       sails.log('result: ', result);
       res.ok(result);
