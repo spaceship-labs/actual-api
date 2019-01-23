@@ -44,7 +44,7 @@ const getOrdersToCancel = async params => {
     if (modelName === 'order') {
       result = {
         orders: await model
-          .find({ CardName: field })
+          .find({ CardName: { like: `%${field}%` } })
           .populate('Client')
           .populate('OrdersSap')
           .paginate({
@@ -52,7 +52,7 @@ const getOrdersToCancel = async params => {
             limit,
           })
           .sort('createdAt DESC'),
-        total: await model.count({ CardName: field }),
+        total: await model.count({ CardName: { like: `%${field}%` } }),
       };
     } else {
       const orders = await model.find({ CardName: field });
