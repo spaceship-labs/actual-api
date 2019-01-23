@@ -64,4 +64,20 @@ module.exports = {
       res.negotiate(error);
     }
   },
+  async findbyfilter(req, res) {
+    try {
+      const { page = 1, limit = 10, category, keyword } = req.allParams();
+      const results = await Search.getOrdersToCancel({
+        page,
+        limit,
+        key: category,
+        keyword,
+        modelName: 'ordercancelation',
+        populateFields: ['Order'],
+      });
+      res.ok(results);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  },
 };

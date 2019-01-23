@@ -646,7 +646,10 @@ module.exports.routes = {
     controller: 'ordercancelation',
     action: 'update',
   },
-
+  'GET /cancel/findbyfilter': {
+    controller: 'ordercancelation',
+    action: 'findbyfilter',
+  },
   // CANCELATIONS
 
   '/order/user/:userId/count': {
