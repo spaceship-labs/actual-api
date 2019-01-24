@@ -84,6 +84,9 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+    "**/*.{js,jsx,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

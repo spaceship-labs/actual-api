@@ -52,11 +52,10 @@ const throwAlert = async ({ subject, message, userCode }) => {
 };
 
 const formatCancelParams = async (id, action) => {
-  const { Quotation: IdQuotation, Details: orderDetails } = await Order.findOne(
-    {
-      id,
-    }
-  ).populate('Details');
+  const {
+    Quotation: IdQuotation,
+    Details: orderDetails,
+  } = await OrderCancelation.findOne({ id }).populate('Details');
   const detailsBeforeFormat = orderDetails.map(
     ({
       id,
@@ -82,19 +81,33 @@ const formatCancelParams = async (id, action) => {
     ({ quantity, shipDate }, index) => ({
       ItemCode: itemCodes[index],
       OpenCreQty: quantity,
-      ShipDate: shipDate,
+      ShipDate: moment(shipDate).format('YYYY-MM-DD'),
       WhsCode: whsCodes[index],
+      Action: action,
     })
   );
-  return { IdQuotation, Product: formatedParams, action };
+  return { IdQuotation, Product: formatedParams };
 };
 
 const cancelOrder = async (orderId, action) => {
   const params = await formatCancelParams(orderId, action);
   console.log('params: ', params);
-  if (process.env.NODE_ENV != 'test') {
-    return await axios.delete('/SalesOrder', params);
+  if (process.env.NODE_ENV === 'test') {
+    return 1;
   }
+  const { value: sapCancels } = await axios.delete('/SalesOrder', params);
+  sapCancels.map(
+    ({
+      result,
+      type,
+      products,
+      Payments: paymentsSap,
+      PaymentsCancel,
+      series,
+    }) => {
+      const payments = paymentsSap.map(({ reference }) => reference);
+    }
+  );
   return 1;
 };
 

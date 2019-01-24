@@ -7,31 +7,30 @@
 
 module.exports = {
   attributes: {
-    // type: {
-    //   type: 'string',
-    // },
-    // result: {
-    //   type: 'string',
-    // },
-    // Payments: {
-    //   collection: 'Payment',
-    //   via: 'cancelationsSapRef',
-    // },
-    // PaymentsCancel: {
-    //   collection: 'Payment',
-    //   via: 'canceledSap',
-    // },
-    // series: {
-    //   type: 'string',
-    // },
-    // CancelationsOrder: {
-    //   collection: 'OrderCancelation',
-    //   via: 'CancelationsSap',
-    //   columnName: 'RequestTransfer',
-    // },
-    // Products: {
-    //   collection: 'Product',
-    //   via: 'CancelationsSap',
-    // },
+    type: {
+      type: 'string',
+    },
+    result: {
+      type: 'string',
+    },
+    Payments: {
+      collection: 'PaymentSap',
+      via: 'CancelationSap',
+    },
+    PaymentsCancel: {
+      collection: 'PaymentCancelSap',
+      via: 'CancelationSap',
+    },
+    series: {
+      type: 'string',
+    },
+    CancelationOrder: {
+      model: 'OrderCancelation',
+    },
+    Products: {
+      collection: 'Product',
+      via: 'CancelationsSap',
+      columnName: 'products',
+    },
   },
 };

@@ -5,6 +5,7 @@ describe('SapService', () => {
   let quotation = null;
   let quotationDetails = null;
   let companies = null;
+  let orderCancelation = null;
 
   before(async () => {
     Product.destroy();
@@ -75,12 +76,24 @@ describe('SapService', () => {
       Details: orderDetails,
       status: 'paid',
       ammountPaid: 100,
+      CardName: 'order.cardName.1',
+    });
+    orderCancelation = await OrderCancelation.create({
+      cancelAll: true,
+      reason: 'cancel.reason.1',
+      CardName: order.CardName,
+      Order: order,
+      Quotation: quotation,
+      Details: orderDetails,
     });
   });
 
   describe('cancelOrder', () => {
     it('should return Sap Cancelations documents', async () => {
-      const result = await SapService.cancelOrder(order.id, 'delete');
+      const result = await SapService.cancelOrder(
+        orderCancelation.id,
+        'delete'
+      );
       expect(result).to.equal(1);
     });
   });

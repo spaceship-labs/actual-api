@@ -25,6 +25,9 @@ module.exports = {
     Order: {
       model: 'Order',
     },
+    Quotation: {
+      model: 'Quotation',
+    },
     Details: {
       collection: 'OrderDetail',
       via: 'CancelationOrders',
@@ -32,6 +35,9 @@ module.exports = {
     CancelationDetails: {
       collection: 'OrderDetailCancelation',
       via: 'Cancelation',
+    },
+    CancelationSap: {
+      model: 'CancelationSap',
     },
   },
 };

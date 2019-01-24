@@ -1,7 +1,12 @@
 module.exports = {
   async index(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.allParams();
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = 'createdAt',
+        sortType = 'DESC',
+      } = req.allParams();
       const orders = await Order.find()
         .populate('Client')
         .populate('OrdersSap')
@@ -9,7 +14,7 @@ module.exports = {
           page,
           limit,
         })
-        .sort('createdAt DESC');
+        .sort(`${sortBy} ${sortType}`);
       const total = await Order.count();
       const results = { orders, total };
       res.ok(results);

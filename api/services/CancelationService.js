@@ -53,7 +53,6 @@ const compareDetailsQuantity = async details =>
     const {
       CancelationDetails: cancelationDetails,
     } = await OrderDetail.findOne({ id }).populate('CancelationDetails');
-    console.log(quantityCanceled);
     await updateDetailAvailableQuantity({
       id,
       quantity,
@@ -86,10 +85,13 @@ const getCanceledAmount = async details =>
 
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
+  const { Quotation: quotationID, CardName } = await Order.findOne({ orderId });
   const { id: orderCancelationID } = await OrderCancelation.create({
     cancelAll: cancelAll,
     reason,
     Order: orderId,
+    Quotation: quotationID,
+    CardName,
   });
   if (cancelAll === true || cancelAll === 'true') {
     const { Details } = await Order.findOne({
