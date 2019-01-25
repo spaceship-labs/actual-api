@@ -29,7 +29,7 @@ module.exports = {
     },
     Products: {
       collection: 'Product',
-      via: 'CancelationsSap',
+      via: 'CancelationSap',
       columnName: 'products',
     },
   },

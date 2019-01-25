@@ -96,19 +96,22 @@ const cancelOrder = async (orderId, action) => {
     return 1;
   }
   const { value: sapCancels } = await axios.delete('/SalesOrder', params);
-  sapCancels.map(
-    ({
-      result,
-      type,
-      products,
-      Payments: paymentsSap,
-      PaymentsCancel,
-      series,
-    }) => {
-      const payments = paymentsSap.map(({ reference }) => reference);
-    }
-  );
+  await createCancelationSap(sapCancels);
   return 1;
+};
+
+const createCancelationSap = async params => {
+  const {
+    result,
+    type,
+    RequestTransFer = '',
+    CreditMemo = '',
+    products,
+    DocEntry,
+    Payments,
+    PaymentsCancel,
+    series,
+  } = params;
 };
 
 module.exports = {

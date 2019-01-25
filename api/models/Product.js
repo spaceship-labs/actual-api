@@ -203,5 +203,8 @@ module.exports = {
       collection: 'PackageRule',
       via: 'Product',
     },
+    CancelationSap: {
+      model: 'CancelationSap',
+    },
   },
 };
