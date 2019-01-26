@@ -18,8 +18,20 @@ module.exports = {
     total: {
       type: 'float',
     },
+    shipDate: {
+      type: 'string',
+      required: true,
+    },
+    Product: {
+      model: 'Product',
+    },
+    shipCompanyFrom: {
+      model: 'Company',
+      required: true,
+    },
     Order: {
       model: 'Order',
+      required: true,
     },
     Cancelation: {
       model: 'OrderCancelation',

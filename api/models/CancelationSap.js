@@ -13,6 +13,15 @@ module.exports = {
     result: {
       type: 'string',
     },
+    DocEntry: {
+      type: 'integer',
+    },
+    BaseRef: {
+      type: 'string',
+    },
+    CancelDetail: {
+      model: 'OrderDetailCancelation',
+    },
     Payments: {
       collection: 'PaymentSap',
       via: 'CancelationSap',

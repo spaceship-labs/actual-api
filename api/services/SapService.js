@@ -54,9 +54,9 @@ const throwAlert = async ({ subject, message, userCode }) => {
 const formatCancelParams = async (id, action) => {
   const {
     Quotation: IdQuotation,
-    Details: orderDetails,
-  } = await OrderCancelation.findOne({ id }).populate('Details');
-  const detailsBeforeFormat = orderDetails.map(
+    CancelationDetails: cancelDetails,
+  } = await OrderCancelation.findOne({ id }).populate('CancelationDetails');
+  const detailsBeforeFormat = cancelDetails.map(
     ({
       id,
       quantity,
@@ -78,7 +78,8 @@ const formatCancelParams = async (id, action) => {
   const whsCodes = companies.map(({ WhsCode }) => WhsCode);
   const itemCodes = products.map(({ ItemCode }) => ItemCode);
   const formatedParams = detailsBeforeFormat.map(
-    ({ quantity, shipDate }, index) => ({
+    ({ id, quantity, shipDate }, index) => ({
+      detailCancelReference: id,
       ItemCode: itemCodes[index],
       OpenCreQty: quantity,
       ShipDate: moment(shipDate).format('YYYY-MM-DD'),
@@ -111,7 +112,14 @@ const createCancelationSap = async params => {
     Payments,
     PaymentsCancel,
     series,
+    BaseRef,
   } = params;
+
+  const detailsIds = products.map(
+    ({ detailCancelReference }) => detailCancelReference
+  );
+
+  const payments = Payments.map(({ reference }) => reference);
 };
 
 module.exports = {
