@@ -84,9 +84,11 @@ const customFind = async (params, extraParams, modelToFind) => {
 
   read = model.find(query);
   read = read.populate(
-    modelToFind === 'ewallet' || modelToFind === 'ewalletreplacement'
+    modelToFind === 'ewallet'
       ? ['Client', 'Store']
-      : ['Store', 'Ewallet']
+      : modelToFind === 'ewalletreplacement'
+        ? ['Client', 'Store', 'requestedBy', 'Files']
+        : ['Store', 'Ewallet']
   );
 
   if (orderBy) {
@@ -123,7 +125,7 @@ const validateExpirationDate = async () => {
       Email.sendEwalletPointsWarning(clientsEmail);
       await EwalletConfiguration.update(
         { id: ewalletConfiguration.id },
-        { emailSend: true }
+        { emailSent: true }
       );
     }
     const expirationDate = moment(ewalletConfiguration.expirationDate).format(
@@ -135,7 +137,7 @@ const validateExpirationDate = async () => {
       const ids = ewallets.map(ewallet => ewallet.id);
       const newExpirationDate = moment(ewalletConfiguration.expirationDate).add(
         1,
-        'y'
+        'years'
       );
       await Ewallet.update({ id: ids }, { amount: 0 });
       await EwalletConfiguration.update(
@@ -186,9 +188,6 @@ module.exports = {
   },
 };
 
-const validateBarcodeFormat = cardNumber => {
-  if (cardNumber.length < 12) throw new Error('Formato no válido');
-};
 function isValidEwalletPayment(paymentAmount, ewalletAmount) {
   console.log('COMPARITION EWALLET AMOUNT: ', ewalletAmount);
   console.log('COMPARITION PAYMENT AMOUNT: ', paymentAmount);
