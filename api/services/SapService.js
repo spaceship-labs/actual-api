@@ -105,22 +105,43 @@ const createCancelationSap = async params => {
   const {
     result,
     type,
-    RequestTransFer = '',
+    RequestTransFer = [],
     CreditMemo = '',
     products,
     DocEntry,
     Payments,
     PaymentsCancel,
-    series,
+    series = [],
     BaseRef,
   } = params;
 
+  const references = [
+    { model: 'requesttransfer', references: RequestTransFer },
+    { model: 'paymentsap', references: Payments },
+    { model: 'paymentcancelsap', references: PaymentsCancel },
+  ];
+
+  references.map(createSapCancelModelReferences);
   const detailsIds = products.map(
     ({ detailCancelReference }) => detailCancelReference
   );
-
-  const payments = Payments.map(({ reference }) => reference);
 };
+
+const createSapCancelModelReferences = ({ model, references }) =>
+  references.length > 0
+    ? references.map(
+        async ({ payment: document, reference: Payment }) =>
+          await sails.models[model].create({ document, Payment })
+      )
+    : false;
+
+const getReferencesIds = async ({ model, references }) =>
+  references.length > 0
+    ? references.map(
+        async ({ pay: document }) =>
+          await sails.models[model].findOne({ document })
+      )
+    : false;
 
 module.exports = {
   createContact: createContact,
