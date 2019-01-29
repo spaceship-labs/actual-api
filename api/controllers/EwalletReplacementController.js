@@ -42,6 +42,8 @@ module.exports = {
 
   async add(req, res) {
     try {
+      console.log('HOLAAAA');
+
       const clientId = req.param('clientId');
       const storeId = req.user.activeStore.id;
       const options = {

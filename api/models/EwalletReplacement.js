@@ -12,18 +12,25 @@ module.exports = {
       enum: ['pending', 'approved'],
       defaultsTo: 'pending',
     },
-    note: {
-      type: 'text',
-    },
     approvedAt: {
       type: 'datetime',
     },
+    amount: {
+      type: 'float',
+    },
     // Relations
+    Ewallet: {
+      model: 'Ewallet',
+    },
     Client: {
       model: 'Client',
     },
     Store: {
       model: 'Store',
+    },
+    Files: {
+      collection: 'replacementfile',
+      via: 'Replacement',
     },
     requestedBy: {
       model: 'User',
