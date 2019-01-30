@@ -288,7 +288,7 @@ async function updateClient(params, req){
 
 		validateSapClientUpdate(sapData);
 
-		const updatedClients = Client.update({CardCode: CardCode}, params);
+		const updatedClients = await Client.update({CardCode: CardCode}, params);
 		const updatedClient = updatedClients[0];
     return updatedClient;
   }
