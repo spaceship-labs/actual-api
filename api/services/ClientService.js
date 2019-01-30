@@ -261,7 +261,7 @@ async function createClient(params, req){
 }
 
 async function updateClient(params, req){
-	const CardCode = _.clone(req.user.CardCode);
+	const { CardCode } = params;
 	const email = params.E_Mail;
 	const userId = req.user ? req.user.id : false;
 	
