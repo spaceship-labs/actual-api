@@ -6,9 +6,14 @@
   "keywords": [],
   "dependencies": {
     "async": "^2.1.4",
+<<<<<<< HEAD
     "aws-sdk": "^2.395.0",
     "axios": "^0.18.0",
     "bcrypt": "1.0.3",
+=======
+    "aws-sdk": "^2.352.0",
+    "bcrypt": "^0.8.x",
+>>>>>>> origin/ewallet_implementation
     "bcrypt-nodejs": "0.0.3",
     "bignumber.js": "^7.2.1",
     "bluebird": "^3.4.7",
@@ -50,7 +55,10 @@
     "skipper": "^0.8.0",
     "skipper-pkgcloud": "0.0.4",
     "skipper-s3": "^0.5.11",
+<<<<<<< HEAD
     "switchcase": "^1.0.0",
+=======
+>>>>>>> origin/ewallet_implementation
     "underscore": "^1.8.3"
   },
   "devDependencies": {
@@ -69,10 +77,15 @@
   "scripts": {
     "precommit": "lint-staged",
     "debug": "node debug app.js",
+<<<<<<< HEAD
     "start": " source .env && node app.js",
     "test": "cross-env NODE_ENV='test' mocha",
     "test:coverage": "nyc --reporter=text npm run test",
     "test:all": "npm run lint && npm run test:coverage"
+=======
+    "start": "node app.js",
+    "test-ewallet-service": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/services/EwalletService.test.js"
+>>>>>>> origin/ewallet_implementation
   },
   "main": "app.js",
   "repository": {

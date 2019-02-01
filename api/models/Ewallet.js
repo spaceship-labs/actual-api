@@ -12,6 +12,7 @@ module.exports = {
     cardNumber: {
       type: 'string',
       required: true,
+      unique: true,
     },
     amount: {
       type: 'float',
@@ -19,6 +20,7 @@ module.exports = {
     },
     active: {
       type: 'boolean',
+      defaultsTo: true,
     },
     // RELATIONS
     Records: {

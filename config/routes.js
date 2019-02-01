@@ -876,10 +876,13 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'index',
   },
+<<<<<<< HEAD
   'POST /ewalletreplacement/:page': {
     controller: 'ewalletreplacement',
     action: 'index',
   },
+=======
+>>>>>>> origin/ewallet_implementation
   'POST /replacementupdate/:clientId': {
     controller: 'ewalletreplacement',
     action: 'add',
