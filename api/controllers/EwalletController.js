@@ -23,17 +23,17 @@ module.exports = {
   async showOrCreate(req, res) {
     try {
       const type = req.param('type');
-      console.log('WHUUUT: ', type);
+      let ewallet;
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
       const storeId = req.user.activeStore.id;
       if (type === 'show') {
         if (cardNumber.length < 12) throw new Error('Formato no válido');
-      const ewallet = await Ewallet.findOne({ cardNumber });
+          ewallet = await Ewallet.findOne({ cardNumber });
       if (!ewallet)
         throw new Error('El monedero electrónico ingresado no existe ');
       } else {
-        const ewallet = await EwalletService.showOrCreate(
+          ewallet = await EwalletService.showOrCreate(
           cardNumber,
           Client,
           storeId
