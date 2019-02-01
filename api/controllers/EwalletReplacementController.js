@@ -22,10 +22,6 @@ module.exports = {
   },
   async update(req, res) {
     try {
-<<<<<<< HEAD
-      console.log('RELOCO');
-=======
->>>>>>> origin/ewallet_implementation
       const id = req.param('id');
       const approvedAt = new Date();
       const { amount, Client } = await EwalletReplacement.findOne({

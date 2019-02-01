@@ -24,12 +24,6 @@ module.exports = {
     try {
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
-<<<<<<< HEAD
-      console.log('cardNumber: ', cardNumber);
-      console.log('req.user', req.user);
-      console.log('Client: ', Client);
-=======
->>>>>>> origin/ewallet_implementation
       const storeId = req.user.activeStore.id;
       const ewallet = await EwalletService.showOrCreate(
         cardNumber,
