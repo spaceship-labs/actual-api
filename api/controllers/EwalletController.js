@@ -22,14 +22,25 @@ module.exports = {
   },
   async showOrCreate(req, res) {
     try {
+      const type = req.param('type');
+      console.log('WHUUUT: ', type);
       const cardNumber = req.param('cardNumber');
       const Client = req.param('client');
       const storeId = req.user.activeStore.id;
-      const ewallet = await EwalletService.showOrCreate(
-        cardNumber,
-        Client,
-        storeId
-      );
+      if (type === 'show') {
+        if (cardNumber.length < 12) throw new Error('Formato no válido');
+      const ewallet = await Ewallet.findOne({ cardNumber });
+      if (!ewallet)
+        throw new Error('El monedero electrónico ingresado no existe ');
+      } else {
+        const ewallet = await EwalletService.showOrCreate(
+          cardNumber,
+          Client,
+          storeId
+        );
+      }
+      const ewalletConfiguration = await EwalletConfiguration.find();
+      ewallet.exchangeRate = ewalletConfiguration[0].exchangeRate;
       res.ok(ewallet);
     } catch (e) {
       res.negotiate(e);
@@ -38,10 +49,6 @@ module.exports = {
   async show(req, res) {
     try {
       const cardNumber = req.param('cardNumber');
-      if (cardNumber.length < 12) throw new Error('Formato no válido');
-      const ewallet = await Ewallet.findOne({ cardNumber });
-      if (!ewallet)
-        throw new Error('El monedero electrónico ingresado no existe ');
       const ewalletConfiguration = await EwalletConfiguration.find();
       ewallet.exchangeRate = ewalletConfiguration[0].exchangeRate;
       res.ok(ewallet);
