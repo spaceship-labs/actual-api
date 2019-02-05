@@ -55,7 +55,7 @@ const getOrdersToCancel = async params => {
         total: await model.count({ CardName: { like: `%${field}%` } }),
       };
     } else {
-      const orders = await model.find({ CardName: field });
+      const orders = await Order.find({ CardName: { like: `%${field}%` } });
       const ids = orders.map(({ id }) => id);
       result = {
         orderCancelations: await model.find({ Order: ids }).populate('Order'),
