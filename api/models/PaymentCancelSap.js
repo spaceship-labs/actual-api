@@ -16,6 +16,9 @@ module.exports = {
     OrderSap: {
       model: 'OrderSap',
     },
+    CancelationOrder: {
+      model: 'CancelationOrder',
+    },
     Payment: {
       model: 'Payment',
     },

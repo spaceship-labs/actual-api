@@ -14,13 +14,14 @@ module.exports = {
       type: 'string',
     },
     DocEntry: {
-      type: 'integer',
+      type: 'string',
     },
     BaseRef: {
       type: 'string',
     },
-    CancelDetail: {
-      model: 'OrderDetailCancelation',
+    Details: {
+      collection: 'Detail',
+      via: 'cancelationSap',
     },
     Payments: {
       collection: 'PaymentSap',
@@ -30,8 +31,8 @@ module.exports = {
       collection: 'PaymentCancelSap',
       via: 'CancelationSap',
     },
-    series: {
-      type: 'string',
+    Order: {
+      model: 'Order',
     },
     CancelationOrder: {
       model: 'OrderCancelation',
@@ -39,7 +40,10 @@ module.exports = {
     Products: {
       collection: 'Product',
       via: 'CancelationSap',
-      columnName: 'products',
+    },
+    cancelDocSap: {
+      collection: 'CancelDocSap',
+      via: 'cancelationSap',
     },
   },
 };

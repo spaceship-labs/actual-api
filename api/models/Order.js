@@ -158,7 +158,7 @@ module.exports = {
   },
 
   beforeCreate: function(val, cb) {
-      Common.orderCustomAI(val, 'orderFolio', function(val) {});
+    Common.orderCustomAI(val, 'orderFolio', function(val) {});
     cb();
   },
   /*

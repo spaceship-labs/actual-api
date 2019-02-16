@@ -90,13 +90,16 @@ const formatCancelParams = async (id, action) => {
   return { IdQuotation, Product: formatedParams };
 };
 
-const cancelOrder = async (orderId, action) => {
+const cancelOrder = async (orderId, action, cancelOrderId) => {
   const params = await formatCancelParams(orderId, action);
   console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
   const { value: sapCancels } = await axios.delete('/SalesOrder', params);
+  sapCancels.order = orderId;
+  sapCancels.cancelOrder = cancelOrderId;
+  console.log('sapCancels: ', sapCancels);
   await createCancelationSap(sapCancels);
   return 1;
 };
@@ -105,43 +108,92 @@ const createCancelationSap = async params => {
   const {
     result,
     type,
-    RequestTransFer = [],
-    CreditMemo = '',
-    products,
+    RequestTransfer = [],
+    CreditMemo = [],
+    products: productsSap,
     DocEntry,
     Payments,
     PaymentsCancel,
     series = [],
     BaseRef,
+    order,
+    cancelOrder,
   } = params;
-
-  const references = [
-    { model: 'requesttransfer', references: RequestTransFer },
-    { model: 'paymentsap', references: Payments },
-    { model: 'paymentcancelsap', references: PaymentsCancel },
+  const documents = [
+    { type: 'RequestTransfer', documents: RequestTransfer },
+    { type: 'CreditMemo', documents: CreditMemo },
   ];
-
-  references.map(createSapCancelModelReferences);
-  const detailsIds = products.map(
-    ({ detailCancelReference }) => detailCancelReference
+  documents.map(document => createCancelDocSap(document, order, cancelOrder));
+  const cancelDocsSap = await CancelDocSap.find({ order });
+  const docsSapIds = cancelDocsSap.map(({ id }) => id);
+  const productsObj = productsSap.map(
+    async ({ ItemCode }) => await Product.findOne({ ItemCode })
   );
+  const Products = productsObj.map(({ id }) => id);
+
+  PaymentsCancel.map(payment =>
+    createPaymentCancelSap(payment, order, cancelOrder)
+  );
+  const paymentsCancels = PaymentsCancel.map(
+    async ({ pay: document }) => await PaymentCancelSap.findOne({ document })
+  );
+  const paymentsCancelsIds = paymentsCancels.map(({ id }) => id);
+
+  Payments.map(async ({ pay: document, reference: Payment }) =>
+    PaymentSap.create({
+      document,
+      Order: order,
+      Payment,
+    })
+  );
+  const payments = Payments.map(
+    async ({ pay: document }) => await PaymentSap.findOne({ document })
+  );
+  const paymentsIds = payments.map(({ id }) => id);
+
+  const detailsIds = series.map(({ DetailId }) => DetailId);
+
+  const cancelSapParams = {
+    result,
+    type,
+    DocEntry,
+    BaseRef,
+    Products,
+    Details: detailsIds,
+    PaymentsCancel: paymentsCancelsIds,
+    Payments: paymentsIds,
+    Order: order,
+    CancelationOrder: cancelOrder,
+    cancelDocsSap: docsSapIds,
+  };
+
+  await CancelationSap.create(cancelSapParams);
 };
 
-const createSapCancelModelReferences = ({ model, references }) =>
-  references.length > 0
-    ? references.map(
-        async ({ payment: document, reference: Payment }) =>
-          await sails.models[model].create({ document, Payment })
+const createCancelDocSap = ({ type, documents }, order, cancelOrder) =>
+  document.length > 0
+    ? documents.map(
+        async value =>
+          await CancelDocSap.create({
+            type,
+            value,
+            order,
+            cancelOrder,
+          })
       )
     : false;
 
-const getReferencesIds = async ({ model, references }) =>
-  references.length > 0
-    ? references.map(
-        async ({ pay: document }) =>
-          await sails.models[model].findOne({ document })
-      )
-    : false;
+const createPaymentCancelSap = async (
+  { pay: Payment, reference: document },
+  Order,
+  CancelationOrder
+) =>
+  await PaymentCancelSap.create({
+    document,
+    Payment,
+    Order,
+    CancelationOrder,
+  });
 
 module.exports = {
   createContact: createContact,
