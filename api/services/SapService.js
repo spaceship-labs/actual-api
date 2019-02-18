@@ -7,8 +7,11 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 const axios = require('axios');
-const API_BASE = 'sapnueve.homedns.org';
+const API_BASE = 'http://sapnueve.homedns.org ';
 axios.defaults.baseURL = API_BASE;
+axios.defaults.headers = {
+  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+};
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
 const CLIENT_CARD_TYPE = 1; //1.Client, 2.Proveedor, 3.Lead
@@ -93,7 +96,12 @@ const formatCancelParams = async (id, action) => {
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
-  const params = await formatCancelParams(orderId, action);
+  const preParams = await formatCancelParams(orderId, action);
+  const preForm = {
+    IdQuotation: JSON.stringify(preParams.IdQuotation),
+    Product: JSON.stringify(preParams.Product),
+  };
+  const params = qs.stringify(preForm, { encode: true });
   console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
@@ -168,8 +176,9 @@ const createCancelationSap = async params => {
     cancelDocsSap: docsSapIds,
   };
 
-  const { id: cancelSapID } = await CancelationSap.create(cancelSapParams);
-  return cancelSapID;
+  const { id } = await CancelationSap.create(cancelSapParams);
+  const { Details } = await CancelationSap.findOne({ id });
+  return Details;
 };
 
 const createCancelDocSap = ({ type, documents }, order, cancelOrder) =>

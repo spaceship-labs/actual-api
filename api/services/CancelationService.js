@@ -85,7 +85,9 @@ const getCanceledAmount = async details =>
 
 const addCancelation = async (orderId, cancelAll, details, reason) => {
   let detailsIds;
-  const { Quotation: quotationID, CardName } = await Order.findOne({ orderId });
+  const { Quotation: quotationID, CardName } = await Order.findOne({
+    id: orderId,
+  });
   const { id: orderCancelationID } = await OrderCancelation.create({
     cancelAll: cancelAll,
     reason,
@@ -123,6 +125,17 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
   return await OrderCancelation.findOne({ id: orderCancelationID });
 };
 
+const formatCancelDetails = (authorizedID, { id, quantity, Detail }) => {
+  if (authorizedID === Detail) {
+    return { id, quantity, Detail };
+  }
+};
+
+const compareDetailsIDS = (id, cancelationDetails) =>
+  cancelationDetails.map(cancelationDetail =>
+    formatCancelDetails(id, cancelationDetail)
+  );
+
 const updateRequest = async (
   cancelationId,
   detailsApprovement,
@@ -153,7 +166,17 @@ const updateRequest = async (
       .populate('CancelationDetails');
   }
   if (requestStatus === 'authorized') {
-    CancelationDetails.map(async ({ id, quantity, Detail }) => {
+    const action =
+      cancelAll === true && requestStatus === 'authorized' ? 'delete' : 'edit';
+    const authorizedDetails = await SapService.cancelOrder(
+      orderCancel.id,
+      action,
+      id
+    );
+    const authorizedCancelationDetails = authorizedDetails.map(id =>
+      compareDetailsIDS(id, cancelationDetails)
+    );
+    authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
       );
@@ -166,9 +189,6 @@ const updateRequest = async (
         }
       );
     });
-    const action =
-      cancelAll === true && requestStatus === 'authorized' ? 'delete' : 'edit';
-    const 
     await Order.update(
       { id: orderCancel.id },
       cancelAll === true && requestStatus === 'authorized'

@@ -20,8 +20,8 @@ module.exports = {
       type: 'string',
     },
     Details: {
-      collection: 'Detail',
-      via: 'cancelationSap',
+      collection: 'OrderDetail',
+      via: 'cancelationsSap',
     },
     Payments: {
       collection: 'PaymentSap',

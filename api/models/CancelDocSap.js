@@ -17,7 +17,10 @@ module.exports = {
       model: 'Order',
     },
     cancelOrder: {
-      type: 'OrderCancelation',
+      model: 'OrderCancelation',
+    },
+    cancelationSap: {
+      model: 'CancelationSap',
     },
   },
 };

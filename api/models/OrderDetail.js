@@ -64,7 +64,10 @@ module.exports = {
       collection: 'OrderDetailCancelation',
       via: 'Detail',
     },
-
+    cancelationsSap: {
+      collection: 'CancelationSap',
+      via: 'Details',
+    },
     //ship
     shipDate: {
       type: 'date',
