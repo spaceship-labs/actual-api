@@ -104,10 +104,11 @@ module.exports = {
 
   beforeCreate: function(val, cb) {
     val.tracing = addDefaultTracingDate();
-    if (process.env.NODE_ENV != 'test') {
-      Common.orderCustomAI(val, 'quotationFolio', function(val) {});
-    }
-    cb();
+    // if (process.env.NODE_ENV != 'test') {
+    Common.orderCustomAI(val, 'quotationFolio', function(val) {
+      cb();
+    });
+    // }
   },
 };
 

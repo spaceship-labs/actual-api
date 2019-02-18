@@ -168,6 +168,7 @@ const updateRequest = async (
     });
     const action =
       cancelAll === true && requestStatus === 'authorized' ? 'delete' : 'edit';
+    const 
     await Order.update(
       { id: orderCancel.id },
       cancelAll === true && requestStatus === 'authorized'
