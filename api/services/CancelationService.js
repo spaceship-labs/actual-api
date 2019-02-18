@@ -166,6 +166,8 @@ const updateRequest = async (
         }
       );
     });
+    const action =
+      cancelAll === true && requestStatus === 'authorized' ? 'delete' : 'edit';
     await Order.update(
       { id: orderCancel.id },
       cancelAll === true && requestStatus === 'authorized'
