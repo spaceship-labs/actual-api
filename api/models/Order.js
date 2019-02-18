@@ -158,6 +158,10 @@ module.exports = {
   },
 
   beforeCreate: function(val, cb) {
+    if (process.env.NODE_ENV === 'test') {
+      cb();
+      return;
+    }
     Common.orderCustomAI(val, 'orderFolio', function(val) {
       cb();
     });

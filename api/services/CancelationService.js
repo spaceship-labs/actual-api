@@ -9,17 +9,21 @@ const createCancelationDetails = async (
   const detail = await OrderDetail.findOne({ id }).populate(
     'CancelationDetails'
   );
-  const total = new BigNumber(detail.total)
+  const total = new BigNumber(detail.quantity)
     .dividedBy(detail.quantity)
     .multipliedBy(quantity)
     .toNumber();
   const { id: newCancelDetailID } = await OrderDetailCancelation.create({
     quantity: quantity,
+    Product: detail.Product,
+    shipDate: detail.shipDate,
+    shipCompanyFrom: detail.shipCompanyFrom,
     Order: orderId,
     Detail: id,
     Cancelation: cancelID,
     total,
   });
+
   detail.CancelationDetails.add(newCancelDetailID);
   await detail.save();
 };

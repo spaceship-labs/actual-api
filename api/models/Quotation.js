@@ -103,12 +103,15 @@ module.exports = {
   },
 
   beforeCreate: function(val, cb) {
+    if (process.env.NODE_ENV === 'test') {
+      cb();
+      return;
+    }
+    console.log('no mames que entra aqui');
     val.tracing = addDefaultTracingDate();
-    // if (process.env.NODE_ENV != 'test') {
     Common.orderCustomAI(val, 'quotationFolio', function(val) {
       cb();
     });
-    // }
   },
 };
 

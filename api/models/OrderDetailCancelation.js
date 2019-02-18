@@ -19,7 +19,7 @@ module.exports = {
       type: 'float',
     },
     shipDate: {
-      type: 'string',
+      type: 'date',
       required: true,
     },
     Product: {
