@@ -7,7 +7,7 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 const axios = require('axios');
-const API_BASE = 'http://sapnueve.homedns.org ';
+const API_BASE = 'http://sapnueve.homedns.org';
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -92,7 +92,7 @@ const formatCancelParams = async (id, action) => {
       Action: action,
     })
   );
-  return { IdQuotation, Product: formatedParams };
+  return { IdQuotation, products: formatedParams };
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
