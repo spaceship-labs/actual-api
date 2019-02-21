@@ -888,6 +888,10 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'update',
   },
+  'GET /ewalletById/:id': {
+    controller: 'ewallet',
+    action: 'getEwalletById',
+  },
   'GET /alert': {
     controller: 'alert',
     action: 'index',
