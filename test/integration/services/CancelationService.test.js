@@ -87,12 +87,31 @@ describe('CancelationService', () => {
       CardName: 'order.cardName.1',
     });
   });
+  // describe('addCancelation', () => {
+  //   it('should create a OrderCancelation record with cancelAll as true', async () => {
+  //     const response = await CancelationService.addCancelation(
+  //       order.id,
+  //       true,
+  //       [],
+  //       'Test reason'
+  //     );
+  //     const cancel = await OrderCancelation.findOne({
+  //       id: response.id,
+  //     }).populate('CancelationDetails');
+  //     expect(response).to.have.property('id');
+  //     expect(cancel.CancelationDetails.length).to.equal(2);
+  //   });
+  // });
+
   describe('addCancelation', () => {
-    it('should create a OrderCancelation record with cancelAll as true', async () => {
+    it('should create a OrderCancelation record with cancelAll as false with an array of products to cancel', async () => {
       const response = await CancelationService.addCancelation(
         order.id,
-        true,
-        [],
+        false,
+        [
+          { id: orderDetails[0].id, quantity: orderDetails[0].quantity },
+          { id: orderDetails[1].id, quantity: orderDetails[1].quantity },
+        ],
         'Test reason'
       );
       const cancel = await OrderCancelation.findOne({

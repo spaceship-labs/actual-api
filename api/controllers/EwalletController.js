@@ -29,11 +29,11 @@ module.exports = {
       const storeId = req.user.activeStore.id;
       if (type === 'show') {
         if (cardNumber.length < 12) throw new Error('Formato no válido');
-          ewallet = await Ewallet.findOne({ cardNumber });
-      if (!ewallet)
-        throw new Error('El monedero electrónico ingresado no existe ');
+        ewallet = await Ewallet.findOne({ cardNumber });
+        if (!ewallet)
+          throw new Error('El monedero electrónico ingresado no existe ');
       } else {
-          ewallet = await EwalletService.showOrCreate(
+        ewallet = await EwalletService.showOrCreate(
           cardNumber,
           Client,
           storeId
@@ -54,6 +54,15 @@ module.exports = {
       res.ok(ewallet);
     } catch (error) {
       res.negotiate(error);
+    }
+  },
+  async getEwalletById(req, res) {
+    try {
+      const id = req.param('id');
+      const ewallet = await Ewallet.findOne({ id });
+      res.ok(ewallet);
+    } catch (e) {
+      res.negotiate(e);
     }
   },
 };
