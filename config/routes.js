@@ -856,6 +856,10 @@ module.exports.routes = {
     controller: 'ewallet',
     action: 'show',
   },
+  'GET /ewallet/:id/client': {
+    controller: 'ewallet',
+    action: 'getById',
+  },
   'GET /ewalletconfiguration': {
     controller: 'ewalletconfiguration',
     action: 'show',
@@ -887,10 +891,6 @@ module.exports.routes = {
   'POST /replacementaccepted/:id': {
     controller: 'ewalletreplacement',
     action: 'update',
-  },
-  'GET /ewalletById/:id': {
-    controller: 'ewallet',
-    action: 'getEwalletById',
   },
   'GET /alert': {
     controller: 'alert',

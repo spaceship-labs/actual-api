@@ -56,7 +56,7 @@ module.exports = {
       res.negotiate(error);
     }
   },
-  async getEwalletById(req, res) {
+  async getById(req, res) {
     try {
       const id = req.param('id');
       const ewallet = await Ewallet.findOne({ id });
