@@ -76,6 +76,6 @@ module.exports = {
   homeStatus(req, res) {
     const status =
       process.env.MODE !== 'production' ? 'ok sandbox!' : 'ok production!';
-    res.ok({ status, branch: 'feat/cancellations transfer' });
+    res.ok({ status, version: 'Staged' });
   },
 };

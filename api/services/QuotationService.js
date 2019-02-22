@@ -22,8 +22,8 @@ const DEFAULT_QUOTATION_TOTALS = {
 };
 
 const statusTypes = {
-  CANCELED: 'canceled'
-}
+  CANCELED: 'canceled',
+};
 
 module.exports = {
   Calculator,
@@ -35,9 +35,9 @@ module.exports = {
   DISCOUNT_KEYS
 };
 
-function getGroupByQuotationPayments(payments = []){
+function getGroupByQuotationPayments(payments = []) {
   var group = 1;
-  const auxPayments = payments.filter(function(payment){
+  const auxPayments = payments.filter(function(payment) {
     return !PaymentService.isCanceled(payment);
   })
 
@@ -144,7 +144,7 @@ function Calculator() {
 
     totals = {
       ...totals,
-      paymentGroup: getGroupByQuotationPayments(quotation.Payments)
+      paymentGroup: getGroupByQuotationPayments(quotation.Payments),
     };
 
     return totals;

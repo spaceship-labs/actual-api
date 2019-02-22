@@ -522,7 +522,6 @@ function mapPaymentsToSap(payments, exchangeRate, currentStore) {
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-
     return paymentSap;
   });
 

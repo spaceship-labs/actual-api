@@ -6,50 +6,49 @@
  */
 module.exports = {
   schema: true,
-  migrate:'alter',
+  migrate: 'alter',
   attributes: {
-    name:{
-      type:'string'
+    name: {
+      type: 'string',
     },
-    group:{
-      type:'string',
-      enum:['home','studio','kids','proyectos']
+    group: {
+      type: 'string',
+      enum: ['home', 'studio', 'kids', 'proyectos'],
     },
     logo: {
-      type: 'string'
+      type: 'string',
     },
-    code:{type:'string'},
-    web: {type:'boolean'},
-    
+    code: { type: 'string' },
+    web: { type: 'boolean' },
+    marketplace: { type: 'boolean' },
 
     //RELATIONS
     users: {
       collection: 'user',
-      via: 'Stores'
+      via: 'Stores',
     },
-    Warehouse:{
-      model:'Company'
+    Warehouse: {
+      model: 'Company',
     },
     Payments: {
-      collection:'Payment',
-      via:'Store'
+      collection: 'Payment',
+      via: 'Store',
     },
     Quotations: {
-      collection:'Quotation',
-      via:'Store'
+      collection: 'Quotation',
+      via: 'Store',
     },
     Orders: {
-      collection:'Order',
-      via:'Store'
+      collection: 'Order',
+      via: 'Store',
     },
-    PromotionPackages:{
-      collection:'ProductGroup',
-      via:'Stores'
+    PromotionPackages: {
+      collection: 'ProductGroup',
+      via: 'Stores',
     },
     PaymentsWeb: {
-      collection:'PaymentWeb',
-      via:'Store'
-    },    
-  }
+      collection: 'PaymentWeb',
+      via: 'Store',
+    },
+  },
 };
-

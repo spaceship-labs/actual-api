@@ -35,8 +35,11 @@
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
+    "pkgcloud": "^1.5.0",
     "promise-delay": "^2.1.0",
     "q": "^1.4.1",
+    "qs": "^6.5.2",
+    "querystring": "^0.2.0",
     "rc": "~0.5.0",
     "request": "^2.72.0",
     "request-promise": "^4.1.1",
@@ -85,9 +88,6 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
   }
 }
