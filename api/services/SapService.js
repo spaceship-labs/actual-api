@@ -10,7 +10,7 @@ const axios = require('axios');
 const API_BASE = 'http://sapnueve.homedns.org';
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+  'content-type': 'application/x-www-form-urlencoded',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -96,17 +96,17 @@ const formatCancelParams = async (id, action) => {
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
-  const preParams = await formatCancelParams(orderId, action);
-  const preForm = {
-    IdQuotation: JSON.stringify(preParams.IdQuotation),
-    Product: JSON.stringify(preParams.Product),
-  };
-  const params = qs.stringify(preForm, { encode: true });
+  const params = await formatCancelParams(orderId, action);
   console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
-  const { value: sapCancels } = await axios.delete('/SalesOrder', params);
+  const { data: { value } } = await axios.delete('/SalesOrder', {
+    data: params,
+  });
+  if (value[0].type === 'NotFound') {
+    throw new Error(value[0].result);
+  }
   sapCancels.order = orderId;
   sapCancels.cancelOrder = cancelOrderId;
   console.log('sapCancels: ', sapCancels);
