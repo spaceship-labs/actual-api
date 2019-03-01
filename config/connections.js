@@ -23,7 +23,8 @@ module.exports.connections = {
   /***************************************************************************
    *                                                                          *
    * Local disk storage for DEVELOPMENT ONLY                                  *
-   *                                                                          *
+   *
+   *                                                  *
    * Installed by default.                                                    *
    *                                                                          *
    ***************************************************************************/
@@ -31,10 +32,18 @@ module.exports.connections = {
     adapter: 'sails-disk',
   },
 
-  mongodb: {
-    adapter: 'sails-mongo',
-    url: process.env.MONGODB_URL,
-  },
+  mongodb:
+    process.env.ENV_TYPE === 'staged'
+      ? {
+          adapter: 'sails-mongo',
+          host: 'localhost',
+          port: 27017,
+          database: process.env.STAGED_MONGO,
+        }
+      : {
+          adapter: 'sails-mongo',
+          url: process.env.MONGODB_URL,
+        },
 
   testMongo: {
     adapter: 'sails-mongo',

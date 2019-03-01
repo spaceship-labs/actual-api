@@ -892,6 +892,10 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'update',
   },
+  'GET /ewalletById/:id': {
+    controller: 'ewallet',
+    action: 'getById',
+  },
   'GET /alert': {
     controller: 'alert',
     action: 'index',
