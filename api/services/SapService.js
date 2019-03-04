@@ -7,8 +7,7 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 const axios = require('axios');
-const API_BASE = 'http://sapnueve.homedns.org';
-axios.defaults.baseURL = API_BASE;
+axios.defaults.baseURL = baseUrl;
 axios.defaults.headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
 };
@@ -56,7 +55,7 @@ const throwAlert = async ({ subject, message, userCode }) => {
 
 const formatCancelParams = async (id, action) => {
   const {
-    Quotation: IdQuotation,
+    Quotation: idQuotation,
     CancelationDetails: cancelDetails,
   } = await OrderCancelation.findOne({ Order: id }).populate(
     'CancelationDetails'
@@ -92,24 +91,26 @@ const formatCancelParams = async (id, action) => {
       Action: action,
     })
   );
-  return { IdQuotation, products: formatedParams };
+  return { idQuotation, products: formatedParams };
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
-  const preParams = await formatCancelParams(orderId, action);
-  const preForm = {
-    IdQuotation: JSON.stringify(preParams.IdQuotation),
-    Product: JSON.stringify(preParams.Product),
-  };
-  const params = qs.stringify(preForm, { encode: true });
+  const params = await formatCancelParams(orderId, action);
   console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
-  const { value: sapCancels } = await axios.delete('/SalesOrder', params);
+  const { data: { value: sapCancels }, error } = await axios.delete(
+    '/SalesOrder',
+    {
+      data: { params },
+    }
+  );
   sapCancels.order = orderId;
   sapCancels.cancelOrder = cancelOrderId;
+  console.log('error: ', error);
   console.log('sapCancels: ', sapCancels);
+  return;
   return await createCancelationSap(sapCancels);
 };
 
