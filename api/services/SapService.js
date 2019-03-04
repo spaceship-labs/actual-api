@@ -349,6 +349,10 @@ function createSaleOrder(params) {
   return buildOrderRequestParams(params)
     .then(function(_requestParams) {
       requestParams = _requestParams;
+
+      sails.log.info('createSaleOrder', API_BASE_ORDER + '/SalesOrder');
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+
       const preForm = {
         contact: JSON.stringify(requestParams.contact),
         products: JSON.stringify(requestParams.products),
