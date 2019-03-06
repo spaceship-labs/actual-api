@@ -27,20 +27,21 @@ module.exports = {
       const approvedAt = new Date();
       let replacement;
       if (status === 'rejected') {
-        await EwalletReplacement.update(
+        replacement = await EwalletReplacement.update(
           { id },
           { approvedAt, approvedBy: req.user, status }
         );
       } else if (status === 'approved') {
+        const { Client } = await EwalletReplacement.findOne({
+          id,
+        }).populate('Client');
+        const { amount } = await Ewallet.findOne({ ReplacementRequests: id });
+        replacement = await EwalletReplacement.update(
+          { id },
+          { approvedAt, approvedBy: req.user, status }
+        );
+        await Ewallet.update({ Client: Client.id }, { amount });
       }
-      const { amount, Client } = await EwalletReplacement.findOne({
-        id,
-      }).populate('Client');
-      const replacement = await EwalletReplacement.update(
-        { id },
-        { approvedAt, approvedBy: req.user, status: 'approved' }
-      );
-      await Ewallet.update({ Client: Client.id }, { amount });
       res.ok(replacement);
     } catch (error) {
       res.negotiate(error);
@@ -87,7 +88,7 @@ module.exports = {
         await Client.update({ id: clientId }, { Ewallet: null });
         await Ewallet.update(
           { id: ewallet.id },
-          { Client: null, active: false, amount: 0 }
+          { Client: null, active: false }
         );
         res.ok(replacement);
       }
