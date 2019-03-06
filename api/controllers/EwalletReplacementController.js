@@ -23,7 +23,16 @@ module.exports = {
   async update(req, res) {
     try {
       const id = req.param('id');
+      const status = req.param('status');
       const approvedAt = new Date();
+      let replacement;
+      if (status === 'rejected') {
+        await EwalletReplacement.update(
+          { id },
+          { approvedAt, approvedBy: req.user, status }
+        );
+      } else if (status === 'approved') {
+      }
       const { amount, Client } = await EwalletReplacement.findOne({
         id,
       }).populate('Client');

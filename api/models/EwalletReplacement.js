@@ -9,7 +9,7 @@ module.exports = {
   attributes: {
     status: {
       type: 'string',
-      enum: ['pending', 'approved'],
+      enum: ['pending', 'approved', 'rejected'],
       defaultsTo: 'pending',
     },
     approvedAt: {

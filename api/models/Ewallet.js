@@ -33,5 +33,9 @@ module.exports = {
     Store: {
       model: 'Store',
     },
+    ReplacementRequests: {
+      collection: 'EwalletReplacement',
+      via: 'Ewallet',
+    },
   },
 };
