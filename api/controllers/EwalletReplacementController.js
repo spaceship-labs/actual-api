@@ -41,6 +41,7 @@ module.exports = {
           { approvedAt, approvedBy: req.user, status }
         );
         await Ewallet.update({ Client: Client.id }, { amount });
+        await Ewallet.update({ ReplacementRequests: id }, { amount: 0 });
       }
       res.ok(replacement);
     } catch (error) {
