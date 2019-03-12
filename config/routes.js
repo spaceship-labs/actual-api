@@ -880,14 +880,11 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'index',
   },
-  'POST /ewalletreplacement/:page': {
-    controller: 'ewalletreplacement',
-    action: 'index',
-  },
   'POST /replacementupdate/:clientId': {
     controller: 'ewalletreplacement',
     action: 'add',
   },
+
   'POST /replacementaccepted/:id': {
     controller: 'ewalletreplacement',
     action: 'update',
