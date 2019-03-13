@@ -9,6 +9,7 @@ const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
 const DEFAULT_CFDI_USE = 'P01';
+const BigNumber = require('bignumber.js');
 
 module.exports = {
   createOrderInvoice,
@@ -24,79 +25,69 @@ module.exports = {
   hasClientBalancePayment,
 };
 
-function createOrderInvoice(orderId) {
-  return new Promise(function(resolve, reject) {
-    var orderFound;
-    var errInvoice;
-
+async function createOrderInvoice(orderId) {
+  try {
     if (process.env.MODE !== 'production') {
-      resolve({});
       return;
     }
-
-    Order.findOne(orderId)
+    const order = await Order.findOne(orderId)
       .populate('Client')
       .populate('Details')
-      .populate('Payments')
-      .then(function(order) {
-        orderFound = order;
+      .populate('Payments');
 
-        if (OrderService.isCanceled(order)) {
-          reject(
-            new Error(
-              'No es posible crear una factura ya que la orden esta cancelada'
-            )
-          );
-          return;
-        }
+    if (OrderService.isCanceled(order)) {
+      throw new Error(
+        'No es posible crear una factura ya que la orden esta cancelada'
+      );
+      return;
+    }
+    const total = order.total;
+    const clientOrder = order.Client;
+    const detailsIds = order.Details.map(d => d.id);
+    const payments = order.Payments;
+    const details = await OrderDetail.find(detailsIds).populate('Product');
+    const address = await FiscalAddress.findOne({
+      CardCode: clientOrder.CardCode,
+      AdresType: ClientService.ADDRESS_TYPE,
+    });
+    const client = prepareClient(order, clientOrder, address);
+    const ewalletDiscount = getEwalletDiscount(payments, total);
+    const items =
+      ewalletDiscount > 0
+        ? prepareItems(details)
+        : prepareItems(details, ewalletDiscount);
+    const alegraInvoice = prepareInvoice(order, payments, client, items);
+    await Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
+  } catch (err) {
+    var log = {
+      User: order ? order.User : null,
+      Order: orderId,
+      Store: order ? order.Store : null,
+      responseData: JSON.stringify(err),
+      isError: true,
+    };
 
-        var client = order.Client;
-        var details = order.Details.map(function(d) {
-          return d.id;
-        });
-        var payments = order.Payments;
-        return [
-          order,
-          payments,
-          OrderDetail.find(details).populate('Product'),
-          FiscalAddress.findOne({
-            CardCode: client.CardCode,
-            AdresType: ClientService.ADDRESS_TYPE,
-          }),
-          client,
-        ];
-      })
-      .spread(function(order, payments, details, address, client) {
-        return [
-          order,
-          payments,
-          prepareClient(order, client, address),
-          prepareItems(details),
-        ];
-      })
-      .spread(function(order, payments, client, items) {
-        return prepareInvoice(order, payments, client, items);
-      })
-      .then(function(alegraInvoice) {
-        resolve(Invoice.create({ alegraId: alegraInvoice.id, order: orderId }));
-      })
-      .catch(function(err) {
-        errInvoice = err;
+    await AlegraLog.create(log);
+  }
+}
 
-        var log = {
-          User: orderFound ? orderFound.User : null,
-          Order: orderId,
-          Store: orderFound ? orderFound.Store : null,
-          responseData: JSON.stringify(errInvoice),
-          isError: true,
-        };
-
-        return AlegraLog.create(log);
-      })
-      .then(function(logCreated) {
-        reject(errInvoice);
-      });
-  });
+function getEwalletDiscount(payments, totalOrder) {
+  const totalDiscount = payments
+    .map(({ type, ammount }) => {
+      if (type === 'ewallet') {
+        return ammount;
+      } else {
+        return 0;
+      }
+    })
+    .reduce((total, paymentAmount) => paymentAmount + total, 0);
+  const ewalletDiscount = new BigNumber(totalDiscount);
+  const total = new BigNumber(totalOrder);
+  const ewalletDiscountPercent = total
+    .devidedBy(ewalletDiscount)
+    .multipliedBy(100)
+    .toNumber();
+  return ewalletDiscountPercent;
 }
 
 function send(orderID) {
@@ -451,7 +442,7 @@ function getUnitTypeByProduct(product) {
   }
 }
 
-function prepareItems(details) {
+function prepareItems(details, ewalletDiscountPercent) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
@@ -463,12 +454,24 @@ function prepareItems(details) {
       product.U_ClaveProdServ === 1010101
         ? '01010101'
         : product.U_ClaveProdServ;
+    if (ewalletDiscountPercent) {
+      const ewalletDiscount = new BigNumber(ewalletDiscountPercent);
+      const detailDiscount = new BigNumber(discount.toFixed(4));
+      const discountDivisor = new BigNumber(100).dividedBy(detailDiscount);
+      const totalDiscount = ewalletDiscount
+        .dividedBy(discountDivisor)
+        .add(detailDiscount)
+        .toNumber();
+    }
+    discount = ewalletDiscountPercent
+      ? totalDiscount
+      : parseFloat(discount.toFixed(4));
     return {
       id: detail.id,
       name: product.ItemName,
       price: detail.unitPrice / 1.16,
       //discount: discount,
-      discount: parseFloat(discount.toFixed(4)),
+      discount,
       tax: [{ id: ALEGRA_IVA_ID }],
       productKey,
       quantity: detail.quantity,
@@ -520,3 +523,78 @@ function createItems(items) {
     });
   });
 }
+
+// function createOrderInvoice(orderId) {
+//   return new Promise(function(resolve, reject) {
+//     var orderFound;
+//     var errInvoice;
+
+//     if (process.env.MODE !== 'production') {
+//       resolve({});
+//       return;
+//     }
+
+//     Order.findOne(orderId)
+//       .populate('Client')
+//       .populate('Details')
+//       .populate('Payments')
+//       .then(function(order) {
+//         orderFound = order;
+
+//         if (OrderService.isCanceled(order)) {
+//           reject(
+//             new Error(
+//               'No es posible crear una factura ya que la orden esta cancelada'
+//             )
+//           );
+//           return;
+//         }
+
+//         var client = order.Client;
+//         var details = order.Details.map(function(d) {
+//           return d.id;
+//         });
+//         var payments = order.Payments;
+//         return [
+//           order,
+//           payments,
+//           OrderDetail.find(details).populate('Product'),
+//           FiscalAddress.findOne({
+//             CardCode: client.CardCode,
+//             AdresType: ClientService.ADDRESS_TYPE,
+//           }),
+//           client,
+//         ];
+//       })
+//       .spread(function(order, payments, details, address, client) {
+//         return [
+//           order,
+//           payments,
+//           prepareClient(order, client, address),
+//           prepareItems(details),
+//         ];
+//       })
+//       .spread(function(order, payments, client, items) {
+//         return prepareInvoice(order, payments, client, items);
+//       })
+//       .then(function(alegraInvoice) {
+//         resolve(Invoice.create({ alegraId: alegraInvoice.id, order: orderId }));
+//       })
+//       .catch(function(err) {
+//         errInvoice = err;
+
+//         var log = {
+//           User: orderFound ? orderFound.User : null,
+//           Order: orderId,
+//           Store: orderFound ? orderFound.Store : null,
+//           responseData: JSON.stringify(errInvoice),
+//           isError: true,
+//         };
+
+//         return AlegraLog.create(log);
+//       })
+//       .then(function(logCreated) {
+//         reject(errInvoice);
+//       });
+//   });
+// }
