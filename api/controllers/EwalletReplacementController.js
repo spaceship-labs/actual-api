@@ -42,14 +42,9 @@ module.exports = {
       const clientId = req.param('clientId');
       const storeId = req.user.activeStore.id;
 
-      const options =
-        req.param.type === 'payment'
-          ? {
-              dir: 'ewallet/attach',
-            }
-          : {
-              dir: 'ewallet/replacement',
-            };
+      const options = {
+        dir: 'ewallet/replacement',
+      };
       const files = await Files.saveFiles(req, options);
       console.log('files', files);
       const fileLoaded = await ReplacementFile.create({

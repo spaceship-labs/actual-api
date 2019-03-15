@@ -884,6 +884,10 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'add',
   },
+  'POST /ewallet/file/:clientId': {
+    controller: 'ewallet',
+    action: 'addFile',
+  },
 
   'POST /replacementaccepted/:id': {
     controller: 'ewalletreplacement',

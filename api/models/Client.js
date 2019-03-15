@@ -98,5 +98,8 @@ module.exports = {
     Ewallet: {
       model: 'Ewallet',
     },
+    EwalletContract: {
+      model: 'EwalletFile',
+    },
   },
 };
