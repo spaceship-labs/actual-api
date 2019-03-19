@@ -447,7 +447,8 @@ function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
   const discountPercent = discount
     .devidedBy(unitPrice)
     .multipliedBy(100)
-    .toFixed(4);
+    .toFixed(4)
+    .toNumber();
   return discountPercent;
 }
 
