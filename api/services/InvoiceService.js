@@ -9,6 +9,7 @@ const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
 const DEFAULT_CFDI_USE = 'P01';
+const BigNumber = require('bignumber.js');
 
 module.exports = {
   createOrderInvoice,
@@ -22,81 +23,62 @@ module.exports = {
   RFCPUBLIC,
   DEFAULT_CFDI_USE,
   hasClientBalancePayment,
+  getItemDiscount,
 };
 
-function createOrderInvoice(orderId) {
-  return new Promise(function(resolve, reject) {
-    var orderFound;
-    var errInvoice;
-
+async function createOrderInvoice(orderId) {
+  try {
     if (process.env.MODE !== 'production') {
-      resolve({});
       return;
     }
-
-    Order.findOne(orderId)
+    const order = await Order.findOne(orderId)
       .populate('Client')
       .populate('Details')
-      .populate('Payments')
-      .then(function(order) {
-        orderFound = order;
+      .populate('Payments');
 
-        if (OrderService.isCanceled(order)) {
-          reject(
-            new Error(
-              'No es posible crear una factura ya que la orden esta cancelada'
-            )
-          );
-          return;
-        }
+    if (OrderService.isCanceled(order)) {
+      throw new Error(
+        'No es posible crear una factura ya que la orden esta cancelada'
+      );
+      return;
+    }
+    const { total, Client: clientOrder, Details, Payments: payments } = order;
+    const detailsIds = Details.map(d => d.id);
+    const details = await OrderDetail.find(detailsIds).populate('Product');
+    const address = await FiscalAddress.findOne({
+      CardCode: clientOrder.CardCode,
+      AdresType: ClientService.ADDRESS_TYPE,
+    });
+    const client = prepareClient(order, clientOrder, address);
+    const ewalletDiscount = getEwalletDiscount(payments);
+    const items = prepareItems(details, ewalletDiscount, total);
+    const alegraInvoice = prepareInvoice(order, payments, client, items);
+    await Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
+  } catch (err) {
+    var log = {
+      User: order ? order.User : null,
+      Order: orderId,
+      Store: order ? order.Store : null,
+      responseData: JSON.stringify(err),
+      isError: true,
+    };
 
-        var client = order.Client;
-        var details = order.Details.map(function(d) {
-          return d.id;
-        });
-        var payments = order.Payments;
-        return [
-          order,
-          payments,
-          OrderDetail.find(details).populate('Product'),
-          FiscalAddress.findOne({
-            CardCode: client.CardCode,
-            AdresType: ClientService.ADDRESS_TYPE,
-          }),
-          client,
-        ];
-      })
-      .spread(function(order, payments, details, address, client) {
-        return [
-          order,
-          payments,
-          prepareClient(order, client, address),
-          prepareItems(details),
-        ];
-      })
-      .spread(function(order, payments, client, items) {
-        return prepareInvoice(order, payments, client, items);
-      })
-      .then(function(alegraInvoice) {
-        resolve(Invoice.create({ alegraId: alegraInvoice.id, order: orderId }));
-      })
-      .catch(function(err) {
-        errInvoice = err;
+    await AlegraLog.create(log);
+  }
+}
 
-        var log = {
-          User: orderFound ? orderFound.User : null,
-          Order: orderId,
-          Store: orderFound ? orderFound.Store : null,
-          responseData: JSON.stringify(errInvoice),
-          isError: true,
-        };
-
-        return AlegraLog.create(log);
-      })
-      .then(function(logCreated) {
-        reject(errInvoice);
-      });
-  });
+function getEwalletDiscount(payments) {
+  const totalDiscount = payments
+    .map(({ type, ammount }) => {
+      if (type === 'ewallet') {
+        return ammount;
+      } else {
+        return 0;
+      }
+    })
+    .reduce((paymentAmount, total) => paymentAmount + total, 0);
+  const ewalletDiscount = new BigNumber(totalDiscount).toFixed(4).toNumber();
+  return ewalletDiscount;
 }
 
 function send(orderID) {
@@ -451,7 +433,26 @@ function getUnitTypeByProduct(product) {
   }
 }
 
-function prepareItems(details) {
+function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
+  const detailAmount = new BigNumber(detailTotal);
+  const ewalletAmount = new BigNumber(ewalletDiscount);
+  const orderAmount = new BigNumber(orderTotal);
+  const unitPrice = new BigNumber(subtotal);
+  const detailDiscount = detailAmount.dividedBy(orderAmount).toFixed(6);
+  const discountAmount = ewalletAmount.multipliedBy(detailDiscount).toFixed(4);
+  const detailAmountDiscount = unitPrice.minus(detailAmount);
+  const discount = new BigNumber(discountAmount)
+    .plus(detailAmountDiscount)
+    .toFixed(4);
+  let discountPercent = new BigNumber(discount)
+    .dividedBy(unitPrice)
+    .multipliedBy(100)
+    .toFixed(4);
+  discountPercent = new BigNumber(discountPercent).toNumber();
+  return discountPercent;
+}
+
+function prepareItems(details, ewalletDiscount, orderTotal) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
@@ -463,12 +464,21 @@ function prepareItems(details) {
       product.U_ClaveProdServ === 1010101
         ? '01010101'
         : product.U_ClaveProdServ;
+
+    discount =
+      ewalletDiscount > 0
+        ? getItemDiscount(
+            ewalletDiscount,
+            orderTotal,
+            detail.total,
+            detail.subtotal
+          )
+        : parseFloat(discount.toFixed(4));
     return {
       id: detail.id,
       name: product.ItemName,
       price: detail.unitPrice / 1.16,
-      //discount: discount,
-      discount: parseFloat(discount.toFixed(4)),
+      discount,
       tax: [{ id: ALEGRA_IVA_ID }],
       productKey,
       quantity: detail.quantity,
@@ -520,3 +530,72 @@ function createItems(items) {
     });
   });
 }
+
+// function createOrderInvoice(orderId) {
+//   return new Promise(function(resolve, reject) {
+//     var orderFound;
+//     var errInvoice;
+//     if (process.env.MODE !== 'production') {
+//       resolve({});
+//       return;
+//     }
+//     Order.findOne(orderId)
+//       .populate('Client')
+//       .populate('Details')
+//       .populate('Payments')
+//       .then(function(order) {
+//         orderFound = order;
+//         if (OrderService.isCanceled(order)) {
+//           reject(
+//             new Error(
+//               'No es posible crear una factura ya que la orden esta cancelada'
+//             )
+//           );
+//           return;
+//         }
+//         var client = order.Client;
+//         var details = order.Details.map(function(d) {
+//           return d.id;
+//         });
+//         var payments = order.Payments;
+//         return [
+//           order,
+//           payments,
+//           OrderDetail.find(details).populate('Product'),
+//           FiscalAddress.findOne({
+//             CardCode: client.CardCode,
+//             AdresType: ClientService.ADDRESS_TYPE,
+//           }),
+//           client,
+//         ];
+//       })
+//       .spread(function(order, payments, details, address, client) {
+//         return [
+//           order,
+//           payments,
+//           prepareClient(order, client, address),
+//           prepareItems(details),
+//         ];
+//       })
+//       .spread(function(order, payments, client, items) {
+//         return prepareInvoice(order, payments, client, items);
+//       })
+//       .then(function(alegraInvoice) {
+//         resolve(Invoice.create({ alegraId: alegraInvoice.id, order: orderId }));
+//       })
+//       .catch(function(err) {
+//         errInvoice = err;
+//         var log = {
+//           User: orderFound ? orderFound.User : null,
+//           Order: orderId,
+//           Store: orderFound ? orderFound.Store : null,
+//           responseData: JSON.stringify(errInvoice),
+//           isError: true,
+//         };
+//         return AlegraLog.create(log);
+//       })
+//       .then(function(logCreated) {
+//         reject(errInvoice);
+//       });
+//   });
+// }
