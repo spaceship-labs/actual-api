@@ -281,4 +281,19 @@ describe('InvoiceService', function() {
       expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('piece');
     });
   });
+  describe('getItemDiscount', () => {
+    it('should return exact discount percent of an item', () => {
+      const ewalletDiscount = 300;
+      const total = 1302.3;
+      const detailTotal = 368;
+      const subtotal = 408;
+      const result = InvoiceService.getItemDiscount(
+        ewalletDiscount,
+        total,
+        detailTotal,
+        total
+      );
+      expect(result).to.be.equal(23.5239);
+    });
+  });
 });

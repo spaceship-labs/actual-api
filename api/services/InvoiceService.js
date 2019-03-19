@@ -23,6 +23,7 @@ module.exports = {
   RFCPUBLIC,
   DEFAULT_CFDI_USE,
   hasClientBalancePayment,
+  getItemDiscount,
 };
 
 async function createOrderInvoice(orderId) {
@@ -50,10 +51,7 @@ async function createOrderInvoice(orderId) {
     });
     const client = prepareClient(order, clientOrder, address);
     const ewalletDiscount = getEwalletDiscount(payments);
-    const items =
-      ewalletDiscount > 0
-        ? prepareItems(details)
-        : prepareItems(details, ewalletDiscount, total);
+    const items = prepareItems(details, ewalletDiscount, total);
     const alegraInvoice = prepareInvoice(order, payments, client, items);
     await Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
   } catch (err) {
@@ -434,18 +432,20 @@ function getUnitTypeByProduct(product) {
       return 'piece';
   }
 }
-//unitPrice = subtotal -> Detail
+
 function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
   const detailAmount = new BigNumber(detailTotal);
   const ewalletAmount = new BigNumber(ewalletDiscount);
   const orderAmount = new BigNumber(orderTotal);
   const unitPrice = new BigNumber(subtotal);
-  const detailDiscount = detailAmount.devidedBy(orderAmount).toFixed(6);
+  const detailDiscount = detailAmount.dividedBy(orderAmount).toFixed(6);
   const discountAmount = ewalletAmount.multipliedBy(detailDiscount).toFixed(4);
   const detailAmountDiscount = unitPrice.minus(detailAmount);
+  console.log('detailAmountDiscount: ', detailAmountDiscount);
+
   const discount = discountAmount.plus(detailAmountDiscount);
   const discountPercent = discount
-    .devidedBy(unitPrice)
+    .dividedBy(unitPrice)
     .multipliedBy(100)
     .toFixed(4)
     .toNumber();
