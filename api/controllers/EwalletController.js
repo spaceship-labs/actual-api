@@ -66,6 +66,7 @@ module.exports = {
     }
   },
   async addFile(req, res) {
+    console.log('hey');
     try {
       const clientId = req.param('clientId');
       const options = {
