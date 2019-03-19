@@ -291,9 +291,9 @@ describe('InvoiceService', function() {
         ewalletDiscount,
         total,
         detailTotal,
-        total
+        subtotal
       );
-      expect(result).to.be.equal(23.5239);
+      expect(result).to.be.equal(30.5816);
     });
   });
 });

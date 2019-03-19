@@ -441,14 +441,14 @@ function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
   const detailDiscount = detailAmount.dividedBy(orderAmount).toFixed(6);
   const discountAmount = ewalletAmount.multipliedBy(detailDiscount).toFixed(4);
   const detailAmountDiscount = unitPrice.minus(detailAmount);
-  console.log('detailAmountDiscount: ', detailAmountDiscount);
-
-  const discount = discountAmount.plus(detailAmountDiscount);
-  const discountPercent = discount
+  const discount = new BigNumber(discountAmount)
+    .plus(detailAmountDiscount)
+    .toFixed(4);
+  let discountPercent = new BigNumber(discount)
     .dividedBy(unitPrice)
     .multipliedBy(100)
-    .toFixed(4)
-    .toNumber();
+    .toFixed(4);
+  discountPercent = new BigNumber(discountPercent).toNumber();
   return discountPercent;
 }
 
