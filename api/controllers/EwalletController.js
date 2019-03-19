@@ -66,21 +66,19 @@ module.exports = {
     }
   },
   async addFile(req, res) {
-    console.log('hey');
     try {
       const clientId = req.param('clientId');
       const options = {
         dir: 'ewallet/attach',
       };
       const files = await Files.saveFiles(req, options);
-      console.log('files', files);
       const fileLoaded = await EwalletFile.create({
         filename: files[0].filename,
         filepath: files[0].fd,
       });
       await Client.update({ id: clientId }, { EwalletContract: fileLoaded.id });
 
-      res.ok();
+      res.ok(fileLoaded);
     } catch (error) {
       res.negotiate(error);
     }
