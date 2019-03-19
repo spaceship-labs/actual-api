@@ -41,21 +41,19 @@ async function createOrderInvoice(orderId) {
       );
       return;
     }
-    const total = order.total;
-    const clientOrder = order.Client;
-    const detailsIds = order.Details.map(d => d.id);
-    const payments = order.Payments;
+    const { total, Client: clientOrder, Details, Payments: payments } = order;
+    const detailsIds = Details.map(d => d.id);
     const details = await OrderDetail.find(detailsIds).populate('Product');
     const address = await FiscalAddress.findOne({
       CardCode: clientOrder.CardCode,
       AdresType: ClientService.ADDRESS_TYPE,
     });
     const client = prepareClient(order, clientOrder, address);
-    const ewalletDiscount = getEwalletDiscount(payments, total);
+    const ewalletDiscount = getEwalletDiscount(payments);
     const items =
       ewalletDiscount > 0
         ? prepareItems(details)
-        : prepareItems(details, ewalletDiscount);
+        : prepareItems(details, ewalletDiscount, total);
     const alegraInvoice = prepareInvoice(order, payments, client, items);
     await Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
   } catch (err) {
@@ -71,7 +69,7 @@ async function createOrderInvoice(orderId) {
   }
 }
 
-function getEwalletDiscount(payments, totalOrder) {
+function getEwalletDiscount(payments) {
   const totalDiscount = payments
     .map(({ type, ammount }) => {
       if (type === 'ewallet') {
@@ -80,14 +78,9 @@ function getEwalletDiscount(payments, totalOrder) {
         return 0;
       }
     })
-    .reduce((total, paymentAmount) => paymentAmount + total, 0);
-  const ewalletDiscount = new BigNumber(totalDiscount);
-  const total = new BigNumber(totalOrder);
-  const ewalletDiscountPercent = total
-    .devidedBy(ewalletDiscount)
-    .multipliedBy(100)
-    .toNumber();
-  return ewalletDiscountPercent;
+    .reduce((paymentAmount, total) => paymentAmount + total, 0);
+  const ewalletDiscount = new BigNumber(totalDiscount).toFixed(4).toNumber();
+  return ewalletDiscount;
 }
 
 function send(orderID) {
@@ -441,8 +434,24 @@ function getUnitTypeByProduct(product) {
       return 'piece';
   }
 }
+//unitPrice = subtotal -> Detail
+function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
+  const detailAmount = new BigNumber(detailTotal);
+  const ewalletAmount = new BigNumber(ewalletDiscount);
+  const orderAmount = new BigNumber(orderTotal);
+  const unitPrice = new BigNumber(subtotal);
+  const detailDiscount = detailAmount.devidedBy(orderAmount).toFixed(6);
+  const discountAmount = ewalletAmount.multipliedBy(detailDiscount).toFixed(4);
+  const detailAmountDiscount = unitPrice.minus(detailAmount);
+  const discount = discountAmount.plus(detailAmountDiscount);
+  const discountPercent = discount
+    .devidedBy(unitPrice)
+    .multipliedBy(100)
+    .toFixed(4);
+  return discountPercent;
+}
 
-function prepareItems(details, ewalletDiscountPercent) {
+function prepareItems(details, ewalletDiscount, orderTotal) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
@@ -454,23 +463,20 @@ function prepareItems(details, ewalletDiscountPercent) {
       product.U_ClaveProdServ === 1010101
         ? '01010101'
         : product.U_ClaveProdServ;
-    if (ewalletDiscountPercent) {
-      const ewalletDiscount = new BigNumber(ewalletDiscountPercent);
-      const detailDiscount = new BigNumber(discount.toFixed(4));
-      const discountDivisor = new BigNumber(100).dividedBy(detailDiscount);
-      const totalDiscount = ewalletDiscount
-        .dividedBy(discountDivisor)
-        .add(detailDiscount)
-        .toNumber();
-    }
-    discount = ewalletDiscountPercent
-      ? totalDiscount
-      : parseFloat(discount.toFixed(4));
+
+    discount =
+      ewalletDiscount > 0
+        ? getItemDiscount(
+            ewalletDiscount,
+            orderTotal,
+            detail.total,
+            detail.subtotal
+          )
+        : parseFloat(discount.toFixed(4));
     return {
       id: detail.id,
       name: product.ItemName,
       price: detail.unitPrice / 1.16,
-      //discount: discount,
       discount,
       tax: [{ id: ALEGRA_IVA_ID }],
       productKey,
@@ -528,19 +534,16 @@ function createItems(items) {
 //   return new Promise(function(resolve, reject) {
 //     var orderFound;
 //     var errInvoice;
-
 //     if (process.env.MODE !== 'production') {
 //       resolve({});
 //       return;
 //     }
-
 //     Order.findOne(orderId)
 //       .populate('Client')
 //       .populate('Details')
 //       .populate('Payments')
 //       .then(function(order) {
 //         orderFound = order;
-
 //         if (OrderService.isCanceled(order)) {
 //           reject(
 //             new Error(
@@ -549,7 +552,6 @@ function createItems(items) {
 //           );
 //           return;
 //         }
-
 //         var client = order.Client;
 //         var details = order.Details.map(function(d) {
 //           return d.id;
@@ -582,7 +584,6 @@ function createItems(items) {
 //       })
 //       .catch(function(err) {
 //         errInvoice = err;
-
 //         var log = {
 //           User: orderFound ? orderFound.User : null,
 //           Order: orderId,
@@ -590,7 +591,6 @@ function createItems(items) {
 //           responseData: JSON.stringify(errInvoice),
 //           isError: true,
 //         };
-
 //         return AlegraLog.create(log);
 //       })
 //       .then(function(logCreated) {
