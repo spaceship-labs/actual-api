@@ -30,6 +30,9 @@ module.exports = {
     Client: {
       model: 'Client',
     },
+    Contract: {
+      model: 'EwalletFile',
+    },
     Store: {
       model: 'Store',
     },

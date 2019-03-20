@@ -187,7 +187,6 @@ async function addPayment(params, req) {
         : params.ammount,
       ewallet.amount
     );
-    console.log('QUE PEDO: ', hasEnoughFunds);
   }
 
   if (params.type === CLIENT_BALANCE_TYPE) {

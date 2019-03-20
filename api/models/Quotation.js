@@ -107,7 +107,6 @@ module.exports = {
       cb();
       return;
     }
-    console.log('no mames que entra aqui');
     val.tracing = addDefaultTracingDate();
     Common.orderCustomAI(val, 'quotationFolio', function(val) {
       cb();
