@@ -158,7 +158,7 @@ module.exports = {
     if (cardNumber.length < 12) throw new Error('Formato no válido');
     const ewallet = await Ewallet.findOne({ cardNumber });
     const client = await Client.findOne({ id: clientId });
-    console.log('client.Ewallet: ', client);
+    // console.log('client.Ewallet: ', client);
     if (ewallet) {
       console.log('ENTRA IF EWALLET');
       if (ewallet.Client === clientId) {
@@ -170,7 +170,7 @@ module.exports = {
       }
     } else if (client.Ewallet) {
       console.log('ENTRA IF EWALLET CLIENT');
-      console.log('client.Ewallet: ', client.Ewallet);
+      // console.log('client.Ewallet: ', client.Ewallet);
       throw new Error(
         'El cliente ya tiene un monedero relacionado, intente de nuevo'
       );
