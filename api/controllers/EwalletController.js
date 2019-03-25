@@ -31,7 +31,7 @@ module.exports = {
         if (cardNumber.length < 12) throw new Error('Formato no válido');
         ewallet = await Ewallet.findOne({ cardNumber });
         if (!ewallet)
-          throw new Error('El monedero electrónico ingresado no existe ');
+          throw new Error('El monedero ingresado no pertenece a este cliente ');
       } else {
         ewallet = await EwalletService.showOrCreate(
           cardNumber,
