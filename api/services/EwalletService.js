@@ -112,17 +112,24 @@ const validateExpirationDate = async () => {
     const currentMonth = moment(ewalletConfiguration.expirationDate).format(
       'MM'
     );
+
     if (
       monthBeforeExpiration === currentMonth &&
       ewalletConfiguration.emailSent === false
     ) {
       const clients = await Client.find();
-      const clientsEmail = clients.map(client => {
-        if (client.Ewallet) {
-          return client.email;
-        }
+      const clientsEmail = clients
+        .filter(function(client) {
+          if (client.Ewallet) {
+            return client;
+          }
+        })
+        .map(function(client) {
+          return { email: client.E_Mail, name: client.CardName };
+        });
+      const status = clientsEmail.map(email => {
+        Email.sendEwalletPointsWarning(email);
       });
-      Email.sendEwalletPointsWarning(clientsEmail);
       await EwalletConfiguration.update(
         { id: ewalletConfiguration.id },
         { emailSent: true }
