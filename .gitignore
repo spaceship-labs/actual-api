@@ -120,3 +120,4 @@ assets/uploads/*
 .eslintrc.js
 
 test/mocha.env.js
+.env
