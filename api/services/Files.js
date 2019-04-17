@@ -32,7 +32,7 @@ function saveFiles(req, opts) {
         });
       });
       console.log('filesUploaded mapped', mappedFilesUploaded);
-      resolve(filesUploaded);
+      resolve(mappedFilesUploaded);
     });
   });
 }
@@ -41,7 +41,7 @@ function camelCaseFileName(fileName) {
   const ext = fileName.split('.').pop() || '';
   const name = fileName.replace('.' + ext, '');
   const camelCaseName = name.replace(/[^a-zA-Z0-9]/g, '_');
-  return camelCaseName + '.' + ext;
+  return camelCaseName + '.' + ext.toLowerCase();
 }
 
 function generateFileName(_stream, callback) {
