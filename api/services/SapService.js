@@ -60,6 +60,7 @@ const formatCancelParams = async (id, action) => {
   } = await OrderCancelation.findOne({ Order: id }).populate(
     'CancelationDetails'
   );
+
   const detailsBeforeFormat = cancelDetails.map(
     ({
       id,
@@ -67,12 +68,14 @@ const formatCancelParams = async (id, action) => {
       shipDate,
       shipCompanyFrom: companyId,
       Product: productId,
+      Detail,
     }) => ({
       id,
       quantity,
       shipDate,
       companyId,
       productId,
+      detailId: Detail,
     })
   );
   const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
@@ -82,8 +85,9 @@ const formatCancelParams = async (id, action) => {
   const whsCodes = companies.map(({ WhsCode }) => WhsCode);
   const itemCodes = products.map(({ ItemCode }) => ItemCode);
   const formatedParams = detailsBeforeFormat.map(
-    ({ id, quantity, shipDate }, index) => ({
+    ({ id, quantity, shipDate, detailId }, index) => ({
       detailCancelReference: id,
+      detailId,
       ItemCode: itemCodes[index],
       OpenCreQty: quantity,
       ShipDate: moment(shipDate).format('YYYY-MM-DD'),
@@ -110,8 +114,9 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   sapCancels.cancelOrder = cancelOrderId;
   console.log('error: ', error);
   console.log('sapCancels: ', sapCancels);
+
   return;
-  return await createCancelationSap(sapCancels);
+  // return await createCancelationSap(sapCancels);
 };
 
 const createCancelationSap = async params => {
