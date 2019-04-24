@@ -22,8 +22,8 @@ const DEFAULT_QUOTATION_TOTALS = {
 };
 
 const statusTypes = {
-  CANCELED: 'canceled'
-}
+  CANCELED: 'canceled',
+};
 
 module.exports = {
   Calculator,
@@ -32,22 +32,22 @@ module.exports = {
   getTotalsByUser,
   getGroupByQuotationPayments,
   statusTypes,
-  DISCOUNT_KEYS
+  DISCOUNT_KEYS,
 };
 
-function getGroupByQuotationPayments(payments = []){
+function getGroupByQuotationPayments(payments = []) {
   var group = 1;
-  const auxPayments = payments.filter(function(payment){
+  const auxPayments = payments.filter(function(payment) {
     return !PaymentService.isCanceled(payment);
-  })
+  });
 
-  if(auxPayments.length > 0){
+  if (auxPayments.length > 0) {
     group = _.last(auxPayments).group;
   }
   return group;
 }
 
-async function updateQuotationToLatestData(quotationId, userId, options){
+async function updateQuotationToLatestData(quotationId, userId, options) {
   var params = {
     paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
@@ -112,7 +112,9 @@ function Calculator() {
     const promos = await getActivePromos();
     setLoadedActivePromotions(promos);
 
-    const quotation = await Quotation.findOne({id:quotationId}).populate('Details').populate('Payments');
+    const quotation = await Quotation.findOne({ id: quotationId })
+      .populate('Details')
+      .populate('Payments');
     const details = quotation.Details;
     const packagesIds = getQuotationDetailsPackagesIds(details);
 
@@ -144,7 +146,7 @@ function Calculator() {
 
     totals = {
       ...totals,
-      paymentGroup: getGroupByQuotationPayments(quotation.Payments)
+      paymentGroup: getGroupByQuotationPayments(quotation.Payments),
     };
 
     return totals;
@@ -308,14 +310,13 @@ function Calculator() {
     return result;
   }
 
-
   const calculateEwalletAmount = (group, total, promotion) => {
     if (promotion[`ewalletTypePg${group}`] === 'ammount') {
       return promotion[`ewalletPg${group}`];
-    } else if (promotion[`ewalletTypePg${group}`] === 'percentage'){
+    } else if (promotion[`ewalletTypePg${group}`] === 'percentage') {
       return total * (promotion[`ewalletPg${group}`] / 100);
     }
-  }
+  };
 
   //@params: detail Object from model Detail
   async function getDetailTotals(detail, options = {}) {
@@ -324,7 +325,7 @@ function Calculator() {
     const quotationId = detail.Quotation;
     const product = await Product.findOne({ id: productId });
     const mainPromo = await getProductMainPromo(product, quantity, quotationId);
-    const {paymentGroup} = options;
+    const { paymentGroup } = options;
     const unitPrice = product.Price;
     const discountKey = getDiscountKeyByGroup(paymentGroup);
     const discountPercent = mainPromo ? mainPromo[discountKey] : 0;
@@ -535,7 +536,7 @@ function Calculator() {
   };
 }
 
-function getTotalsByUser(options) {
+async function getTotalsByUser(options) {
   var userId = options.userId;
   var todayDate = moment()
     .endOf('day')
@@ -594,27 +595,20 @@ function getTotalsByUser(options) {
   //sails.log.info('queryByDateRange', queryByDateRange);
   //sails.log.info('queryAllByDateRange', queryAllByDateRange);
 
-  var props = {
-    totalUntilToday: Quotation.find(queryUntilToday).sum('total'),
-    totalByDateRange: Quotation.find(queryByDateRange).sum('total'),
-    totalByDateRangeAll: Quotation.find(queryAllByDateRange).sum('total'),
+  const totalUntilToday = await Quotation.find(queryUntilToday);
+  const totalByDateRange = await Quotation.find(queryByDateRange);
+  const totalByDateRangeAll = await Quotation.find(queryAllByDateRange);
+
+  const getTotal = (x, { total = 0 }) => x + total;
+  const resultUntilToday = totalUntilToday.reduce(getTotal, 0);
+  const resultByDateRange = totalByDateRange.reduce(getTotal, 0);
+  const resultByDateRangeAll = totalByDateRangeAll.reduce(getTotal, 0);
+
+  return {
+    untilToday: resultUntilToday,
+    byDateRange: resultByDateRange,
+    allByDateRange: resultByDateRangeAll,
   };
-
-  return Promise.props(props).then(function(result) {
-    var resultUntilToday = result.totalUntilToday[0] || {};
-    var resultByDateRange = result.totalByDateRange[0] || {};
-    var resultAllByDateRange = result.totalByDateRangeAll[0] || {};
-
-    var totalUntilToday = resultUntilToday.total || 0;
-    var totalByDateRange = resultByDateRange.total || 0;
-    var totalByDateRangeAll = resultAllByDateRange.total || 0;
-
-    return {
-      untilToday: totalUntilToday,
-      byDateRange: totalByDateRange,
-      allByDateRange: totalByDateRangeAll,
-    };
-  });
 }
 
 function getCountByUser(options) {
@@ -667,7 +661,7 @@ function getCountByUser(options) {
 
   var queryAllByDateRange = _.clone(queryByDateRange);
 
-  if(isClosed){
+  if (isClosed) {
     queryUntilToday.isClosed = isClosed;
     queryByDateRange.isClosed = isClosed;
   }
