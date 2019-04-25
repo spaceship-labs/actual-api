@@ -371,7 +371,7 @@ function getCountByUser(form) {
   });
 }
 
-function getTotalsByUser(form) {
+async function getTotalsByUser(form) {
   var userId = form.userId;
   var getFortnightTotals = !_.isUndefined(form.fortnight)
     ? form.fortnight
@@ -390,29 +390,45 @@ function getTotalsByUser(form) {
     createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end },
   };
 
-  var props = {
-    totalDateRange: Order.find(queryDateRange).sum('total'),
-  };
-  if (getFortnightTotals) {
-    props.totalFortnight = Order.find(queryfortNightRange).sum('total');
-  }
+  // var props = {
+  //   totalDateRange: Order.find(queryDateRange).sum('total'),
+  // };
+  // if (getFortnightTotals) {
+  //   props.totalFortnight = Order.find(queryfortNightRange).sum('total');
+  // }
 
+  const getTotal = (x, { total = 0 }) => x + total;
+
+  const totalDateRange = await Order.find(queryDateRange);
+  const totalFortnight = getFortnightTotals
+    ? await Order.find(queryfortNightRange)
+    : false;
+
+  const resultFortnight = totalFortnight.reduce(getTotal, 0);
+  const resultDateRange = !totalFortnight
+    ? false
+    : totalDateRange.reduce(getTotal, 0);
+
+  return {
+    fortnight: resultFortnight,
+    dateRange: resultDateRange,
+  };
   //Find all totals
-  return Promise.props(props).then(function(result) {
-    var totalFortnight = 0;
-    var totalDateRange = 0;
-    if (getFortnightTotals && result.totalFortnight.length > 0) {
-      totalFortnight = result.totalFortnight[0].total;
-    }
-    if (result.totalDateRange.length > 0) {
-      totalDateRange = result.totalDateRange[0].total;
-    }
-    var response = {
-      fortnight: totalFortnight || false,
-      dateRange: totalDateRange,
-    };
-    return response;
-  });
+  // return Promise.props(props).then(function(result) {
+  //   var totalFortnight = 0;
+  //   var totalDateRange = 0;
+  //   if (getFortnightTotals && result.totalFortnight.length > 0) {
+  //     totalFortnight = result.totalFortnight[0].total;
+  //   }
+  //   if (result.totalDateRange.length > 0) {
+  //     totalDateRange = result.totalDateRange[0].total;
+  //   }
+  //   var response = {
+  //     fortnight: totalFortnight || false,
+  //     dateRange: totalDateRange,
+  //   };
+  //   return response;
+  // });
 }
 
 function buildOrderCreateParams({
