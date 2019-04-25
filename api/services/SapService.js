@@ -9,7 +9,7 @@ const moment = require('moment');
 const axios = require('axios');
 axios.defaults.baseURL = baseUrl;
 axios.defaults.headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+  'Content-Type': 'application/json; charset=utf-8',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -75,7 +75,7 @@ const formatCancelParams = async (id, action) => {
       shipDate,
       companyId,
       productId,
-      detailId: Detail,
+      DetailId: Detail,
     })
   );
   const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
@@ -104,10 +104,17 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
+
+  axios.interceptors.request.use(request => {
+    console.log('Request delete sapOrder', request);
+    return request;
+  });
+
   const { data: { value: sapCancels }, error } = await axios.delete(
     '/SalesOrder',
     {
-      data: { params },
+      data: params,
+      port: 80,
     }
   );
   sapCancels.order = orderId;
@@ -115,8 +122,7 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   console.log('error: ', error);
   console.log('sapCancels: ', sapCancels);
 
-  return;
-  // return await createCancelationSap(sapCancels);
+  return await createCancelationSap(sapCancels);
 };
 
 const createCancelationSap = async params => {
@@ -355,6 +361,9 @@ function createSaleOrder(params) {
         products: JSON.stringify(requestParams.products),
         payments: JSON.stringify(requestParams.payments),
       };
+
+      console.log('preForm', preForm);
+
       const formDataStr = qs.stringify(preForm, { encode: true });
       var options = {
         json: true,
@@ -362,9 +371,11 @@ function createSaleOrder(params) {
         url: endPoint,
         body: formDataStr,
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+          'Content-Type': 'application/json; charset=utf-8',
         },
       };
+      // console.log('options', options);
+
       return request(options);
     })
     .then(function(response) {
@@ -447,6 +458,8 @@ function buildOrderRequestParams(params) {
         DetailId: detail.id,
         //unitPrice: detail.Product.Price
       };
+      // console.log('product', product);
+
       return product;
     });
 
@@ -486,7 +499,7 @@ function getCompanyCode(code, storeGroup) {
 }
 
 function mapPaymentsToSap(payments, exchangeRate, currentStore) {
-  console.log('currentStore', currentStore);
+  // console.log('currentStore', currentStore);
   payments = payments.filter(function(payment) {
     return (
       payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
