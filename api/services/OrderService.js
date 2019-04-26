@@ -141,8 +141,17 @@ module.exports = {
     } = await SapService.createSaleOrder(sapSaleOrderParams);
     const sapResponse = response;
     const sapEndpoint = decodeURIComponent(endPoint);
-    sails.log.info('createSaleOrder response', sapResponse);
 
+    // const logToCreate = {
+    //   content: {
+    //     sapEndpoint,
+    //     requestParams,
+    //     sapResponse,
+    //   },
+    //   User: currentUser.id,
+    //   Store: opts.currentStoreId,
+    //   Quotation: quotationId,
+    // };
     const logToCreate = {
       content:
         sapEndpoint +
@@ -157,7 +166,13 @@ module.exports = {
 
     const sapLog = await SapOrderConnectionLog.create(logToCreate);
 
-    const sapResult = JSON.parse(sapResponse.value);
+    console.log('response sap: ', sapResponse);
+
+    const sapResult = sapResponse;
+
+    console.log('sap', sapResponse);
+    console.log('sap', sapResult);
+    console.log('sap', quotation.Payments);
 
     validateSapOrderCreated(sapResponse, sapResult, quotation.Payments);
 
@@ -628,6 +643,8 @@ function saveSapReferences(sapResult, order, orderDetails) {
 }
 
 function extractBalanceFromSapResult(sapResult) {
+  console.log('extractBalanceFromSapResult', sapResult);
+
   var balanceItem = _.findWhere(sapResult, { type: BALANCE_SAP_TYPE });
   if (balanceItem && balanceItem.result && !isNaN(balanceItem.result)) {
     return parseFloat(balanceItem.result);
