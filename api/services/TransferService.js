@@ -10,7 +10,7 @@ function transfers(group, storeCode) {
       sucursal: '7004',
       account: '6988750',
       clabe: '002691700469887500',
-      swift: 'BNMXMXMM'
+      swift: 'BNMXMXMM',
     },
     {
       currency: 'Pesos',
@@ -18,7 +18,7 @@ function transfers(group, storeCode) {
       sucursal: '-',
       account: '0194554957',
       clabe: '012691001945549572',
-      swift: '-'
+      swift: '-',
     },
     {
       currency: 'Pesos',
@@ -26,7 +26,7 @@ function transfers(group, storeCode) {
       sucursal: '7852',
       account: '65504120542',
       clabe: '014691655041205423',
-      swift: '-'
+      swift: '-',
     },
     {
       currency: 'Pesos',
@@ -34,7 +34,7 @@ function transfers(group, storeCode) {
       sucursal: '-',
       account: '0201852130',
       clabe: '072691002018521301',
-      swift: '-'
+      swift: '-',
     },
     {
       currency: 'Dólares',
@@ -43,7 +43,7 @@ function transfers(group, storeCode) {
       account: '3416508',
       clabe: '002691000134165082',
       swift: 'BNMXMXMM',
-    }
+    },
   ];
   var noStudio = [
     {
@@ -87,9 +87,24 @@ function transfers(group, storeCode) {
       swift: 'BNMXMXMM',
     },
   ];
-  if(group === 'studio' && storeCode !== 'actual_studio_merida'){
+
+  if (storeCode === 'actual_marketplace') {
+    const marketPlace = [
+      {
+        currency: 'Pesos',
+        bank: 'Banamex',
+        sucursal: '7013',
+        account: '6383408',
+        clabe: '002691701363834085',
+        swift: '',
+      },
+    ];
+    return marketPlace;
+  }
+
+  if (group === 'studio' && storeCode !== 'actual_studio_merida') {
     return studio;
-  }else{
+  } else {
     return noStudio;
   }
 }
