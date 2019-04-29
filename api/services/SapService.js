@@ -75,7 +75,7 @@ const formatCancelParams = async (id, action) => {
       shipDate,
       companyId,
       productId,
-      DetailId: Detail,
+      detailId: Detail,
     })
   );
   const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
@@ -100,7 +100,6 @@ const formatCancelParams = async (id, action) => {
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
   const params = await formatCancelParams(orderId, action);
-  console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
@@ -119,13 +118,13 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
       port: 80,
     }
   );
-  console.log('sapCancels:', sapCancels);
 
   sapCancels.order = orderId;
   sapCancels.cancelOrder = cancelOrderId;
-  console.log('sapcproducts', sapCancels.products[0]);
 
-  return await createCancelationSap(sapCancels);
+  const dataCancels = sapCancels[0];
+
+  return await createCancelationSap(dataCancels);
 };
 
 const createCancelationSap = async params => {
@@ -143,9 +142,6 @@ const createCancelationSap = async params => {
     order,
     cancelOrder,
   } = params;
-  console.log('params', params);
-
-  console.log('params cancel', params.products);
 
   const documents = [
     { type: 'RequestTransfer', documents: RequestTransfer },
@@ -155,7 +151,6 @@ const createCancelationSap = async params => {
   documents.map(document => createCancelDocSap(document, order, cancelOrder));
   const cancelDocsSap = await CancelDocSap.find({ order });
   const docsSapIds = cancelDocsSap.map(({ id }) => id);
-  console.log('productsSap', productsSap);
 
   const productsObj = productsSap.map(
     async ({ ItemCode }) => await Product.findOne({ ItemCode })

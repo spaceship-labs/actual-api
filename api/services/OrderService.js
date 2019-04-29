@@ -170,10 +170,6 @@ module.exports = {
 
     const sapResult = sapResponse;
 
-    console.log('sap', sapResponse);
-    console.log('sap', sapResult);
-    console.log('sap', quotation.Payments);
-
     validateSapOrderCreated(sapResponse, sapResult, quotation.Payments);
 
     orderParams.documents = sapResult;
