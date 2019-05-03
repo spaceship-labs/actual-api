@@ -57,10 +57,21 @@ const formatCancelParams = async (id, action) => {
   const {
     Quotation: idQuotation,
     CancelationDetails: cancelDetails,
-  } = await OrderCancelation.findOne({ Order: id }).populate(
-    'CancelationDetails'
+    Details: orderDetails,
+  } = await OrderCancelation.findOne({ Order: id })
+    .populate('CancelationDetails')
+    .populate('Details');
+  const detailsQuantity = cancelDetails.map(({ quantity }) => quantity);
+  const detailsCanceledQuantity = orderDetails.map(
+    ({ quantityCanceled }) => quantityCanceled
   );
-
+  const quantityCanceled = detailsQuantity.map(
+    quantity,
+    index => quantity - detailsCanceledQuantity[index]
+  );
+  const actions = quantityCanceled.map(
+    quantity => (quantity > 0 ? 'edit' : 'delete')
+  );
   const detailsBeforeFormat = cancelDetails.map(
     ({
       id,
@@ -102,7 +113,7 @@ const formatCancelParams = async (id, action) => {
       OpenCreQty: quantity,
       ShipDate: moment(shipDate).format('YYYY-MM-DD'),
       WhsCode: whsCodes[index],
-      Action: action,
+      Action: actions[index],
     })
   );
 
@@ -197,6 +208,18 @@ const createCancelationSap = async (params, order, cancelOrder) => {
   );
   const Products = productsObj.map(({ id }) => id);
 
+  const detailCancelReferences = productsSap.map(
+    ({ detailCancelReference }) => detailCancelReference
+  );
+
+  const orderDetailCancels = await OrderDetailCancelation.find({
+    id: detailCancelReferences,
+  });
+
+  const detailsIds = orderDetailCancels.map(({ Detail }) => Detail);
+
+  console.log('detailsIds: ', detailsIds);
+
   PaymentsCancel.map(payment =>
     createPaymentCancelSap(payment, order, cancelOrder)
   );
@@ -219,7 +242,7 @@ const createCancelationSap = async (params, order, cancelOrder) => {
   );
   const paymentsIds = payments.map(({ id }) => id);
 
-  const detailsIds = series.map(({ DetailId }) => DetailId);
+  // const detailsIds = series.map(({ DetailId }) => DetailId);
 
   const cancelSapParams = {
     result,
