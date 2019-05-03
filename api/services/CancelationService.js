@@ -157,6 +157,7 @@ const updateRequest = async (
     .populate('Details')
     .populate('Order')
     .populate('CancelationDetails');
+
   const { amountCanceled: amountCanceledBefore, ammountPaid } = orderCancel;
   const amountCanceled = await getCanceledAmount(Details);
   if (requestStatus === 'rejected') {
@@ -177,10 +178,16 @@ const updateRequest = async (
       action,
       id
     );
+
+    console.log('authorized', authorizedDetails);
+
     const authorizedCancelationDetails = authorizedDetails.map(id =>
-      compareDetailsIDS(id, cancelationDetails)
+      compareDetailsIDS(id, CancelationDetails)
     );
+
     authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
+      console.log('id:', id, 'quantity: ', quantity, 'detail: ', Detail);
+
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
       );
