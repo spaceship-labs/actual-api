@@ -61,6 +61,7 @@ const formatCancelParams = async (id, action) => {
   } = await OrderCancelation.findOne({ Order: id })
     .populate('CancelationDetails')
     .populate('Details');
+  // TODO: CONVERTIR GETACTIONS EN FUNCION
   const detailsQuantity = cancelDetails.map(({ quantity }) => quantity);
   const detailsCanceledQuantity = orderDetails.map(
     ({ quantityCanceled }) => quantityCanceled
