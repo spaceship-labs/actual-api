@@ -96,7 +96,7 @@ function transfers(group, storeCode) {
         sucursal: '7013',
         account: '6383408',
         clabe: '002691701363834085',
-        swift: '',
+        swift: 'BNMXMXMM',
       },
     ];
     return marketPlace;
