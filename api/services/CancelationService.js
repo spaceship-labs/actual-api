@@ -227,6 +227,13 @@ const updateRequest = async (
       .populate('CancelationDetails');
   }
   if (requestStatus === 'partially') {
+    const authorizedDetails = await SapService.cancelOrder(
+      orderCancel.id,
+      action
+    );
+    const detailsToCancel = await OrderDetailCancelation.findOne({
+      Detail: authorizedDetails,
+    });
     detailsApprovement.map(async ({ id, status }) => {
       const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(

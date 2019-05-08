@@ -63,14 +63,14 @@ const formatCancelParams = async (id, action) => {
     .populate('Details');
   // TODO: CONVERTIR GETACTIONS EN FUNCION
   const detailsQuantity = cancelDetails.map(({ quantity }) => quantity);
-  const detailsCanceledQuantity = orderDetails.map(
-    ({ quantityCanceled }) => quantityCanceled
+  const detailsAvailableQuantity = orderDetails.map(
+    ({ quantityAvailable }) => quantityAvailable
   );
-  const quantityCanceled = detailsQuantity.map(
+  const quantityAvailable = detailsQuantity.map(
     quantity,
-    index => quantity - detailsCanceledQuantity[index]
+    index => detailsAvailableQuantity[index] - quantity
   );
-  const actions = quantityCanceled.map(
+  const actions = quantityAvailable.map(
     quantity => (quantity > 0 ? 'edit' : 'delete')
   );
   const detailsBeforeFormat = cancelDetails.map(
