@@ -205,6 +205,7 @@ function buildOrderRequestParams(params) {
   var MARKETPLACES_GROUPCODE = 11;
   var MERCADOLIBRE_MARKETPLACE_GROUPCODE = 12;
   var AMAZON_MARKETPLACE_GROUPCODE = 13;
+  let PROJECTS_PLAYA_GROUPCODE = 14;
 
   if (
     params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
@@ -217,6 +218,7 @@ function buildOrderRequestParams(params) {
     params.groupCode != MARKETPLACES_GROUPCODE &&
     params.groupCode != MERCADOLIBRE_MARKETPLACE_GROUPCODE &&
     params.groupCode != AMAZON_MARKETPLACE_GROUPCODE &&
+    params.groupCode != PROJECTS_PLAYA_GROUPCODE &&
     process.env.MODE === 'production'
   ) {
     return Promise.reject(
