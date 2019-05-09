@@ -1,0 +1,9 @@
+version: '3'
+services:
+ web:
+  build: .
+  ports:
+  - "${HOST_PORT}:1337"
+  volumes:
+  - $PWD:/actual-api
+  - $PWD/pm2.json:/pm2.json
