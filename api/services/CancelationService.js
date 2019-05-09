@@ -231,8 +231,8 @@ const updateRequest = async (
       orderCancel.id,
       action
     );
-    const detailsToCancel = await OrderDetailCancelation.findOne({
-      Detail: authorizedDetails,
+    const detailsToCancel = await OrderDetail.findOne({
+      id: authorizedDetails,
     });
     detailsApprovement.map(async ({ id, status }) => {
       const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
@@ -290,6 +290,31 @@ const getCancelDetails = async ids => {
   return _.union(details);
 };
 
+const getDetailsToCancelModels = async (id, status, details) => {
+  const { CancelationDetails } = await OrderCancelation.findOne({
+    id,
+  }).populate('CancelationDetails');
+  if (status === 'authorized') {
+    return CancelationDetails;
+  } else {
+    return filteredDetails(CancelationDetails, details);
+  }
+};
+
+const filterDeailsByStatus = (cancelationDetails, detailsWithStatus) => {
+  const details = detailsWithStatus.filter(
+    ({ status }) => status === 'authorized'
+  );
+};
+
+const filteredDetails = (cancelationDetails, details) =>
+  cancelationDetails.map(cancelDetail => {
+    details.forEach(detail => {
+      if (cancelDetail.Detail === detail) {
+        return cancelDetail.id;
+      }
+    });
+  });
 module.exports = {
   addCancelation,
   updateRequest,
@@ -297,4 +322,7 @@ module.exports = {
   getCanceledAmount,
   compareDetailsQuantity,
   getCancelDetails,
+  getDetailsToCancelModels,
+  filterDeailsByStatus,
+  filteredDetails,
 };

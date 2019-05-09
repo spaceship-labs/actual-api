@@ -262,15 +262,18 @@ const createCancelationSap = async (params, order, cancelOrder) => {
   const { id } = await CancelationSap.create(cancelSapParams);
   console.log('id CancelationSap', id);
 
-  const prueba = await CancelationSap.findOne({
-    id: '5ccb6a4aad15bc003a24348f',
-  }).populate('Details');
+  const prueba = await CancelationSap.findOne({ id }).populate('Details');
   console.log('prueba', prueba);
 
-  const Details = await CancelationSap.findOne({ id }).populate('Details');
+  const { Details } = await CancelationSap.findOne({ id }).populate('Details');
   console.log('details', Details);
 
-  return Details;
+  const canceledDetails = await OrderDetailCancelation.find({
+    Detail: Details,
+  });
+  const authorizedCancelDetails = canceledDetails.map(({ Detail }) => Detail);
+
+  return authorizedCancelDetails;
 };
 
 const createCancelDocSap = ({ type, documents }, order, cancelOrder) => {
