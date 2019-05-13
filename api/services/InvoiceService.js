@@ -37,10 +37,10 @@ const formatSendMailRequest = (folio, email) => ({
 });
 
 /* Disabled until Actual tell us
-*
-*
-*
-*/
+ *
+ *
+ *
+ */
 /*
 const formatElectronicPayment = (
   order,
@@ -447,17 +447,16 @@ const ammountCompare = (currency, payment, ammount, exchangeRate) =>
     : ammount;
 
 const getHighestPayment = payments => {
-  payments.reduce(
-    (prev, current) =>
-      ammountCompare(prev.currency, prev, prev.ammount, prev.exchangeRate) >
-      ammountCompare(
-        current.currency,
-        current,
-        current.ammount,
-        current.exchangeRate
-      )
-        ? prev
-        : current
+  payments.reduce((prev, current) =>
+    ammountCompare(prev.currency, prev, prev.ammount, prev.exchangeRate) >
+    ammountCompare(
+      current.currency,
+      current,
+      current.ammount,
+      current.exchangeRate
+    )
+      ? prev
+      : current
   );
 };
 

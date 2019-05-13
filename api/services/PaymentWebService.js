@@ -1,9 +1,11 @@
+const cloneDeep = require('lodash.clonedeep');
+
 module.exports = {
-  getPaymentGroups: getPaymentGroups
+  getPaymentGroups
 };
 
 function getPaymentGroups(){
-  return paymentGroups;
+  return cloneDeep(paymentGroups);
 }
 
 var paymentGroups = [
@@ -20,6 +22,7 @@ var paymentGroups = [
         cards:['Visa','MasterCard','American Express'],
         currency: 'mxn',
         min:0,
+        group: 1
       },
 
       {
@@ -32,6 +35,7 @@ var paymentGroups = [
         cards:['Banamex','HSBC','Inbursa','Santander'],
         currency: 'mxn',
         min:0,
+        group: 1
       },
       {
         label:'Transferencia',
@@ -61,6 +65,7 @@ var paymentGroups = [
           {label:'Banorte', value:'banorte'},
           {label:'Santander', value:'santander'}
         ],
+        group: 1
       },
     ]
   },
@@ -101,7 +106,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:300,
         needsVerification: true,
-        web:true
+        web:true,
+        group: 2
       }
     ]
   },
@@ -143,7 +149,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:600,
         needsVerification: true,
-        web:true
+        web:true,
+        group: 3
       },
       {
         label:'9',
@@ -178,7 +185,8 @@ var paymentGroups = [
         currency: 'mxn',
         min:800,
         needsVerification: true,
-        web:true
+        web:true,
+        group: 3
       },
     ]
   },
@@ -219,7 +227,8 @@ var paymentGroups = [
         currency: 'mxn',
         min: 1200,
         needsVerification: true,
-        web:true
+        web:true,
+        group: 4
       },
     ]
   },
@@ -248,7 +257,8 @@ var paymentGroups = [
         currency: 'mxn',
         needsVerification: true,
         min:2000,
-        web:true
+        web:true,
+        group: 5
       },
       */
     ]

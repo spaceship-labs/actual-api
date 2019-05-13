@@ -22,6 +22,18 @@ function formatMongoRecord(record){
 
 module.exports = {
 
+  mapTerminalCode: function(code){
+    var mapper = {
+      'american-express': 'American express',
+      'banamex': 'Banamex',
+      'bancomer': 'Bancomer',
+      'banorte': 'Banorte',
+      'santander': 'Santander'       
+    };
+    return mapper[code];
+  },
+
+
   nativeFindOne: function(findCrieria, model){
     return new Promise(function(resolve, reject){
       model.native(function(err, collection){

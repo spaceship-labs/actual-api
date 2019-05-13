@@ -7,6 +7,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "axios": "^0.18.0",
+    "aws-sdk": "^2.311.0",
     "bcrypt": "^0.8.x",
     "bcrypt-nodejs": "0.0.3",
     "bignumber.js": "^7.2.1",
@@ -34,8 +35,11 @@
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
+    "pkgcloud": "^1.5.0",
     "promise-delay": "^2.1.0",
     "q": "^1.4.1",
+    "qs": "^6.5.2",
+    "querystring": "^0.2.0",
     "rc": "~0.5.0",
     "request": "^2.72.0",
     "request-promise": "^4.1.1",
@@ -47,7 +51,7 @@
     "sails-sqlserver": "^0.10.8",
     "sendgrid": "^3.0.8",
     "skipper": "^0.8.0",
-    "skipper-pkgcloud": "0.0.4",
+    "skipper-s3": "^0.5.11",
     "underscore": "^1.8.3"
   },
   "devDependencies": {

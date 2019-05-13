@@ -89,7 +89,7 @@ module.exports = {
     //TODO: Check status types
     status:{
       type:'string',
-      //enum:['closed','pending-payment','to-order']
+      //enum:['closed','pending-payment','to-order', 'canceled']
     },
     source:{
       type:'string',

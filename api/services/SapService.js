@@ -1,6 +1,7 @@
 const baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
 //var baseUrl = 'http://189.149.131.100:8080';
 const request = require('request-promise');
+const qs = require('qs');
 const Promise = require('bluebird');
 const buildUrl = require('build-url');
 const _ = require('underscore');
@@ -27,13 +28,18 @@ var reqOptions = {
 };
 
 module.exports = {
-  createContact: createContact,
-  createSaleOrder: createSaleOrder,
-  createClient: createClient,
-  updateClient: updateClient,
-  updateContact: updateContact,
-  updateFiscalAddress: updateFiscalAddress,
-  buildSaleOrderRequestParams: buildSaleOrderRequestParams,
+  createContact,
+  createSaleOrder,
+  createClient,
+  updateClient,
+  updateContact,
+  updateFiscalAddress,
+  buildOrderRequestParams,
+  cancelOrder,
+
+  //EXPOSED FOR TESTING PURPOSES
+  mapPaymentsToSap,
+  SAP_DATE_FORMAT,
 };
 
 function createClient(params) {
@@ -154,24 +160,40 @@ function updateFiscalAddress(cardcode, form) {
 */
 function createSaleOrder(params) {
   var endPoint;
-  return buildSaleOrderRequestParams(params)
-    .then(function(requestParams) {
-      endPoint = baseUrl + requestParams;
-      sails.log.info('createSaleOrder');
-      sails.log.info(decodeURIComponent(endPoint));
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
+  var requestParams;
+  return buildOrderRequestParams(params)
+    .then(function(_requestParams) {
+      requestParams = _requestParams;
+      endPoint = baseUrl + '/SalesOrder';
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+      const preForm = {
+        contact: JSON.stringify(requestParams.contact),
+        products: JSON.stringify(requestParams.products),
+        payments: JSON.stringify(requestParams.payments),
+      };
+      const formDataStr = qs.stringify(preForm, { encode: true });
+      var options = {
+        json: true,
+        method: 'POST',
+        url: endPoint,
+        body: formDataStr,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        },
+      };
+      return request(options);
     })
     .then(function(response) {
       return {
+        requestParams,
         endPoint: endPoint,
         response: response,
       };
     });
 }
 
-function buildSaleOrderRequestParams(params) {
-  var requestParams = '/SalesOrder?sales=';
+function buildOrderRequestParams(params) {
   var products = [];
   var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
@@ -180,6 +202,10 @@ function buildSaleOrderRequestParams(params) {
   var ACTUAL_STUDIO_MALECON_GROUPCODE = 1;
   var ACTUAL_STUDIO_PLAYA_GROUPCODE = 2;
   var ACTUAL_STUDIO_MERIDA_GROUPCODE = 3;
+  var MARKETPLACES_GROUPCODE = 11;
+  var MERCADOLIBRE_MARKETPLACE_GROUPCODE = 12;
+  var AMAZON_MARKETPLACE_GROUPCODE = 13;
+  let PROJECTS_PLAYA_GROUPCODE = 14;
 
   if (
     params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
@@ -189,6 +215,10 @@ function buildSaleOrderRequestParams(params) {
     params.groupCode != ACTUAL_STUDIO_MALECON_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_PLAYA_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_MERIDA_GROUPCODE &&
+    params.groupCode != MARKETPLACES_GROUPCODE &&
+    params.groupCode != MERCADOLIBRE_MARKETPLACE_GROUPCODE &&
+    params.groupCode != AMAZON_MARKETPLACE_GROUPCODE &&
+    params.groupCode != PROJECTS_PLAYA_GROUPCODE &&
     process.env.MODE === 'production'
   ) {
     return Promise.reject(
@@ -196,7 +226,7 @@ function buildSaleOrderRequestParams(params) {
     );
   }
 
-  var saleOrderRequest = {
+  var contactParams = {
     QuotationId: params.quotationId,
     GroupCode: params.groupCode,
     ContactPersonCode: params.cntctCode,
@@ -211,8 +241,8 @@ function buildSaleOrderRequestParams(params) {
     Broker: params.brokerCode,
   };
 
-  if (saleOrderRequest.SalesPersonCode === []) {
-    saleOrderRequest.SalesPersonCode = -1;
+  if (contactParams.SalesPersonCode === []) {
+    contactParams.SalesPersonCode = -1;
   }
 
   return getAllWarehouses().then(function(warehouses) {
@@ -239,21 +269,20 @@ function buildSaleOrderRequestParams(params) {
       return product;
     });
 
-    saleOrderRequest.WhsCode = getWhsCodeById(
+    contactParams.WhsCode = getWhsCodeById(
       params.currentStore.Warehouse,
       warehouses
     );
 
-    requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
-    requestParams +=
-      '&products=' + encodeURIComponent(JSON.stringify(products));
-    requestParams +=
-      '&payments=' +
-      encodeURIComponent(
-        JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate))
-      );
-
-    return requestParams;
+    return {
+      products,
+      contact: contactParams,
+      payments: mapPaymentsToSap(
+        params.payments,
+        params.exchangeRate,
+        params.currentStore
+      ),
+    };
   });
 }
 
@@ -275,39 +304,43 @@ function getCompanyCode(code, storeGroup) {
   return companyCode;
 }
 
-function mapPaymentsToSap(payments, exchangeRate) {
-  payments = payments.filter(function(p) {
+function mapPaymentsToSap(payments, exchangeRate, currentStore) {
+  console.log('currentStore', currentStore);
+  payments = payments.filter(function(payment) {
     return (
-      p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
-      p.type !== PaymentService.types.CLIENT_CREDIT
+      payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
+      payment.type !== PaymentService.types.CLIENT_CREDIT &&
+      payment.type !== PaymentService.EWALLET_TYPE &&
+      !PaymentService.isCanceled(payment)
     );
   });
 
   var paymentsTopSap = payments.map(function(payment) {
-    var DEFAULT_TERMINAL = 'banamex';
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
       amount: payment.ammount,
     };
+
+    if (
+      currentStore.marketplace &&
+      payment.type === PaymentService.types.TRANSFER
+    ) {
+      paymentSap.TypePay = PaymentService.types.TRANSFER_ECOMMERCE;
+    }
+
     if (payment.currency === 'usd') {
       paymentSap.rate = exchangeRate;
     }
     if (PaymentService.isCardPayment(payment)) {
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
-      /*
-      if(!payment.terminal){
-        payment.terminal = DEFAULT_TERMINAL;
-      }
-      */
     }
     if (payment.terminal) {
       paymentSap.Terminal = payment.terminal;
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-
     return paymentSap;
   });
 
@@ -408,8 +441,23 @@ function buildAddressContactEndpoint(fields, cardcode) {
     U_Correos: fields.U_Correos,
     LicTradNum: fields.LicTradNum,
   };
-  field = _.omit(fields, _.isUndefined);
+  fields = _.omit(fields, _.isUndefined);
   path += '?address=' + encodeURIComponent(JSON.stringify(fields));
   path += '&contact=' + encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
+}
+
+function cancelOrder(quotationId) {
+  const requestParams = {
+    QuotationId: quotationId,
+  };
+  const endPoint = buildUrl(baseUrl, {
+    path: 'SalesOrder',
+    queryParams: requestParams,
+  });
+  sails.log.info('cancel order');
+  sails.log.info(decodeURIComponent(endPoint));
+  reqOptions.uri = endPoint;
+  reqOptions.method = 'DELETE';
+  return request(reqOptions);
 }

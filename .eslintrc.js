@@ -76,6 +76,7 @@ module.exports = {
 		"PMPeriod": true,
 		"PackageRule": true,
 		"Payment": true,
+		"PaymentWeb": true,
 		"PaymentSap": true,
 		"Permission": true,
 		"Product": true,
@@ -133,6 +134,7 @@ module.exports = {
 		"StockService": true,
 		"StoreService": true,
 		"SyncService": true,
-		"TransferService": true
+		"TransferService": true,
+		"ReportService": true
 	}
 };

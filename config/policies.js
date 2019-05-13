@@ -23,7 +23,10 @@ module.exports.policies = {
   },
   SiteController: {
     '*': ['isAuthenticated'],
+<<<<<<< HEAD
     findByHandle: true,
+=======
+>>>>>>> feat/projects-playa
     generateSitesCashReport: ['isAuthenticated', 'isAdmin'],
   },
   UserController: {
@@ -43,15 +46,18 @@ module.exports.policies = {
   },
   QuotationController: {
     addDetail: ['isAuthenticated', 'isSellerOrAdmin'],
-    update: ['isAuthenticated', 'isSellerOrAdmin'],
+    update: ['isAuthenticated', 'isAdminSellerOrManager'],
     create: ['isAuthenticated', 'isSellerOrAdmin'],
     removeDetailsGroup: ['isAuthenticated', 'isSellerOrAdmin'],
   },
   PaymentController: {
     add: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isAdminOrManager'],
   },
   OrderController: {
-    createFromQuotation: ['isAuthenticated', 'isSellerOrAdmin'],
+    create: ['isAuthenticated', 'isSellerOrAdmin'],
+    cancel: ['isAuthenticated', 'isAdminOrManager'],
+    //cancel: ['isAuthenticated', 'isAccountingUser']
   },
   ProductController: {
     find: ['isAuthenticated', 'isAllowed'],
@@ -77,6 +83,7 @@ module.exports.policies = {
   },
   ProductFilterValueController: {
     getProducts: true,
+<<<<<<< HEAD
   },
   ProductSearchController: {
     /*
@@ -85,6 +92,8 @@ module.exports.policies = {
     searchByCategory: true,
     searchByFilterValues: true
     */
+=======
+>>>>>>> feat/projects-playa
   },
   LoggingController: {
     find: true,
@@ -104,10 +113,13 @@ module.exports.policies = {
   LocalController:{
     '*':true
   }
+<<<<<<< HEAD
   */
 
   //Por ahora
   //SyncController:{'*':true}
+=======
+>>>>>>> feat/projects-playa
 
   /***************************************************************************
    *                                                                          *

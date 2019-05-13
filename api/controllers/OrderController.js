@@ -1,12 +1,3 @@
-var _ = require('underscore');
-var Promise = require('bluebird');
-var BALANCE_SAP_TYPE = 'Balance';
-var CLIENT_BALANCE_TYPE = 'client-balance';
-var ERROR_SAP_TYPE = 'Error';
-var EWALLET_POSITIVE = 'positive';
-var INVOICE_SAP_TYPE = 'Invoice';
-var ORDER_SAP_TYPE = 'Order';
-
 module.exports = {
   sendOrderEmail: function(req, res) {
     var form = req.params.all();
@@ -92,39 +83,51 @@ module.exports = {
       });
   },
 
-  async createFromQuotation(req, res) {
+  async create(req, res) {
+    var form = req.allParams();
+    var responseSent = false;
+
     try {
-      const orderCreated = await OrderService.createFromQuotation(
-        req.allParams(),
-        req.user
-      );
+      const orderCreated = await OrderService.create(form, req.user);
+      //RESPONSE
       res.json(orderCreated);
+      responseSent = true;
+      const orderDetails = orderCreated.Details;
+
+      //STARTS EMAIL SENDING PROCESS
       const order = await Order.findOne({ id: orderCreated.id })
         .populate('User')
         .populate('Client')
         .populate('Payments')
         .populate('EwalletRecords')
-        .populate('Address')
-        .populate('Details');
-      const fiscalAddress = await FiscalAddress.findOne({
-        CardCode: order.Client.CardCode,
-        AdresType: ClientService.ADDRESS_TYPE,
-      });
-      const user = req.user;
-      // await Email.sendOrderConfirmation(order.id);
+        .populate('Address');
+
+      await Email.sendOrderConfirmation(order.id);
       await Email.sendFreesale(order.id);
-      await InvoiceService.createInvoice(
-        order,
-        order.Client,
-        fiscalAddress,
-        order.Payments,
-        order.Details,
-        user
+      const invoice = await InvoiceService.createOrderInvoice(order.id);
+      const syncProducts = await StockService.syncOrderDetailsProducts(
+        orderDetails
       );
-      // await StockService.syncOrderDetailsProducts(orderDetails);
+
       console.log('Email de orden enviado: ' + order.folio);
+      console.log('productsSynced', syncProducts);
+      console.log('generated invoice', invoice);
     } catch (err) {
-      res.negotiate(err);
+      console.log(err);
+      if (!responseSent) {
+        return res.negotiate(err);
+      }
+    }
+  },
+
+  async cancel(req, res) {
+    const { id } = req.allParams();
+    try {
+      const canceledOrder = await OrderService.cancel(id);
+      return res.json(canceledOrder);
+    } catch (err) {
+      console.log('err', err);
+      return res.negotiate(err);
     }
   },
 

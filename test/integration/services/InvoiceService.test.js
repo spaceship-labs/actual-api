@@ -1,220 +1,185 @@
-describe('InvoiceService migration', () => {
-  describe('structuredItems', () => {
-    it('should return the correct structured items', () => {
-      const discount = 3999.8006399999995;
-      const discountPercent = 20;
-      const detail = {
-        id: 'id.1',
-        quantity: 1,
-        unitPrice: 19999.0032,
-      };
-      const product = {
-        id: 'id.1',
-        quantity: 1,
-        U_ClaveUnidad: 'H87',
-        Service: 'N',
-        ItemCode: 'ST09978',
-        ItemName: 'SALA 95533 SOFA+CORNER+OTTOMAN KFC-216-33C14 GRIS CLARO',
-      };
-
-      const result = InvoiceService.structuredItems(
-        discount,
-        detail,
-        product,
-        discountPercent
-      );
-      console.log('result', JSON.stringify(result));
-      expect(result.cantidad).to.be.equal(1);
-      expect(result.Unidad).to.be.equal('Pieza');
-      expect(result.valorUnitario).to.be.equal(17240.52);
-      expect(result.importe).to.be.equal(17240.52);
-      expect(result.descuento).to.be.equal(3448.1);
-    });
-  });
-
-  describe('handleClient', () => {
-    it('should return the correct structured client', () => {
-      const genericClient = false;
-      const client = {
-        cfdiUse: 'G01',
-      };
-      const orderClient = {
-        LicTradNum: 'PALR671017T95',
-        CardName: 'ROCIO PATIÑO LASTRA',
-      };
-      const fiscalAddress = {
-        Street: 'AV 34 SN COLONIA GONZALO GUERRERO',
-        U_NumExt: '445',
-        Block: 'Bonampak',
-        City: 'Cancun',
-        State: 'QR',
-        ZipCode: '77500',
-      };
-      const result = InvoiceService.handleClient(
-        client,
-        orderClient,
-        fiscalAddress,
-        genericClient
-      );
-      console.log('result', JSON.stringify(result));
-      expect(result).to.deep.equal({
-        rfc: 'PALR671017T95',
-        nombre: 'ROCIO PATIÑO LASTRA',
-        usoCfdi: 'G01',
-        DomicilioFiscal: {
-          calle: 'AV 34 SN COLONIA GONZALO GUERRERO',
-          noExterior: '445',
-          colonia: 'Bonampak',
-          localidad: 'Cancun',
-          estado: 'QR',
-          pais: 'México',
-          cp: '77500',
-        },
-      });
-    });
-  });
-  describe('formatInvoice', () => {
-    it('should return the correct structured format for the invoice request', async () => {
-      const order = {
-        ammountPaid: 15999.21,
-        total: 15999.20256,
-        subtotal: 19999.0032,
-        discount: 3999.8006399999995,
-        paymentGroup: 1,
-        CardName: 'ROCIO PATIÑO LASTRA',
-        CardCode: 'C000005',
-        SlpCode: -1,
-        address:
-          'AV. 34 LOTE 14 MZN 165 COL. GONZALO GUERRERO PLAYA DEL CARMEN',
-        folio: '000347',
-        createdAt: '2018-08-27T18:50:17.275Z',
-        Client: {
-          CardCode: 'C000005',
-          CardName: 'ROCIO PATIÑO LASTRA',
-          CardType: 'C',
-          Phone1: null,
-          Phone2: null,
-          Cellular: '7774179291',
-          E_Mail: 'jpablofh@gmail.com',
-          LicTradNum: 'PALR671017T95',
-          U_Correos: null,
-          Series: 0,
-          Name: null,
-          cfdiUse: 'G01',
-        },
-      };
-      const client = {
-        CardCode: 'C000005',
-        CardName: 'ROCIO PATIÑO LASTRA',
-        CardType: 'C',
-        Phone1: null,
-        Phone2: null,
-        Cellular: '7774179291',
-        E_Mail: 'jpablofh@gmail.com',
-        LicTradNum: 'PALR671017T95',
-        U_Correos: null,
-        Series: 0,
-        Name: null,
-        cfdiUse: 'G01',
-      };
-      const fiscalAddress = {
-        Street: 'AV 34 SN COLONIA GONZALO GUERRERO',
-        U_NumExt: '445',
-        Block: 'Bonampak',
-        City: 'Cancun',
-        State: 'QR',
-        ZipCode: '77500',
-      };
+describe('InvoiceService', function() {
+  describe('getHighestPayment', function() {
+    it('should get the highest payment', function() {
       const payments = [
-        {
-          name: 'Efectivo MXN',
-          type: 'cash',
-          currency: 'mxn',
-          exchangeRate: 18.58,
-          group: 1,
-          ammount: 15999.21,
-          folio: '000659',
-        },
+        { type: 'cash', currency: 'mxn', ammount: 2000 },
+        { type: 'cash-usd', currency: 'usd', ammount: 400, exchangeRate: 18.2 },
+        { type: 'cash', currency: 'mxn', ammount: 4000 },
       ];
-      const partidas = [
-        {
-          cantidad: 1,
-          claveUnidad: 'H87',
-          Unidad: 'Pieza',
-          noIdentificacion: 'ST09978',
-          descripcion:
-            'SALA 95533 SOFA+CORNER+OTTOMAN KFC-216-33C14 GRIS CLARO',
-          valorUnitario: 17240.52,
-          importe: 17240.52,
-          descuento: 3448.1,
-          Impuestos: [
-            {
-              tipo: 'traslado',
-              claveImpuesto: 'IVA',
-              tipoFactor: 'tasa',
-              tasaOCuota: '0.16',
-              baseImpuesto: 13792.42,
-              importe: 2206.79,
-            },
-          ],
-        },
-      ];
-      const genericClient = false;
-      const result = await InvoiceService.formatInvoice(
-        order,
-        client,
-        fiscalAddress,
-        payments,
-        partidas,
-        genericClient
+      expect(InvoiceService.getHighestPayment(payments)).to.deep.equal(
+        payments[1]
       );
-      console.log('request', JSON.stringify(result));
-      expect(result.CFDi.modo).to.be.equal('debug');
     });
   });
 
-  describe('formatInvoice', () => {
-    it('should return the correct structured format for the invoice request with two products', async () => {
+  describe('getPaymentMethodBasedOnPayments', function() {
+    it('should get the debit-card payment method, taking the highest', function() {
+      const order = { id: 'order.id1', total: 23280 };
+      const payments = [
+        { type: 'cash', currency: 'mxn', ammount: 2000 },
+        { type: 'cash-usd', currency: 'usd', ammount: 400, exchangeRate: 18.2 },
+        { type: 'debit-card', currency: 'mxn', ammount: 14000 },
+      ];
+      expect(
+        InvoiceService.getPaymentMethodBasedOnPayments(payments, order)
+      ).to.equal('debit-card');
+    });
+
+    it('should get the credit-card payment method(9-msi), taking the highest, ignoring client balance and client credit methods', function() {
+      const order = { id: 'order.id1', total: 189280 };
+      const payments = [
+        { type: 'cash', currency: 'mxn', ammount: 2000 },
+        { type: '9-msi', currency: 'usd', ammount: 400, exchangeRate: 18.2 },
+        { type: 'client-credit', currency: 'mxn', ammount: 85000 },
+        { type: 'client-balance', currency: 'mxn', ammount: 95000 },
+      ];
+      expect(
+        InvoiceService.getPaymentMethodBasedOnPayments(payments, order)
+      ).to.equal('credit-card');
+    });
+
+    it("should get the 'other' payment method, when amount is 100k or higher applying a cash and other payment type(credit card, debit, deposit, etc except client balance and client credit)", function() {
+      const order = { id: 'order.id1', total: 115000 };
+      const payments = [
+        { type: 'debit-card', currency: 'mxn', ammount: 5000 },
+        { type: 'cash', currency: 'mxn', ammount: 85000 },
+        { type: '3-msi', currency: 'mxn', ammount: 20000 },
+      ];
+      expect(
+        InvoiceService.getPaymentMethodBasedOnPayments(payments, order)
+      ).to.equal('other');
+    });
+
+    it("should get the 'other' payment method, when amount is 100k or higher applying a cash and other payment type(credit card, debit, deposit, etc except client balance and client credit)", function() {
+      const order = { id: 'order.id1', total: 171000 };
+      const payments = [
+        { type: 'debit-card', currency: 'mxn', ammount: 15000 },
+        { type: 'cash', currency: 'usd', ammount: 8000, exchangeRate: 17 },
+        { type: '3-msi', currency: 'mxn', ammount: 20000 },
+      ];
+      expect(
+        InvoiceService.getPaymentMethodBasedOnPayments(payments, order)
+      ).to.equal('other');
+    });
+  });
+
+  describe('getAlegraPaymentType', function() {
+    it('should return PPD (pago en parcialidades o diferido) when alegra payment method is other', function() {
+      const alegraPaymentMethod = 'other';
+      const order = { id: 'order.id1', total: 179000 };
+      const payments = [
+        { id: 'payment.id1', type: 'client-credit', ammount: 150000 },
+        { id: 'payment.id2', type: 'debit-card', ammount: 2000 },
+        { id: 'payment.id3', type: '9-msi', ammount: 900 },
+      ];
+      expect(
+        InvoiceService.getAlegraPaymentType(
+          alegraPaymentMethod,
+          payments,
+          order
+        )
+      ).to.equal('PPD');
+    });
+
+    it('should return PPD (pago en parcialidades o diferido) when payments match the special cash payment rule', function() {
+      const alegraPaymentMethod = 'other';
+      const order = { id: 'order.id1', total: 179000 };
+      const payments = [
+        { id: 'payment.id1', type: 'cash', ammount: 150000 },
+        { id: 'payment.id2', type: 'debit-card', ammount: 2000 },
+        { id: 'payment.id3', type: '9-msi', ammount: 900 },
+      ];
+      expect(
+        InvoiceService.getAlegraPaymentType(
+          alegraPaymentMethod,
+          payments,
+          order
+        )
+      ).to.equal('PPD');
+    });
+
+    it('should return PUE (pago en una sola exhibicion) when payments dont match the special cash payment rule', function() {
+      const alegraPaymentMethod = 'cash';
+      const order = { id: 'order.id1', total: 5000 };
+      const payments = [
+        { id: 'payment.id1', type: 'cash', ammount: 4000 },
+        { id: 'payment.id2', type: 'debit-card', ammount: 500 },
+        { id: 'payment.id3', type: '9-msi', ammount: 1500 },
+      ];
+      expect(
+        InvoiceService.getAlegraPaymentType(
+          alegraPaymentMethod,
+          payments,
+          order
+        )
+      ).to.equal('PUE');
+    });
+
+    it('should return PUE (pago en una sola exhibición) when alegra payment method is credit-card', function() {
+      const alegraPaymentMethod = 'credit-card';
+      const order = { id: 'order.id1', total: 179000 };
+      const payments = [
+        { id: 'payment.id1', type: 'credit-credit', ammount: 150000 },
+        { id: 'payment.id2', type: 'debit-card', ammount: 2000 },
+        { id: 'payment.id3', type: '9-msi', ammount: 900 },
+      ];
+      expect(
+        InvoiceService.getAlegraPaymentType(
+          alegraPaymentMethod,
+          payments,
+          order
+        )
+      ).to.equal('PUE');
+    });
+
+    it('should return PUE (pago en una sola exhibición) when any of the payments is client balance type', function() {
+      const alegraPaymentMethod = 'credit-card';
+      const order = { id: 'order.id1', total: 179000 };
+      const payments = [
+        { id: 'payment.id1', type: 'credit-credit', ammount: 150000 },
+        { id: 'payment.id2', type: 'client-balance', ammount: 2000 },
+        { id: 'payment.id3', type: '9-msi', ammount: 900 },
+      ];
+      expect(
+        InvoiceService.getAlegraPaymentType(
+          alegraPaymentMethod,
+          payments,
+          order
+        )
+      ).to.equal('PUE');
+    });
+  });
+
+  describe('hasClientBalancePayment', function() {
+    it('should return true if any of the payments is client balance', function() {
+      const payments = [
+        { id: 'payment.id1', type: 'credit-credit', ammount: 150000 },
+        { id: 'payment.id2', type: 'client-balance', ammount: 2000 },
+        { id: 'payment.id3', type: '9-msi', ammount: 900 },
+      ];
+      expect(InvoiceService.hasClientBalancePayment(payments)).to.equal(true);
+    });
+
+    it('should return return if none of the payments is client balance', function() {
+      const payments = [
+        { id: 'payment.id1', type: 'credit-credit', ammount: 150000 },
+        { id: 'payment.id2', type: 'cash', ammount: 2000 },
+        { id: 'payment.id3', type: '9-msi', ammount: 900 },
+      ];
+      expect(InvoiceService.hasClientBalancePayment(payments)).to.equal(false);
+    });
+  });
+
+  describe('prepareClient', function() {
+    it('should return an object with real data, when RFC is not generic', function() {
       const order = {
-        ammountPaid: 18035.39,
-        total: 18035.38536,
-        subtotal: 30058.975599999998,
-        discount: 12023.59024,
-        paymentGroup: 1,
-        CardName: 'ROCIO PATIÑO LASTRA',
-        CardCode: 'C000005',
-        SlpCode: -1,
-        address:
-          'AV. 34 LOTE 14 MZN 165 COL. GONZALO GUERRERO PLAYA DEL CARMEN',
-        folio: '000358',
-        createdAt: '2018-08-27T18:50:17.275Z',
-        Client: {
-          CardCode: 'C000005',
-          CardName: 'ROCIO PATIÑO LASTRA',
-          CardType: 'C',
-          Phone1: null,
-          Phone2: null,
-          Cellular: '7774179291',
-          E_Mail: 'jpablofh@gmail.com',
-          LicTradNum: 'PALR671017T95',
-          U_Correos: null,
-          Series: 0,
-          Name: null,
-          cfdiUse: 'G01',
-        },
+        id: 'order.id',
+        folio: '000001',
+        CardName: 'card.name',
+        U_Estado: 'QR',
       };
       const client = {
-        CardCode: 'C000005',
-        CardName: 'ROCIO PATIÑO LASTRA',
-        CardType: 'C',
-        Phone1: null,
-        Phone2: null,
-        Cellular: '7774179291',
-        E_Mail: 'jpablofh@gmail.com',
-        LicTradNum: 'PALR671017T95',
-        U_Correos: null,
-        Series: 0,
-        Name: null,
+        LicTradNum: 'ADC180325',
         cfdiUse: 'G01',
       };
       const fiscalAddress = {
@@ -222,54 +187,89 @@ describe('InvoiceService migration', () => {
         U_NumExt: '445',
         Block: 'Bonampak',
         City: 'Cancun',
-        State: 'QR',
         ZipCode: '77500',
       };
-      const payments = [
-        {
-          name: 'Efectivo MXN',
-          type: 'cash',
-          currency: 'mxn',
-          exchangeRate: 18.58,
-          group: 1,
-          ammount: 18035.39,
-          folio: '000668',
+
+      const expected = {
+        name: address.companyName,
+        identification: (client.LicTradNum || '').toUpperCase(),
+        email: address.U_Correos,
+        cfdiUse: client.cfdiUse,
+        address: {
+          street: address.Street,
+          exteriorNumber: address.U_NumExt,
+          interiorNumber: address.U_NumInt,
+          colony: address.Block,
+          country: 'México',
+          state: address.State,
+          municipality: address.U_Localidad,
+          localitiy: address.City,
+          zipCode: address.ZipCode,
         },
-      ];
-      const partidas = [
-        {
-          cantidad: 1,
-          claveUnidad: 'H87',
-          Unidad: 'Pieza',
-          noIdentificacion: 'ST09978',
-          descripcion:
-            'SALA 95533 SOFA+CORNER+OTTOMAN KFC-216-33C14 GRIS CLARO',
-          valorUnitario: 17240.52,
-          importe: 17240.52,
-          descuento: 3448.1,
-          Impuestos: [
-            {
-              tipo: 'traslado',
-              claveImpuesto: 'IVA',
-              tipoFactor: 'tasa',
-              tasaOCuota: '0.16',
-              baseImpuesto: 13792.42,
-              importe: 2206.79,
-            },
-          ],
+      };
+
+      const result = InvoiceService.prepareClientParams(order, client, address);
+      expect(result).to.deep.equal(expected);
+    });
+  });
+
+    it('should return an object with real data, when RFC is generic', function() {
+      const order = {
+        id: 'order.id',
+        folio: '000001',
+        CardName: 'card.name',
+        U_Estado: 'QR',
+      };
+      const client = {
+        LicTradNum: InvoiceService.RFCPUBLIC,
+        cfdiUse: 'G01',
+      };
+      const fiscalAddress = {
+        Street: 'AV 34 SN COLONIA GONZALO GUERRERO',
+        U_NumExt: '445',
+        Block: 'Bonampak',
+        City: 'Cancun',
+        ZipCode: '77500',
+      };
+
+      const expected = {
+        name: order.CardName,
+        identification: InvoiceService.RFCPUBLIC,
+        cfdiUse: InvoiceService.DEFAULT_CFDI_USE,
+        address: {
+          country: 'México',
+          state: order.U_Estado,
         },
-      ];
-      const genericClient = false;
-      const result = await InvoiceService.formatInvoice(
-        order,
-        client,
-        fiscalAddress,
-        payments,
-        partidas,
-        genericClient
+      };
+
+      const result = InvoiceService.prepareClientParams(order, client, address);
+      expect(result).to.deep.equal(expected);
+    });
+  });
+
+  describe('getUnitTypeByProduct', function() {
+    it('should return service type when product is service', function() {
+      const product = { Service: 'Y' };
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal(
+        'service'
       );
-      console.log('request', JSON.stringify(result));
-      expect(result.CFDi.modo).to.be.equal('debug');
+    });
+
+    it('should return service type when product unit clave is E48', function() {
+      const product = { U_ClaveUnidad: 'E48' };
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal(
+        'service'
+      );
+    });
+
+    it('should return piece type when product unit clave is H87', function() {
+      const product = { U_ClaveUnidad: 'H87' };
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('piece');
+    });
+
+    it('should return piece type when product unit clave is missing', function() {
+      const product = {};
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('piece');
     });
   });
 });
