@@ -23,10 +23,6 @@ module.exports.policies = {
   },
   SiteController: {
     '*': ['isAuthenticated'],
-<<<<<<< HEAD
-    findByHandle: true,
-=======
->>>>>>> feat/projects-playa
     generateSitesCashReport: ['isAuthenticated', 'isAdmin'],
   },
   UserController: {
@@ -83,17 +79,6 @@ module.exports.policies = {
   },
   ProductFilterValueController: {
     getProducts: true,
-<<<<<<< HEAD
-  },
-  ProductSearchController: {
-    /*
-    advancedSearch: true,
-    searchByFilters: true,
-    searchByCategory: true,
-    searchByFilterValues: true
-    */
-=======
->>>>>>> feat/projects-playa
   },
   LoggingController: {
     find: true,
@@ -113,13 +98,6 @@ module.exports.policies = {
   LocalController:{
     '*':true
   }
-<<<<<<< HEAD
-  */
-
-  //Por ahora
-  //SyncController:{'*':true}
-=======
->>>>>>> feat/projects-playa
 
   /***************************************************************************
    *                                                                          *
