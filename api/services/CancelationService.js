@@ -129,17 +129,6 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
   return await OrderCancelation.findOne({ id: orderCancelationID });
 };
 
-const formatCancelDetails = (authorizedID, { id, quantity, Detail }) => {
-  if (authorizedID === Detail) {
-    return { id, quantity, Detail };
-  }
-};
-
-const compareDetailsIDS = (id, cancelationDetails) =>
-  cancelationDetails.map(cancelationDetail =>
-    formatCancelDetails(id, cancelationDetail)
-  );
-
 const updateRequest = async (
   cancelationId,
   detailsApprovement,
@@ -179,15 +168,22 @@ const updateRequest = async (
       id
     );
 
-    console.log('authorized', authorizedDetails);
+    const authorizedProducts = [];
 
-    const authorizedCancelationDetails = authorizedDetails.map(id =>
-      compareDetailsIDS(id, CancelationDetails)
+    authorizedDetails.map(item => {
+      item.map(product => {
+        authorizedProducts.push(product);
+      });
+    });
+
+    const authorizedCancelationDetails = CancelationDetails.filter(
+      ({ Detail }) => {
+        const data = authorizedProducts.find(({ id }) => id === Detail);
+        return data;
+      }
     );
 
     authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
-      console.log('id:', id, 'quantity: ', quantity, 'detail: ', Detail);
-
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
       );
@@ -197,6 +193,7 @@ const updateRequest = async (
         {
           quantityCanceled:
             quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
+          quantityAvailable: 0,
         }
       );
     });
@@ -205,6 +202,7 @@ const updateRequest = async (
       cancelAll === true && requestStatus === 'authorized'
         ? {
             status: 'canceled',
+            amountCanceled: ammountPaid,
             ammountPaid: 0,
           }
         : {

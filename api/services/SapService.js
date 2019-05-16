@@ -124,14 +124,6 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
     return request;
   });
 
-  // const id_order = '5cc77b49a5effd966059c27b';
-  // const cancelDocsSap = await CancelDocSap.find({ order: id_order }).populate(
-  //   'order'
-  // );
-  // console.log('cancelDocsSap', cancelDocsSap);
-
-  // throw new Error('Error');
-
   const { data: { value: sapCancels }, error } = await axios.delete(
     '/SalesOrder',
     {
@@ -142,9 +134,6 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
 
   console.log('sapCancels', sapCancels);
   console.log('error', error);
-
-  // sapCancels[0].order = orderId;
-  // sapCancels[0].cancelOrder = cancelOrderId;
 
   const sapcancelation = await Promise.mapSeries(
     sapCancels,
@@ -197,6 +186,16 @@ const createCancelationSap = async (params, order, cancelOrder) => {
   );
   const Products = productsObj.map(({ id }) => id);
 
+  const detailCancelReferences = productsSap.map(
+    ({ detailCancelReference }) => detailCancelReference
+  );
+
+  const orderDetailCancels = await OrderDetailCancelation.find({
+    id: detailCancelReferences,
+  });
+
+  const detailsIds = orderDetailCancels.map(({ Detail }) => Detail);
+
   PaymentsCancel.map(payment =>
     createPaymentCancelSap(payment, order, cancelOrder)
   );
@@ -219,7 +218,7 @@ const createCancelationSap = async (params, order, cancelOrder) => {
   );
   const paymentsIds = payments.map(({ id }) => id);
 
-  const detailsIds = series.map(({ DetailId }) => DetailId);
+  // const detailsIds = series.map(({ DetailId }) => DetailId);
 
   const cancelSapParams = {
     result,
@@ -236,17 +235,11 @@ const createCancelationSap = async (params, order, cancelOrder) => {
   };
 
   const { id } = await CancelationSap.create(cancelSapParams);
-  console.log('id CancelationSap', id);
+  const data = await CancelationSap.findOne({ id }).populate('Details');
+  console.log('data', data);
+  console.log('data details', data.Details);
 
-  const prueba = await CancelationSap.findOne({
-    id: '5ccb6a4aad15bc003a24348f',
-  }).populate('Details');
-  console.log('prueba', prueba);
-
-  const Details = await CancelationSap.findOne({ id }).populate('Details');
-  console.log('details', Details);
-
-  return Details;
+  return data.Details;
 };
 
 const createCancelDocSap = ({ type, documents }, order, cancelOrder) => {
