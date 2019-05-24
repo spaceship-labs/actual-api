@@ -159,21 +159,15 @@ module.exports = {
     const ewallet = await Ewallet.findOne({ cardNumber });
     const client = await Client.findOne({ id: clientId });
     // console.log('client.Ewallet: ', client);
-    if (ewallet) {
+    if (client.Ewallet) {
       console.log('ENTRA IF EWALLET');
-      if (ewallet.Client === clientId) {
+      if (ewallet && ewallet.Client === clientId) {
         return ewallet;
       } else {
         throw new Error(
           'El monedero ingresado no pertenece al cliente de esta cotización'
         );
       }
-    } else if (client.Ewallet) {
-      console.log('ENTRA IF EWALLET CLIENT');
-      // console.log('client.Ewallet: ', client.Ewallet);
-      throw new Error(
-        'El cliente ya tiene un monedero relacionado, intente de nuevo'
-      );
     } else {
       console.log('entra else');
       const ewalletCreated = await Ewallet.create({
