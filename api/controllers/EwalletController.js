@@ -28,7 +28,7 @@ module.exports = {
       const storeId = req.user.activeStore.id;
       ewallet = await Ewallet.findOne({ cardNumber });
       if (ewallet && ewallet.Client === clientId) {
-        ewallet.exchangeRate = EwalletService.getExchangeRate();
+        ewallet.exchangeRate = await EwalletService.getExchangeRate();
         res.ok(ewallet);
       } else if (ewallet && ewallet.Client !== clientId) {
         throw new Error('El monedero ingresado no pertenece a este cliente ');
@@ -47,7 +47,7 @@ module.exports = {
           cardNumber,
         });
         await Client.update({ id: clientId }, { Ewallet: ewallet.id });
-        ewallet.exchangeRate = EwalletService.getExchangeRate();
+        ewallet.exchangeRate = await EwalletService.getExchangeRate();
         res.ok(ewallet);
       }
     } catch (e) {
