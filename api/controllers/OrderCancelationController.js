@@ -53,6 +53,8 @@ module.exports = {
   async update(req, res) {
     try {
       const cancelationId = req.param('id');
+      console.log('cancelationId', cancelationId);
+
       const { detailApprovement, requestStatus } = req.allParams();
       const orderCancelationUpdated = await CancelationService.updateRequest(
         cancelationId,

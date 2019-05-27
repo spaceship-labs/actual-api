@@ -9,7 +9,7 @@ const moment = require('moment');
 const axios = require('axios');
 axios.defaults.baseURL = baseUrl;
 axios.defaults.headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+  'Content-Type': 'application/json; charset=utf-8',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -78,12 +78,22 @@ const formatCancelParams = async (id, action) => {
       detailId: Detail,
     })
   );
+
   const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
-  const companies = await Company.find({ id: companiesIds });
+  const companies = await Promise.mapSeries(companiesIds, async companyId => {
+    const c = await Company.find({ id: companyId });
+    return c;
+  });
+
   const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
-  const products = await Product.find({ id: productsIds });
-  const whsCodes = companies.map(({ WhsCode }) => WhsCode);
-  const itemCodes = products.map(({ ItemCode }) => ItemCode);
+  const products = await Promise.mapSeries(productsIds, async productId => {
+    const response = await Product.find({ id: productId });
+    return response;
+  });
+
+  const whsCodes = companies.map(item => item[0].WhsCode);
+
+  const itemCodes = products.map(item => item[0].ItemCode);
   const formatedParams = detailsBeforeFormat.map(
     ({ id, quantity, shipDate, detailId }, index) => ({
       detailCancelReference: id,
@@ -95,31 +105,53 @@ const formatCancelParams = async (id, action) => {
       Action: action,
     })
   );
+
+  console.log('idQuotation', idQuotation);
+
+  console.log('products', formatedParams);
+
   return { idQuotation, products: formatedParams };
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
   const params = await formatCancelParams(orderId, action);
-  console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
+
+  axios.interceptors.request.use(request => {
+    console.log('Request delete sapOrder', request);
+    return request;
+  });
+
   const { data: { value: sapCancels }, error } = await axios.delete(
     '/SalesOrder',
     {
-      data: { params },
+      data: params,
+      port: 80,
     }
   );
-  sapCancels.order = orderId;
-  sapCancels.cancelOrder = cancelOrderId;
-  console.log('error: ', error);
-  console.log('sapCancels: ', sapCancels);
 
-  return;
-  // return await createCancelationSap(sapCancels);
+  console.log('sapCancels', sapCancels);
+  console.log('error', error);
+
+  const sapcancelation = await Promise.mapSeries(
+    sapCancels,
+    async sapCancel => {
+      const request = await createCancelationSap(
+        sapCancel,
+        orderId,
+        cancelOrderId
+      );
+      return request;
+    }
+  );
+  console.log('sapcancelation', sapcancelation);
+
+  return sapcancelation;
 };
 
-const createCancelationSap = async params => {
+const createCancelationSap = async (params, order, cancelOrder) => {
   const {
     result,
     type,
@@ -131,25 +163,44 @@ const createCancelationSap = async params => {
     PaymentsCancel,
     series = [],
     BaseRef,
-    order,
-    cancelOrder,
   } = params;
+
   const documents = [
     { type: 'RequestTransfer', documents: RequestTransfer },
     { type: 'CreditMemo', documents: CreditMemo },
   ];
-  documents.map(document => createCancelDocSap(document, order, cancelOrder));
-  const cancelDocsSap = await CancelDocSap.find({ order });
+
+  documents.map(document => {
+    createCancelDocSap(document, order, cancelOrder);
+  });
+
+  const cancelDocsSap = await CancelDocSap.find({ id: order }).populate(
+    'order'
+  );
+
   const docsSapIds = cancelDocsSap.map(({ id }) => id);
-  const productsObj = productsSap.map(
-    async ({ ItemCode }) => await Product.findOne({ ItemCode })
+
+  const productsObj = await Promise.mapSeries(
+    productsSap,
+    async ({ ItemCode }) => await Product.findOne({ ItemCode: ItemCode })
   );
   const Products = productsObj.map(({ id }) => id);
+
+  const detailCancelReferences = productsSap.map(
+    ({ detailCancelReference }) => detailCancelReference
+  );
+
+  const orderDetailCancels = await OrderDetailCancelation.find({
+    id: detailCancelReferences,
+  });
+
+  const detailsIds = orderDetailCancels.map(({ Detail }) => Detail);
 
   PaymentsCancel.map(payment =>
     createPaymentCancelSap(payment, order, cancelOrder)
   );
-  const paymentsCancels = PaymentsCancel.map(
+  const paymentsCancels = await Promise.mapSeries(
+    PaymentsCancel,
     async ({ pay: document }) => await PaymentCancelSap.findOne({ document })
   );
   const paymentsCancelsIds = paymentsCancels.map(({ id }) => id);
@@ -161,12 +212,13 @@ const createCancelationSap = async params => {
       Payment,
     })
   );
-  const payments = Payments.map(
+  const payments = await Promise.mapSeries(
+    Payments,
     async ({ pay: document }) => await PaymentSap.findOne({ document })
   );
   const paymentsIds = payments.map(({ id }) => id);
 
-  const detailsIds = series.map(({ DetailId }) => DetailId);
+  // const detailsIds = series.map(({ DetailId }) => DetailId);
 
   const cancelSapParams = {
     result,
@@ -183,22 +235,26 @@ const createCancelationSap = async params => {
   };
 
   const { id } = await CancelationSap.create(cancelSapParams);
-  const { Details } = await CancelationSap.findOne({ id });
-  return Details;
+  const data = await CancelationSap.findOne({ id }).populate('Details');
+  console.log('data', data);
+  console.log('data details', data.Details);
+
+  return data.Details;
 };
 
-const createCancelDocSap = ({ type, documents }, order, cancelOrder) =>
-  document.length > 0
-    ? documents.map(
-        async value =>
-          await CancelDocSap.create({
-            type,
-            value,
-            order,
-            cancelOrder,
-          })
-      )
+const createCancelDocSap = ({ type, documents }, order, cancelOrder) => {
+  documents.length > 0
+    ? documents.map(async value => {
+        const data = await CancelDocSap.create({
+          type,
+          value,
+          order,
+          cancelOrder,
+        });
+        return data;
+      })
     : false;
+};
 
 const createPaymentCancelSap = async (
   { pay: Payment, reference: document },
@@ -341,42 +397,81 @@ function updateFiscalAddress(cardcode, form) {
     exchangeRate,
     currentStore
 */
-function createSaleOrder(params) {
-  var endPoint;
-  var requestParams;
-  return buildOrderRequestParams(params)
-    .then(function(_requestParams) {
-      requestParams = _requestParams;
-      endPoint = baseUrl + '/SalesOrder';
-      sails.log.info('createSaleOrder', endPoint);
-      sails.log.info('requestParams', JSON.stringify(requestParams));
-      const preForm = {
-        contact: JSON.stringify(requestParams.contact),
-        products: JSON.stringify(requestParams.products),
-        payments: JSON.stringify(requestParams.payments),
-      };
-      const formDataStr = qs.stringify(preForm, { encode: true });
-      var options = {
-        json: true,
-        method: 'POST',
-        url: endPoint,
-        body: formDataStr,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        },
-      };
-      return request(options);
-    })
-    .then(function(response) {
-      return {
-        requestParams,
-        endPoint: endPoint,
-        response: response,
-      };
-    });
+
+async function createSaleOrder(params) {
+  const requestParams = await buildOrderRequestParams(params);
+
+  const preForm = {
+    contact: requestParams.contact,
+    products: requestParams.products,
+    payments: requestParams.payments,
+  };
+
+  console.log('pre', preForm);
+
+  const { data: { value: response }, error } = await axios.post(
+    '/SalesOrder',
+    requestParams
+  );
+
+  console.log('error: ', error);
+  console.log('response: ', response);
+
+  return {
+    requestParams,
+    endPoint: baseUrl + '/SalesOrder',
+    response: response,
+  };
 }
 
-function buildOrderRequestParams(params) {
+// async function createSaleOrder(params) {
+//   var endPoint;
+//   var requestParams;
+//   return buildOrderRequestParams(params)
+//     .then(function(_requestParams) {
+//       requestParams = _requestParams;
+//       endPoint = baseUrl + '/SalesOrder';
+//       sails.log.info('createSaleOrder', endPoint);
+//       sails.log.info('requestParams', JSON.stringify(requestParams));
+//       const preForm = {
+//         contact: requestParams.contact,
+//         products: requestParams.products,
+//         payments: requestParams.payments,
+//       };
+
+//       const { data: { value: sapCancels }, error } = await axios.post(
+//         '/SalesOrder',
+//         {
+//           data: preForm,
+//           port: 80,
+//         }
+//       );
+//       console.log('preForm', preForm);
+
+//       const formDataStr = qs.stringify(preForm, { encode: true });
+//       var options = {
+//         json: true,
+//         method: 'POST',
+//         url: endPoint,
+//         body: formDataStr,
+//         headers: {
+//           'Content-Type': 'application/json; charset=utf-8',
+//         },
+//       };
+//       // console.log('options', options);
+
+//       return request(options);
+//     })
+//     .then(function(response) {
+//       return {
+//         requestParams,
+//         endPoint: endPoint,
+//         response: response,
+//       };
+//     });
+// }
+
+async function buildOrderRequestParams(params) {
   var products = [];
   var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
@@ -447,6 +542,8 @@ function buildOrderRequestParams(params) {
         DetailId: detail.id,
         //unitPrice: detail.Product.Price
       };
+      // console.log('product', product);
+
       return product;
     });
 
@@ -486,7 +583,7 @@ function getCompanyCode(code, storeGroup) {
 }
 
 function mapPaymentsToSap(payments, exchangeRate, currentStore) {
-  console.log('currentStore', currentStore);
+  // console.log('currentStore', currentStore);
   payments = payments.filter(function(payment) {
     return (
       payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
