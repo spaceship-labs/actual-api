@@ -22,26 +22,33 @@ module.exports = {
   },
   async showOrCreate(req, res) {
     try {
-      const type = req.param('type');
       let ewallet;
       const cardNumber = req.param('cardNumber');
-      const Client = req.param('client');
+      const clientId = req.param('client');
       const storeId = req.user.activeStore.id;
-      if (type === 'show') {
+      ewallet = await Ewallet.findOne({ cardNumber });
+      if (ewallet && ewallet.Client === clientId) {
+        ewallet.exchangeRate = EwalletService.getExchangeRate();
+        res.ok(ewallet);
+      } else if (ewallet && ewallet.Client !== clientId) {
+        throw new Error('El monedero ingresado no pertenece a este cliente ');
+      } else if (!ewallet) {
+        const client = await Client.findOne({ id: clientId });
+        if (client.Ewallet)
+          throw new Error(
+            'El cliente ya cuenta con un monedero favor de verificar'
+          );
+        if (!client.EwalletContract)
+          throw new Error('Favor de cargar un contrato antes de continuar');
         if (cardNumber.length < 12) throw new Error('Formato no válido');
-        ewallet = await Ewallet.findOne({ cardNumber });
-        if (!ewallet)
-          throw new Error('El monedero ingresado no pertenece a este cliente ');
-      } else {
-        ewallet = await EwalletService.showOrCreate(
+        ewallet = await Ewallet.create({
+          Client: clientId,
+          Store: storeId,
           cardNumber,
-          Client,
-          storeId
-        );
+        });
+        ewallet.exchangeRate = EwalletService.getExchangeRate();
+        res.ok(ewallet);
       }
-      const ewalletConfiguration = await EwalletConfiguration.find();
-      ewallet.exchangeRate = ewalletConfiguration[0].exchangeRate;
-      res.ok(ewallet);
     } catch (e) {
       res.negotiate(e);
     }

@@ -149,37 +149,17 @@ const validateExpirationDate = async () => {
   }
 };
 
+const getExchangeRate = async () => {
+  const ewalletConfiguration = await EwalletConfiguration.find();
+  return ewalletConfiguration[0].exchangeRate;
+};
+
 module.exports = {
+  getExchangeRate,
   customFind: customFind,
   applyEwalletRecord: applyEwalletRecord,
   isValidEwalletPayment: isValidEwalletPayment,
   validateExpirationDate: validateExpirationDate,
-  async showOrCreate(cardNumber, clientId, storeId) {
-    if (cardNumber.length < 12) throw new Error('Formato no válido');
-    const ewallet = await Ewallet.findOne({ cardNumber });
-    const client = await Client.findOne({ id: clientId });
-    // console.log('client.Ewallet: ', client);
-    if (client.Ewallet) {
-      console.log('ENTRA IF EWALLET');
-      if (ewallet && ewallet.Client === clientId) {
-        return ewallet;
-      } else {
-        throw new Error(
-          'El monedero ingresado no pertenece al cliente de esta cotización'
-        );
-      }
-    } else {
-      console.log('entra else');
-      const ewalletCreated = await Ewallet.create({
-        Client: clientId,
-        Store: storeId,
-        cardNumber,
-        amount: 0,
-      });
-      await Client.update({ id: clientId }, { Ewallet: ewalletCreated.id });
-      return ewalletCreated;
-    }
-  },
 };
 
 function isValidEwalletPayment(paymentAmount, ewalletAmount) {

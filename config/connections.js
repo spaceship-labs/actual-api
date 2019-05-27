@@ -37,7 +37,8 @@ module.exports.connections = {
       ? {
           adapter: 'sails-mongo',
           host: 'localhost',
-          port: 27017,
+          port: process.env.MONGODB_PORT,
+          user: process.env.MONGODB_USER,
           database: process.env.STAGED_MONGO,
         }
       : {

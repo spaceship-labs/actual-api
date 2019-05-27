@@ -17,6 +17,7 @@ module.exports = {
     amount: {
       type: 'float',
       required: true,
+      defaultsTo: 0,
     },
     active: {
       type: 'boolean',
