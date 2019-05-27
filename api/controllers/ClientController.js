@@ -61,10 +61,10 @@ module.exports = {
         CardCode: client.CardCode,
         AdresType: ClientService.ADDRESS_TYPE,
       });
-      const response = { 
+      const response = {
         ...client,
-        Contacts, 
-        FiscalAddress: fiscalAddress 
+        Contacts,
+        FiscalAddress: fiscalAddress,
       };
       res.ok(response);
     } catch (err) {
@@ -74,34 +74,32 @@ module.exports = {
 
   async create(req, res) {
     var form = req.allParams();
-    try{
+    try {
       var {
-        createdClient, 
-        contactsCreated, 
-        fiscalAddressesCreated
+        createdClient,
+        contactsCreated,
+        fiscalAddressesCreated,
       } = await ClientService.createClient(form, req);
 
-      if(contactsCreated && contactsCreated.length > 0){
+      if (contactsCreated && contactsCreated.length > 0) {
         sails.log.info('contacts created', contactsCreated);
-        createdClient = Object.assign(createdClient ,{
-          Contacts: contactsCreated
+        createdClient = Object.assign(createdClient, {
+          Contacts: contactsCreated,
         });
       }
 
       return res.json(createdClient);
-    }
-    catch(e){
+    } catch (e) {
       return res.negotiate(e);
     }
   },
 
-  async update(req, res){
+  async update(req, res) {
     var form = req.allParams();
-    try{
-      const updatedClient = await ClientService.updateClient(form, req)
+    try {
+      const updatedClient = await ClientService.updateClient(form, req);
       res.json(updatedClient);
-    }
-    catch(err){
+    } catch (err) {
       console.log(err);
       res.negotiate(err);
     }
@@ -120,13 +118,13 @@ module.exports = {
       });
   },
 
-  async createContact(req, res){
+  async createContact(req, res) {
     var form = req.allParams();
     var CardCode = form.CardCode;
-    try{
+    try {
       const createdContact = await ContactService.createContact(form, CardCode);
       res.json(createdContact);
-    }catch(err){
+    } catch (err) {
       console.log('err', err);
       res.negotiate(err);
     }
@@ -134,20 +132,22 @@ module.exports = {
 
   async updateContact(req, res) {
     var form = req.allParams();
-    try{
+    try {
       const updatedContact = await ContactService.updateContact(form);
       res.json(updatedContact);
-    }catch(err){
+    } catch (err) {
       res.negotiate(err);
     }
   },
 
-  async updateFiscalAddress(req, res){
+  async updateFiscalAddress(req, res) {
     var form = req.allParams();
-    try{
-      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(form);
+    try {
+      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(
+        form
+      );
       res.json(updatedFiscalAddress);
-    }catch(err){
+    } catch (err) {
       res.negotiate(err);
     }
   },

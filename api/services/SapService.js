@@ -342,7 +342,7 @@ function updateFiscalAddress(cardcode, form) {
     exchangeRate,
     currentStore
 */
-
+/* 
 function createSaleOrder(params) {
   var endPoint;
   var requestParams;
@@ -366,6 +366,41 @@ function createSaleOrder(params) {
           console.log(response.data);
           return response.data;
         });
+    })
+    .then(function(response) {
+      return {
+        requestParams,
+        endPoint: endPoint,
+        response: response,
+      };
+    });
+} */
+
+function createSaleOrder(params) {
+  var endPoint;
+  var requestParams;
+  return buildOrderRequestParams(params)
+    .then(function(_requestParams) {
+      requestParams = _requestParams;
+      endPoint = baseUrl + '/SalesOrder';
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+      const preForm = {
+        contact: JSON.stringify(requestParams.contact),
+        products: JSON.stringify(requestParams.products),
+        payments: JSON.stringify(requestParams.payments),
+      };
+      const formDataStr = qs.stringify(preForm, { encode: true });
+      var options = {
+        json: true,
+        method: 'POST',
+        url: endPoint,
+        body: formDataStr,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        },
+      };
+      return request(options);
     })
     .then(function(response) {
       return {
