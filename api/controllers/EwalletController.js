@@ -46,6 +46,7 @@ module.exports = {
           Store: storeId,
           cardNumber,
         });
+        await Client.update({ id: clientId }, { Ewallet: ewallet.id });
         ewallet.exchangeRate = EwalletService.getExchangeRate();
         res.ok(ewallet);
       }
