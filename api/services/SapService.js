@@ -7,17 +7,10 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 const axios = require('axios');
-const API_BASE = 'http://sapnueve.homedns.org';
+const API_BASE = 'http://sapnueve.homedns.org:81';
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers = {
-  'content-type': 'application/x-www-form-urlencoded',
-};
-
-const axiosOrder = require('axios');
-const API_BASE_ORDER = 'http://sapmovil.homedns.org:81';
-axiosOrder.defaults.baseURL = API_BASE_ORDER;
-axiosOrder.defaults.headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+  'content-type': 'application/json',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -61,63 +54,157 @@ const throwAlert = async ({ subject, message, userCode }) => {
   return alert;
 };
 
-const formatCancelParams = async (id, action) => {
-  const {
-    Quotation: IdQuotation,
-    CancelationDetails: cancelDetails,
-  } = await OrderCancelation.findOne({ Order: id }).populate(
-    'CancelationDetails'
-  );
-  const detailsBeforeFormat = cancelDetails.map(
-    ({
-      id,
-      quantity,
-      shipDate,
-      shipCompanyFrom: companyId,
-      Product: productId,
-    }) => ({
-      id,
-      quantity,
-      shipDate,
-      companyId,
-      productId,
-    })
-  );
-  const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
-  const companies = await Company.find({ id: companiesIds });
-  const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
-  const products = await Product.find({ id: productsIds });
-  const whsCodes = companies.map(({ WhsCode }) => WhsCode);
-  const itemCodes = products.map(({ ItemCode }) => ItemCode);
-  const formatedParams = detailsBeforeFormat.map(
-    ({ id, quantity, shipDate }, index) => ({
+const cancelFormatParams = async (params, IdQuotation, action) => {
+  if (params.length > 0) {
+    const companiesIds = params.map(({ companyId }) => companyId);
+    const companies = await Promise.mapSeries(companiesIds, async companyId => {
+      const c = await Company.find({ id: companyId });
+      return c;
+    });
+
+    const productsIds = params.map(({ productId }) => productId);
+    const products = await Promise.mapSeries(productsIds, async productId => {
+      const response = await Product.find({ id: productId });
+      return response;
+    });
+    const whsCodes = companies.map(({ WhsCode }) => WhsCode);
+    console.log('whsCodes', whsCodes);
+
+    const itemCodes = products.map(({ ItemCode }) => ItemCode);
+    const formatedParams = params.map(({ id, quantity, shipDate }, index) => ({
       detailCancelReference: id,
       ItemCode: itemCodes[index],
       OpenCreQty: quantity,
       ShipDate: moment(shipDate).format('YYYY-MM-DD'),
       WhsCode: whsCodes[index],
       Action: action,
-    })
+    }));
+    return { IdQuotation, products: formatedParams };
+  }
+  return null;
+};
+
+const formatCancelParams = async (id, action) => {
+  const {
+    Quotation: IdQuotation,
+    CancelationDetails: cancelDetails,
+    Details,
+  } = await OrderCancelation.findOne({ Order: id })
+    .populate('CancelationDetails')
+    .populate('Details');
+
+  console.log('cancelDetails', cancelDetails);
+  console.log('Details', Details);
+
+  const immediateProducts = [];
+  const orderProducts = [];
+  cancelDetails.map(
+    ({
+      id,
+      quantity,
+      shipDate,
+      shipCompanyFrom: companyId,
+      Product: productId,
+    }) => {
+      const { immediateDelivery } = Details.find(
+        ({ Product }) => productId === Product
+      );
+      if (immediateDelivery) {
+        immediateProducts.push({
+          id,
+          quantity,
+          shipDate,
+          companyId,
+          productId,
+        });
+      } else {
+        orderProducts.push({
+          id,
+          quantity,
+          shipDate,
+          companyId,
+          productId,
+        });
+      }
+    }
   );
-  return { IdQuotation, products: formatedParams };
+
+  const formatProducts = await cancelFormatParams(
+    orderProducts,
+    IdQuotation,
+    action
+  );
+  const formatInmediate = await cancelFormatParams(
+    immediateProducts,
+    IdQuotation,
+    action
+  );
+
+  return {
+    productsOrder: formatProducts,
+    productsImmediate: formatInmediate,
+  };
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
   const params = await formatCancelParams(orderId, action);
+
   console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
-  const { data: { value } } = await axios.delete('/SalesOrder', {
-    data: params,
-  });
-  if (value[0].type === 'NotFound') {
-    throw new Error(value[0].result);
+  const responseSap = [];
+
+  if (params.productsOrder) {
+    console.log('order');
+    axios.interceptors.request.use(request => {
+      console.log('Starting Request', request);
+      return request;
+    });
+
+    const { data: { value: sapCancels } } = await axios.delete('/SalesOrder', {
+      data: params.productsOrder,
+    });
+
+    axios.interceptors.response.use(response => {
+      console.log('Response:', response);
+      return response;
+    });
+    if (sapCancels[0].type === 'NotFound') {
+      throw new Error(sapCancels[0].result);
+    }
+    sapCancels.order = orderId;
+    sapCancels.cancelOrder = cancelOrderId;
+    console.log('sapCancels order: ', sapCancels);
+    responseSap.push(sapCancels);
   }
-  sapCancels.order = orderId;
-  sapCancels.cancelOrder = cancelOrderId;
-  console.log('sapCancels: ', sapCancels);
-  return await createCancelationSap(sapCancels);
+  if (params.productsImmediate) {
+    console.log('immediate', params.productsImmediate);
+
+    axios.interceptors.request.use(request => {
+      console.log('Starting Request', request);
+      return request;
+    });
+    const { data: { value: sapCancels } } = await axios.delete('/Invoice', {
+      data: params.productsImmediate,
+    });
+    axios.interceptors.response.use(response => {
+      console.log('Response:', response);
+      return response;
+    });
+    if (sapCancels[0].type === 'NotFound') {
+      throw new Error(sapCancels[0].result);
+    }
+    sapCancels.order = orderId;
+    sapCancels.cancelOrder = cancelOrderId;
+    console.log('sapCancels immediate: ', sapCancels);
+    responseSap.push(sapCancels);
+  }
+
+  console.log('responseSap', responseSap);
+  throw new Error('saperror');
+
+  return await createCancelationSap(responseSap);
 };
 
 const createCancelationSap = async params => {
