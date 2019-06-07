@@ -189,8 +189,8 @@ module.exports = {
         .populate('EwalletRecords')
         .populate('Address');
 
-      await Email.sendOrderConfirmation(order.id);
-      await Email.sendFreesale(order.id);
+      // await Email.sendOrderConfirmation(order.id);
+      // await Email.sendFreesale(order.id);
       const invoice = await InvoiceService.createOrderInvoice(order.id);
       const syncProducts = await StockService.syncOrderDetailsProducts(
         orderDetails

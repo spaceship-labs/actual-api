@@ -7,10 +7,9 @@ const buildUrl = require('build-url');
 const _ = require('underscore');
 const moment = require('moment');
 const axios = require('axios');
-const API_BASE = 'http://sapnueve.homedns.org:81';
-axios.defaults.baseURL = API_BASE;
+axios.defaults.baseURL = baseUrl;
 axios.defaults.headers = {
-  'content-type': 'application/json',
+  'Content-Type': 'application/json; charset=utf-8',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -54,19 +53,26 @@ const throwAlert = async ({ subject, message, userCode }) => {
   return alert;
 };
 
-const cancelFormatParams = async (params, IdQuotation, action) => {
+const cancelFormatParams = async (params, idQuotation, action) => {
   if (params.length > 0) {
     const companiesIds = params.map(({ companyId }) => companyId);
+    console.log('companiesIds', companiesIds);
+
     const companies = await Promise.mapSeries(companiesIds, async companyId => {
-      const c = await Company.find({ id: companyId });
+      const c = await Company.findOne({ id: companyId });
       return c;
     });
+    console.log('companies', companies);
 
     const productsIds = params.map(({ productId }) => productId);
+    console.log('productsIds', productsIds);
+
     const products = await Promise.mapSeries(productsIds, async productId => {
-      const response = await Product.find({ id: productId });
+      const response = await Product.findOne({ id: productId });
       return response;
     });
+    console.log('products', products);
+
     const whsCodes = companies.map(({ WhsCode }) => WhsCode);
     console.log('whsCodes', whsCodes);
 
@@ -79,22 +85,19 @@ const cancelFormatParams = async (params, IdQuotation, action) => {
       WhsCode: whsCodes[index],
       Action: action,
     }));
-    return { IdQuotation, products: formatedParams };
+    return { idQuotation, products: formatedParams };
   }
   return null;
 };
 
 const formatCancelParams = async (id, action) => {
   const {
-    Quotation: IdQuotation,
+    Quotation: idQuotation,
     CancelationDetails: cancelDetails,
     Details,
   } = await OrderCancelation.findOne({ Order: id })
     .populate('CancelationDetails')
     .populate('Details');
-
-  console.log('cancelDetails', cancelDetails);
-  console.log('Details', Details);
 
   const immediateProducts = [];
   const orderProducts = [];
@@ -131,12 +134,12 @@ const formatCancelParams = async (id, action) => {
 
   const formatProducts = await cancelFormatParams(
     orderProducts,
-    IdQuotation,
+    idQuotation,
     action
   );
   const formatInmediate = await cancelFormatParams(
     immediateProducts,
-    IdQuotation,
+    idQuotation,
     action
   );
 
@@ -148,15 +151,13 @@ const formatCancelParams = async (id, action) => {
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
   const params = await formatCancelParams(orderId, action);
+  var responseSap = [];
 
-  console.log('params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
-  const responseSap = [];
 
   if (params.productsOrder) {
-    console.log('order');
     axios.interceptors.request.use(request => {
       console.log('Starting Request', request);
       return request;
@@ -164,6 +165,7 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
 
     const { data: { value: sapCancels } } = await axios.delete('/SalesOrder', {
       data: params.productsOrder,
+      port: 80,
     });
 
     axios.interceptors.response.use(response => {
@@ -173,10 +175,8 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
     if (sapCancels[0].type === 'NotFound') {
       throw new Error(sapCancels[0].result);
     }
-    sapCancels.order = orderId;
-    sapCancels.cancelOrder = cancelOrderId;
     console.log('sapCancels order: ', sapCancels);
-    responseSap.push(sapCancels);
+    responseSap = responseSap.concat(sapCancels);
   }
   if (params.productsImmediate) {
     console.log('immediate', params.productsImmediate);
@@ -187,27 +187,38 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
     });
     const { data: { value: sapCancels } } = await axios.delete('/Invoice', {
       data: params.productsImmediate,
+      port: 80,
     });
     axios.interceptors.response.use(response => {
       console.log('Response:', response);
       return response;
     });
-    if (sapCancels[0].type === 'NotFound') {
+    if (sapCancels[0].type === 'NotFound' || sapCancels[0].type === 'Error') {
       throw new Error(sapCancels[0].result);
     }
-    sapCancels.order = orderId;
-    sapCancels.cancelOrder = cancelOrderId;
     console.log('sapCancels immediate: ', sapCancels);
-    responseSap.push(sapCancels);
+    responseSap = responseSap.concat(sapCancels);
   }
 
   console.log('responseSap', responseSap);
-  throw new Error('saperror');
 
-  return await createCancelationSap(responseSap);
+  const sapcancelation = await Promise.mapSeries(
+    responseSap,
+    async sapCancel => {
+      const request = await createCancelationSap(
+        sapCancel,
+        orderId,
+        cancelOrderId
+      );
+      return request;
+    }
+  );
+  console.log('sapcancelation', sapcancelation);
+
+  return sapcancelation;
 };
 
-const createCancelationSap = async params => {
+const createCancelationSap = async (params, order, cancelOrder) => {
   const {
     result,
     type,
@@ -219,25 +230,44 @@ const createCancelationSap = async params => {
     PaymentsCancel,
     series = [],
     BaseRef,
-    order,
-    cancelOrder,
   } = params;
+
   const documents = [
     { type: 'RequestTransfer', documents: RequestTransfer },
     { type: 'CreditMemo', documents: CreditMemo },
   ];
-  documents.map(document => createCancelDocSap(document, order, cancelOrder));
-  const cancelDocsSap = await CancelDocSap.find({ order });
+
+  documents.map(document => {
+    createCancelDocSap(document, order, cancelOrder);
+  });
+
+  const cancelDocsSap = await CancelDocSap.find({ id: order }).populate(
+    'order'
+  );
+
   const docsSapIds = cancelDocsSap.map(({ id }) => id);
-  const productsObj = productsSap.map(
-    async ({ ItemCode }) => await Product.findOne({ ItemCode })
+
+  const productsObj = await Promise.mapSeries(
+    productsSap,
+    async ({ ItemCode }) => await Product.findOne({ ItemCode: ItemCode })
   );
   const Products = productsObj.map(({ id }) => id);
+
+  const detailCancelReferences = productsSap.map(
+    ({ detailCancelReference }) => detailCancelReference
+  );
+
+  const orderDetailCancels = await OrderDetailCancelation.find({
+    id: detailCancelReferences,
+  });
+
+  const detailsIds = orderDetailCancels.map(({ Detail }) => Detail);
 
   PaymentsCancel.map(payment =>
     createPaymentCancelSap(payment, order, cancelOrder)
   );
-  const paymentsCancels = PaymentsCancel.map(
+  const paymentsCancels = await Promise.mapSeries(
+    PaymentsCancel,
     async ({ pay: document }) => await PaymentCancelSap.findOne({ document })
   );
   const paymentsCancelsIds = paymentsCancels.map(({ id }) => id);
@@ -249,12 +279,13 @@ const createCancelationSap = async params => {
       Payment,
     })
   );
-  const payments = Payments.map(
+  const payments = await Promise.mapSeries(
+    Payments,
     async ({ pay: document }) => await PaymentSap.findOne({ document })
   );
   const paymentsIds = payments.map(({ id }) => id);
 
-  const detailsIds = series.map(({ DetailId }) => DetailId);
+  // const detailsIds = series.map(({ DetailId }) => DetailId);
 
   const cancelSapParams = {
     result,
@@ -271,22 +302,24 @@ const createCancelationSap = async params => {
   };
 
   const { id } = await CancelationSap.create(cancelSapParams);
-  const { Details } = await CancelationSap.findOne({ id });
-  return Details;
+  const data = await CancelationSap.findOne({ id }).populate('Details');
+
+  return data.Details;
 };
 
-const createCancelDocSap = ({ type, documents }, order, cancelOrder) =>
-  document.length > 0
-    ? documents.map(
-        async value =>
-          await CancelDocSap.create({
-            type,
-            value,
-            order,
-            cancelOrder,
-          })
-      )
+const createCancelDocSap = ({ type, documents }, order, cancelOrder) => {
+  documents.length > 0
+    ? documents.map(async value => {
+        const data = await CancelDocSap.create({
+          type,
+          value,
+          order,
+          cancelOrder,
+        });
+        return data;
+      })
     : false;
+};
 
 const createPaymentCancelSap = async (
   { pay: Payment, reference: document },
@@ -417,52 +450,6 @@ function updateFiscalAddress(cardcode, form) {
   return request(reqOptions);
 }
 
-/*
-  @param params object properties
-    quotationId,
-    groupCode,
-    cardCode,
-    slpCode,
-    cntctCode,
-    quotationDetails, //Populated with products
-    payments,
-    exchangeRate,
-    currentStore
-*/
-/* 
-function createSaleOrder(params) {
-  var endPoint;
-  var requestParams;
-  return buildOrderRequestParams(params)
-    .then(function(_requestParams) {
-      requestParams = _requestParams;
-
-      sails.log.info('createSaleOrder', API_BASE_ORDER + '/SalesOrder');
-      sails.log.info('requestParams', JSON.stringify(requestParams));
-
-      const preForm = {
-        contact: JSON.stringify(requestParams.contact),
-        products: JSON.stringify(requestParams.products),
-        payments: JSON.stringify(requestParams.payments),
-      };
-      const formDataStr = qs.stringify(preForm, { encode: true });
-
-      return axiosOrder
-        .post('/SalesOrder', formDataStr)
-        .then(function(response) {
-          console.log(response.data);
-          return response.data;
-        });
-    })
-    .then(function(response) {
-      return {
-        requestParams,
-        endPoint: endPoint,
-        response: response,
-      };
-    });
-} */
-
 function createSaleOrder(params) {
   var endPoint;
   var requestParams;
@@ -498,7 +485,33 @@ function createSaleOrder(params) {
     });
 }
 
-function buildOrderRequestParams(params) {
+/* async function createSaleOrder(params) {
+  const requestParams = await buildOrderRequestParams(params);
+
+  const preForm = {
+    contact: requestParams.contact,
+    products: requestParams.products,
+    payments: requestParams.payments,
+  };
+
+  console.log('pre', preForm);
+
+  const { data: { value: response }, error } = await axios.post(
+    '/SalesOrder',
+    requestParams
+  );
+
+  console.log('error: ', error);
+  console.log('response: ', response);
+
+  return {
+    requestParams,
+    endPoint: baseUrl + '/SalesOrder',
+    response: response,
+  };
+} */
+
+async function buildOrderRequestParams(params) {
   var products = [];
   var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var ACTUAL_HOME_XCARET_GROUPCODE = 8;
@@ -569,6 +582,8 @@ function buildOrderRequestParams(params) {
         DetailId: detail.id,
         //unitPrice: detail.Product.Price
       };
+      // console.log('product', product);
+
       return product;
     });
 
@@ -608,7 +623,7 @@ function getCompanyCode(code, storeGroup) {
 }
 
 function mapPaymentsToSap(payments, exchangeRate, currentStore) {
-  console.log('currentStore', currentStore);
+  // console.log('currentStore', currentStore);
   payments = payments.filter(function(payment) {
     return (
       payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&

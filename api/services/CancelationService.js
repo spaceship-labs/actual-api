@@ -129,17 +129,6 @@ const addCancelation = async (orderId, cancelAll, details, reason) => {
   return await OrderCancelation.findOne({ id: orderCancelationID });
 };
 
-const formatCancelDetails = (authorizedID, { id, quantity, Detail }) => {
-  if (authorizedID === Detail) {
-    return { id, quantity, Detail };
-  }
-};
-
-const compareDetailsIDS = (id, cancelationDetails) =>
-  cancelationDetails.map(cancelationDetail =>
-    formatCancelDetails(id, cancelationDetail)
-  );
-
 const updateRequest = async (
   cancelationId,
   detailsApprovement,
@@ -157,6 +146,7 @@ const updateRequest = async (
     .populate('Details')
     .populate('Order')
     .populate('CancelationDetails');
+
   const { amountCanceled: amountCanceledBefore, ammountPaid } = orderCancel;
   const amountCanceled = await getCanceledAmount(Details);
   if (requestStatus === 'rejected') {
@@ -177,9 +167,22 @@ const updateRequest = async (
       action,
       id
     );
-    const authorizedCancelationDetails = authorizedDetails.map(id =>
-      compareDetailsIDS(id, cancelationDetails)
+
+    const authorizedProducts = [];
+
+    authorizedDetails.map(item => {
+      item.map(product => {
+        authorizedProducts.push(product);
+      });
+    });
+
+    const authorizedCancelationDetails = CancelationDetails.filter(
+      ({ Detail }) => {
+        const data = authorizedProducts.find(({ id }) => id === Detail);
+        return data;
+      }
     );
+
     authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
@@ -190,6 +193,7 @@ const updateRequest = async (
         {
           quantityCanceled:
             quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
+          quantityAvailable: 0,
         }
       );
     });
@@ -198,6 +202,7 @@ const updateRequest = async (
       cancelAll === true && requestStatus === 'authorized'
         ? {
             status: 'canceled',
+            amountCanceled: ammountPaid,
             ammountPaid: 0,
           }
         : {
@@ -220,6 +225,12 @@ const updateRequest = async (
       .populate('CancelationDetails');
   }
   if (requestStatus === 'partially') {
+    // const authorizedDetails = await SapService.cancelOrder(
+    //   orderCancel.id,
+    //   action,
+    //   id
+    // );
+
     detailsApprovement.map(async ({ id, status }) => {
       const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
