@@ -22,6 +22,7 @@ module.exports = {
   RFCPUBLIC,
   DEFAULT_CFDI_USE,
   hasClientBalancePayment,
+  hasClientCreditPayment,
 };
 
 function createOrderInvoice(orderId) {
@@ -171,6 +172,12 @@ function hasClientBalancePayment(payments) {
   });
 }
 
+function hasClientCreditPayment(payments) {
+  return payments.some(
+    payment => payment.type === PaymentService.types.CLIENT_CREDIT
+  );
+}
+
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   if (hasClientBalancePayment(payments)) {
     return 'PUE';
@@ -178,6 +185,8 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
+    return 'PPD';
+  } else if (hasClientCreditPayment(payments)) {
     return 'PPD';
   }
 
