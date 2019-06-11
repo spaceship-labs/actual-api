@@ -179,7 +179,7 @@ function hasClientCreditPayment(payments) {
 }
 
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
-  if (hasClientBalancePayment(payments)) {
+  if (hasClientBalancePayment(payments) && !hasClientCreditPayment(payments)) {
     return 'PUE';
   } else if (
     alegraPaymentMethod === 'other' ||
