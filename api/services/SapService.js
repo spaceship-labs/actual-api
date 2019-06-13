@@ -62,19 +62,15 @@ const cancelFormatParams = async (params, idQuotation, action) => {
       const c = await Company.findOne({ id: companyId });
       return c;
     });
-    console.log('companies', companies);
 
     const productsIds = params.map(({ productId }) => productId);
-    console.log('productsIds', productsIds);
 
     const products = await Promise.mapSeries(productsIds, async productId => {
       const response = await Product.findOne({ id: productId });
       return response;
     });
-    console.log('products', products);
 
     const whsCodes = companies.map(({ WhsCode }) => WhsCode);
-    console.log('whsCodes', whsCodes);
 
     const itemCodes = products.map(({ ItemCode }) => ItemCode);
     const formatedParams = params.map(({ id, quantity, shipDate }, index) => ({
@@ -90,18 +86,43 @@ const cancelFormatParams = async (params, idQuotation, action) => {
   return null;
 };
 
-const formatCancelParams = async (id, action) => {
+const formatCancelParams = async (
+  id,
+  action,
+  requestStatus,
+  detailsApprovement
+) => {
   const {
     Quotation: idQuotation,
     CancelationDetails: cancelDetails,
     Details,
-  } = await OrderCancelation.findOne({ Order: id })
+  } = await OrderCancelation.findOne({ id })
     .populate('CancelationDetails')
     .populate('Details');
 
   const immediateProducts = [];
   const orderProducts = [];
-  cancelDetails.map(
+  console.log('detailsApprovement', detailsApprovement);
+
+  const cancelProducts = [];
+  if (requestStatus === 'partially') {
+    const responsefilter = await filterProducts(
+      cancelDetails,
+      detailsApprovement
+    );
+    console.log('responsefilter', responsefilter);
+    responsefilter.map(item => {
+      cancelProducts.push(item);
+    });
+  } else {
+    cancelDetails.map(item => {
+      cancelProducts.push(item);
+    });
+  }
+
+  console.log('responseSap filter', cancelProducts);
+
+  cancelProducts.map(
     ({
       id,
       quantity,
@@ -109,7 +130,7 @@ const formatCancelParams = async (id, action) => {
       shipCompanyFrom: companyId,
       Product: productId,
     }) => {
-      const { immediateDelivery } = Details.find(
+      const { immediateDelivery = null } = Details.find(
         ({ Product }) => productId === Product
       );
       if (immediateDelivery) {
@@ -149,8 +170,19 @@ const formatCancelParams = async (id, action) => {
   };
 };
 
-const cancelOrder = async (orderId, action, cancelOrderId) => {
-  const params = await formatCancelParams(orderId, action);
+const cancelOrder = async (
+  orderId,
+  action,
+  cancelOrderId,
+  requestStatus,
+  detailsApprovement
+) => {
+  const params = await formatCancelParams(
+    cancelOrderId,
+    action,
+    requestStatus,
+    detailsApprovement
+  );
   var responseSap = [];
 
   if (process.env.NODE_ENV === 'test') {
@@ -213,12 +245,25 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
       return request;
     }
   );
-  console.log('sapcancelation', sapcancelation);
 
   return sapcancelation;
 };
 
+const filterProducts = async (cancelDetails, detailsApprovement) => {
+  const authorizedCancelationDetails = cancelDetails.filter(
+    ({ id: idDetails }) => {
+      const data = detailsApprovement.find(({ id }) => id === idDetails);
+      return data;
+    }
+  );
+  console.log('authorizedCancelationDetails', authorizedCancelationDetails);
+
+  return authorizedCancelationDetails;
+};
+
 const createCancelationSap = async (params, order, cancelOrder) => {
+  console.log('params sapcancel', params);
+
   const {
     result,
     type,
@@ -230,6 +275,7 @@ const createCancelationSap = async (params, order, cancelOrder) => {
     PaymentsCancel,
     series = [],
     BaseRef,
+    delivery = [],
   } = params;
 
   const documents = [
@@ -237,9 +283,10 @@ const createCancelationSap = async (params, order, cancelOrder) => {
     { type: 'CreditMemo', documents: CreditMemo },
   ];
 
-  documents.map(document => {
-    createCancelDocSap(document, order, cancelOrder);
-  });
+  await Promise.mapSeries(
+    documents,
+    async document => await createCancelDocSap(document, order, cancelOrder)
+  );
 
   const cancelDocsSap = await CancelDocSap.find({ id: order }).populate(
     'order'
@@ -279,10 +326,12 @@ const createCancelationSap = async (params, order, cancelOrder) => {
       Payment,
     })
   );
+
   const payments = await Promise.mapSeries(
     Payments,
     async ({ pay: document }) => await PaymentSap.findOne({ document })
   );
+
   const paymentsIds = payments.map(({ id }) => id);
 
   // const detailsIds = series.map(({ DetailId }) => DetailId);
@@ -299,15 +348,18 @@ const createCancelationSap = async (params, order, cancelOrder) => {
     Order: order,
     CancelationOrder: cancelOrder,
     cancelDocsSap: docsSapIds,
+    series,
+    delivery,
   };
 
   const { id } = await CancelationSap.create(cancelSapParams);
   const data = await CancelationSap.findOne({ id }).populate('Details');
+  console.log('data sap', data);
 
   return data.Details;
 };
 
-const createCancelDocSap = ({ type, documents }, order, cancelOrder) => {
+const createCancelDocSap = async ({ type, documents }, order, cancelOrder) => {
   documents.length > 0
     ? documents.map(async value => {
         const data = await CancelDocSap.create({
@@ -770,18 +822,3 @@ function buildAddressContactEndpoint(fields, cardcode) {
   path += '&contact=' + encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
 }
-
-// function cancelOrder(quotationId) {
-//   const requestParams = {
-//     QuotationId: quotationId,
-//   };
-//   const endPoint = buildUrl(baseUrl, {
-//     path: 'SalesOrder',
-//     queryParams: requestParams,
-//   });
-//   sails.log.info('cancel order');
-//   sails.log.info(decodeURIComponent(endPoint));
-//   reqOptions.uri = endPoint;
-//   reqOptions.method = 'DELETE';
-//   return request(reqOptions);
-// }

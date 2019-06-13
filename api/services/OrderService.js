@@ -139,7 +139,7 @@ module.exports = {
       endPoint,
       requestParams,
     } = await SapService.createSaleOrder(sapSaleOrderParams);
-    const sapResponse = response;
+    const sapResponse = JSON.parse(response.value);
     const sapEndpoint = decodeURIComponent(endPoint);
 
     // const logToCreate = {
@@ -158,7 +158,7 @@ module.exports = {
         '\n' +
         JSON.stringify(requestParams) +
         '\n' +
-        JSON.stringify(sapResponse),
+        JSON.stringify(response),
       User: currentUser.id,
       Store: opts.currentStoreId,
       Quotation: quotationId,
@@ -174,11 +174,14 @@ module.exports = {
 
     orderParams.documents = sapResult;
     orderParams.SapOrderConnectionLog = sapLog.id;
+    console.log('sapresult', sapResult);
+    console.log('orderParams', orderParams);
 
     const orderCreated = await Order.create(orderParams);
     const orderFound = await Order.findOne({ id: orderCreated.id }).populate(
       'Details'
     );
+    console.log('orderFound', orderFound);
 
     //Cloning quotation details to order details
     quotation.Details.forEach(function(detail) {
