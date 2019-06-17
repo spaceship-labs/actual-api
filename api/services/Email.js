@@ -255,8 +255,8 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var subject = 'Confirmación de compra | Folio #' + order.folio;
   var content = new helper.Content('text/html', emailBody);
 
-  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
-  personalization.addTo(toAux);
+  // var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  // personalization.addTo(toAux);
 
   var toAux2 = new helper.Email(
     'auditoria@actualg.com',
@@ -558,8 +558,8 @@ function sendFreesale(user, order, products, store) {
   personalization.addTo(to);
   personalization.setSubject(subject);
 
-  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
-  personalization.addTo(toAux);
+  // var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  // personalization.addTo(toAux);
   var toAux2 = new helper.Email(
     'informatica@actualg.com',
     'Informatica ActualGroup'
