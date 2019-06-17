@@ -186,6 +186,9 @@ const updateRequest = async (
     );
 
     authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
+      const { quantity: quantitycancel } = await OrderDetailCancelation.findOne(
+        { id }
+      );
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
       );
@@ -194,8 +197,11 @@ const updateRequest = async (
         { id: OrderDetailId },
         {
           quantityCanceled:
-            quantityCanceled > 0 ? quantityCanceled + quantity : quantity,
-          quantityAvailable: 0,
+            quantityCanceled > 0
+              ? quantityCanceled + quantitycancel
+              : quantitycancel,
+          quantity: quantity - quantitycancel,
+          quantityAvailable: quantity - quantitycancel,
         }
       );
     });
@@ -262,6 +268,8 @@ const updateRequest = async (
         return data;
       }
     );
+    console.log('authorizedCancelationDetails', authorizedCancelationDetails);
+    console.log('CancelationDetails', CancelationDetails);
 
     rejectedProduct.map(async ({ id, status }) => {
       await OrderDetailCancelation.update({ id }, { status });
@@ -286,9 +294,12 @@ const updateRequest = async (
               ? quantityCanceled + quantitycancel
               : quantitycancel,
           quantity: quantity - quantitycancel,
+          quantityAvailable: quantity - quantitycancel,
         }
       );
     });
+
+    amountCancelation(orderCancel.id);
     await Order.update(
       { id: orderCancel.id },
       {
@@ -305,11 +316,45 @@ const updateRequest = async (
     );
 
     await OrderCancelation.update({ id }, { status: 'reviewed' });
+
     return await OrderCancelation.findOne({ id })
       .populate('Order')
       .populate('Details')
       .populate('CancelationDetails');
   }
+};
+const amountCancelation = async id => {
+  const { Details } = await Order.findOne(id).populate('Details');
+  console.log('Detaller', Details);
+
+  const subTotal = Details.reduce(
+    async (total, { unitPriceWithDiscount, quantity }) => {
+      console.log(unitPriceWithDiscount, quantity, id);
+      const dta = await OrderDetail.findOne({ id });
+      console.log('dataaa', dta);
+
+      return total + unitPriceWithDiscount * quantity;
+    }
+  );
+
+  const discounts = Details.reduce((total, { discount, quantity }) => {
+    return discount * quantity;
+  });
+  console.log('Subtotal: ', subTotal, ' Discount: ', discounts);
+  await Order.update(
+    { id },
+    {
+      amountCanceled:
+        amountCanceledBefore > 0
+          ? amountCanceledBefore + amountCanceled
+          : amountCanceled,
+      ammountPaid:
+        amountCanceledBefore > 0
+          ? ammountPaid - (amountCanceledBefore + amountCanceled)
+          : ammountPaid - amountCanceled,
+      status: 'partiallyCanceled',
+    }
+  );
 };
 
 const getCancelDetails = async ids => {
