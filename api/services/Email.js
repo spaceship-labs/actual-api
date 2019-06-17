@@ -189,13 +189,20 @@ function orderEmail(orderId) {
 }
 
 function sendOrder(client, user, order, products, payments, ewallet, store) {
+  var nInterior = order.U_Nointerior || 'S/N';
+  var entreCalle = order.U_Entrecalle || 'S/N';
+  var yCalle = order.U_Ycalle || 'S/N';
   var address =
-    'Número ' +
+    'Calle ' +
+    order.address +
+    ' Número exterior ' +
     order.U_Noexterior +
+    ' Número interior ' +
+    nInterior +
     ' Entre calle ' +
-    order.U_Entrecalle +
+    entreCalle +
     ' y calle ' +
-    order.U_Ycalle +
+    yCalle +
     ' colonia ' +
     order.U_Colonia +
     ', ' +
@@ -258,18 +265,18 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   // var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   // personalization.addTo(toAux);
 
-  var toAux2 = new helper.Email(
-    'auditoria@actualg.com',
-    'Auditoria ActualGroup'
-  );
+  // var toAux2 = new helper.Email(
+  //   'auditoria@actualg.com',
+  //   'Auditoria ActualGroup'
+  // );
   //personalization.addTo(toAux2);
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
-    personalization.addTo(toAux2);
     personalization.addTo(to);
     personalization.addTo(from);
   }
+
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
