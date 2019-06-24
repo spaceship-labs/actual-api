@@ -190,6 +190,8 @@ const cancelOrder = async (
   }
 
   if (params.productsOrder) {
+    console.log('params.productsOrder', params.productsOrder);
+
     axios.interceptors.request.use(request => {
       console.log('Starting Request', request);
       return request;
@@ -204,10 +206,9 @@ const cancelOrder = async (
       console.log('Response:', response);
       return response;
     });
-    if (sapCancels[0].type === 'NotFound') {
+    if (sapCancels[0].type === 'NotFound' || sapCancels[0].type === 'Error') {
       throw new Error(sapCancels[0].result);
     }
-    console.log('sapCancels order: ', sapCancels);
     responseSap = responseSap.concat(sapCancels);
   }
   if (params.productsImmediate) {
@@ -262,8 +263,6 @@ const filterProducts = async (cancelDetails, detailsApprovement) => {
 };
 
 const createCancelationSap = async (params, order, cancelOrder) => {
-  console.log('params sapcancel', params);
-
   const {
     result,
     type,
@@ -326,6 +325,7 @@ const createCancelationSap = async (params, order, cancelOrder) => {
       Payment,
     })
   );
+  console.log('Payments', Payments);
 
   const payments = await Promise.mapSeries(
     Payments,
@@ -354,7 +354,7 @@ const createCancelationSap = async (params, order, cancelOrder) => {
 
   const { id } = await CancelationSap.create(cancelSapParams);
   const data = await CancelationSap.findOne({ id }).populate('Details');
-  console.log('data sap', data);
+  console.log(' data.Details', data.Details);
 
   return data.Details;
 };

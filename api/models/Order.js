@@ -33,6 +33,10 @@ module.exports = {
     totalProducts: {
       type: 'integer',
     },
+    totalProductsCancel: {
+      type: 'integer',
+      defaultsTo: 0,
+    },
     discount: {
       type: 'float',
     },

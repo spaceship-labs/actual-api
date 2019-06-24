@@ -702,18 +702,18 @@ async function cancel(orderId, details, cancelAll) {
   if (cancelAll) {
     await Order.update({ id: orderId }, { status: statusTypes.CANCELED });
   }
-  if (!cancelAll) {
-    details.map(async detail => {
-      const orderDetail = await OrderDetail.findOne({ id: detail.id });
-      await OrderDetail.update(
-        { id: orderDetail.id },
-        {
-          quantityCanceled: detail.quantity,
-          quantity: orderDetail.quantity - detail.quantity,
-        }
-      );
-    });
-  }
+  // if (!cancelAll) {
+  //   details.map(async detail => {
+  //     const orderDetail = await OrderDetail.findOne({ id: detail.id });
+  //     await OrderDetail.update(
+  //       { id: orderDetail.id },
+  //       {
+  //         quantityCanceled: detail.quantity,
+  //         quantity: orderDetail.quantity - detail.quantity,
+  //       }
+  //     );
+  //   });
+  // }
 
   return canceledOrder;
 }

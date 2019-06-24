@@ -1,5 +1,6 @@
 const BigNumber = require('bignumber.js');
 const _ = require('underscore');
+const Promise = require('bluebird');
 
 const createCancelationDetails = async (
   { id, quantity },
@@ -36,19 +37,11 @@ const add = (total, number) => total + number;
 const getCanceledQuantity = details =>
   details.map(validateCancelDetailStatus).reduce(add, 0);
 
-const updateDetailAvailableQuantity = async ({
-  id,
-  quantity,
-  quantityCanceled,
-  detailsCanceled,
-}) =>
+const updateDetailAvailableQuantity = async ({ id, quantity }) =>
   await OrderDetail.update(
     { id },
     {
-      quantityAvailable:
-        quantity - quantityCanceled - detailsCanceled <= 0
-          ? 0
-          : quantity - quantityCanceled - detailsCanceled,
+      quantityAvailable: quantity,
     }
   );
 
@@ -146,9 +139,8 @@ const updateRequest = async (
     .populate('Details')
     .populate('Order')
     .populate('CancelationDetails');
+  console.log('cancelationId', cancelationId);
 
-  const { amountCanceled: amountCanceledBefore, ammountPaid } = orderCancel;
-  const amountCanceled = await getCanceledAmount(Details);
   if (requestStatus === 'rejected') {
     CancelationDetails.map(async ({ id }) => {
       await OrderDetailCancelation.update({ id }, { status: 'rejected' });
@@ -185,45 +177,31 @@ const updateRequest = async (
       }
     );
 
-    authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
-      const { quantity: quantitycancel } = await OrderDetailCancelation.findOne(
-        { id }
-      );
-      const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
-        Detail
-      );
-      await OrderDetailCancelation.update({ id }, { status: 'authorized' });
-      await OrderDetail.update(
-        { id: OrderDetailId },
-        {
-          quantityCanceled:
-            quantityCanceled > 0
-              ? quantityCanceled + quantitycancel
-              : quantitycancel,
-          quantity: quantity - quantitycancel,
-          quantityAvailable: quantity - quantitycancel,
-        }
-      );
-    });
-    await Order.update(
-      { id: orderCancel.id },
-      cancelAll === true && requestStatus === 'authorized'
-        ? {
-            status: 'canceled',
-            amountCanceled: ammountPaid,
-            ammountPaid: 0,
-          }
-        : {
-            amountCanceled:
-              amountCanceledBefore > 0
-                ? amountCanceledBefore + amountCanceled
-                : amountCanceled,
-            ammountPaid:
-              amountCanceledBefore > 0
-                ? ammountPaid - (amountCanceledBefore + amountCanceled)
-                : ammountPaid - amountCanceled,
-            status: 'partiallyCanceled',
-          }
+    const quantityCancel = authorizedCancelationDetails.reduce(
+      (total, { quantity }) => {
+        return total + quantity;
+      }
+    );
+
+    const getAmount = await getAmountCanceled(authorizedCancelationDetails);
+
+    const resultupdate = await Promise.all(
+      authorizedCancelationDetails.map(async ({ id }) => {
+        const {
+          Detail,
+          quantity: quantitycancel,
+        } = await OrderDetailCancelation.findOne({ id });
+        console.log('updating...');
+        await updateOrderDetail(Detail, quantitycancel, id);
+      })
+    );
+
+    const resultordet = await amountCancelation(
+      orderCancel.id,
+      getAmount,
+      cancelAll,
+      requestStatus,
+      quantityCancel
     );
 
     await OrderCancelation.update({ id }, { status: 'reviewed' });
@@ -244,9 +222,6 @@ const updateRequest = async (
         rejectedProduct.push(item);
       }
     });
-    console.log('authorizedProduct', authorizedProduct);
-
-    console.log('rejectedProduct', rejectedProduct);
 
     const authorizedDetails = await SapService.cancelOrder(
       orderCancel.id,
@@ -255,6 +230,7 @@ const updateRequest = async (
       requestStatus,
       authorizedProduct
     );
+
     const authorizedProductSap = [];
     authorizedDetails.map(item => {
       item.map(product => {
@@ -268,51 +244,45 @@ const updateRequest = async (
         return data;
       }
     );
-    console.log('authorizedCancelationDetails', authorizedCancelationDetails);
-    console.log('CancelationDetails', CancelationDetails);
 
-    rejectedProduct.map(async ({ id, status }) => {
-      await OrderDetailCancelation.update({ id }, { status });
-    });
-
-    authorizedCancelationDetails.map(async ({ id, status }) => {
-      const {
-        Detail,
-        quantity: quantitycancel,
-      } = await OrderDetailCancelation.findOne({ id });
-      const {
-        id: OrderDetailId,
-        quantityCanceled,
-        quantity,
-      } = await OrderDetail.findOne(Detail);
-      await OrderDetailCancelation.update({ id }, { status: 'authorized' });
-      await OrderDetail.update(
-        { id: OrderDetailId },
-        {
-          quantityCanceled:
-            quantityCanceled > 0
-              ? quantityCanceled + quantitycancel
-              : quantitycancel,
-          quantity: quantity - quantitycancel,
-          quantityAvailable: quantity - quantitycancel,
-        }
-      );
-    });
-
-    amountCancelation(orderCancel.id);
-    await Order.update(
-      { id: orderCancel.id },
-      {
-        amountCanceled:
-          amountCanceledBefore > 0
-            ? amountCanceledBefore + amountCanceled
-            : amountCanceled,
-        ammountPaid:
-          amountCanceledBefore > 0
-            ? ammountPaid - (amountCanceledBefore + amountCanceled)
-            : ammountPaid - amountCanceled,
-        status: 'partiallyCanceled',
+    const quantityCancel = authorizedCancelationDetails.reduce(
+      (total, { quantity }) => {
+        return total + quantity;
       }
+    );
+    const getAmount = await getAmountCanceled(authorizedCancelationDetails);
+
+    await Promise.all(
+      rejectedProduct.map(async ({ id, status }) => {
+        await OrderDetailCancelation.update({ id }, { status: status });
+        const { Detail } = await OrderDetailCancelation.findOne({ id });
+        const { quantity } = await OrderDetail.findOne(Detail);
+        await OrderDetail.update(
+          { id: Detail },
+          {
+            quantityAvailable: quantity,
+          }
+        );
+      })
+    );
+
+    const resultupdate = await Promise.all(
+      authorizedCancelationDetails.map(async ({ id }) => {
+        const {
+          Detail,
+          quantity: quantitycancel,
+        } = await OrderDetailCancelation.findOne({ id });
+        console.log('updating...');
+        await updateOrderDetail(Detail, quantitycancel, id);
+      })
+    );
+
+    const resultordet = await amountCancelation(
+      orderCancel.id,
+      getAmount,
+      cancelAll,
+      requestStatus,
+      quantityCancel
     );
 
     await OrderCancelation.update({ id }, { status: 'reviewed' });
@@ -323,38 +293,110 @@ const updateRequest = async (
       .populate('CancelationDetails');
   }
 };
-const amountCancelation = async id => {
-  const { Details } = await Order.findOne(id).populate('Details');
-  console.log('Detaller', Details);
 
-  const subTotal = Details.reduce(
-    async (total, { unitPriceWithDiscount, quantity }) => {
-      console.log(unitPriceWithDiscount, quantity, id);
-      const dta = await OrderDetail.findOne({ id });
-      console.log('dataaa', dta);
+const getAmountCanceled = async authorizedDetails => {
+  const totalCancelAmount = await Promise.all(
+    authorizedDetails.map(async ({ Detail, total: quantitycancel }) => {
+      const { unitPriceWithDiscount } = await OrderDetail.findOne(Detail);
+      return { quantitycancel, unitPriceWithDiscount };
+    })
+  );
+  const result = totalCancelAmount.reduce(
+    (total, { unitPriceWithDiscount, quantitycancel }) => {
+      return total + unitPriceWithDiscount * quantitycancel;
+    },
+    0
+  );
 
-      return total + unitPriceWithDiscount * quantity;
+  console.log('result', result);
+  return result;
+};
+
+const updateOrderDetail = async (Detail, quantitycancel, id) => {
+  const {
+    quantityCanceled,
+    quantity,
+    unitPriceWithDiscount,
+    unitPrice,
+    discount: discountCanceledBefore,
+  } = await OrderDetail.findOne(Detail);
+  const discount =
+    discountCanceledBefore / quantity * (quantity - quantitycancel);
+  
+
+  await OrderDetailCancelation.update({ id }, { status: 'authorized' });
+  await OrderDetail.update(
+    { id: Detail },
+    {
+      quantityCanceled: quantitycancel,
+      quantity: quantity - quantitycancel,
+      quantityAvailable: quantity - quantitycancel,
+      discount: discount,
+      subtotal: parseFloat(unitPrice * (quantity - quantitycancel)),
+      subtotal2: parseFloat(
+        unitPriceWithDiscount * (quantity - quantitycancel)
+      ),
+      totalPg1: parseFloat(unitPriceWithDiscount * (quantity - quantitycancel)),
+      total: parseFloat(unitPriceWithDiscount * (quantity - quantitycancel)),
     }
   );
+  return true;
+};
+
+const amountCancelation = async (
+  orderID,
+  totalCanceled,
+  cancelAll,
+  requestStatus,
+  quantityCancel
+) => {
+  const {
+    Details,
+    amountCanceled: amountCanceledBefore,
+    ammountPaid: ammountPaidBefore,
+    Client: client,
+    totalProductsCancel: totalProductsCancelBefore,
+    totalProducts: totalProductsBefore,
+  } = await Order.findOne(orderID).populate('Details');
+
+  const subTotal = Details.reduce((total, { total: totalDetail }) => {
+    return total + totalDetail;
+  }, 0);
 
   const discounts = Details.reduce((total, { discount, quantity }) => {
-    return discount * quantity;
-  });
+    return total + discount * quantity;
+  }, 0);
   console.log('Subtotal: ', subTotal, ' Discount: ', discounts);
+
   await Order.update(
-    { id },
-    {
-      amountCanceled:
-        amountCanceledBefore > 0
-          ? amountCanceledBefore + amountCanceled
-          : amountCanceled,
-      ammountPaid:
-        amountCanceledBefore > 0
-          ? ammountPaid - (amountCanceledBefore + amountCanceled)
-          : ammountPaid - amountCanceled,
-      status: 'partiallyCanceled',
-    }
+    { id: orderID },
+    cancelAll === true && requestStatus === 'authorized'
+      ? {
+          status: 'canceled',
+          amountCanceled: parseFloat(ammountPaidBefore),
+          ammountPaid: parseFloat(0.0),
+          total: parseFloat(0.0),
+          subtotal: parseFloat(0.0),
+          totalProductsCancel: totalProductsBefore,
+        }
+      : {
+          amountCanceled: parseFloat(amountCanceledBefore + totalCanceled),
+          ammountPaid: parseFloat(ammountPaidBefore - totalCanceled),
+          subtotal: subTotal,
+          total: subTotal - discounts,
+          status: 'partiallyCanceled',
+          totalProductsCancel: totalProductsCancelBefore + quantityCancel,
+        }
   );
+  const { Balance: balanceBefore } = await Client.findOne({ id: client });
+  console.log('balance', balanceBefore);
+
+  await Client.update(
+    { id: client },
+    { Balance: balanceBefore + totalCanceled }
+  );
+  const { Balance } = await Client.findOne({ id: client });
+  console.log('Balance', Balance);
 };
 
 const getCancelDetails = async ids => {

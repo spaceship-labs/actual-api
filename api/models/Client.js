@@ -39,6 +39,7 @@ module.exports = {
     },
     Balance: {
       type: 'float',
+      defaultsTo: 0,
     },
     Currency: {
       type: 'string',

@@ -4,82 +4,88 @@ var _ = require('underscore');
 var CLIENT_FIXED_DISCOUNT = 'F';
 var CLIENT_ADDITIONAL_DISCOUNT = 'M';
 
-module.exports ={
+module.exports = {
   areSpecialClientPromotions,
   removeSpecialClientPromotions,
-	getProductMainPromo,
+  getProductMainPromo,
   getProductActivePromotions,
-  getPromotionWithHighestDiscount
+  getPromotionWithHighestDiscount,
 };
 
-function getProductMainPromo(productId, quotationId){
-  var currentDate = new Date();	
-	var promotionsQuery = {
-    startDate: {'$lte': currentDate},
-    endDate: {'$gte': currentDate},		
-	};
-	var productFind = Common.nativeFindOne({_id: ObjectId(productId)}, Product);
-	var promotionsFind = Common.nativeFind(promotionsQuery, Promotion);
+function getProductMainPromo(productId, quotationId) {
+  var currentDate = new Date();
+  var promotionsQuery = {
+    startDate: { $lte: currentDate },
+    endDate: { $gte: currentDate },
+  };
+  var productFind = Common.nativeFindOne({ _id: ObjectId(productId) }, Product);
+  var promotionsFind = Common.nativeFind(promotionsQuery, Promotion);
 
-	return Promise.join(productFind, promotionsFind)
-		.then(function(results){
-			var product = results[0];
-			var activePromotions = results[1];
+  return Promise.join(productFind, promotionsFind)
+    .then(function(results) {
+      var product = results[0];
+      var activePromotions = results[1];
 
-      if(!product){
+      if (!product) {
         return Promise.reject(new Error('Producto no encontrado'));
       }
 
-			return getProductActivePromotions(product, activePromotions, quotationId);
-		})
-    .then(function(productActivePromotions){
-      return getPromotionWithHighestDiscount(productActivePromotions);      
+      return getProductActivePromotions(product, activePromotions, quotationId);
+    })
+    .then(function(productActivePromotions) {
+      return getPromotionWithHighestDiscount(productActivePromotions);
     });
 }
 
-function getProductActivePromotions(product, activePromotions, quotationId){
-  var productActivePromotions = activePromotions.filter(function(promotion){
+function getProductActivePromotions(product, activePromotions, quotationId) {
+  var productActivePromotions = activePromotions.filter(function(promotion) {
     var isValid = false;
-    if(promotion.sa){
+    if (promotion.sa) {
       var productSA = ProductService.getProductSA(product);
-      if(promotion.sa === productSA){
+      if (promotion.sa === productSA) {
         isValid = true;
-      } 
+      }
     }
     return isValid;
   });
 
-  productActivePromotions = filterByHighestRegisteredPromotion(productActivePromotions);
-  
+  productActivePromotions = filterByHighestRegisteredPromotion(
+    productActivePromotions
+  );
+
   return mapRelatedPromotions(productActivePromotions, product, quotationId);
 }
 
-function filterByHighestRegisteredPromotion(productActivePromotions){
-  if(productActivePromotions.length === 0){
+function filterByHighestRegisteredPromotion(productActivePromotions) {
+  if (productActivePromotions.length === 0) {
     return [];
   }
-  var highestDiscountPromo = getPromotionWithHighestDiscount(productActivePromotions);
+  var highestDiscountPromo = getPromotionWithHighestDiscount(
+    productActivePromotions
+  );
   var highestDiscount = highestDiscountPromo.discountPg1;
 
-  return productActivePromotions.filter(function(promotion){
+  return productActivePromotions.filter(function(promotion) {
     return promotion.discountPg1 === highestDiscount;
   });
 }
 
-function mapRelatedPromotions(promotions, product, quotationId){
+function mapRelatedPromotions(promotions, product, quotationId) {
   var mappedPromotions = [];
 
-  if(product.Discount){
-    mappedPromotions = promotions.map(function(promotion){
+  if (product.Discount) {
+    mappedPromotions = promotions.map(function(promotion) {
       var auxPromotion = {
         discountPg1: product.Discount,
-        discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
-        discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product), 
-        discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product), 
-        discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product) 
+        discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product),
+        discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product),
+        discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product),
+        discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product),
       };
 
       promotion = _.extend(promotion, auxPromotion);
+      console.log('promotion extend', promotion);
+
       return promotion;
     });
   }
@@ -89,80 +95,94 @@ function mapRelatedPromotions(promotions, product, quotationId){
     resolve(mappedPromotions);    
   });
   */
-  return mapClientDiscountWithPromotions(mappedPromotions, product, quotationId);
-
+  return mapClientDiscountWithPromotions(
+    mappedPromotions,
+    product,
+    quotationId
+  );
 }
 
-function mapClientDiscountWithPromotions(promotions, product, quotationId){
+function mapClientDiscountWithPromotions(promotions, product, quotationId) {
   var clientFound = true;
   var productSA = ProductService.getProductSA(product);
 
-  return Quotation.findOne({id: quotationId}).populate('Client')
-    .then(function(quotation){
-      if(quotation && quotation.Client){
+  return Quotation.findOne({ id: quotationId })
+    .populate('Client')
+    .then(function(quotation) {
+      if (quotation && quotation.Client) {
         var client = quotation.Client;
         var currentDate = new Date();
         var clientDiscountsQuery = {
           U_SocioNegocio: client.CardCode,
-          U_VigDesde: {'<=': currentDate},
-          U_VigHasta: {'>=': currentDate},    
-          U_Sociedad: productSA      
+          U_VigDesde: { '<=': currentDate },
+          U_VigHasta: { '>=': currentDate },
+          U_Sociedad: productSA,
         };
         return ClientDiscount.findOne(clientDiscountsQuery);
-      }else{
+      } else {
         clientFound = false;
         return promotions;
       }
     })
-    .then(function(result){
+    .then(function(result) {
       var clientDiscount;
 
-      if(clientFound){
+      if (clientFound) {
         clientDiscount = result;
       }
 
-      if(clientDiscount && !_.isUndefined(clientDiscount.U_Porcentaje2) ){
-        
-        if(clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT){
+      if (clientDiscount && !_.isUndefined(clientDiscount.U_Porcentaje2)) {
+        if (clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT) {
           promotions = mapClientAdditionalDiscounts(promotions, clientDiscount);
-        }
-        else if(clientDiscount.U_FijoMovil === CLIENT_FIXED_DISCOUNT){
+        } else if (clientDiscount.U_FijoMovil === CLIENT_FIXED_DISCOUNT) {
           promotions = mapClientFixedDiscounts(promotions, clientDiscount);
         }
 
-        if(  (!promotions || promotions.length === 0) ){
-  
-          if(clientDiscount.U_FijoMovil === CLIENT_FIXED_DISCOUNT){
+        if (!promotions || promotions.length === 0) {
+          if (clientDiscount.U_FijoMovil === CLIENT_FIXED_DISCOUNT) {
+            promotions = [buildClientFixedDiscount(clientDiscount)];
+          } else if (
+            clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT
+          ) {
             promotions = [
-              buildClientFixedDiscount(clientDiscount)
-            ];
-          }
-          else if( clientDiscount.U_FijoMovil === CLIENT_ADDITIONAL_DISCOUNT ){
-            promotions = [
-              buildClientAdditionalDiscount({
-                discountPg1: 0
-              }, clientDiscount)
+              buildClientAdditionalDiscount(
+                {
+                  discountPg1: 0,
+                },
+                clientDiscount
+              ),
             ];
           }
         }
       }
-
 
       return promotions;
     });
 }
 
-function mapClientFixedDiscounts(promotions, clientDiscount){
-  return promotions.map(function(promotion){
-    promotion = _.extend(_.clone(promotion), buildClientFixedDiscount(clientDiscount));
+function mapClientFixedDiscounts(promotions, clientDiscount) {
+  return promotions.map(function(promotion) {
+    promotion = _.extend(
+      _.clone(promotion),
+      buildClientFixedDiscount(clientDiscount)
+    );
     return promotion;
   });
 }
 
-function buildClientFixedDiscount(clientDiscount){
+function buildClientFixedDiscount(clientDiscount) {
   var fixedDiscount = clientDiscount.U_Porcentaje2;
-  var defaultName = 'Descuento fijo cliente '+ clientDiscount.U_SocioNegocio +' '+ fixedDiscount + '%';
-  var clientDiscountReference = 'clientFixedDiscount-' + fixedDiscount + '-' + clientDiscount.U_SocioNegocio;
+  var defaultName =
+    'Descuento fijo cliente ' +
+    clientDiscount.U_SocioNegocio +
+    ' ' +
+    fixedDiscount +
+    '%';
+  var clientDiscountReference =
+    'clientFixedDiscount-' +
+    fixedDiscount +
+    '-' +
+    clientDiscount.U_SocioNegocio;
   clientDiscountReference += '-code-' + clientDiscount.Code;
 
   return {
@@ -173,41 +193,65 @@ function buildClientFixedDiscount(clientDiscount){
     discountPg5: 0,
     name: defaultName,
     publicName: defaultName,
-    handle: 'descuento-cliente-'+clientDiscount.U_SocioNegocio+'-' + fixedDiscount + '-porciento',
-    clientDiscountReference: clientDiscountReference
+    handle:
+      'descuento-cliente-' +
+      clientDiscount.U_SocioNegocio +
+      '-' +
+      fixedDiscount +
+      '-porciento',
+    clientDiscountReference: clientDiscountReference,
   };
 }
 
-function buildClientAdditionalDiscount(promotion, clientDiscount){
+function buildClientAdditionalDiscount(promotion, clientDiscount) {
   var additionalDiscount = clientDiscount.U_Porcentaje2;
   var auxPromotion = {};
-  var defaultName = 'Descuento cliente '+ clientDiscount.U_SocioNegocio +' ' + promotion.discountPg1 + '% mas ' + additionalDiscount + '%';
-  var clientDiscountReference = 'clientAdditionalDiscount-' + additionalDiscount + '-' + clientDiscount.U_SocioNegocio;
+  var defaultName =
+    'Descuento cliente ' +
+    clientDiscount.U_SocioNegocio +
+    ' ' +
+    promotion.discountPg1 +
+    '% mas ' +
+    additionalDiscount +
+    '%';
+  var clientDiscountReference =
+    'clientAdditionalDiscount-' +
+    additionalDiscount +
+    '-' +
+    clientDiscount.U_SocioNegocio;
   clientDiscountReference += '-originalDiscount-' + promotion.discountPg1;
   clientDiscountReference += '-code-' + clientDiscount.Code;
 
   auxPromotion.discountPg1 = promotion.discountPg1 + additionalDiscount;
-  auxPromotion.discountPg2 = 0,
-  auxPromotion.discountPg3 = 0,
-  auxPromotion.discountPg4 = 0,
-  auxPromotion.discountPg5 = 0,
-  auxPromotion.name = defaultName,
-  auxPromotion.publicName = defaultName,
-  auxPromotion.handle = 'descuento-cliente-'+ clientDiscount.U_SocioNegocio +'-' + auxPromotion.discountPg1 + 'mas' + additionalDiscount + '-porciento-adicional';    
+  (auxPromotion.discountPg2 = 0),
+    (auxPromotion.discountPg3 = 0),
+    (auxPromotion.discountPg4 = 0),
+    (auxPromotion.discountPg5 = 0),
+    (auxPromotion.name = defaultName),
+    (auxPromotion.publicName = defaultName),
+    (auxPromotion.handle =
+      'descuento-cliente-' +
+      clientDiscount.U_SocioNegocio +
+      '-' +
+      auxPromotion.discountPg1 +
+      'mas' +
+      additionalDiscount +
+      '-porciento-adicional');
   auxPromotion.clientDiscountReference = clientDiscountReference;
   auxPromotion = _.extend(_.clone(promotion), auxPromotion);
 
   return auxPromotion;
-
 }
 
-function mapClientAdditionalDiscounts(promotions, clientDiscount){
-  return promotions.map(function(promotion){
+function mapClientAdditionalDiscounts(promotions, clientDiscount) {
+  return promotions.map(function(promotion) {
     return buildClientAdditionalDiscount(promotion, clientDiscount);
   });
 }
 
-function getRelatedPromotionGroupDiscount(group, promotion, product){
+function getRelatedPromotionGroupDiscount(group, promotion, product) {
+  console.log('promo', promotion);
+
   var originalCashDiscount = promotion.discountPg1;
   var originalGroupDiscount = promotion['discountPg' + group];
   var difference = originalCashDiscount - originalGroupDiscount;
@@ -216,10 +260,10 @@ function getRelatedPromotionGroupDiscount(group, promotion, product){
   return groupDiscount;
 }
 
-function getPromotionWithHighestDiscount(promotions){
-	if(promotions.length <= 0){
-		return false;
-	}
+function getPromotionWithHighestDiscount(promotions) {
+  if (promotions.length <= 0) {
+    return false;
+  }
 
   var highestDiscountPromo;
   var indexMaxPromo = 0;
@@ -227,24 +271,24 @@ function getPromotionWithHighestDiscount(promotions){
   promotions = promotions || [];
 
   //sails.log.info('promotions in getPromotionWithHighestDiscount', promotions);
-  promotions.forEach(function(promo, index){
-    if(promo.discountPg1 >= maxDiscount){
-      maxDiscount   = promo.discountPg1;
+  promotions.forEach(function(promo, index) {
+    if (promo.discountPg1 >= maxDiscount) {
+      maxDiscount = promo.discountPg1;
       indexMaxPromo = index;
     }
-  });	
+  });
   highestDiscountPromo = promotions[indexMaxPromo];
   return highestDiscountPromo;
 }
 
-function areSpecialClientPromotions(promotions){
-  return _.some(promotions,function(promotion){
+function areSpecialClientPromotions(promotions) {
+  return _.some(promotions, function(promotion) {
     return promotion.clientDiscountReference;
   });
 }
 
-function removeSpecialClientPromotions(promotions){
-  return promotions.filter(function(promotion){
+function removeSpecialClientPromotions(promotions) {
+  return promotions.filter(function(promotion) {
     return !promotion.clientDiscountReference;
   });
 }
