@@ -5,6 +5,9 @@ var Promise = require('bluebird');
 const moment = require('moment');
 
 const customFind = async (params, extraParams, modelToFind) => {
+  console.log('extraParams', extraParams);
+  console.log('params', params);
+
   const searchFields = extraParams.searchFields || [];
   const selectedFields = extraParams.selectedFields || [];
   const items = params.items || 10;
@@ -81,8 +84,11 @@ const customFind = async (params, extraParams, modelToFind) => {
     query.skip = (page - 1) * items;
     query.limit = items;
   }
+  console.log('query', query);
 
   read = model.find(query);
+  console.log('modelToFind', modelToFind);
+
   read = read.populate(
     modelToFind === 'ewallet'
       ? ['Client', 'Store', 'Contract']
@@ -95,6 +101,8 @@ const customFind = async (params, extraParams, modelToFind) => {
     read.sort(orderBy);
   }
   const results = await read;
+  console.log('results', results);
+
   const total = await model.count(querySearchAux);
 
   return { data: results, total };

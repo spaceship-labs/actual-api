@@ -32,7 +32,8 @@ module.exports = {
       model: 'Client',
     },
     Contract: {
-      model: 'EwalletFile',
+      collection: 'EwalletFile',
+      via: 'Ewallet',
     },
     Store: {
       model: 'Store',
