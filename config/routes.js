@@ -223,15 +223,15 @@ module.exports.routes = {
     action: 'setCategoryChildsRelations',
   },
 
-  '/productcategory/:id/featuredproduct/:productId': {
+  'POST /productcategory/:id/featuredproduct/:productId': {
     controller: 'productcategory',
     action: 'addFeaturedProduct',
   },
 
-  // '/productcategory/featuredproduct/:id': {
-  //   controller: 'productcategory',
-  //   action: 'getFeaturedProductsByCategory',
-  // },
+  'POST /delete/productcategory/:id/featuredproduct/:productId': {
+    controller: 'productcategory',
+    action: 'removeFeaturedProduct',
+  },
 
   '/productfilter/find/:page': {
     controller: 'productfilter',

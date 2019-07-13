@@ -213,4 +213,23 @@ module.exports = {
       res.negotiate(err);
     }
   },
+
+  async removeFeaturedProduct(req, res) {
+    try {
+      const id = req.param('id');
+      const productId = req.param('productId');
+      const category = await ProductCategory.findOne({ id }).populate(
+        'FeaturedProducts'
+      );
+      category.FeaturedProducts.remove(productId);
+      const categoryUpdated = await ProductCategory.findOne({ id })
+        .populate('Childs')
+        .populate('Parents')
+        .populate('FeaturedProducts');
+      res.ok(categoryUpdated);
+      await category.save();
+    } catch (err) {
+      res.negotiate(err);
+    }
+  },
 };
