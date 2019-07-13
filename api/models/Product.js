@@ -185,6 +185,10 @@ module.exports = {
       via: 'Products',
       dominant: true,
     },
+    FeaturedCategories: {
+      collection: 'ProductCategory',
+      via: 'Featuredproducts',
+    },
     FilterValues: {
       collection: 'ProductFilterValue',
       via: 'Products',

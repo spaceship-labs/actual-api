@@ -215,13 +215,22 @@ module.exports.routes = {
 
   '/productcategory/childsrelations/:handle': {
     controller: 'productcategory',
-    action: 'getCategoryChildsRelations'
+    action: 'getCategoryChildsRelations',
   },
-
 
   '/productcategory/setchildsrelations/:handle': {
     controller: 'productcategory',
-    action: 'setCategoryChildsRelations'
+    action: 'setCategoryChildsRelations',
+  },
+
+  '/productcategory/:id/featuredproduct/:productId': {
+    controller: 'productcategory',
+    action: 'addFeaturedProduct',
+  },
+
+  '/productcategory/featuredproduct/:id': {
+    controller: 'productcategory',
+    action: 'getFeaturedProductsByCategory',
   },
 
   '/productfilter/find/:page': {
@@ -607,9 +616,9 @@ module.exports.routes = {
     action: 'findById',
   },
 
-  'POST /order/:id/cancel':{
+  'POST /order/:id/cancel': {
     controller: 'order',
-    action: 'cancel'
+    action: 'cancel',
   },
 
   '/order/user/:userId/totals': {
