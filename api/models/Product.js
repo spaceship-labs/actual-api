@@ -187,7 +187,7 @@ module.exports = {
     },
     FeaturedCategories: {
       collection: 'ProductCategory',
-      via: 'Featuredproducts',
+      via: 'FeaturedProducts',
     },
     FilterValues: {
       collection: 'ProductFilterValue',

@@ -228,10 +228,10 @@ module.exports.routes = {
     action: 'addFeaturedProduct',
   },
 
-  '/productcategory/featuredproduct/:id': {
-    controller: 'productcategory',
-    action: 'getFeaturedProductsByCategory',
-  },
+  // '/productcategory/featuredproduct/:id': {
+  //   controller: 'productcategory',
+  //   action: 'getFeaturedProductsByCategory',
+  // },
 
   '/productfilter/find/:page': {
     controller: 'productfilter',

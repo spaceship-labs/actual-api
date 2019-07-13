@@ -32,7 +32,7 @@ module.exports = {
       collection: 'Product',
       via: 'Categories',
     },
-    Featuredproducts: {
+    FeaturedProducts: {
       collection: 'Product',
       via: 'FeaturedCategories',
     },

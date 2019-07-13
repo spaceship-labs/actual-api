@@ -200,7 +200,7 @@ module.exports = {
       const id = req.param('id');
       const productId = req.param('productId');
       const category = await ProductCategory.findOne({ id }).populate(
-        'Featuredproducts'
+        'FeaturedProducts'
       );
       category.FeaturedProducts.add(productId);
       await category.save();
