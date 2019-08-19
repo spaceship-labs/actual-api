@@ -10,6 +10,10 @@ module.exports = {
     filename: {
       type: 'string',
     },
+    type: { type: 'string', enum: ['contract', 'reposition'] },
+    status: {
+      type: 'boolean',
+    },
     filepath: {
       type: 'string',
     },
