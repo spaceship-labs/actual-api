@@ -36,6 +36,7 @@ module.exports = {
   sendFreesale: freesaleEmail,
   sendQuotation: quotation,
   sendEwalletPointsWarning,
+  sendEwalletPoints,
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -74,13 +75,19 @@ function password(userName, userEmail, recoveryUrl, cb) {
   });
 }
 
-function sendEwalletPointsWarning(emails) {
+function sendEwalletPoints(emails) {
   var request = sendgrid.emptyRequest();
   var requestBody = undefined;
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'actualgroup');
-  var to = new helper.Email('yupit@spaceshiplabs.com', 'Emmanuel Yupit');
+  // var to = new helper.Email('brandon@spaceshiplabs.com', 'brandon navarrete');
+  var to = emails.map(function(email) {
+    if (email !== 'undefined') {
+      console.log(email);
+      return new helper.Email(email, 'Client_Actual');
+    }
+  });
   var subject = 'Expiración de puntos del monedero';
   var res = ewalletReminderTemplate({
     company: {
@@ -104,6 +111,51 @@ function sendEwalletPointsWarning(emails) {
       } else {
         resolve(response);
       }
+    });
+  });
+}
+
+function sendEwalletPointsWarning(emails) {
+  console.log('------------------------');
+  console.log(emails);
+  var request = sendgrid.emptyRequest();
+  var res = ewalletReminderTemplate({
+    company: {
+      url: baseURL,
+    },
+  });
+  var contentEmail = new helper.Content('text/html', res);
+  var requestBody = {
+    personalizations: [
+      {
+        to: [emails],
+        subject: 'Expiración de puntos del monedero',
+      },
+    ],
+    from: {
+      email: 'noreply@actualgroup.com',
+      name: 'actualgroup',
+    },
+    content: [
+      {
+        type: contentEmail.type,
+        value: contentEmail.value,
+      },
+    ],
+  };
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+
+  return new Promise((resolve, reject) => {
+    sendgrid.API(request, function(response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve();
+      } else {
+        resolve(response);
+      }
+      console.log('----------status----------', response.statusCode);
+      console.log('headers', response.headers);
     });
   });
 }
