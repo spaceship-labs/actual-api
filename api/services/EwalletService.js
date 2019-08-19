@@ -5,6 +5,9 @@ var Promise = require('bluebird');
 const moment = require('moment');
 
 const customFind = async (params, extraParams, modelToFind) => {
+  console.log('extraParams', extraParams);
+  console.log('params', params);
+
   const searchFields = extraParams.searchFields || [];
   const selectedFields = extraParams.selectedFields || [];
   const items = params.items || 10;
@@ -81,11 +84,14 @@ const customFind = async (params, extraParams, modelToFind) => {
     query.skip = (page - 1) * items;
     query.limit = items;
   }
+  console.log('query', query);
 
   read = model.find(query);
+  console.log('modelToFind', modelToFind);
+
   read = read.populate(
     modelToFind === 'ewallet'
-      ? ['Client', 'Store']
+      ? ['Client', 'Store', 'Contract']
       : modelToFind === 'ewalletreplacement'
         ? ['Client', 'Store', 'requestedBy', 'Files']
         : ['Store', 'Ewallet']
@@ -95,6 +101,8 @@ const customFind = async (params, extraParams, modelToFind) => {
     read.sort(orderBy);
   }
   const results = await read;
+  console.log('results', results);
+
   const total = await model.count(querySearchAux);
 
   return { data: results, total };
@@ -156,43 +164,17 @@ const validateExpirationDate = async () => {
   }
 };
 
+const getExchangeRate = async () => {
+  const ewalletConfiguration = await EwalletConfiguration.find();
+  return ewalletConfiguration[0].exchangeRate;
+};
+
 module.exports = {
+  getExchangeRate,
   customFind: customFind,
   applyEwalletRecord: applyEwalletRecord,
   isValidEwalletPayment: isValidEwalletPayment,
   validateExpirationDate: validateExpirationDate,
-  async showOrCreate(cardNumber, clientId, storeId) {
-    if (cardNumber.length < 12) throw new Error('Formato no válido');
-    const ewallet = await Ewallet.findOne({ cardNumber });
-    const client = await Client.findOne({ id: clientId });
-    console.log('client.Ewallet: ', client);
-    if (ewallet) {
-      console.log('ENTRA IF EWALLET');
-      if (ewallet.Client === clientId) {
-        return ewallet;
-      } else {
-        throw new Error(
-          'El monedero ingresado no pertenece al cliente de esta cotización'
-        );
-      }
-    } else if (client.Ewallet) {
-      console.log('ENTRA IF EWALLET CLIENT');
-      console.log('client.Ewallet: ', client.Ewallet);
-      throw new Error(
-        'El cliente ya tiene un monedero relacionado, intente de nuevo'
-      );
-    } else {
-      console.log('entra else');
-      const ewalletCreated = await Ewallet.create({
-        Client: clientId,
-        Store: storeId,
-        cardNumber,
-        amount: 0,
-      });
-      await Client.update({ id: clientId }, { Ewallet: ewalletCreated.id });
-      return ewalletCreated;
-    }
-  },
 };
 
 function isValidEwalletPayment(paymentAmount, ewalletAmount) {

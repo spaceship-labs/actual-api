@@ -41,6 +41,7 @@ module.exports = {
     try {
       const clientId = req.param('clientId');
       const storeId = req.user.activeStore.id;
+
       const options = {
         dir: 'ewallet/replacement',
       };

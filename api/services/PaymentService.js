@@ -10,6 +10,7 @@ const TRANSFER_USD_TYPE = 'transfer-usd';
 const CLIENT_BALANCE_TYPE = 'client-balance';
 const EWALLET_GROUP_INDEX = 0;
 const DEFAULT_EXCHANGE_RATE = 18.78;
+const CURRENCY_USD = 'usd';
 const types = {
   CREDIT_CARD: 'credit-card',
   DEBIT_CARD: 'debit-card',
@@ -22,6 +23,7 @@ const types = {
   CASH: 'cash',
   CASH_USD: 'cash-usd',
   TRANSFER_ECOMMERCE: 'transfer-ecommerce',
+  CLIENT_BALANCE: 'client-balance',
 };
 
 const LEGACY_METHODS_TYPES = [types.SINGLE_PAYMENT_TERMINAL, types.DEPOSIT];
@@ -43,6 +45,7 @@ const VALID_STORES_CODES = [
   'actual_studio_merida',
   'actual_puerto_cancun',
   'actual_proyect',
+  'actual_marketplace', //FOR MARKET_PLACES
 ];
 
 module.exports = {
@@ -55,6 +58,7 @@ module.exports = {
   calculatePaymentsTotal,
   calculatePaymentsTotalPg1,
   calculateUSDPayment,
+  currencyTypes,
   checkIfClientHasCreditById,
   getPaymentGroupsForEmail,
   getQuotationTotalsByMethod,
@@ -74,8 +78,8 @@ module.exports = {
   LEGACY_METHODS_TYPES,
   types,
   statusTypes,
-  currencyTypes,
   mapStatusType,
+  isTransferMethod,
 };
 
 function mapStatusType(status) {
@@ -95,6 +99,10 @@ function isCardPayment(payment) {
     payment.type === types.DEBIT_CARD ||
     payment.msi
   );
+}
+
+function isTransferMethod(method) {
+  return method.type === types.TRANSFER || method.type === types.TRANSFER_USD;
 }
 
 function isTransferPayment(payment) {
@@ -179,7 +187,6 @@ async function addPayment(params, req) {
         : params.ammount,
       ewallet.amount
     );
-    console.log('QUE PEDO: ', hasEnoughFunds);
   }
 
   if (params.type === CLIENT_BALANCE_TYPE) {
@@ -649,6 +656,7 @@ const SINGLE_PAYMENT_TERMINAL_METHOD = {
   currency: 'mxn',
   needsVerification: true,
   min: 0,
+  group: 1,
 };
 
 const DEPOSIT_METHOD = {
@@ -664,6 +672,7 @@ const DEPOSIT_METHOD = {
     { label: 'Santander', value: 'santander' },
   ],
   needsVerification: false,
+  group: 1,
 };
 
 const CREDIT_METHOD = {
@@ -673,4 +682,5 @@ const CREDIT_METHOD = {
   description: '',
   currency: 'mxn',
   needsVerification: false,
+  group: 1,
 };

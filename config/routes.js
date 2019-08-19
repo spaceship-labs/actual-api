@@ -848,13 +848,17 @@ module.exports.routes = {
     controller: 'ewallet',
     action: 'index',
   },
-  '/ewallet/:client/:cardNumber': {
+  '/ewallet/:client/:cardNumber/:type': {
     controller: 'ewallet',
     action: 'showOrCreate',
   },
   '/ewallet/:cardNumber': {
     controller: 'ewallet',
     action: 'show',
+  },
+  'GET /ewallet/:id/client': {
+    controller: 'ewallet',
+    action: 'getById',
   },
   'GET /ewalletconfiguration': {
     controller: 'ewalletconfiguration',
@@ -876,21 +880,22 @@ module.exports.routes = {
     controller: 'ewalletreplacement',
     action: 'index',
   },
-  'POST /ewalletreplacement/:page': {
-    controller: 'ewalletreplacement',
-    action: 'index',
-  },
   'POST /replacementupdate/:clientId': {
     controller: 'ewalletreplacement',
     action: 'add',
   },
+  'POST /file/:clientId/ewallet': {
+    controller: 'ewallet',
+    action: 'addFile',
+  },
+
   'POST /replacementaccepted/:id': {
     controller: 'ewalletreplacement',
     action: 'update',
   },
   'GET /ewalletById/:id': {
     controller: 'ewallet',
-    action: 'getEwalletById',
+    action: 'getById',
   },
   'GET /alert': {
     controller: 'alert',

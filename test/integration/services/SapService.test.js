@@ -1,100 +1,51 @@
-// describe('SapService', () => {
-//   let products = null;
-//   let orderDetails = null;
-//   let order = null;
-//   let quotation = null;
-//   let quotationDetails = null;
-//   let companies = null;
-//   let orderCancelation = null;
+describe('SapService', function() {
+  describe('mapPaymentsToSap', function() {
+    it('should map correctly payments to sap request format, filtering client balance, client credit payments and canceled payments', function() {
+      const payments = [
+        { id: 'payment.id.1', type: 'cash', ammount: 500 },
+        { id: 'payment.id.2', type: 'cash', ammount: 1500, status: 'canceled' },
+        { id: 'payment.id.3', type: 'cash-usd', ammount: 100, currency: 'usd' },
+        { id: 'payment.id.4', type: 'client-balance', ammount: 350 },
+        {
+          id: 'payment.id.5',
+          type: 'credit-card',
+          ammount: 250,
+          terminal: 'american-express',
+          verificationCode: '1241',
+        },
+        { id: 'payment.id.6', type: 'client-credit', ammount: 450 },
+      ];
 
-//   before(async () => {
-//     Product.destroy();
-//     OrderDetail.destroy();
-//     Order.destroy();
-//     Quotation.destroy();
-//     QuotationDetail.destroy();
-//     Company.destroy();
-//     companies = [
-//       await Company.create({ WhsCode: '01' }),
-//       await Company.create({ WhsCode: '02' }),
-//     ];
-//     products = [
-//       await Product.create({
-//         ItemCode: 'product.itemCode.1',
-//         ItemName: 'product.itemName.1',
-//       }),
-//       await Product.create({
-//         ItemCode: 'product.itemCode.2',
-//         ItemName: 'product.itemName.2',
-//       }),
-//     ];
-//     quotationDetails = [
-//       await QuotationDetail.create({
-//         quantity: 1,
-//         Product: products[0],
-//         shipDate: new Date(),
-//         originalShipDate: new Date(),
-//         productDate: new Date(),
-//         shipCompany: companies[0],
-//         shipCompanyFrom: companies[1],
-//       }),
-//       await QuotationDetail.create({
-//         quantity: 2,
-//         Product: products[1],
-//         shipDate: new Date(),
-//         originalShipDate: new Date(),
-//         productDate: new Date(),
-//         shipCompany: companies[1],
-//         shipCompanyFrom: companies[0],
-//       }),
-//     ];
-//     quotation = await Quotation.create({ Details: quotationDetails });
-//     orderDetails = [
-//       await OrderDetail.create({
-//         quantity: 1,
-//         Product: products[0],
-//         shipDate: new Date(),
-//         originalShipDate: new Date(),
-//         productDate: new Date(),
-//         shipCompany: companies[0],
-//         shipCompanyFrom: companies[1],
-//         QuotationDetail: quotationDetails[0],
-//       }),
-//       await OrderDetail.create({
-//         quantity: 1,
-//         Product: products[1],
-//         shipDate: new Date(),
-//         originalShipDate: new Date(),
-//         productDate: new Date(),
-//         shipCompany: companies[1],
-//         shipCompanyFrom: companies[0],
-//         QuotationDetail: quotationDetails[1],
-//       }),
-//     ];
-//     order = await Order.create({
-//       Quotation: quotation,
-//       Details: orderDetails,
-//       status: 'paid',
-//       ammountPaid: 100,
-//       CardName: 'order.cardName.1',
-//     });
-//     orderCancelation = await OrderCancelation.create({
-//       cancelAll: true,
-//       reason: 'cancel.reason.1',
-//       CardName: order.CardName,
-//       Order: order,
-//       Quotation: quotation,
-//       Details: orderDetails,
-//     });
-//   });
+      const exchangeRate = 18.5;
+      const currentStore = {};
 
-//   describe('cancelOrder', () => {
-//     it('should return Sap Cancelations documents', async () => {
-//       const result = await SapService.cancelOrder(
-//         orderCancelation.id,
-//         'delete'
-//       );
-//       expect(result).to.equal(1);
-//     });
-//   });
-// });
+      const expected = [
+        {
+          TypePay: payments[0].type,
+          PaymentAppId: payments[0].id,
+          amount: payments[0].ammount,
+        },
+        {
+          TypePay: payments[2].type,
+          PaymentAppId: payments[2].id,
+          amount: payments[2].ammount,
+          rate: exchangeRate,
+        },
+        {
+          TypePay: payments[4].type,
+          PaymentAppId: payments[4].id,
+          amount: payments[4].ammount,
+          CardNum: '4802',
+          CardDate: '05/16',
+          Terminal: payments[4].terminal,
+          ReferenceTerminal: payments[4].verificationCode,
+          DateTerminal: moment().format(SapService.SAP_DATE_FORMAT),
+        },
+      ];
+
+      expect(
+        SapService.mapPaymentsToSap(payments, exchangeRate, currentStore)
+      ).to.deep.equal(expected);
+    });
+  });
+});

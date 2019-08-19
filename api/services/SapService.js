@@ -9,6 +9,13 @@ const moment = require('moment');
 const axios = require('axios');
 axios.defaults.baseURL = baseUrl;
 axios.defaults.headers = {
+  'content-type': 'application/x-www-form-urlencoded',
+};
+
+const axiosOrder = require('axios');
+const API_BASE_ORDER = 'http://sapmovil.homedns.org:81';
+axiosOrder.defaults.baseURL = API_BASE_ORDER;
+axiosOrder.defaults.headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
 };
 
@@ -104,12 +111,14 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
+
   const { data: { value: sapCancels }, error } = await axios.delete(
     '/SalesOrder',
     {
       data: { params },
     }
   );
+
   sapCancels.order = orderId;
   sapCancels.cancelOrder = cancelOrderId;
   console.log('error: ', error);
@@ -341,6 +350,40 @@ function updateFiscalAddress(cardcode, form) {
     exchangeRate,
     currentStore
 */
+/* 
+function createSaleOrder(params) {
+  var endPoint;
+  var requestParams;
+  return buildOrderRequestParams(params)
+    .then(function(_requestParams) {
+      requestParams = _requestParams;
+
+      sails.log.info('createSaleOrder', API_BASE_ORDER + '/SalesOrder');
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+
+      const preForm = {
+        contact: JSON.stringify(requestParams.contact),
+        products: JSON.stringify(requestParams.products),
+        payments: JSON.stringify(requestParams.payments),
+      };
+      const formDataStr = qs.stringify(preForm, { encode: true });
+
+      return axiosOrder
+        .post('/SalesOrder', formDataStr)
+        .then(function(response) {
+          console.log(response.data);
+          return response.data;
+        });
+    })
+    .then(function(response) {
+      return {
+        requestParams,
+        endPoint: endPoint,
+        response: response,
+      };
+    });
+} */
+
 function createSaleOrder(params) {
   var endPoint;
   var requestParams;
@@ -528,7 +571,6 @@ function mapPaymentsToSap(payments, exchangeRate, currentStore) {
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-
     return paymentSap;
   });
 

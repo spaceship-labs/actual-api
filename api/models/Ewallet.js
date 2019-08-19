@@ -17,6 +17,7 @@ module.exports = {
     amount: {
       type: 'float',
       required: true,
+      defaultsTo: 0,
     },
     active: {
       type: 'boolean',
@@ -29,6 +30,10 @@ module.exports = {
     },
     Client: {
       model: 'Client',
+    },
+    Contract: {
+      collection: 'EwalletFile',
+      via: 'Ewallet',
     },
     Store: {
       model: 'Store',
