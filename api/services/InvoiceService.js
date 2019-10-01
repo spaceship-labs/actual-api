@@ -190,7 +190,7 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
     return 'PPD';
   }
 
-  return 'PUE';
+  return 'PPD';
 }
 
 function createInvoice(data) {
