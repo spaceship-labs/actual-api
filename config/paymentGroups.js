@@ -381,7 +381,8 @@ module.exports.paymentGroups = [
         //],
         cardsImages: ['/cards/amexcard.png'],
         moreCards: true,
-        cards:['American Express',
+        cards: [
+          'American Express',
           'Afirme',
           'Bancomer',
           'Banbajio',
@@ -397,7 +398,7 @@ module.exports.paymentGroups = [
           'Ixe',
           'Liverpool Premium Card',
           'Santander',
-          'Scotiabank'
+          'Scotiabank',
         ],
         terminals: [
           { label: 'Banamex', value: 'banamex' },
