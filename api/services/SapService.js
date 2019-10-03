@@ -406,7 +406,7 @@ function mapWhsSeries(whsName) {
       series = 186;
       break;
     case 'STUDIO CUMBRES':
-      series = 180;
+      series = 185;
       break;
     case 'STUDIO CARMEN':
       series = 278;
@@ -415,7 +415,7 @@ function mapWhsSeries(whsName) {
       series = 188;
       break;
     case 'HOME PUERTO CANCUN':
-      series = 278;
+      series = 186;
       break;
     default:
       series = 183;
