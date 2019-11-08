@@ -7,7 +7,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "aws-sdk": "^2.311.0",
-    "bcrypt": "^0.8.x",
+    "bcrypt": "^3.0.6",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.4.7",
     "build-url": "^1.0.9",
@@ -66,8 +66,7 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": "node app.js",
-    "test":
-      "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
+    "test": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
   },
   "main": "app.js",
   "repository": {
@@ -81,6 +80,9 @@
     "npm": "5.6.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+    "**/*.{js,jsx,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }
