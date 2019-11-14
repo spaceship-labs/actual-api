@@ -29,6 +29,7 @@ function createOrderInvoice(orderId) {
   return new Promise(function(resolve, reject) {
     var orderFound;
     var errInvoice;
+    console.log('no pasa', process.env.MODE);
 
     if (process.env.MODE !== 'production') {
       resolve({});
@@ -180,14 +181,14 @@ function hasClientCreditPayment(payments) {
 
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   if (hasClientBalancePayment(payments) && !hasClientCreditPayment(payments)) {
-    return 'PUE';
+    return 'PPD';
   } else if (
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
     return 'PPD';
   } else if (hasClientCreditPayment(payments)) {
-    return 'PDD';
+    return 'PUE';
   }
 
   return 'PUE';
