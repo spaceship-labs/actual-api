@@ -300,6 +300,10 @@ function getCompanyCode(code, storeGroup) {
         companyCode = COMPANY_HOME_CODE;
         break;
     }
+  } else {
+    if(storeGroup == KIDS_GROUP){
+      companyCode = COMPANY_KIDS_CODE;
+    }
   }
   return companyCode;
 }
