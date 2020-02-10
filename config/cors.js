@@ -28,9 +28,9 @@
 
 module.exports.cors = {
   allRoutes: true,
-  //origin: '*',
-  origin:
-    'http://ventaskids.miactual.com, http://adminkids.miactual.com, http://stagingventaskids.miactual.com, http://stagingadminkids.miactual.com, http://13.58.136.42:8082 , http://sandboxventas.miactual.com, http://ventas.miactual.com, http://demoventas.miactual.com, http://admin.miactual.com, http://sandboxadmin.miactual.com, http://demoadmin.miactual.com, http://localhost:9000, http://localhost:3000',
+  origin: '*',
+  //origin:
+  //  'http://ventaskids.miactual.com, http://adminkids.miactual.com, http://stagingventaskids.miactual.com, http://stagingadminkids.miactual.com, http://13.58.136.42:8082 , http://sandboxventas.miactual.com, http://ventas.miactual.com, http://demoventas.miactual.com, http://admin.miactual.com, http://sandboxadmin.miactual.com, http://demoadmin.miactual.com, http://localhost:9000, http://localhost:3000',
   headers: 'content-type, Authorization, ActiveStoreId',
 
   /***************************************************************************
