@@ -32,5 +32,9 @@ module.exports = {
       collection: 'Product',
       via: 'Categories',
     },
+    FeaturedProducts: {
+      collection: 'Product',
+      via: 'FeaturedCategories',
+    },
   },
 };
