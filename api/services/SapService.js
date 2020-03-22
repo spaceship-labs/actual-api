@@ -252,7 +252,7 @@ function buildOrderRequestParams(params) {
         OpenCreQty: detail.quantity,
         WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
         ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
-        DiscountPercent: detail.discountPercent,
+        DiscountPercent: Math.abs(detail.discountPercent),
         Company: getCompanyCode(
           detail.Product.U_Empresa,
           params.currentStore.group
