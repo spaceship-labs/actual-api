@@ -170,12 +170,12 @@ function Calculator() {
       detail.originalDiscountPercent = _.clone(detail.discountPercent);
       detail.total = proportionalPayment + detailRemaining;
       detail.discount = detail.total - detail.subtotal;
-      detail.discountPercent = 100 - detail.total / detail.subtotal * 100;
+      detail.discountPercent = Math.abs(100 - detail.total / detail.subtotal * 100);
       detail.unitPriceWithDiscount = calculateAfterDiscount(
         detail.unitPrice,
         detail.discountPercent
       );
-      detail.discountPercentPromos = detail.discountPercentPromos;
+      detail.discountPercentPromos = Math.abs(detail.discountPercentPromos);
       return detail;
     });
   }
@@ -320,7 +320,7 @@ function Calculator() {
 
     const unitPrice = product.Price;
     const discountKey = getDiscountKeyByGroup(options.paymentGroup);
-    const discountPercent = mainPromo ? mainPromo[discountKey] : 0;
+    const discountPercent = mainPromo ? Math.abs(mainPromo[discountKey]) : 0;
     const discountPercentPromos = discountPercent;
     const unitPriceWithDiscount = calculateAfterDiscount(
       unitPrice,
@@ -343,7 +343,7 @@ function Calculator() {
     if (mainPromo) {
       const PAYMENT_GROUP_1 = 1;
       const _discountKey = getDiscountKeyByGroup(PAYMENT_GROUP_1);
-      const _discountPercent = mainPromo[_discountKey];
+      const _discountPercent = Math.abs(mainPromo[_discountKey]);
       const _unitPriceWithDiscount = calculateAfterDiscount(
         unitPrice,
         _discountPercent
