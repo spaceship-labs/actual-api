@@ -403,7 +403,7 @@ function prepareClientParams(order, client, address) {
         exteriorNumber: address.U_NumExt,
         interiorNumber: address.U_NumInt,
         colony: address.Block,
-        country: client.CardCode === 'PL10003936' ? 'MEX' : 'México',
+        country: 'MEX',
         state: address.State,
         municipality: address.U_Localidad,
         localitiy: address.City,
@@ -417,7 +417,7 @@ function prepareClientParams(order, client, address) {
       cfdiUse: DEFAULT_CFDI_USE,
       //email: order.E_Mail,
       address: {
-        country: 'México',
+        country: 'MEX',
         state: order.U_Estado || 'Quintana Roo',
         //TODO; Check default Inovice data for GENERAL PUBLIC
       },
