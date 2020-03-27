@@ -315,7 +315,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   );
   //personalization.addTo(toAux2);
 
-  if (process.env.MODE === 'production') {
+  if (process.env.ENV_TYPE === 'production') {
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(toAux2);
     personalization.addTo(to);
@@ -486,7 +486,7 @@ function sendQuotation(
   );
   personalization.addTo(toAux);
 
-  if (process.env.MODE === 'production') {
+  if (process.env.ENV_TYPE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
     personalization.addTo(to);
     personalization.addTo(from);
