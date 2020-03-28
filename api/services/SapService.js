@@ -341,7 +341,6 @@ function updateFiscalAddress(cardcode, form) {
     payments,
     exchangeRate,
     currentStore
-*/
 
 function createSaleOrder(params) {
   var endPoint;
@@ -375,7 +374,7 @@ function createSaleOrder(params) {
       };
     });
 }
-/*
+*/
 function createSaleOrder(params) {
   var endPoint;
   var requestParams;
@@ -410,7 +409,6 @@ function createSaleOrder(params) {
       };
     });
 }
-*/
 
 function buildOrderRequestParams(params) {
   var products = [];
