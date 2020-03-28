@@ -10,14 +10,14 @@ const axios = require('axios');
 const API_BASE = 'http://sapnueve.homedns.org';
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers = {
-  'content-type': 'application/x-www-form-urlencoded',
+  'content-type': 'application/json',
 };
 
 const axiosOrder = require('axios');
 const API_BASE_ORDER = 'http://sapmovil.homedns.org:81';
 axiosOrder.defaults.baseURL = API_BASE_ORDER;
 axiosOrder.defaults.headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+  'Content-Type': 'application/json; charset=utf-8',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -397,7 +397,7 @@ function createSaleOrder(params) {
         url: endPoint,
         body: formDataStr,
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+          'Content-Type': 'application/json; charset=utf-8',
         },
       };
       return request(options);
