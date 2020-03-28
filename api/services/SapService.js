@@ -389,19 +389,23 @@ function createSaleOrder(params) {
         products: JSON.stringify(requestParams.products),
         payments: JSON.stringify(requestParams.payments),
       };
-      const formDataStr = qs.stringify(preForm, { encode: true });
+      //const formDataStr = qs.stringify(preForm, { encode: true });
+      //sails.log.info('CreateSaleOrder FormDataString', formDataStr);
       var options = {
         json: true,
         method: 'POST',
         url: endPoint,
-        body: formDataStr,
+        body: preForm,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
       };
+      sails.log.info('CreateSaleOrder first .then() request options', options);
+
       return request(options);
     })
     .then(function(response) {
+      sails.log.info("CreateSaleOrder second .then() RESPONSE",response);
       return {
         requestParams,
         endPoint: endPoint,
