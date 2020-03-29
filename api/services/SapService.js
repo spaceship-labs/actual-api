@@ -381,28 +381,19 @@ function createSaleOrder(params) {
   return buildOrderRequestParams(params)
     .then(function(_requestParams) {
       requestParams = _requestParams;
-      endPoint = baseUrl + '/SalesOrder';
-      sails.log.info('createSaleOrder', endPoint);
-      sails.log.info('requestParams', JSON.stringify(requestParams));
       const preForm = {
         contact: JSON.stringify(requestParams.contact),
         products: JSON.stringify(requestParams.products),
         payments: JSON.stringify(requestParams.payments),
       };
-      //const formDataStr = qs.stringify(preForm, { encode: true });
-      //sails.log.info('CreateSaleOrder FormDataString', formDataStr);
-      var options = {
-        json: true,
-        method: 'POST',
-        url: endPoint,
-        body: preForm,
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
-      };
-      sails.log.info('CreateSaleOrder first .then() request options', options);
-
-      return request(options);
+      const endPoint = buildUrl(baseUrl, {
+        path: 'SalesOrder',
+        queryParams: preForm
+      });
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+      reqOptions.uri = endPoint;
+      return request(reqOptions);
     })
     .then(function(response) {
       sails.log.info("CreateSaleOrder second .then() RESPONSE",response);
