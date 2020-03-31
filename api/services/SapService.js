@@ -10,14 +10,14 @@ const axios = require('axios');
 const API_BASE = 'http://sapnueve.homedns.org';
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers = {
-  'content-type': 'application/json',
+  'content-type': 'application/x-www-form-urlencoded',
 };
 
 const axiosOrder = require('axios');
 const API_BASE_ORDER = 'http://sapmovil.homedns.org:81';
 axiosOrder.defaults.baseURL = API_BASE_ORDER;
 axiosOrder.defaults.headers = {
-  'Content-Type': 'application/json; charset=utf-8',
+  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
@@ -381,22 +381,27 @@ function createSaleOrder(params) {
   return buildOrderRequestParams(params)
     .then(function(_requestParams) {
       requestParams = _requestParams;
+      endPoint = baseUrl + '/SalesOrder';
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
       const preForm = {
         contact: JSON.stringify(requestParams.contact),
         products: JSON.stringify(requestParams.products),
         payments: JSON.stringify(requestParams.payments),
       };
-      const endPoint = buildUrl(baseUrl, {
-        path: 'SalesOrder',
-        queryParams: preForm
-      });
-      sails.log.info('createSaleOrder', endPoint);
-      sails.log.info('requestParams', JSON.stringify(requestParams));
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
+      const formDataStr = qs.stringify(preForm, { encode: true });
+      var options = {
+        json: true,
+        method: 'POST',
+        url: endPoint,
+        body: formDataStr,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        },
+      };
+      return request(options);
     })
     .then(function(response) {
-      sails.log.info("CreateSaleOrder second .then() RESPONSE",response);
       return {
         requestParams,
         endPoint: endPoint,
