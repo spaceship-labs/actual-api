@@ -103,8 +103,9 @@ const formatCancelParams = async (id, action) => {
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
+  sails.log.info('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
   const params = await formatCancelParams(orderId, action);
-  console.log('params: ', params);
+  sails.log.info('CancelOrder SAP params: ', params);
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
@@ -116,7 +117,7 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   }
   sapCancels.order = orderId;
   sapCancels.cancelOrder = cancelOrderId;
-  console.log('sapCancels: ', sapCancels);
+  sails.log.info('CancelOrder SAP  sapCancels: ', sapCancels);
   return await createCancelationSap(sapCancels);
 };
 
@@ -182,23 +183,24 @@ const createCancelationSap = async params => {
     CancelationOrder: cancelOrder,
     cancelDocsSap: docsSapIds,
   };
-
+  sails.log.info('CreateCancelationSap cancelSapParams: ', cancelSapParams);
   const { id } = await CancelationSap.create(cancelSapParams);
   const { Details } = await CancelationSap.findOne({ id });
+  sails.log.info('CreateCancelationSap returnvalue: ', Details);
   return Details;
 };
 
 const createCancelDocSap = ({ type, documents }, order, cancelOrder) =>
   document.length > 0
     ? documents.map(
-        async value =>
-          await CancelDocSap.create({
-            type,
-            value,
-            order,
-            cancelOrder,
-          })
-      )
+      async value =>
+        await CancelDocSap.create({
+          type,
+          value,
+          order,
+          cancelOrder,
+        })
+    )
     : false;
 
 const createPaymentCancelSap = async (
@@ -237,14 +239,14 @@ function createClient(params) {
 
   return User.findOne({ id: client.User })
     .populate('Seller')
-    .then(function(user) {
+    .then(function (user) {
       client.SlpCode = -1; //Assigns seller code from SAP
       if (user.Seller) {
         client.SlpCode = user.Seller.SlpCode || -1;
       }
       return getSeriesNum(user.activeStore);
     })
-    .then(function(seriesNum) {
+    .then(function (seriesNum) {
       client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
       var requestParams = {
         Client: encodeURIComponent(JSON.stringify(client)),
@@ -379,7 +381,7 @@ function createSaleOrder(params) {
   var endPoint;
   var requestParams;
   return buildOrderRequestParams(params)
-    .then(function(_requestParams) {
+    .then(function (_requestParams) {
       requestParams = _requestParams;
       endPoint = baseUrl + '/SalesOrder';
       sails.log.info('createSaleOrder', endPoint);
@@ -401,7 +403,7 @@ function createSaleOrder(params) {
       };
       return request(options);
     })
-    .then(function(response) {
+    .then(function (response) {
       return {
         requestParams,
         endPoint: endPoint,
@@ -460,8 +462,8 @@ function buildOrderRequestParams(params) {
     contactParams.SalesPersonCode = -1;
   }
 
-  return getAllWarehouses().then(function(warehouses) {
-    products = params.quotationDetails.map(function(detail) {
+  return getAllWarehouses().then(function (warehouses) {
+    products = params.quotationDetails.map(function (detail) {
       var product = {
         ItemCode: detail.Product.ItemCode,
         OpenCreQty: detail.quantity,
@@ -521,7 +523,7 @@ function getCompanyCode(code, storeGroup) {
 
 function mapPaymentsToSap(payments, exchangeRate, currentStore) {
   console.log('currentStore', currentStore);
-  payments = payments.filter(function(payment) {
+  payments = payments.filter(function (payment) {
     return (
       payment.type !== PaymentService.CLIENT_BALANCE_TYPE &&
       payment.type !== PaymentService.types.CLIENT_CREDIT &&
@@ -530,7 +532,7 @@ function mapPaymentsToSap(payments, exchangeRate, currentStore) {
     );
   });
 
-  var paymentsTopSap = payments.map(function(payment) {
+  var paymentsTopSap = payments.map(function (payment) {
     var DEFAULT_TERMINAL = 'banamex';
     var paymentSap = {
       TypePay: payment.type,
@@ -592,7 +594,7 @@ function getFarthestShipDate(quotationDetails) {
 
 function calculateUsedEwalletByPayments(payments) {
   var ewallet = 0;
-  ewallet = payments.reduce(function(amount, payment) {
+  ewallet = payments.reduce(function (amount, payment) {
     if (payment.type === PaymentService.EWALLET_TYPE) {
       amount += payment.ammount;
     }
@@ -608,10 +610,10 @@ function getAllWarehouses() {
 function getSeriesNum(storeId) {
   return Store.findOne({ id: storeId })
     .populate('Warehouse')
-    .then(function(store) {
+    .then(function (store) {
       return mapWhsSeries(store.Warehouse.WhsName);
     })
-    .catch(function(err) {
+    .catch(function (err) {
       console.log(err);
       return err;
     });
