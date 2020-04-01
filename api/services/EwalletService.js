@@ -146,7 +146,7 @@ const validateExpirationDate = async () => {
       const newExpirationDate = moment(ewalletConfiguration.expirationDate).add(
         1,
         'years'
-      );
+      ).format('YYYY-MM-DD HH:mm');
       await Ewallet.update({ id: ids }, { amount: 0 });
       await EwalletConfiguration.update(
         { id: ewalletConfiguration.id },

@@ -4,6 +4,7 @@
  * @description :: Server-side logic for managing Ewalletconfigurations
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+const moment = require('moment');
 
 module.exports = {
   async show(req, res) {
@@ -25,7 +26,11 @@ module.exports = {
       } = req.allParams();
       const ewalletConfiguration = await EwalletConfiguration.update(
         { id },
-        { exchangeRate, expirationDate, maximumPercentageToGeneratePoints }
+        { 
+          exchangeRate, 
+          expirationDate: moment(expirationDate).format("YYYY-MM-DD HH:mm"), 
+          maximumPercentageToGeneratePoints 
+        }
       );
       res.ok(ewalletConfiguration);
     } catch (error) {
