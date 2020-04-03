@@ -112,6 +112,10 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   const { data: { value } } = await axios.delete('/SalesOrder', {
     data: params,
   });
+  axios.interceptors.response.use(response => {
+      console.log('Response:', response);
+      return response;
+  });
   if (value[0].type === 'NotFound') {
     throw new Error(value[0].result);
   }
