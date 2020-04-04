@@ -103,16 +103,22 @@ const formatCancelParams = async (id, action) => {
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
-  sails.log.info('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
+  console.log('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
+  sails.log('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
+
   const params = await formatCancelParams(orderId, action);
-  sails.log.info('CancelOrder SAP params: ', params);
+  console.log('CancelOrder SAP params: ', params);
+  sails.log('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
+
   if (process.env.NODE_ENV === 'test') {
     return 1;
   }
-  const { data: { value } } = await axios.delete('/SalesOrder', {
+  const { data } = await axios.delete('/SalesOrder', {
     data: params,
   });
-  console.log("Value mayor: ", value);
+  console.log("Data from salesOrder: ", data);
+  sails.log("Data from salesOrder: ", data);
+  const { value } = data;
   /*
   axios.interceptors.response.use(response => {
       console.log('Response:', response);
@@ -122,8 +128,12 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   if (value[0].type === 'NotFound') {
     throw new Error(value[0].result);
   }
-  sapCancels.order = orderId;
-  sapCancels.cancelOrder = cancelOrderId;
+  const sapCancels = {
+    order: orderId,
+    cancelOrder: cancelOrderId
+  };
+  //sapCancels.order = orderId;
+  //sapCancels.cancelOrder = cancelOrderId;
   sails.log.info('CancelOrder SAP  sapCancels: ', sapCancels);
   return await createCancelationSap(sapCancels);
 };
