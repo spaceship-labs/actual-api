@@ -17,7 +17,7 @@ const axiosOrder = require('axios');
 const API_BASE_ORDER = 'http://sapmovil.homedns.org:81';
 axiosOrder.defaults.baseURL = API_BASE_ORDER;
 axiosOrder.defaults.headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+  'Content-Type': 'application/json; charset=utf-8',
 };
 
 const SAP_DATE_FORMAT = 'YYYY-MM-DD';
