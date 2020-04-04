@@ -112,11 +112,13 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   const { data: { value } } = await axios.delete('/SalesOrder', {
     data: params,
   });
+  console.log("Value mayor: ", value);
+  /*
   axios.interceptors.response.use(response => {
       console.log('Response:', response);
       return response;
   });
-  console.log("Value mayor: ", value);
+  */
   if (value[0].type === 'NotFound') {
     throw new Error(value[0].result);
   }
