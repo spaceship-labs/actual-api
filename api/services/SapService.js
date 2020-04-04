@@ -119,6 +119,7 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   if (value[0].type === 'NotFound') {
     throw new Error(value[0].result);
   }
+  console.log("Value mayor: ", value);
   sapCancels.order = orderId;
   sapCancels.cancelOrder = cancelOrderId;
   sails.log.info('CancelOrder SAP  sapCancels: ', sapCancels);
