@@ -110,10 +110,7 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   console.log('CancelOrder SAP params: ', params);
   sails.log('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
 
-  if (process.env.NODE_ENV === 'test') {
-    return 1;
-  }
-  const { data } = await axios.delete('/SalesOrder', {
+  const { data } = await axiosOrder.delete('/SalesOrder', {
     data: params,
   });
   console.log("Data from salesOrder: ", data);
