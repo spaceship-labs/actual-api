@@ -126,8 +126,18 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   if (value[0].type === 'NotFound') {
     throw new Error(value[0].result);
   }
+  const CancelationResponse = value[0];
   const sapCancels = {
-    value,
+    result: CancelationResponse.result,
+    type: CancelationResponse.type,
+    RequestTransfer: CancelationResponse.RequestTransfer,
+    CreditMemo: CancelationResponse.CreditMemo,
+    products: CancelationResponse.products,
+    DocEntry: CancelationResponse.DocEntry,
+    Payments: CancelationResponse.Payments,
+    PaymentsCancel: CancelationResponse.PaymentsCancel,
+    series: CancelationResponse.series,
+    BaseRef: CancelationResponse.BaseRef,
     order: orderId,
     cancelOrder: cancelOrderId
   };
