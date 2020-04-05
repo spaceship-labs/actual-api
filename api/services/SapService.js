@@ -145,7 +145,7 @@ const createCancelationSap = async params => {
     products: productsSap,
     DocEntry,
     Payments,
-    PaymentsCancel,
+    PaymentsCancel = [],
     series = [],
     BaseRef,
     order,
@@ -206,7 +206,7 @@ const createCancelationSap = async params => {
 };
 
 const createCancelDocSap = ({ type, documents }, order, cancelOrder) =>
-  document.length > 0
+  documents.length > 0
     ? documents.map(
       async value =>
         await CancelDocSap.create({
