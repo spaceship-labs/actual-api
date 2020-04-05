@@ -592,7 +592,7 @@ function getWhsCodeById(whsId, warehouses) {
   if (warehouse) {
     return warehouse.WhsCode;
   }
-  return false;
+  return '01';
 }
 
 function getFarthestShipDate(quotationDetails) {
