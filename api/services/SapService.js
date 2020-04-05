@@ -99,7 +99,7 @@ const formatCancelParams = async (id, action) => {
       Action: action,
     })
   );
-  return { IdQuotation, products: formatedParams };
+  return { idQuotation: IdQuotation, products: formatedParams };
 };
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
