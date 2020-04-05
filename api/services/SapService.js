@@ -83,19 +83,20 @@ const formatCancelParams = async (id, action) => {
       productId,
     })
   );
-  const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
-  const companies = await Company.find({ id: companiesIds });
+  //const companiesIds = detailsBeforeFormat.map(({ companyId }) => companyId);
+  //const companies = await Company.find({ id: companiesIds });
   const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
   const products = await Product.find({ id: productsIds });
-  const whsCodes = companies.map(({ WhsCode }) => WhsCode);
+  //const whsCodes = companies.map(({ WhsCode }) => WhsCode);
+  const warehouses = await getAllWarehouses(); 
   const itemCodes = products.map(({ ItemCode }) => ItemCode);
   const formatedParams = detailsBeforeFormat.map(
-    ({ id, quantity, shipDate }, index) => ({
+    ({ id, quantity, shipDate, companyId }, index) => ({
       detailCancelReference: id,
       ItemCode: itemCodes[index],
       OpenCreQty: quantity,
       ShipDate: moment(shipDate).format('YYYY-MM-DD'),
-      WhsCode: whsCodes[index],
+      WhsCode: getWhsCodeById(companyId,warehouses),
       Action: action,
     })
   );
