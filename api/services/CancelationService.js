@@ -45,6 +45,7 @@ const updateDetailAvailableQuantity = async ({
   await OrderDetail.update(
     { id },
     {
+      quantityCanceled: detailsCanceled,
       quantityAvailable:
         quantity - quantityCanceled - detailsCanceled <= 0
           ? 0
