@@ -126,6 +126,7 @@ async function addPayment(params, req) {
     (isCardPayment(params) || isTransferPayment(params)) &&
     !params.terminal
   ) {
+    
     throw new Error('Es necesario asignar una terminal a este tipo de pago');
   }
 
