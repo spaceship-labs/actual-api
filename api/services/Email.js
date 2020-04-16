@@ -39,6 +39,7 @@ module.exports = {
   sendFreesale: freesaleEmail,
   sendQuotation: quotation,
   sendEwalletPointsWarning,
+  sendCedisCancelation: orderEmailCancelation
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -772,4 +773,229 @@ function materials(product) {
       if (filters.length === 0) return;
       return filters[0].split(' ')[0];
     });
+}
+
+
+function orderEmailCancelation(orderId) {
+  return Order.findOne(orderId)
+    .populate('Client')
+    .populate('User')
+    .populate('Store')
+    .populate('Details')
+    .populate('Payments')
+    .populate('EwalletRecords')
+    .then(function(order) {
+      var client = order.Client;
+      var user = order.User;
+      var store = order.Store;
+      var details = order.Details.map(function(detail) {
+        return detail.id;
+      });
+      var payments = order.Payments.map(function(payment) {
+        return payment.id;
+      });
+      var ewallet = order.EwalletRecords;
+      details = OrderDetail.find(details)
+        .populate('Product')
+        .populate('Promotion');
+      payments = Payment.find(payments);
+      var ewalletAmounts = order.EwalletRecords.map(function(ewalletRecord) {
+        if (ewalletRecord.movement === 'increase') {
+          return ewalletRecord.amount;
+        } else {
+          return 0;
+        }
+      });
+      order.ewalletAmount = ewalletAmounts.reduce(function(total, amount) {
+        return total + amount;
+      }, 0);
+      order.ewalletAmount = parseFloat(order.ewalletAmount.toFixed(2));
+      return [client, user, order, details, payments, ewallet, store];
+    })
+    .spread(function(client, user, order, details, payments, ewallet, store) {
+      var products = details.map(function(detail) {
+        var date = moment(detail.shipDate);
+        moment.locale('es');
+        date.locale(false);
+        date = date.format('DD/MMM/YYYY');
+        return {
+          id: detail.Product.id,
+          name: detail.Product.ItemName,
+          code: detail.Product.ItemCode,
+          color: (detail.Product.DetailedColor || '').split(' ')[0],
+          material: '',
+          ewallet: detail.ewallet && detail.ewallet.toFixed(2),
+          warranty: detail.Product.U_garantia.toLowerCase(),
+          qty: detail.quantity,
+          ship: date,
+          price: numeral(detail.unitPrice).format('0,0.00'),
+          total: numeral(detail.total).format('0,0.00'),
+          discount: numeral(detail.discountPercent).format('0,0.00'),
+          promo: (detail.Promotion || {}).publicName,
+          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+        };
+      });
+      var payments = payments.map(function(payment) {
+        var ammount =
+          payment.currency == 'usd'
+            ? payment.ammount * payment.exchangeRate
+            : payment.ammount;
+        ammount = ammount.toFixed(2);
+        var date = moment(payment.createdAt);
+        moment.locale('es');
+        date.locale(false);
+        date = date.format('DD/MMM/YYYY');
+        return {
+          method: paymentMethod(payment),
+          date: date,
+          folio: payment.folio,
+          type: paymentType(payment),
+          ammount: numeral(ammount).format('0,0.00'),
+          currency: payment.currency,
+          status: PaymentService.mapStatusType(payment.status),
+        };
+      });
+      var bewallet = client.ewallet;
+      var pewallet = ewallet.reduce(function(acum, curr) {
+        if (curr.type == 'negative') {
+          return acum + curr.amount;
+        }
+        return acum - curr.amount;
+      }, bewallet);
+      var eewallet = ewallet.reduce(function(acum, curr) {
+        if (curr.type == 'positive') {
+          return acum + curr.amount;
+        }
+        return acum;
+      }, 0);
+      var sewallet = ewallet.reduce(function(acum, curr) {
+        if (curr.type == 'negative') {
+          return acum + curr.amount;
+        }
+        return acum;
+      }, 0);
+      ewallet = {
+        prev: numeral(pewallet).format('0,0.00'),
+        earned: numeral(eewallet).format('0,0.00'),
+        spent: numeral(sewallet).format('0,0.00'),
+        balance: numeral(bewallet).format('0,0.00'),
+      };
+      return [client, user, order, products, payments, ewallet, store];
+    })
+    .spread(function(client, user, order, products, payments, ewallet, store) {
+      var mats = products.map(function(p) {
+        return materials(p.id);
+      });
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
+        });
+        return sendCEDISrequest(
+          client,
+          user,
+          order,
+          products,
+          payments,
+          ewallet,
+          store
+        );
+      });
+    });
+}
+function sendCEDISrequest(client, user, order, products, payments, ewallet, store) {
+  var address =
+    'Número ' +
+    order.U_Noexterior +
+    ' Entre calle ' +
+    order.U_Entrecalle +
+    ' y calle ' +
+    order.U_Ycalle +
+    ' colonia ' +
+    order.U_Colonia +
+    ', ' +
+    order.U_Mpio +
+    ', ' +
+    order.U_Estado +
+    ', ' +
+    order.U_CP;
+  var emailBody = orderTemplate({
+    client: {
+      name: client.CardName,
+      address: address,
+      phone: client.Phone1,
+      cel: client.Cellular,
+      references: '',
+      balance: numeral(client.Balance).format('0,0.00'),
+    },
+    user: {
+      name: user.firstName + ' ' + user.lastName,
+      email: user.email,
+      phone: user.phone,
+    },
+    order: {
+      folio: order.folio,
+      subtotal: numeral(order.subtotal).format('0,0.00'),
+      discount: numeral(order.discount).format('0,0.00'),
+      total: numeral(order.total).format('0,0.00'),
+      paid: numeral(order.total).format('0,0.00'),
+      pending: numeral(0).format('0,0.00'),
+      points: order.ewalletAmount || 0,
+    },
+    company: {
+      url: baseURL,
+      image: store.logo,
+      survey: surveyURL,
+    },
+    products: products,
+    payments: payments,
+    ewallet: {
+      prev: numeral(ewallet.prev).format('0,0.00'),
+      received: numeral(ewallet.earned).format('0,0.00'),
+      paid: numeral(ewallet.spent).format('0,0.00'),
+      balance: numeral(ewallet.balance).format('0,0.00'),
+    },
+    store: {
+      name: store.name,
+    },
+  });
+
+  // mail stuff
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var subject = 'Solicitud de cancelacion | Folio #' + order.folio;
+  var content = new helper.Content('text/html', emailBody);
+
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Sergio');
+  var toAux2 = new helper.Email('ernesto@spaceshiplabs.com', 'Ernesto');
+  var toAux3 = new helper.Email('admin@spaceshiplabs.com', 'Daniel');
+  personalization.addTo(toAux);
+  personalization.addTo(toAux2);
+  personalization.addTo(toAux3);
+
+  //personalization.addTo(toAux2);
+
+  if (process.env.ENV_TYPE === 'production') {
+    sails.log.info('sending email cedis cancelation order ', order.folio);
+    personalization.addTo(from);
+  }
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve(order);
+      } else {
+        reject(response);
+      }
+    });
+  });
 }

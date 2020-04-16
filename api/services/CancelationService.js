@@ -178,6 +178,7 @@ const updateRequest = async (
       action,
       id
     );
+    await Email.sendCedisCancelation(orderCancel.id);
     const authorizedCancelationDetails = authorizedDetails.map(id =>
       compareDetailsIDS(id, cancelationDetails)
     );
