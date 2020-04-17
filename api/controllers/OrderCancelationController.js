@@ -4,6 +4,8 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
+const Facturapi = require('facturapi');
+const facturapi = new Facturapi(process.env.FACTURAPITOKEN);
 
 module.exports = {
   async index(req, res) {
@@ -45,6 +47,8 @@ module.exports = {
         details,
         reason
       );
+      const creditNoteInvoice = await InvoiceService.createOrderInvoice(orderId, facturapi.InvoiceType.EGRESO);
+      console.log('creditNoteInvoice', creditNoteInvoice)
       res.ok(orderCancelation);
     } catch (error) {
       res.negotiate(error);

@@ -2,9 +2,12 @@ const _ = require('underscore');
 const moment = require('moment');
 const request = require('request-promise');
 const Promise = require('bluebird');
-const ALEGRAUSER = process.env.ALEGRAUSER;
-const ALEGRATOKEN = process.env.ALEGRATOKEN;
-const token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
+const Facturapi = require('facturapi');
+const facturapi = new Facturapi(process.env.FACTURAPITOKEN);
+
+// const ALEGRAUSER = process.env.ALEGRAUSER;
+// const ALEGRATOKEN = process.env.ALEGRATOKEN;
+// const token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
 const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
@@ -26,7 +29,7 @@ module.exports = {
   getItemDiscount,
 };
 
-async function createOrderInvoice(orderId) {
+async function createOrderInvoice(orderId, invoiceType = '') {
   try {
     if (process.env.MODE !== 'production') {
       return;
@@ -36,7 +39,7 @@ async function createOrderInvoice(orderId) {
       .populate('Details')
       .populate('Payments');
 
-    if (OrderService.isCanceled(order)) {
+    if (OrderService.isCanceled(order) && invoiceType !== facturapi.InvoiceType.EGRESO) {
       throw new Error(
         'No es posible crear una factura ya que la orden esta cancelada'
       );
@@ -51,7 +54,7 @@ async function createOrderInvoice(orderId) {
     });
     const client = prepareClient(order, clientOrder, address);
     const ewalletDiscount = getEwalletDiscount(payments);
-    const items = prepareItems(details, ewalletDiscount, total);
+    const items = prepareItems(details, ewalletDiscount, total, invoiceType);
     const alegraInvoice = prepareInvoice(order, payments, client, items);
     await Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
   } catch (err) {
@@ -84,7 +87,7 @@ function getEwalletDiscount(payments) {
 function send(orderID) {
   return Order.findOne(orderID)
     .populate('Client')
-    .then(function(order) {
+    .then(function (order) {
       return [
         Invoice.findOne({ order: orderID }),
         FiscalAddress.findOne({
@@ -93,7 +96,7 @@ function send(orderID) {
         }),
       ];
     })
-    .spread(function(invoice, address) {
+    .spread(function (invoice, address) {
       var emails = [];
       sails.log.info('address', address.U_Correos);
 
@@ -108,17 +111,17 @@ function send(orderID) {
       var id = invoice.alegraId;
       return { id: id, emails: emails };
     })
-    .then(function(data) {
-      var options = {
-        method: 'POST',
-        uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
-        body: data,
-        headers: {
-          Authorization: 'Basic ' + token,
-        },
-        json: true,
-      };
-      return request(options);
+    .then(function (data) {
+      //var options = {
+      //  method: 'POST',
+      //  uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
+      //  body: data,
+      //  headers: {
+      //    Authorization: 'Basic ' + token,
+      //  },
+      //  json: true,
+      //};
+      return facturapi.invoices.sendByEmail(data.id, { email: "sergiocan@spaceshiplabs.com" });
     });
 }
 
@@ -127,15 +130,16 @@ function prepareInvoice(order, payments, client, items) {
   var dueDate = moment(order.createdAt)
     .add(7, 'days')
     .format('YYYY-MM-DD');
+  const newItems = items.map(({ id: product, quantity }) => ({ product, quantity }));
 
   var data = {
-    date: date,
-    dueDate: dueDate,
-    client: client,
-    items: items,
-    cfdiUse: client.cfdiUse,
-    paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
-    anotation: order.folio,
+    //date: date,
+    //dueDate: dueDate,
+    customer: client,
+    items: newItems,
+    use: client.cfdiUse,
+    payment_form: getFacturapiPaymentMethod(getPaymentMethodBasedOnPayments(payments, order)),
+    folio_number: order.folio,
     stamp: {
       generateStamp: true,
     },
@@ -144,11 +148,11 @@ function prepareInvoice(order, payments, client, items) {
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
 
-  return createInvoice(data);
+  return createInvoice(data, invoiceType);
 }
 
 function hasClientBalancePayment(payments) {
-  return payments.some(function(payment) {
+  return payments.some(function (payment) {
     return payment.type === PaymentService.types.CLIENT_BALANCE;
   });
 }
@@ -169,15 +173,17 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
 function createInvoice(data) {
   var orderObject = _.clone(data.orderObject);
   delete data.orderObject;
-
+  if (invoiceType !== '') {
+    data.type = facturapi.InvoiceType.EGRESO;
+  }
   var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/invoices',
-    body: data,
-    headers: {
-      Authorization: 'Basic ' + token,
-    },
-    json: true,
+    //method: 'POST',
+    uri: 'https://facturapi.io/v1/invoices',
+    //body: data,
+    //headers: {
+    //  Authorization: 'Basic ' + token,
+    //},
+    //json: true,
   };
 
   var log = {
@@ -191,23 +197,23 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     AlegraLog.create(log)
-      .then(function(logCreated) {
+      .then(function (logCreated) {
         log.id = logCreated.id;
-        return request(options);
+        return facturapi.invoices.create(data);
       })
-      .then(function(result) {
+      .then(function (result) {
         resultAlegra = result;
         return AlegraLog.update(
           { id: log.id },
           { responseData: JSON.stringify(result) }
         );
       })
-      .then(function(logUpdated) {
+      .then(function (logUpdated) {
         resolve(resultAlegra);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         requestError = err;
         return AlegraLog.update(
           { id: log.id },
@@ -217,14 +223,14 @@ function createInvoice(data) {
           }
         );
       })
-      .then(function(logUpdated) {
+      .then(function (logUpdated) {
         reject(requestError);
       });
   });
 }
 
 function getHighestPayment(payments) {
-  var highest = payments.reduce(function(prev, current) {
+  var highest = payments.reduce(function (prev, current) {
     var prevAmount =
       prev.currency === PaymentService.currencyTypes.USD
         ? PaymentService.calculateUSDPayment(prev, prev.exchangeRate)
@@ -263,7 +269,7 @@ function appliesForSpecialCashRule(payments, order) {
 
 //Excludes CLIENT BALANCE and CREDIT CLIENT payments
 function getDirectPayments(payments) {
-  return payments.filter(function(p) {
+  return payments.filter(function (p) {
     return (
       p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
       p.type !== PaymentService.types.CLIENT_CREDIT
@@ -352,13 +358,13 @@ function prepareClientParams(order, client, address) {
 
   if (order.folio === '013334') {
     data = {
-      name: order.CardName,
-      identification: 'XEXX010101000',
+      legal_name: order.CardName,
+      tax_id: 'XEXX010101000',
       cfdiUse: DEFAULT_CFDI_USE,
       email: 'natalieroe@intercorpgrp.com',
       address: {
         country: 'ESP',
-        colony: address.Block,
+        neighborhood: address.Block,
         state: 'San José',
       },
     };
@@ -367,26 +373,26 @@ function prepareClientParams(order, client, address) {
 
   if (!generic) {
     data = {
-      name: address.companyName,
-      identification: (client.LicTradNum || '').toUpperCase(),
+      legal_name: address.companyName,
+      tax_id: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
       address: {
         street: address.Street,
-        exteriorNumber: address.U_NumExt,
-        interiorNumber: address.U_NumInt,
-        colony: address.Block,
+        exterior: address.U_NumExt,
+        interior: address.U_NumInt,
+        neighborhood: address.Block,
         country: client.CardCode === 'PL10003936' ? 'MEX' : 'México',
         state: address.State,
         municipality: address.U_Localidad,
-        localitiy: address.City,
-        zipCode: address.ZipCode,
+        city: address.City,
+        zip: address.ZipCode,
       },
     };
   } else {
     data = {
-      name: order.CardName,
-      identification: FiscalAddressService.GENERIC_RFC,
+      legal_name: order.CardName,
+      tax_id: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
       //email: order.E_Mail,
       address: {
@@ -405,16 +411,16 @@ function prepareClient(order, client, address) {
 }
 
 function createClient(client) {
-  var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/contacts',
-    body: client,
-    headers: {
-      Authorization: 'Basic ' + token,
-    },
-    json: true,
-  };
-  return request(options);
+  //var options = {
+  //  method: 'POST',
+  //  uri: 'https://app.alegra.com/api/v1/contacts',
+  //  body: client,
+  //  headers: {
+  //    Authorization: 'Basic ' + token,
+  //  },
+  //  json: true,
+  //};
+  return facturapi.customers.create(client);
 }
 
 function getUnitTypeByProduct(product) {
@@ -452,8 +458,8 @@ function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
   return discountPercent;
 }
 
-function prepareItems(details, ewalletDiscount, orderTotal) {
-  var items = details.map(function(detail) {
+function prepareItems(details, ewalletDiscount, orderTotal, invoiceType) {
+  var items = details.map(function (detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
     if (discount < 1) {
@@ -468,29 +474,40 @@ function prepareItems(details, ewalletDiscount, orderTotal) {
     discount =
       ewalletDiscount > 0
         ? getItemDiscount(
-            ewalletDiscount,
-            orderTotal,
-            detail.total,
-            detail.subtotal
-          )
+          ewalletDiscount,
+          orderTotal,
+          detail.total,
+          detail.subtotal
+        )
         : parseFloat(discount.toFixed(4));
+    const quantity =
+      invoiceType !== facturapi.InvoiceType.EGRESO
+        ? detail.quantity : detail.quantityCanceled;
+
     return {
-      id: detail.id,
-      name: product.ItemName,
+      sku: detail.id,
+      description: product.ItemName,
       price: detail.unitPrice / 1.16,
       discount,
-      tax: [{ id: ALEGRA_IVA_ID }],
-      productKey,
-      quantity: detail.quantity,
-      inventory: {
-        unit: getUnitTypeByProduct(product),
-        unitCost: detail.unitPrice,
-        initialQuantity: detail.quantity,
-      },
+      tax_included: false,
+      taxes: [{
+        withholding: false,
+        type: "IVA",
+        rate: 0.16
+      }],
+      product_key: productKey,
+      quantity,
+      unit_key: product.U_ClaveUnidad,
+      unit_name: getUnitTypeByProduct(product),
+      //inventory: {
+      //  unit: getUnitTypeByProduct(product),
+      //  unitCost: detail.unitPrice,
+      //  initialQuantity: detail.quantity,
+      //},
     };
   });
 
-  return Promise.mapSeries(items, function(item) {
+  return Promise.mapSeries(items, function (item) {
     return createItemWithDelay(item);
   });
 
@@ -499,23 +516,23 @@ function prepareItems(details, ewalletDiscount, orderTotal) {
 }
 
 function createItemWithDelay(item) {
-  var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/items',
-    body: item,
-    headers: {
-      Authorization: 'Basic ' + token,
-    },
-    json: true,
-  };
-  return promiseDelay(600, request(options)).then(function(ic) {
+  // var options = {
+  // method: 'POST',
+  // uri: 'https://app.alegra.com/api/v1/items',
+  // body: item,
+  // headers: {
+  // Authorization: 'Basic ' + token,
+  // },
+  // json: true,
+  // };
+  return promiseDelay(600, facturapi.products.create(item)).then(function (ic) {
     //console.log('item delayed ' + item.name, new Date());
     return _.assign({}, item, { id: ic.id });
   });
 }
 
 function createItems(items) {
-  return items.map(function(item) {
+  return items.map(function (item) {
     var options = {
       method: 'POST',
       uri: 'https://app.alegra.com/api/v1/items',
@@ -525,7 +542,7 @@ function createItems(items) {
       },
       json: true,
     };
-    return request(options).then(function(ic) {
+    return request(options).then(function (ic) {
       return _.assign({}, item, { id: ic.id });
     });
   });
@@ -599,3 +616,22 @@ function createItems(items) {
 //       });
 //   });
 // }
+
+function getFacturapiPaymentMethod(method) {
+  switch (method) {
+    case 'cash':
+      return "01";
+    case 'electronic-wallet':
+      return "05";
+    case 'credit-card':
+      return "04";
+    case 'debit-card':
+      return "28";
+    case 'check':
+      return "02";
+    case 'transfer':
+      return "03";
+    default:
+      return "99";
+  }
+}

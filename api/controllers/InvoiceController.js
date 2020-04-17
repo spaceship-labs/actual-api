@@ -6,29 +6,29 @@
  */
 
 module.exports = {
-  create: function(req, res) {
+  create: function (req, res) {
     var form = req.allParams();
     var order = form.order;
     Invoice
       .findOne({ order: order })
-      .then(function(exists) {
+      .then(function (exists) {
         if (exists) throw new Error('invoice already exists');
-        return  InvoiceService.createOrderInvoice(order);
+        return InvoiceService.createOrderInvoice(order);
       })
-      .then(function(invoice) {
+      .then(function (invoice) {
         return res.json(invoice);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err invoice create', err);
         if (err.error && err.error.message) {
           err = new Error(err.error.message);
           return res.json(400, err);
         }
-        if (err.error && err.error.error)  {
+        if (err.error && err.error.error) {
           err = new Error(err.error.error.message);
           return res.json(400, err);
         }
-        if (err.error)  {
+        if (err.error) {
           err = new Error(err.error);
           return res.json(400, err);
         }
@@ -36,37 +36,37 @@ module.exports = {
       });
   },
 
-  find: function(req, res) {
+  find: function (req, res) {
     var form = req.allParams();
     var order = form.order;
     Invoice
       .find({ order: order })
-      .then(function(order) {
+      .then(function (order) {
         return res.json(order);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         return res.json(400, err);
       });
   },
 
-  send: function(req, res) {
+  send: function (req, res) {
     var form = req.allParams();
     var order = form.order;
     InvoiceService
       .send(order)
-      .then(function(order) {
+      .then(function (order) {
         return res.json(order);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         if (err.error && err.error.message) {
           err = new Error(err.error.message);
           return res.negotiate(err);
         }
-        if (err.error && err.error.error)  {
+        if (err.error && err.error.error) {
           err = new Error(err.error.error.message);
           return res.negotiate(err);
         }
-        if (err.error)  {
+        if (err.error) {
           err = new Error(err.error);
           return res.negotiate(err);
         }
