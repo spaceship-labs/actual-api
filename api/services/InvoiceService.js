@@ -29,7 +29,7 @@ module.exports = {
   getItemDiscount,
 };
 
-async function createOrderInvoice(orderId, invoiceType = '') {
+async function createOrderInvoice(orderId) {
   try {
     if (process.env.MODE !== 'production') {
       return;
@@ -39,7 +39,7 @@ async function createOrderInvoice(orderId, invoiceType = '') {
       .populate('Details')
       .populate('Payments');
 
-    if (OrderService.isCanceled(order) && invoiceType !== facturapi.InvoiceType.EGRESO) {
+    if (OrderService.isCanceled(order)) {
       throw new Error(
         'No es posible crear una factura ya que la orden esta cancelada'
       );
@@ -54,7 +54,7 @@ async function createOrderInvoice(orderId, invoiceType = '') {
     });
     const client = prepareClient(order, clientOrder, address);
     const ewalletDiscount = getEwalletDiscount(payments);
-    const items = prepareItems(details, ewalletDiscount, total, invoiceType);
+    const items = prepareItems(details, ewalletDiscount, total);
     const alegraInvoice = prepareInvoice(order, payments, client, items);
     await Invoice.create({ alegraId: alegraInvoice.id, order: orderId });
   } catch (err) {
@@ -148,7 +148,7 @@ function prepareInvoice(order, payments, client, items) {
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
 
-  return createInvoice(data, invoiceType);
+  return createInvoice(data);
 }
 
 function hasClientBalancePayment(payments) {
@@ -173,9 +173,6 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
 function createInvoice(data) {
   var orderObject = _.clone(data.orderObject);
   delete data.orderObject;
-  if (invoiceType !== '') {
-    data.type = facturapi.InvoiceType.EGRESO;
-  }
   var options = {
     //method: 'POST',
     uri: 'https://facturapi.io/v1/invoices',
@@ -458,7 +455,7 @@ function getItemDiscount(ewalletDiscount, orderTotal, detailTotal, subtotal) {
   return discountPercent;
 }
 
-function prepareItems(details, ewalletDiscount, orderTotal, invoiceType) {
+function prepareItems(details, ewalletDiscount, orderTotal) {
   var items = details.map(function (detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
@@ -480,9 +477,7 @@ function prepareItems(details, ewalletDiscount, orderTotal, invoiceType) {
           detail.subtotal
         )
         : parseFloat(discount.toFixed(4));
-    const quantity =
-      invoiceType !== facturapi.InvoiceType.EGRESO
-        ? detail.quantity : detail.quantityCanceled;
+    const quantity = detail.quantity;
 
     return {
       sku: detail.id,
