@@ -180,9 +180,9 @@ const updateRequest = async (
     );
     await Email.sendCedisCancelation(orderCancel.id);
     const authorizedCancelationDetails = authorizedDetails.map(id =>
-      compareDetailsIDS(id, cancelationDetails)
+      compareDetailsIDS(id, CancelationDetails)
     );
-    authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
+    await authorizedCancelationDetails.map(async ({ id, quantity, Detail }) => {
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
       );
@@ -216,13 +216,21 @@ const updateRequest = async (
     );
 
     await OrderCancelation.update({ id }, { status: 'reviewed' });
+
+    // UPDATE QUANTITIES
+    const { Details:OrderDetails } = await Order.findOne({ id:orderCancel.id }).populate('Details');
+    await compareDetailsQuantity(OrderDetails);
+    // Create note invoice
+    const invoice = await InvoiceService.createCreditNoteInvoice(orderCancel.id);
+    console.log('Created partially authorized credit note',invoice);
+
     return await OrderCancelation.findOne({ id })
       .populate('Order')
       .populate('Details')
       .populate('CancelationDetails');
   }
   if (requestStatus === 'partially') {
-    detailsApprovement.map(async ({ id, status }) => {
+    await detailsApprovement.map(async ({ id, status }) => {
       const { Detail, quantity } = await OrderDetailCancelation.findOne({ id });
       const { id: OrderDetailId, quantityCanceled } = await OrderDetail.findOne(
         Detail
@@ -252,6 +260,12 @@ const updateRequest = async (
     );
 
     await OrderCancelation.update({ id }, { status: 'reviewed' });
+    // UPDATE QUANTITIES
+    const { Details:OrderDetails } = await Order.findOne({ id:orderCancel.id }).populate('Details');
+    await compareDetailsQuantity(OrderDetails);
+    // Create note invoice
+    const invoice = await InvoiceService.createCreditNoteInvoice(orderCancel.id);
+    console.log('Created partially authorized credit note',invoice);
     return await OrderCancelation.findOne({ id })
       .populate('Order')
       .populate('Details')

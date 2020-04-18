@@ -13,6 +13,9 @@ module.exports = {
     order: {
       model: 'order',
       required: true,
+    },
+    facturapiId:{
+      type: 'text'
     }
   },
 };
