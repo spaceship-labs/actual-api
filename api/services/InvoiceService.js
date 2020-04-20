@@ -631,12 +631,13 @@ async function createCreditNoteInvoice(orderId) {
     //if (process.env.MODE !== 'production') {
     //  return;
     //}
-    const { alegraId: paymentInvoice } = await Invoice.findOne({ order: orderID });
+    const { alegraId: paymentInvoice } = await Invoice.findOne({ order: orderId });
     if (!paymentInvoice) {
       //throw new Error(
       //  'No es posible crear una nota de crédito ya que la orden no cuenta con una factura activa'
       //);
       sails.log.info("No se puede crear una nota de crédito de una orden sin facturar");
+      console.log("No se puede crear una nota de crédito de una orden sin facturar");
       return;
     }
     const { uuid: relatedInvoice } = await getAlegraInvoiceUUID(paymentInvoice);
