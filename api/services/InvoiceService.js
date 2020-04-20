@@ -32,7 +32,7 @@ module.exports = {
 
 async function createOrderInvoice(orderId) {
   try {
-    if (process.env.MODE !== 'production') {
+    if (process.env.MODE !== 'production'|| process.env.FACTURING != "facturing") {
       return;
     }
     var order = await Order.findOne(orderId)
