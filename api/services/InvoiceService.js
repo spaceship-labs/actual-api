@@ -640,7 +640,7 @@ async function createCreditNoteInvoice(orderId) {
       return;
     }
     const { uuid: relatedInvoice } = await getAlegraInvoiceUUID(paymentInvoice);
-    const order = await Order.findOne(orderId)
+    var order = await Order.findOne(orderId)
       .populate('Client')
       .populate('Details')
       .populate('Payments');
@@ -744,14 +744,15 @@ function prepareCreditNoteItems(details, ewalletDiscount, orderTotal) {
   });
 
   const CreditNoteConcept = items.reduce(function (accum, item) {
-    accum.price += (item.price * item.quantity);
+    accum.price += ((item.price*1.16) * item.quantity);
+
     if (item.quantity > 0) {
       accum.description += item.ItemCode + " | ";
     }
     return accum;
   }, {
     price: 0,
-    description: "Devolución: "
+    description: "Devolución / Cancelación de los siguientes artículos: ",
   });
 
   return CreditNoteConcept;
