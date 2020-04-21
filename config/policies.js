@@ -71,6 +71,9 @@ module.exports.policies = {
     search: true,
     testSold: true,
   },
+  OrderCancelationController: {
+    updateOrderStatus: true,
+  },
   ProductCategoryController: {
     getCategoriesGroups: true,
     getCategoriesTree: true,

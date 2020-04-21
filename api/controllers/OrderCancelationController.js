@@ -84,4 +84,16 @@ module.exports = {
       res.negotiate(error);
     }
   },
+  async updateOrderStatus(req,res){
+    try {
+      const { orderId, status } = req.allParams();
+      const results = await CancelationService.updateOrderStatus(
+        orderId, 
+        status
+      );
+      res.ok(results);
+    } catch (error) {
+      res.negotiate(error);
+    }
+  }
 };

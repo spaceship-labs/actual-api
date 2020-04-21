@@ -292,6 +292,17 @@ const getCancelDetails = async ids => {
   return _.union(details);
 };
 
+const updateOrderStatus = async (orderId,status)=> {
+  // ['paid', 'partiallyCanceled', 'canceled']
+  await Order.update(
+    { id: orderId },
+    {
+      status,
+    }
+  );
+  return await Order.findOne({id: orderId});
+};
+
 module.exports = {
   addCancelation,
   updateRequest,
@@ -299,4 +310,5 @@ module.exports = {
   getCanceledAmount,
   compareDetailsQuantity,
   getCancelDetails,
+  updateOrderStatus
 };

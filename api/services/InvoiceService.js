@@ -631,7 +631,7 @@ async function createCreditNoteInvoice(orderId) {
     //if (process.env.MODE !== 'production') {
     //  return;
     //}
-    const { alegraId: paymentInvoice } = await Invoice.findOne({ order: orderId });
+    const { alegraId: paymentInvoice, id: InvoiceId } = await Invoice.findOne({ order: orderId });
     if (!paymentInvoice) {
       //throw new Error(
       //  'No es posible crear una nota de crédito ya que la orden no cuenta con una factura activa'
@@ -656,7 +656,7 @@ async function createCreditNoteInvoice(orderId) {
     const ewalletDiscount = getEwalletDiscount(payments);
     const generalItemsConcept = prepareCreditNoteItems(details, ewalletDiscount, total);
     const facturapiInvoice = prepareCreditNote(order, payments, client, generalItemsConcept, relatedInvoice);
-    await Invoice.update({id:paymentInvoice},{ facturapiId: facturapiInvoice.id, order: orderId });
+    await Invoice.update({ id: InvoiceId },{ facturapiId: facturapiInvoice.id });
 
   } catch (err) {
     var log = {
@@ -748,7 +748,7 @@ function prepareCreditNoteItems(details, ewalletDiscount, orderTotal) {
     accum.price += ((item.price*1.16) * item.quantity);
 
     if (item.quantity > 0) {
-      accum.description += item.ItemCode + " | ";
+      accum.description += `${item.quantity} x item.ItemCode | `;
     }
     return accum;
   }, {
