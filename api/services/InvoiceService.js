@@ -656,7 +656,7 @@ async function createCreditNoteInvoice(orderId) {
     const ewalletDiscount = getEwalletDiscount(payments);
     const generalItemsConcept = prepareCreditNoteItems(details, ewalletDiscount, total);
     const facturapiInvoice = prepareCreditNote(order, payments, client, generalItemsConcept, relatedInvoice);
-    await Invoice.update({id:paymentInvoice},{ facturapiId: facturapiInvoice.id, order: orderId });
+    await Invoice.update({ alegraId: paymentInvoice },{ facturapiId: facturapiInvoice.id });
 
   } catch (err) {
     var log = {
