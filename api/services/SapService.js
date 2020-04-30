@@ -132,6 +132,9 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   });
   */
   if (value[0].type === 'NotFound' || value[0].type==="Error") {
+    console.log("Error detected",value[0].result);
+    sails.log('Error detected ', value[0].result);
+
     throw new Error(value[0].result);
   }
   const CancelationResponse = value[0];
