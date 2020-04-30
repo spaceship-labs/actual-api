@@ -89,19 +89,27 @@ const formatCancelParams = async (id, action) => {
   const products = await Product.find({ id: productsIds });
   //const whsCodes = companies.map(({ WhsCode }) => WhsCode);
   const warehouses = await getAllWarehouses(); 
-  const itemCodes = products.map(({ ItemCode }) => ItemCode);
+  const itemCodes = products.map(({ id,ItemCode }) => ({id, ItemCode}));
   const formatedParams = detailsBeforeFormat.map(
-    ({ id, quantity, shipDate, companyId }, index) => ({
+    ({ id, quantity, shipDate, companyId, productId }) => ({
       detailCancelReference: id,
-      ItemCode: itemCodes[index],
+      ItemCode: searchItemCodeOnArray(productId,itemCodes), //itemCodes[index],
       OpenCreQty: quantity,
       ShipDate: moment(shipDate).format('YYYY-MM-DD'),
       WhsCode: getWhsCodeById(companyId,warehouses),
       Action: action,
     })
   );
+  console.log("formatedparams",formatedParams);
   return { idQuotation: IdQuotation, products: formatedParams };
 };
+function searchItemCodeOnArray(idProduct, products){
+  for (var i=0; i < products.length; i++) {
+      if (products[i].id === idProduct) {
+          return products[i].ItemCode;
+      }
+  }
+}
 
 const cancelOrder = async (orderId, action, cancelOrderId) => {
   console.log('CancelOrder SAP (order,action,cancelOid): ', orderId, action, cancelOrderId);
