@@ -131,7 +131,7 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
       return response;
   });
   */
-  if (value[0].type === 'NotFound') {
+  if (value[0].type === 'NotFound' || value[0].type==="Error") {
     throw new Error(value[0].result);
   }
   const CancelationResponse = value[0];
