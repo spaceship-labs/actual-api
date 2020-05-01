@@ -8,6 +8,9 @@ const _ = require('underscore');
 const moment = require('moment');
 const axios = require('axios');
 const API_BASE = 'http://sapnueve.homedns.org';
+const ERROR_SAP_TYPE="Error";
+const NOT_FOUND_SAP_TYPE="NotFound";
+const ORDER_CANCELATION_TYPE="order-Cancelation";
 axios.defaults.baseURL = API_BASE;
 axios.defaults.headers = {
   'content-type': 'application/x-www-form-urlencoded',
@@ -131,12 +134,23 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
       return response;
   });
   */
-  if (value[0].type === 'NotFound' || value[0].type==="Error") {
-    console.log("Error detected",value[0].result);
-    sails.log('Error detected ', value[0].result);
-
-    throw new Error(value[0].result);
+  if (value.length === 0) {
+    console.log('Sap no regreso respuesta');
+    throw new Error('SAP no regreso respuesta');
+  } 
+  const everyDocumentIsCorrect = value.every(checkIfIsValidSapDocument);
+  if(!everyDocumentIsCorrect){
+    console.log('Error detected ', collectSapErrors(value));
+    sails.log('Error detected ', collectSapErrors(value));
+    throw new Error(collectSapErrors(value) || true);
   }
+  
+  //if (value[0].type === 'NotFound' || value[0].type==="Error") {
+  //  console.log("Error detected",value[0].result);
+  //  sails.log('Error detected ', value[0].result);
+  //
+  //  throw new Error(value[0].result);
+  //}
   const CancelationResponse = value[0];
   const sapCancels = {
     result: CancelationResponse.result,
@@ -721,3 +735,26 @@ function buildAddressContactEndpoint(fields, cardcode) {
 //   reqOptions.method = 'DELETE';
 //   return request(reqOptions);
 // }
+// Sap error handler
+function collectSapErrors(sapResult) {
+  var sapErrorsString = '';
+  if (_.isArray(sapResult)) {
+    var sapErrors = sapResult.map(collectSapErrorsBySapOrder);
+    sapErrorsString = sapErrors.join(', ');
+  }
+  return sapErrorsString;
+}
+
+function collectSapErrorsBySapOrder(sapDocument) {
+  if (sapDocument.type === ERROR_SAP_TYPE || sapDocument.type === NOT_FOUND_SAP_TYPE) {
+    return sapDocument.result;
+  }
+  return null;
+}
+
+function checkIfIsValidSapDocument(sapDocument) {
+  return (
+    sapDocument.result &&
+    (sapDocument.type === ORDER_CANCELATION_TYPE )
+  );
+}
