@@ -474,6 +474,10 @@ module.exports.routes = {
     controller: 'quotation',
     action: 'find',
   },
+  '/quotation/all/find/:page': {
+    controller: 'quotation',
+    action: 'findAll'
+  },
 
   '/quotation/user/:userId/totals': {
     controller: 'quotation',
