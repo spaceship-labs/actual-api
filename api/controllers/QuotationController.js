@@ -44,7 +44,7 @@ module.exports = {
     }
 
     try{
-      const updatedQuotations = await Quotation.update({id:id}, form)
+      const updatedQuotations = await Quotation.update({id:id}, form);
       if(updatedQuotations && updatedQuotations.length > 0){
         return res.json(updatedQuotations[0]);
       }else{
@@ -272,7 +272,7 @@ module.exports = {
     };
     
     try{
-      const createdDetails = await QuotationDetail.create(form.Details)
+      const createdDetails = await QuotationDetail.create(form.Details);
       const calculator = QuotationService.Calculator();
       const updatedQuotation = await calculator.updateQuotationTotals(id, opts);
       const quotation = await Quotation.findOne({id: id});
@@ -540,7 +540,7 @@ module.exports = {
   async getQuotationPaymentOptions(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    const quotation = await Quotation.findOne({id:quotationId})
+    const quotation = await Quotation.findOne({id:quotationId});
     const options = {
       financingTotals: form.financingTotals || false
     };
@@ -574,10 +574,60 @@ module.exports = {
         res.json(payments);
       })
       .catch(function(err){
-        console.log('err',err)
+        console.log('err',err);
         res.negotiate(err);
       });
-  }
+  },
+
+  findAll: function(req, res) {
+    var form = req.allParams();
+    form.filters = form.filters || {};
+    //if(req.activeStore){
+    //  form.filters.Store = req.activeStore.id;
+    //}
+
+    var model = 'quotation';
+    var extraParams = {
+      searchFields: ['folio', 'id'],
+      selectFields: form.fields,
+      filters: form.filters,
+      populateFields: ['Client','User','Payments','Store']
+    };
+
+    extraParams.filters = Common.removeUnusedFilters(extraParams.filters);
+
+    var clientSearch = form.clientSearch;
+    var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
+    var preSearch = Promise.resolve();
+
+    if (clientSearch && form.term) {
+      preSearch = ClientService.clientsIdSearch(form.term, clientSearchFields);
+      delete form.term;
+    }
+
+    if (form.clientSearchTerm) {
+      preSearch = ClientService.clientsIdSearch(form.clientSearchTerm, clientSearchFields);
+      delete form.clientSearchTerm;
+    }
+
+    preSearch
+      .then(function(preSearchResults) {
+        //Search by pre clients search
+        if (preSearchResults && _.isArray(preSearchResults)) {
+          extraParams.filters.Client = preSearchResults;
+        }
+
+        return Common.find(model, form, extraParams);
+      })
+      .then(function(result) {
+        console.log(result);
+        res.ok(result);
+      })
+      .catch(function(err) {
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
 
 };
 

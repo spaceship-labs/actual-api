@@ -21,6 +21,16 @@ function formatMongoRecord(record){
 }
 
 module.exports = {
+  removeUnusedFilters: function(filters){
+    if(filters){
+      for(var key in filters){
+        if(filters[key] === '' || filters[key]===null || filters[key]===undefined){
+          delete filters[key];
+        }
+      }
+    }  
+    return filters;
+  },
 
   mapTerminalCode: function(code){
     var mapper = {
@@ -333,7 +343,7 @@ module.exports = {
                cb(val);
             }
         );
-    })
+    });
   },
 
 
