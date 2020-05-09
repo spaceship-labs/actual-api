@@ -117,11 +117,19 @@ async function buildShippingItem(
   let seasonDays;
 
   if (isMeridaWhsCode(stockItem.whsCode)) {
-    MAIN_SEASON_DAYS = 9; //ORIGINAL 13
-    LOW_SEASON_DAYS = 9; // ORIGINAL 13
+    MAIN_SEASON_DAYS = 20; //ORIGINAL 13
+    LOW_SEASON_DAYS = 20; // ORIGINAL 13
+    if (stockItem.whsCode === CEDIS_MERIDA_WHS_CODE) {
+      MAIN_SEASON_DAYS = 12;
+      LOW_SEASON_DAYS = 12; // ORIGINAL 5
+    }
   } else {
-    MAIN_SEASON_DAYS = 4; //10 // ORIGINAL 5
-    LOW_SEASON_DAYS = 4; // ORIGINAL 5
+    MAIN_SEASON_DAYS = 15; //10 // ORIGINAL 5
+    LOW_SEASON_DAYS = 15; // ORIGINAL 5
+    if (stockItem.whsCode === CEDIS_QROO_CODE) {
+      MAIN_SEASON_DAYS = 5;
+      LOW_SEASON_DAYS = 5; // ORIGINAL 5
+    }
   }
 
   if (season) {
