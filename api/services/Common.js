@@ -196,8 +196,8 @@ module.exports = {
     var read = false;
     var getAll = form.getAll;
     var dateRange = form.dateRange;
+    var closeDateRange = form.closeDateRange;
     var keywords = form.keywords;
-
     if(term){
       if(searchFields.length > 0){
         query.or = [];
@@ -264,9 +264,30 @@ module.exports = {
       if( _.isEmpty(query[dateRange.field]) ){
         delete query[dateRange.field];
       }
+    }
+    if(closeDateRange){
+      var closeStartDate, closeEndDate;
+      query[closeDateRange.field] = {};
+      if(closeDateRange.start){
+        closeStartDate = new Date(closeDateRange.start);
+        closeStartDate.setHours(0,0,0,0);
+        query[closeDateRange.field] = assign(query[closeDateRange.field],{
+          '>=': new Date(closeStartDate)
+        });
+      }
+      if(closeDateRange.end){
+        closeEndDate = new Date(closeDateRange.end);
+        closeEndDate.setHours(23,59,59,999);
+        query[closeDateRange.field] = assign(query[closeDateRange.field],{
+          '<=': new Date(closeEndDate)
+        });
+      }
+
+      if( _.isEmpty(query[closeDateRange.field]) ){
+        delete query[closeDateRange.field];
+      }
 
     }
-
     //sails.log.info('query', query);
     querySearchAux = _.clone(query);
 
