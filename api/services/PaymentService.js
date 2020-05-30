@@ -89,6 +89,7 @@ function mapStatusType(status) {
 
   return mapper[status] || status;
 }
+
 function isCanceled(payment) {
   return payment.status === statusTypes.CANCELED;
 }
@@ -127,6 +128,9 @@ async function addPayment(params, req) {
     !params.terminal
   ) {
     params.terminal = params.terminals[0].value;
+    if (params.terminal === 'american-express' && !params.card) {
+      params.card = 'american-express';
+    }
     //throw new Error('Es necesario asignar una terminal a este tipo de pago');
   }
 
@@ -159,7 +163,8 @@ async function addPayment(params, req) {
       .populate('Payments')
       .populate('Client');
   } else {
-    quotation = await Quotation.findOne(params.Quotation).populate('Payments');
+    quotation = await Quotation.findOne(params.Quotation).populate(
+      'Payments');
   }
 
   const client = quotation.Client;
@@ -210,7 +215,8 @@ async function addPayment(params, req) {
   ) {
     const hasCredit = await checkIfClientHasCreditById(params.Client);
     if (!hasCredit) {
-      throw new Error('Este cliente no cuenta con crédito como forma de pago');
+      throw new Error(
+        'Este cliente no cuenta con crédito como forma de pago');
     }
   }
 
@@ -265,10 +271,11 @@ async function addPayment(params, req) {
       client: client,
       paymentId: paymentCreated.id,
     };
-    const appliedClientBalanceRecord = await ClientBalanceService.applyClientBalanceRecord(
-      params,
-      clientBalanceConfig
-    );
+    const appliedClientBalanceRecord = await ClientBalanceService
+      .applyClientBalanceRecord(
+        params,
+        clientBalanceConfig
+      );
   }
 
   const quotationUpdateParams = {
@@ -277,21 +284,33 @@ async function addPayment(params, req) {
     paymentGroup: paymentGroup,
   };
 
-  const findCriteria = { _id: new ObjectId(quotationId) };
-  await Common.nativeUpdateOne(findCriteria, quotationUpdateParams, Quotation);
+  const findCriteria = {
+    _id: new ObjectId(quotationId)
+  };
+  await Common.nativeUpdateOne(findCriteria, quotationUpdateParams,
+    Quotation);
 
   return paymentCreated;
 }
 
 async function cancel(paymentId) {
-  const query = { id: paymentId, Order: null };
-  const updateParams = { status: statusTypes.CANCELED };
+  const query = {
+    id: paymentId,
+    Order: null
+  };
+  const updateParams = {
+    status: statusTypes.CANCELED
+  };
   const updatedPayments = await Payment.update(query, updateParams);
   if (updatedPayments) {
-    const payment = _.findWhere(updatedPayments, { id: paymentId });
+    const payment = _.findWhere(updatedPayments, {
+      id: paymentId
+    });
     const quotationId = payment.Quotation;
 
-    const quotation = await Quotation.findOne({ id: quotationId }).populate(
+    const quotation = await Quotation.findOne({
+      id: quotationId
+    }).populate(
       'Payments'
     );
     const exchangeRate = await getExchangeRate();
@@ -303,7 +322,9 @@ async function cancel(paymentId) {
       quotation.Payments,
       exchangeRate
     );
-    const findCriteria = { _id: new ObjectId(quotationId) };
+    const findCriteria = {
+      _id: new ObjectId(quotationId)
+    };
     const updateQuotationParams = {
       ammountPaid,
       ammountPaidPg1,
@@ -320,7 +341,7 @@ async function cancel(paymentId) {
 
 function calculatePaymentsTotal(payments = [], exchangeRate) {
   if (payments.length === 0) return 0;
-  const total = payments.reduce(function(acum, payment) {
+  const total = payments.reduce(function (acum, payment) {
     if (!isCanceled(payment)) {
       if (payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
@@ -335,11 +356,13 @@ function calculatePaymentsTotal(payments = [], exchangeRate) {
 }
 
 function calculatePaymentsTotalPg1(payments = [], exchangeRate) {
-  const paymentsG1 = _.where(payments, { group: 1 });
+  const paymentsG1 = _.where(payments, {
+    group: 1
+  });
   if (!paymentsG1 || paymentsG1.length === 0) {
     return 0;
   }
-  const totalG1 = paymentsG1.reduce(function(acum, payment) {
+  const totalG1 = paymentsG1.reduce(function (acum, payment) {
     if (!isCanceled(payment)) {
       if (payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
@@ -358,7 +381,9 @@ function calculateUSDPayment(payment, exchangeRate) {
 }
 
 async function getExchangeRate() {
-  const site = await Common.nativeFindOne({ handle: 'actual-group' }, Site);
+  const site = await Common.nativeFindOne({
+    handle: 'actual-group'
+  }, Site);
   return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
 }
 
@@ -370,7 +395,7 @@ async function getQuotationTotalsByMethod(
   var paymentGroups = cloneDeep(sails.config.paymentGroups);
   const discountKeys = sails.config.discountKeys;
 
-  const getTotalsPromises = paymentGroups.map(function(paymentGroup) {
+  const getTotalsPromises = paymentGroups.map(function (paymentGroup) {
     const params = {
       financingTotals: options.financingTotals,
       update: false,
@@ -398,11 +423,11 @@ async function getQuotationTotalsByMethod(
     paymentGroups = removeCreditMethod(paymentGroups);
   }
 
-  paymentGroups = paymentGroups.map(function(paymentGroup, index) {
+  paymentGroups = paymentGroups.map(function (paymentGroup, index) {
     paymentGroup.total = totalsByGroup[index].total || 0;
     paymentGroup.subtotal = totalsByGroup[index].subtotal || 0;
     paymentGroup.discount = totalsByGroup[index].discount || 0;
-    paymentGroup.methods = paymentGroup.methods.map(function(method) {
+    paymentGroup.methods = paymentGroup.methods.map(function (method) {
       const discountKey = discountKeys[paymentGroup.group - 1];
       method.discountKey = discountKey;
       method.total = paymentGroup.total;
@@ -411,8 +436,10 @@ async function getQuotationTotalsByMethod(
       method.exchangeRate = exchangeRate;
 
       if (method.type === CASH_USD_TYPE) {
-        const exchangeRateString = numeral(exchangeRate).format('0,0.00');
-        method.description = 'Tipo de cambio ' + exchangeRateString + ' MXN';
+        const exchangeRateString = numeral(exchangeRate).format(
+          '0,0.00');
+        method.description = 'Tipo de cambio ' + exchangeRateString +
+          ' MXN';
       } else if (method.type === EWALLET_TYPE) {
         //var balance = vm.quotation.Client.ewallet || 0;
         //m.description = getEwalletDescription(balance);
@@ -425,12 +452,16 @@ async function getQuotationTotalsByMethod(
 
   const currentDate = new Date();
   const query = {
-    startDate: { '<=': currentDate },
-    endDate: { '>=': currentDate },
+    startDate: {
+      '<=': currentDate
+    },
+    endDate: {
+      '>=': currentDate
+    },
   };
   const validMethods = await PMPeriod.findOne(query);
   const activeKeys = sails.config.paymentGroupsKeys;
-  paymentGroups = paymentGroups.filter(function(m) {
+  paymentGroups = paymentGroups.filter(function (m) {
     var index = m.group - 1;
     return validMethods[activeKeys[index]];
   });
@@ -439,13 +470,15 @@ async function getQuotationTotalsByMethod(
 }
 
 function isADiscountClient(paymentTotals) {
-  return _.some(paymentTotals, function(paymentTotal) {
+  return _.some(paymentTotals, function (paymentTotal) {
     return paymentTotal.appliesClientDiscount;
   });
 }
 
 async function checkIfClientHasCreditByQuotationId(quotationId) {
-  const quotation = await Quotation.findOne({ id: quotationId }).populate(
+  const quotation = await Quotation.findOne({
+    id: quotationId
+  }).populate(
     'Client'
   );
   if (!quotation || !quotation.Client) {
@@ -454,7 +487,9 @@ async function checkIfClientHasCreditByQuotationId(quotationId) {
   const currentDate = new Date();
   const creditQuery = {
     Name: quotation.Client.CardCode,
-    U_Vigencia: { '>=': currentDate },
+    U_Vigencia: {
+      '>=': currentDate
+    },
   };
   const credit = await ClientCredit.findOne(creditQuery);
   if (credit && !_.isUndefined(credit)) {
@@ -464,14 +499,18 @@ async function checkIfClientHasCreditByQuotationId(quotationId) {
 }
 
 async function checkIfClientHasCreditById(clientId) {
-  const client = await Client.findOne({ id: clientId });
+  const client = await Client.findOne({
+    id: clientId
+  });
   if (!client) {
     return false;
   }
   const currentDate = new Date();
   const creditQuery = {
     Name: client.CardCode,
-    U_Vigencia: { '>=': currentDate },
+    U_Vigencia: {
+      '>=': currentDate
+    },
   };
   const credit = await ClientCredit.findOne(creditQuery);
   sails.log.info('credit', credit);
@@ -483,13 +522,13 @@ async function checkIfClientHasCreditById(clientId) {
 }
 
 function filterPaymentTotalsForDiscountClients(paymentTotals) {
-  return paymentTotals.filter(function(paymentTotal) {
+  return paymentTotals.filter(function (paymentTotal) {
     return paymentTotal.paymentGroup === 1;
   });
 }
 
 function filterMethodsGroupsForDiscountClients(methodsGroups) {
-  return methodsGroups.filter(function(mg) {
+  return methodsGroups.filter(function (mg) {
     return mg.group === 1;
   });
 }
@@ -500,27 +539,23 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
     activeStore
   );
 
-  const fixedMethods = [
-    {
-      name: '1 pago de contado',
-      cards:
-        'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
-      total: numeral(paymentGroups[0].total).format('0,0.00'),
-    },
-  ];
+  const fixedMethods = [{
+    name: '1 pago de contado',
+    cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
+    total: numeral(paymentGroups[0].total).format('0,0.00'),
+  }, ];
   paymentGroups = paymentGroups.slice(1);
 
-  const methodsForEmail = paymentGroups.reduce(function(acum, current) {
+  const methodsForEmail = paymentGroups.reduce(function (acum, current) {
     var grouped = _.groupBy(current.methods, 'mainCard');
     for (var k in grouped) {
-      var msi = _.every(grouped[k], function(method) {
+      var msi = _.every(grouped[k], function (method) {
         return method.msi;
       });
-      var merged = grouped[k].reduce(function(a, b) {
+      var merged = grouped[k].reduce(function (a, b) {
         return {
-          name: msi
-            ? [a.msi, b.msi].join(', ') + ' Meses sin intereses'
-            : [a.name, b.name].join(', '),
+          name: msi ? [a.msi, b.msi].join(', ') +
+            ' Meses sin intereses' : [a.name, b.name].join(', '),
           cards: a.cards,
           total: a.total,
         };
@@ -529,7 +564,7 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
     }
     return acum;
   }, []);
-  const methodsForEmailFormatted = methodsForEmail.map(function(mi) {
+  const methodsForEmailFormatted = methodsForEmail.map(function (mi) {
     return {
       name: mi.msi ? mi.msi + ' Meses sin intereses' : mi.name,
       cards: mi.cards.join(','),
@@ -551,7 +586,7 @@ function getPaymentGroups(options = {}) {
 }
 
 function addCreditMethod(methodsGroups) {
-  return methodsGroups.map(function(mg) {
+  return methodsGroups.map(function (mg) {
     if (mg.group === 1) {
       var isCreditMethodAdded = _.findWhere(mg.methods, {
         type: types.CLIENT_CREDIT,
@@ -565,7 +600,7 @@ function addCreditMethod(methodsGroups) {
 }
 
 function addSinglePaymentTerminalMethod(methodsGroups) {
-  return methodsGroups.map(function(mg) {
+  return methodsGroups.map(function (mg) {
     if (mg.group === 1) {
       var isSinglePaymentMethodADDED = _.findWhere(mg.methods, {
         type: types.SINGLE_PAYMENT_TERMINAL,
@@ -579,7 +614,7 @@ function addSinglePaymentTerminalMethod(methodsGroups) {
 }
 
 function addDepositMethod(methodsGroups) {
-  return methodsGroups.map(function(mg) {
+  return methodsGroups.map(function (mg) {
     if (mg.group === 1) {
       var isSinglePaymentMethodADDED = _.findWhere(mg.methods, {
         type: types.DEPOSIT,
@@ -599,9 +634,9 @@ function addLegacyMethods(methodsGroups) {
 }
 
 function removeCreditMethod(methodsGroups) {
-  return methodsGroups.map(function(methodGroup) {
+  return methodsGroups.map(function (methodGroup) {
     if (methodGroup.group === 1) {
-      methodGroup.methods = methodGroup.methods.filter(function(method) {
+      methodGroup.methods = methodGroup.methods.filter(function (method) {
         return method.type !== types.CLIENT_CREDIT;
       });
     }
@@ -620,9 +655,14 @@ const SINGLE_PAYMENT_TERMINAL_METHOD = {
     '/cards/american.png',
   ],
   cards: ['Visa', 'MasterCard', 'American Express'],
-  terminals: [
-    { label: 'American Express', value: 'american-express' },
-    { label: 'Banamex', value: 'banamex' },
+  terminals: [{
+      label: 'American Express',
+      value: 'american-express'
+    },
+    {
+      label: 'Banamex',
+      value: 'banamex'
+    },
   ],
   currency: 'mxn',
   needsVerification: true,
@@ -636,11 +676,22 @@ const DEPOSIT_METHOD = {
   type: 'deposit',
   description: 'Sujeto a verificación contable',
   currency: 'mxn',
-  terminals: [
-    { label: 'Banamex', value: 'banamex' },
-    { label: 'Bancomer', value: 'bancomer' },
-    { label: 'Banorte', value: 'banorte' },
-    { label: 'Santander', value: 'santander' },
+  terminals: [{
+      label: 'Banamex',
+      value: 'banamex'
+    },
+    {
+      label: 'Bancomer',
+      value: 'bancomer'
+    },
+    {
+      label: 'Banorte',
+      value: 'banorte'
+    },
+    {
+      label: 'Santander',
+      value: 'santander'
+    },
   ],
   needsVerification: false,
   group: 1,
