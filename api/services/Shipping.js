@@ -20,7 +20,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
     ToCode: storeWarehouse.WhsCode,
     Active: 'Y',
   });
-  const companiesCodes = deliveries.map(function(delivery) {
+  const companiesCodes = deliveries.map(function (delivery) {
     return delivery.FromCode;
   });
   const stockItemsQuery = {
@@ -32,14 +32,14 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   };
   let stockItems = await DatesDelivery.find(stockItemsQuery);
   const pendingProductDetailSum = await getPendingProductDetailsSum(product);
-  const stockItemscodes = stockItems.map(function(p) {
+  const stockItemscodes = stockItems.map(function (p) {
     return p.whsCode;
   });
   const whsCodes = await Company.find({ WhsCode: stockItemscodes });
 
-  stockItems = stockItems.map(function(stockItem) {
+  stockItems = stockItems.map(function (stockItem) {
     //stockItem.company is storeWarehouse id
-    stockItem.warehouseId = _.find(whsCodes, function(ci) {
+    stockItem.warehouseId = _.find(whsCodes, function (ci) {
       return ci.WhsCode == stockItem.whsCode;
     }).id;
     return stockItem;
@@ -47,7 +47,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
 
   if (deliveries.length > 0 && stockItems.length > 0) {
     stockItems = filterStockItems(stockItems, deliveries, storeWarehouse.id);
-    var shippingPromises = stockItems.map(function(stockItem) {
+    var shippingPromises = stockItems.map(function (stockItem) {
       return buildShippingItem(
         stockItem,
         deliveries,
@@ -103,7 +103,7 @@ async function buildShippingItem(
   storeWarehouseId,
   pendingProductDetailSum
 ) {
-  const delivery = _.find(deliveries, function(d) {
+  const delivery = _.find(deliveries, function (d) {
     return d.FromCode == stockItem.whsCode;
   });
 
@@ -117,18 +117,18 @@ async function buildShippingItem(
   let seasonDays;
 
   if (isMeridaWhsCode(stockItem.whsCode)) {
-    MAIN_SEASON_DAYS = 20; //ORIGINAL 13
-    LOW_SEASON_DAYS = 20; // ORIGINAL 13
+    MAIN_SEASON_DAYS = 14; //ORIGINAL 13
+    LOW_SEASON_DAYS = 14; // ORIGINAL 13
     if (stockItem.whsCode === CEDIS_MERIDA_WHS_CODE) {
       MAIN_SEASON_DAYS = 12;
       LOW_SEASON_DAYS = 12; // ORIGINAL 5
     }
   } else {
-    MAIN_SEASON_DAYS = 15; //10 // ORIGINAL 5
-    LOW_SEASON_DAYS = 15; // ORIGINAL 5
+    MAIN_SEASON_DAYS = 8; //10 // ORIGINAL 5
+    LOW_SEASON_DAYS = 8; // ORIGINAL 5
     if (stockItem.whsCode === CEDIS_QROO_CODE) {
-      MAIN_SEASON_DAYS = 5;
-      LOW_SEASON_DAYS = 5; // ORIGINAL 5
+      MAIN_SEASON_DAYS = 6;
+      LOW_SEASON_DAYS = 6; // ORIGINAL 5
     }
   }
 
@@ -175,8 +175,8 @@ function isMeridaWhsCode(whsCode) {
 }
 
 function filterStockItems(stockItems, deliveries, storeWarehouseId) {
-  return stockItems.filter(function(stockItem) {
-    var delivery = _.find(deliveries, function(delivery) {
+  return stockItems.filter(function (stockItem) {
+    var delivery = _.find(deliveries, function (delivery) {
       return delivery.FromCode == stockItem.whsCode;
     });
 
@@ -191,8 +191,8 @@ function filterStockItems(stockItems, deliveries, storeWarehouseId) {
 }
 
 function getImmediateStockItem(stockItems, deliveries) {
-  return _.find(stockItems, function(stockItem) {
-    var delivery = _.find(deliveries, function(delivery) {
+  return _.find(stockItems, function (stockItem) {
+    var delivery = _.find(deliveries, function (delivery) {
       return delivery.FromCode == stockItem.whsCode;
     });
 
@@ -239,11 +239,11 @@ function substractDeliveriesStockByQuotationDetails(
   productId
 ) {
   let details = quotationDetails.slice();
-  details = details.filter(function(detail) {
+  details = details.filter(function (detail) {
     return detail.Product === productId;
   });
 
-  return shippingItems.map(function(item) {
+  return shippingItems.map(function (item) {
     for (var j = 0; j < details.length; j++) {
       if (
         details[j].shipCompany === item.company &&
@@ -267,14 +267,14 @@ function getPendingProductDetailsSum(product) {
     pendingStock: { $sum: '$quantity' },
   };
 
-  return new Promise(function(resolve, reject) {
-    OrderDetailWeb.native(function(err, collection) {
+  return new Promise(function (resolve, reject) {
+    OrderDetailWeb.native(function (err, collection) {
       if (err) {
         console.log('err', err);
         return reject(err);
       }
 
-      collection.aggregate([{ $match: match }, { $group: group }], function(
+      collection.aggregate([{ $match: match }, { $group: group }], function (
         _err,
         results
       ) {
