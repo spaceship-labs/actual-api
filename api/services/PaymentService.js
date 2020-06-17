@@ -128,6 +128,10 @@ async function addPayment(params, req) {
   ) {
     params.terminal = params.terminals[0].value;
     //throw new Error('Es necesario asignar una terminal a este tipo de pago');
+    params.terminal = params.terminals[0].value;
+    if (params.terminal === 'american-express' && !params.card) {
+      params.card = 'american-express';
+    }
   }
 
   const storeCode = req.user.activeStore.code;
@@ -320,7 +324,7 @@ async function cancel(paymentId) {
 
 function calculatePaymentsTotal(payments = [], exchangeRate) {
   if (payments.length === 0) return 0;
-  const total = payments.reduce(function(acum, payment) {
+  const total = payments.reduce(function (acum, payment) {
     if (!isCanceled(payment)) {
       if (payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
@@ -339,7 +343,7 @@ function calculatePaymentsTotalPg1(payments = [], exchangeRate) {
   if (!paymentsG1 || paymentsG1.length === 0) {
     return 0;
   }
-  const totalG1 = paymentsG1.reduce(function(acum, payment) {
+  const totalG1 = paymentsG1.reduce(function (acum, payment) {
     if (!isCanceled(payment)) {
       if (payment.currency === currencyTypes.USD) {
         acum += calculateUSDPayment(payment, exchangeRate);
@@ -370,7 +374,7 @@ async function getQuotationTotalsByMethod(
   var paymentGroups = cloneDeep(sails.config.paymentGroups);
   const discountKeys = sails.config.discountKeys;
 
-  const getTotalsPromises = paymentGroups.map(function(paymentGroup) {
+  const getTotalsPromises = paymentGroups.map(function (paymentGroup) {
     const params = {
       financingTotals: options.financingTotals,
       update: false,
@@ -398,11 +402,11 @@ async function getQuotationTotalsByMethod(
     paymentGroups = removeCreditMethod(paymentGroups);
   }
 
-  paymentGroups = paymentGroups.map(function(paymentGroup, index) {
+  paymentGroups = paymentGroups.map(function (paymentGroup, index) {
     paymentGroup.total = totalsByGroup[index].total || 0;
     paymentGroup.subtotal = totalsByGroup[index].subtotal || 0;
     paymentGroup.discount = totalsByGroup[index].discount || 0;
-    paymentGroup.methods = paymentGroup.methods.map(function(method) {
+    paymentGroup.methods = paymentGroup.methods.map(function (method) {
       const discountKey = discountKeys[paymentGroup.group - 1];
       method.discountKey = discountKey;
       method.total = paymentGroup.total;
@@ -430,7 +434,7 @@ async function getQuotationTotalsByMethod(
   };
   const validMethods = await PMPeriod.findOne(query);
   const activeKeys = sails.config.paymentGroupsKeys;
-  paymentGroups = paymentGroups.filter(function(m) {
+  paymentGroups = paymentGroups.filter(function (m) {
     var index = m.group - 1;
     return validMethods[activeKeys[index]];
   });
@@ -439,7 +443,7 @@ async function getQuotationTotalsByMethod(
 }
 
 function isADiscountClient(paymentTotals) {
-  return _.some(paymentTotals, function(paymentTotal) {
+  return _.some(paymentTotals, function (paymentTotal) {
     return paymentTotal.appliesClientDiscount;
   });
 }
@@ -483,13 +487,13 @@ async function checkIfClientHasCreditById(clientId) {
 }
 
 function filterPaymentTotalsForDiscountClients(paymentTotals) {
-  return paymentTotals.filter(function(paymentTotal) {
+  return paymentTotals.filter(function (paymentTotal) {
     return paymentTotal.paymentGroup === 1;
   });
 }
 
 function filterMethodsGroupsForDiscountClients(methodsGroups) {
-  return methodsGroups.filter(function(mg) {
+  return methodsGroups.filter(function (mg) {
     return mg.group === 1;
   });
 }
@@ -510,13 +514,13 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
   ];
   paymentGroups = paymentGroups.slice(1);
 
-  const methodsForEmail = paymentGroups.reduce(function(acum, current) {
+  const methodsForEmail = paymentGroups.reduce(function (acum, current) {
     var grouped = _.groupBy(current.methods, 'mainCard');
     for (var k in grouped) {
-      var msi = _.every(grouped[k], function(method) {
+      var msi = _.every(grouped[k], function (method) {
         return method.msi;
       });
-      var merged = grouped[k].reduce(function(a, b) {
+      var merged = grouped[k].reduce(function (a, b) {
         return {
           name: msi
             ? [a.msi, b.msi].join(', ') + ' Meses sin intereses'
@@ -529,7 +533,7 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
     }
     return acum;
   }, []);
-  const methodsForEmailFormatted = methodsForEmail.map(function(mi) {
+  const methodsForEmailFormatted = methodsForEmail.map(function (mi) {
     return {
       name: mi.msi ? mi.msi + ' Meses sin intereses' : mi.name,
       cards: mi.cards.join(','),
@@ -551,7 +555,7 @@ function getPaymentGroups(options = {}) {
 }
 
 function addCreditMethod(methodsGroups) {
-  return methodsGroups.map(function(mg) {
+  return methodsGroups.map(function (mg) {
     if (mg.group === 1) {
       var isCreditMethodAdded = _.findWhere(mg.methods, {
         type: types.CLIENT_CREDIT,
@@ -565,7 +569,7 @@ function addCreditMethod(methodsGroups) {
 }
 
 function addSinglePaymentTerminalMethod(methodsGroups) {
-  return methodsGroups.map(function(mg) {
+  return methodsGroups.map(function (mg) {
     if (mg.group === 1) {
       var isSinglePaymentMethodADDED = _.findWhere(mg.methods, {
         type: types.SINGLE_PAYMENT_TERMINAL,
@@ -579,7 +583,7 @@ function addSinglePaymentTerminalMethod(methodsGroups) {
 }
 
 function addDepositMethod(methodsGroups) {
-  return methodsGroups.map(function(mg) {
+  return methodsGroups.map(function (mg) {
     if (mg.group === 1) {
       var isSinglePaymentMethodADDED = _.findWhere(mg.methods, {
         type: types.DEPOSIT,
@@ -599,9 +603,9 @@ function addLegacyMethods(methodsGroups) {
 }
 
 function removeCreditMethod(methodsGroups) {
-  return methodsGroups.map(function(methodGroup) {
+  return methodsGroups.map(function (methodGroup) {
     if (methodGroup.group === 1) {
-      methodGroup.methods = methodGroup.methods.filter(function(method) {
+      methodGroup.methods = methodGroup.methods.filter(function (method) {
         return method.type !== types.CLIENT_CREDIT;
       });
     }
