@@ -789,7 +789,11 @@ module.exports.routes = {
     controller: 'payment',
     action: 'getPaymentGroups',
   },
-
+  '/paymentsapconciliation': {
+    controller: 'payment',
+    action: 'SAPConciliation',
+  },
+  
   '/paymentwebgroups': {
     controller: 'paymentweb',
     action: 'getPaymentWebGroups',
