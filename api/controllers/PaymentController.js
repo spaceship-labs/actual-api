@@ -56,12 +56,12 @@ module.exports = {
     if (startingDate){
       dateStart = new Date(startingDate).toISOString()
     } else {
-      dateStart = "2020-02-01T00:00:00-05:00"
+      dateStart = "2019-02-01T00:00:00-05:00"
     }
     if (endingDate){
       dateEnd = new Date(endingDate).toISOString()
     } else {
-      dateEnd = "2020-02-28T00:00:00-05:00"
+      dateEnd = "2019-06-01T00:00:00-05:00"
     }
     console.log(dateStart,dateEnd)
     // retrieve for exportation
@@ -84,49 +84,58 @@ module.exports = {
       value = SapValue
     }
     // collation
-    const Ids = value.map( payment => payment.U_MongoId )
-    const payments = await Payment.find({ id: Ids })
-    const AllStores = await Store.find();
 
-    Promise.all(payments.map( async payment => {
-      try{
-        // get corresponding sap value
-        const sapValue = value.find(value => value.U_MongoId == payment.id )
-        // get store
-        const { name: Store } = AllStores.find(value => value.id == payment.Store);
-        const sellers = await User.find({id:payment.User})
-        const {firstName, lastName} = sellers[0]
-        const clients = await Client.find({id:payment.Client})
-        
-        if(clients[0] && clients[0].CardCode){
-          const { CardCode } = clients[0]
-          payment.CardCode = CardCode;
+    Promise.all(value.map( async paymentSap => {
+      try {
+        const payment = await Payment.findOne({ id: paymentSap.U_MongoId });
+        if (!payment) {
+          let dummyData = {
+            ammount: 0,
+            ammountUSD: 0,
+            ammountMXN: 0,
+            folio: "Not found",
+            CardCode:"Not found",
+            CardName:"Not found",
+            Store:"Not found",
+            Seller:"Not found",
+            diff: -paymentSap.DocTotal
+          }
+          return {
+            ...paymentSap,
+            ...dummyData
+          }
         }
-        if(clients[0] && clients[0].CardName){
-          const { CardName } = clients[0]
-          payment.CardName = CardName;
+        const quotation = await Quotation.findOne({ id: payment.Quotation }).populate('User').populate('Store').populate('Client');
+        if (quotation) {
+          payment.Store = quotation.Store.name;
+          payment.User = quotation.User.name;
+          if (quotation.Client && quotation.Client.CardCode) {
+            const { CardCode } = quotation.Client;
+            payment.CardCode= CardCode;
+          } 
+          if (quotation.Client && quotation.Client.CardName) {
+            const { CardName } = quotation.Client;
+            payment.CardName= CardName;
+          }
         }
-        payment.Store = Store;
-        payment.User = `${firstName} ${lastName}`;
-        // formatting payment
-        if(payment.currency!='mxn'){
+        if (payment.currency!='mxn') {
           payment.ammountUSD = payment.ammount;
           payment.ammountMXN = payment.ammount * payment.exchangeRate;
-        }else {
+        } else {
           payment.ammountUSD = payment.ammount/payment.exchangeRate;
           payment.ammountMXN = payment.ammount;
         }
+
         return {
+          ...paymentSap,
           ...payment,
-          ...sapValue,
-          diff: payment.ammountMXN - sapValue.DocTotal
+          diff: payment.ammountMXN - paymentSap.DocTotal
         }
-      } catch (ex){
-        console.log(ex)
+      } catch (ex) {
+        console.log(ex);
       }
-    })
-    ).then(data => { 
-      res.json({data, total:180})
+    })).then( data => { 
+      res.json({ data, total:180 })
     })
   }
 };
