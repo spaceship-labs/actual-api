@@ -162,6 +162,10 @@ module.exports.routes = {
     controller: 'invoice',
     action: 'find',
   },
+  '/invoicesapconciliation': {
+    controller: 'invoice',
+    action: 'SAPConciliation',
+  },
 
   '/productcategory/find/:page': {
     controller: 'productcategory',

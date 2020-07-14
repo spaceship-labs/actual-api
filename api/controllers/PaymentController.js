@@ -53,25 +53,25 @@ module.exports = {
     const { page, startingDate, endingDate, getAll } = req.allParams()
     var dateStart, dateEnd;
     // validations
-    if (startingDate){
+    if (startingDate) {
       dateStart = new Date(startingDate).toISOString()
     } else {
       dateStart = "2019-02-01T00:00:00-05:00"
     }
-    if (endingDate){
+    if (endingDate) {
       dateEnd = new Date(endingDate).toISOString()
     } else {
       dateEnd = "2019-06-01T00:00:00-05:00"
     }
     console.log(dateStart,dateEnd)
     // retrieve for exportation
-    let value=[];
-    if(getAll){
-      let i=1;
-      let isRetrieving=true;
-      while(isRetrieving){
+    let value = [];
+    if (getAll) {
+      let i = 1;
+      let isRetrieving = true;
+      while(isRetrieving) {
         const { value: SapValue } = await SapService.paymentReport(i, dateStart, dateEnd);
-        if(SapValue.length == 0){
+        if (SapValue.length == 0) {
           isRetrieving = false
         } else {
           value = value.concat(SapValue) // append all
@@ -93,7 +93,7 @@ module.exports = {
             ammount: 0,
             ammountUSD: 0,
             ammountMXN: 0,
-            folio: "Not found",
+            folio: "sap: "+paymentSap.DocEntry,
             CardCode:"Not found",
             CardName:"Not found",
             Store:"Not found",

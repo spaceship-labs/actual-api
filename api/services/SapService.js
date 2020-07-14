@@ -41,6 +41,7 @@ module.exports = {
   mapPaymentsToSap,
   SAP_DATE_FORMAT,
   paymentReport,
+  invoiceReport
 };
 
 function createClient(params) {
@@ -465,6 +466,23 @@ function paymentReport(page,beforeDate, afterDate){
     queryParams: requestParams,
   });
   sails.log.info('payment report');
+  sails.log.info(decodeURIComponent(endPoint));
+  reqOptions.uri = endPoint
+  reqOptions.method = 'GET';
+  return request(reqOptions);
+
+}
+function invoiceReport(page,beforeDate, afterDate){
+  const requestParams={
+    before: beforeDate,
+    after: afterDate,
+    $skip: (parseInt(page)-1)*10
+  }
+  const endPoint = buildUrl(baseUrl, {
+    path: 'ReportInvoice',
+    queryParams: requestParams,
+  });
+  sails.log.info('invoice report');
   sails.log.info(decodeURIComponent(endPoint));
   reqOptions.uri = endPoint
   reqOptions.method = 'GET';
