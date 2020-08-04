@@ -47,7 +47,7 @@ function getCountByUser(form) {
   return Promise.join(
     Order.count(queryfortNightRange),
     Order.count(queryDateRange)
-  ).then(function(results) {
+  ).then(function (results) {
     var response = {
       fortnight: results[0],
       dateRange: results[1],
@@ -134,7 +134,6 @@ async function create(form, currentUser) {
       'Ya se ha creado un pedido sobre esta cotización : ' + orderUrl
     );
   }
-
   const isValidStock = await StockService.validateQuotationStockById(
     quotationId,
     currentUser.activeStore
@@ -271,7 +270,7 @@ async function create(form, currentUser) {
   );
 
   //Cloning quotation details to order details
-  quotation.Details.forEach(function(detail) {
+  quotation.Details.forEach(function (detail) {
     detail.QuotationDetail = _.clone(detail.id);
     delete detail.id;
     orderFound.Details.add(detail);
@@ -318,7 +317,7 @@ function buildOrderCreateParams({
   ewalletRecords,
   broker,
 }) {
-  const paymentsIds = payments.map(function(p) {
+  const paymentsIds = payments.map(function (p) {
     return p.id;
   });
   const SlpCode = user.Seller ? user.Seller.SlpCode : -1;
@@ -376,7 +375,7 @@ function validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate) {
     }
 
     const sapResultWithBalance = _.clone(sapResult);
-    sapResult = sapResult.filter(function(item) {
+    sapResult = sapResult.filter(function (item) {
       return item.type !== BALANCE_SAP_TYPE;
     });
 
@@ -385,7 +384,7 @@ function validateSapOrderCreated(sapResponse, sapResult, paymentsToCreate) {
       throw new Error('Documentos no generados en SAP');
     }
 
-    const everyOrderHasPayments = sapResult.every(function(sapOrder) {
+    const everyOrderHasPayments = sapResult.every(function (sapOrder) {
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
     });
     const everyOrderHasFolio = sapResult.every(checkIfSapOrderHasReference);
@@ -443,7 +442,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate) {
     }
 
     if (sapOrder.Payments.length > 0) {
-      return sapOrder.Payments.every(function(payment) {
+      return sapOrder.Payments.every(function (payment) {
         return !isNaN(payment.pay) && payment.reference;
       });
     }
@@ -453,7 +452,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate) {
 }
 
 function everyPaymentIsClientBalanceOrCredit(paymentsToCreate) {
-  var everyPaymentIsClientBalance = paymentsToCreate.every(function(p) {
+  var everyPaymentIsClientBalance = paymentsToCreate.every(function (p) {
     return (
       p.type === PaymentService.CLIENT_BALANCE_TYPE ||
       p.type === PaymentService.types.CLIENT_CREDIT
@@ -466,16 +465,16 @@ function saveSapReferences(sapResult, order, orderDetails) {
   var clientBalance = extractBalanceFromSapResult(sapResult);
   var clientId = order.Client.id || order.Client;
 
-  sapResult = sapResult.filter(function(item) {
+  sapResult = sapResult.filter(function (item) {
     return item.type !== BALANCE_SAP_TYPE;
   });
 
-  var ordersSap = sapResult.map(function(orderSap) {
+  var ordersSap = sapResult.map(function (orderSap) {
     var orderSapReference = {
       Order: order.id,
       invoiceSap: orderSap.Invoice || null,
       document: orderSap.Order,
-      PaymentsSap: orderSap.Payments.map(function(payment) {
+      PaymentsSap: orderSap.Payments.map(function (payment) {
         return {
           document: payment.pay,
           Payment: payment.reference,
@@ -490,7 +489,7 @@ function saveSapReferences(sapResult, order, orderDetails) {
     }
 
     if (orderSap.series && _.isArray(orderSap.series)) {
-      orderSapReference.ProductSeries = orderSap.series.map(function(serie) {
+      orderSapReference.ProductSeries = orderSap.series.map(function (serie) {
         var productSerie = {
           QuotationDetail: serie.DetailId,
           OrderDetail: _.findWhere(orderDetails, {
@@ -549,7 +548,7 @@ function processEwalletBalance(params) {
     }
   }
   return Client.update({ id: params.clientId }, { ewallet: generated }).then(
-    function(clientUpdated) {
+    function (clientUpdated) {
       return Promise.each(ewalletRecords, createEwalletRecord);
     }
   );
