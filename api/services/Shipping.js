@@ -119,16 +119,15 @@ async function buildShippingItem(
   if (isMeridaWhsCode(stockItem.whsCode)) {
     MAIN_SEASON_DAYS = 6; //ORIGINAL 13
     LOW_SEASON_DAYS = 6; // ORIGINAL 13
-    if (stockItem.whsCode === CEDIS_QROO_CODE) {
-      MAIN_SEASON_DAYS = 10;
-      LOW_SEASON_DAYS = 10; // ORIGINAL 5
-    }
   } else {
     MAIN_SEASON_DAYS = 9; //10 // ORIGINAL 5
     LOW_SEASON_DAYS = 9; // ORIGINAL 5
-    if (stockItem.whsCode === CEDIS_QROO_CODE) {
+    if (stockItem.whsCode === CEDIS_QROO_CODE && storeWarehouseId !== CEDIS_MERIDA_WHS_CODE) {
       MAIN_SEASON_DAYS = 8;
       LOW_SEASON_DAYS = 8; // ORIGINAL 5
+    } else if (stockItem.whsCode === CEDIS_QROO_CODE && storeWarehouseId === CEDIS_MERIDA_WHS_CODE) {
+      MAIN_SEASON_DAYS = 10;
+      LOW_SEASON_DAYS = 10; // ORIGINAL 5
     }
   }
 
