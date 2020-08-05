@@ -395,6 +395,11 @@ module.exports.routes = {
     controller: 'seller',
     action: 'getAll',
   },
+  '/seller/getMainStore': {
+    controller: 'seller',
+    action: 'getMainStoreByEmail',
+  },
+
 
   '/client/find': {
     controller: 'client',
