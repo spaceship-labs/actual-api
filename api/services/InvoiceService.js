@@ -473,10 +473,12 @@ function prepareItems(details) {
       product.U_ClaveProdServ === 1010101
         ? '01010101'
         : product.U_ClaveProdServ;
+    const alegraDesc = product.ItemCode +" "+product.ItemName;
     return {
       id: detail.id,
       name: product.ItemName,
       price: detail.unitPrice / 1.16,
+      description: alegraDesc,
       //discount: discount,
       discount: parseFloat(discount.toFixed(4)),
       tax: [{ id: ALEGRA_IVA_ID }],
