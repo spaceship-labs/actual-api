@@ -400,7 +400,10 @@ module.exports.routes = {
     controller: 'client',
     action: 'find',
   },
-
+  '/seller/getMainStore': {
+    controller: 'seller',
+    action: 'getMainStoreByEmail',
+  },
   // 'get /client/:id': 'ClientController.findById',
 
   '/client/findbyid/:id': {

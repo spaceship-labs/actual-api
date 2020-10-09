@@ -34,6 +34,17 @@ module.exports = {
       console.log('err', err);
       return res.negotiate(err);
     });
+  },
+  async getMainStoreByEmail(req, res) {
+    const { email } = req.allParams();
+    try {
+      const sellerObj = await User.findOne({ email: email })
+      const { mainStore } = sellerObj
+      return res.json({ id: mainStore })
+    } catch (err) {
+      return res.negotiate(err);
+    }
   }
+ 
 
 };

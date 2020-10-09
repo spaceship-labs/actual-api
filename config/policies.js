@@ -91,6 +91,9 @@ module.exports.policies = {
     list: ['isAdmin'],
     product: true,
   },
+  SellerController: {
+    getMainStoreByEmail: true,
+  },
   ZipcodeController: {
     listZipcodeStates: ['isAdmin'],
   },
