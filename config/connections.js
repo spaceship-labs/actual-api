@@ -44,6 +44,7 @@ module.exports.connections = {
         }
       : {
           adapter: 'sails-mongo',
+          ssl: true,
           url: process.env.MONGODB_URL,
         },
 
