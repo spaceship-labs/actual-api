@@ -7,6 +7,7 @@ const CEDIS_QROO_CODE = '01';
 const CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 const CEDIS_MERIDA_WHS_CODE = '10';
 const STUDIO_MERIDA_WHS_CODE = '11';
+const STUDIO_ISLA_MERIDA_WHS_CODE = '22';
 
 module.exports = {
   product: productShipping,
@@ -173,7 +174,7 @@ async function buildShippingItem(
 
 function isMeridaWhsCode(whsCode) {
   return (
-    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE
+    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === STUDIO_ISLA_MERIDA_WHS_CODE
   );
 }
 
