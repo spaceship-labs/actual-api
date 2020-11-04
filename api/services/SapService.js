@@ -206,6 +206,7 @@ function buildOrderRequestParams(params) {
   var MERCADOLIBRE_MARKETPLACE_GROUPCODE = 12;
   var AMAZON_MARKETPLACE_GROUPCODE = 13;
   var PROJECTS_PLAYA_GROUPCODE = 14;
+  var ACTUAL_STUDIO_ISLA_MERIDA_GROUPCODE = 15;
 
   if (
     params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
@@ -219,6 +220,7 @@ function buildOrderRequestParams(params) {
     params.groupCode != MERCADOLIBRE_MARKETPLACE_GROUPCODE &&
     params.groupCode != AMAZON_MARKETPLACE_GROUPCODE &&
     params.groupCode != PROJECTS_PLAYA_GROUPCODE &&
+    params.groupCode != ACTUAL_STUDIO_ISLA_MERIDA_GROUPCODE &&
     process.env.MODE === 'production'
   ) {
     return Promise.reject(
