@@ -47,7 +47,7 @@ const VALID_STORES_CODES = [
   'actual_proyect',
   'actual_marketplace', //FOR MARKET_PLACES
   'actual_proyect_playa',
-  'actual_studio_isla_merida',
+  'actual_isla_merida',
 ];
 
 module.exports = {
