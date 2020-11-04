@@ -7,6 +7,7 @@ const CEDIS_QROO_CODE = '01';
 const CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 const CEDIS_MERIDA_WHS_CODE = '10';
 const STUDIO_MERIDA_WHS_CODE = '11';
+const ISLA_MERIDA_WHS_CODE = '22';
 
 module.exports = {
   product: productShipping,
@@ -15,7 +16,7 @@ module.exports = {
 
 async function productShipping(product, storeWarehouse, activeQuotationId) {
   let shippingItems = [];
-
+  sails.log.info("WH1",storeWarehouse)
   const deliveries = await Delivery.find({
     ToCode: storeWarehouse.WhsCode,
     Active: 'Y',
@@ -23,6 +24,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   const companiesCodes = deliveries.map(function (delivery) {
     return delivery.FromCode;
   });
+  sails.log.info("WH2",companiesCodes)
   const stockItemsQuery = {
     ItemCode: product.ItemCode,
     whsCode: companiesCodes,
@@ -35,11 +37,15 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   const stockItemscodes = stockItems.map(function (p) {
     return p.whsCode;
   });
+  sails.log.info("WH3",stockItemscodes)
+
   const whsCodes = await Company.find({ WhsCode: stockItemscodes });
 
   stockItems = stockItems.map(function (stockItem) {
     //stockItem.company is storeWarehouse id
     stockItem.warehouseId = _.find(whsCodes, function (ci) {
+      sails.log.info("WH4",ci)
+
       return ci.WhsCode == stockItem.whsCode;
     }).id;
     return stockItem;
@@ -173,7 +179,7 @@ async function buildShippingItem(
 
 function isMeridaWhsCode(whsCode) {
   return (
-    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE
+    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_WHS_CODE
   );
 }
 
