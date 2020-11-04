@@ -48,7 +48,7 @@ function substractStockByDetail(detail){
 }
 
 function substractProductStockByDetail(detail){
-	sails.log.info("WH5",detail)
+	5",detail)
 
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
@@ -79,7 +79,6 @@ function substractProductStockByDetail(detail){
 }
 
 function substractDeliveryStockByDetail(detail){
-	sails.log.info("WH6",detail)
 
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
@@ -123,7 +122,6 @@ function getStoresWithProduct(ItemCode, whsCode){
 	return Delivery.find({FromCode: whsCode, Active:'Y'})
 		.then(function(deliveries){
 			var warehouses = deliveries.map(function(d){return d.ToCode});
-			sails.log.info("WH7",warehouses)
 
 			return Company.find({WhsCode: warehouses}).populate('Stores');
 		})
