@@ -146,7 +146,7 @@ module.exports = {
     actual_studio_malecon: { type: 'integer' },
     actual_studio_playa_del_carmen: { type: 'integer' },
     actual_studio_cumbres: { type: 'integer' },
-    actual_sisla_merida: {type: 'integer'},
+    actual_isla_merida: {type: 'integer'},
     actual_home_xcaret: { type: 'integer' },
     actual_home_merida: { type: 'integer' },
     actual_home: { type: 'integer' },
