@@ -48,8 +48,6 @@ function substractStockByDetail(detail){
 }
 
 function substractProductStockByDetail(detail){
-	5",detail)
-
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
 
@@ -79,7 +77,6 @@ function substractProductStockByDetail(detail){
 }
 
 function substractDeliveryStockByDetail(detail){
-
 	var whsCode = detail.shipCompanyFrom.WhsCode;
 	var ItemCode = detail.Product.ItemCode;
 
@@ -122,7 +119,6 @@ function getStoresWithProduct(ItemCode, whsCode){
 	return Delivery.find({FromCode: whsCode, Active:'Y'})
 		.then(function(deliveries){
 			var warehouses = deliveries.map(function(d){return d.ToCode});
-
 			return Company.find({WhsCode: warehouses}).populate('Stores');
 		})
 		.then(function(warehouses){
