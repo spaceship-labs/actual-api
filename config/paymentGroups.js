@@ -379,11 +379,11 @@ module.exports.paymentGroups = [
         //cards: [
         //  'American Express',
         //],
-        cardsImages: ['/cards/amexcard.png','/cards/banamex.png'],
+        cardsImages: ['/cards/amexcard.png'],
         moreCards: true,
         cards: [
           'American Express',
-          'Banamex',
+          //'Banamex',
           // 'Afirme',
           // 'Bancomer',
           // 'Banbajio',
