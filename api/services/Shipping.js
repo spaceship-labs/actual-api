@@ -6,6 +6,7 @@ const { ObjectId } = require('sails-mongo/node_modules/mongodb');
 const CEDIS_QROO_CODE = '01';
 const CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 const ISLA_MERIDA_ID = '5fa22aa1d4a59d093dfed967';
+const STUDIO_MERIDA_ID = '576acfee5280c21ef87ea5bc';
 const CEDIS_MERIDA_WHS_CODE = '10';
 const STUDIO_MERIDA_WHS_CODE = '11';
 const ISLA_MERIDA_WHS_CODE = '22';
@@ -175,7 +176,7 @@ async function buildShippingItem(
 
 function isMeridaWhsCode(whsCode) {
   return (
-    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_ID
+    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_ID || whsCode === STUDIO_MERIDA_ID
   );
 }
 
