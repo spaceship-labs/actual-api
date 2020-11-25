@@ -125,7 +125,7 @@ async function buildShippingItem(
     //in stores
     MAIN_SEASON_DAYS = 15;
     LOW_SEASON_DAYS = 15;
-    if (stockItem.whsCode === CEDIS_QROO_CODE && storeWarehouseId !== CEDIS_MERIDA_WHS_CODE) {
+    if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
       // from cedis in cancun
       MAIN_SEASON_DAYS = 15;
       LOW_SEASON_DAYS = 15;
