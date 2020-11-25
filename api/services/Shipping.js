@@ -5,6 +5,7 @@ const { ObjectId } = require('sails-mongo/node_modules/mongodb');
 
 const CEDIS_QROO_CODE = '01';
 const CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
+const ISLA_MERIDA_ID = '5fa22aa1d4a59d093dfed967';
 const CEDIS_MERIDA_WHS_CODE = '10';
 const STUDIO_MERIDA_WHS_CODE = '11';
 const ISLA_MERIDA_WHS_CODE = '22';
@@ -129,7 +130,8 @@ async function buildShippingItem(
       // from cedis in cancun
       MAIN_SEASON_DAYS = 15;
       LOW_SEASON_DAYS = 15;
-    } else if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
+    } 
+    if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
       // from cedis 01 to any merida
       MAIN_SEASON_DAYS = 12;
       LOW_SEASON_DAYS = 12;
@@ -173,7 +175,7 @@ async function buildShippingItem(
 
 function isMeridaWhsCode(whsCode) {
   return (
-    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_WHS_CODE
+    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_ID
   );
 }
 
