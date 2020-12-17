@@ -188,7 +188,7 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   ) {
     return 'PPD';
   } else if (hasClientCreditPayment(payments)) {
-    return 'PUE';
+    return 'PPD';
   }
 
   return 'PUE';
