@@ -372,7 +372,9 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       paymentMethod = 'other';
       break;
   }
-
+  if (hasClientCreditPayment(payments)) {
+    paymentMethod = 'other'
+  }
   return paymentMethod;
 }
 
