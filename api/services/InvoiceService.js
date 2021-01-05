@@ -311,7 +311,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
 
     if (directPayments.length === 0) {
       sails.log.info("Is returning here")
-      return 'transfer';
+      return 'other';
     }
 
     uniquePaymentMethod = getHighestPayment(directPayments);
