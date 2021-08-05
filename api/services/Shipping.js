@@ -125,12 +125,12 @@ async function buildShippingItem(
     LOW_SEASON_DAYS = 6;
   } else {
     //in stores
-    MAIN_SEASON_DAYS = 6;
-    LOW_SEASON_DAYS = 6;
+    MAIN_SEASON_DAYS = 5;
+    LOW_SEASON_DAYS = 5;
     if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
       // from cedis in cancun
-      MAIN_SEASON_DAYS = 6;
-      LOW_SEASON_DAYS = 6;
+      MAIN_SEASON_DAYS = 5;
+      LOW_SEASON_DAYS = 5;
     } else if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
       // from cedis 01 to any merida
       MAIN_SEASON_DAYS = 10;
