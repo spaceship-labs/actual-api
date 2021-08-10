@@ -135,7 +135,11 @@ async function buildShippingItem(
       // from cedis 01 to any merida
       MAIN_SEASON_DAYS = 10;
       LOW_SEASON_DAYS = 10;
-    } 
+    } else { 
+      // use minimum
+      MAIN_SEASON_DAYS = 5;
+      LOW_SEASON_DAYS = 5;
+    }
   }
   if (season) {
     seasonDays = MAIN_SEASON_DAYS;
