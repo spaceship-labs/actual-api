@@ -134,6 +134,10 @@ async function buildShippingItem(
       // from cedis 01 to any merida
       MAIN_SEASON_DAYS = 10;
       LOW_SEASON_DAYS = 10;
+    } else if (["02","03","05","82"].includes(stockItem.whsCode) && isMeridaWhsCode(storeWarehouseId)) {
+      // from qroo store to any merida
+      MAIN_SEASON_DAYS = 12;
+      LOW_SEASON_DAYS = 12;
     } else { 
       // use minimum
       MAIN_SEASON_DAYS = 7;
