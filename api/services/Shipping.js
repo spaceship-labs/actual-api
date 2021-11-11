@@ -140,8 +140,8 @@ async function buildShippingItem(
       LOW_SEASON_DAYS = 15;
     }  else { 
       // use minimum
-      MAIN_SEASON_DAYS = 9;
-      LOW_SEASON_DAYS = 9;
+      MAIN_SEASON_DAYS = 15;
+      LOW_SEASON_DAYS = 15;
     }
   }
 
