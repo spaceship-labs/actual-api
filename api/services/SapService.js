@@ -265,6 +265,9 @@ function buildOrderRequestParams(params) {
           detail.shipDate,
           detail.immediateDelivery
         ),
+        ShopDelivery: Shipping.isDateShopDelivery(
+          detail.ShopDelivery
+        ),
         DetailId: detail.id,
         //unitPrice: detail.Product.Price
       };

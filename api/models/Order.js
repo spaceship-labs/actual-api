@@ -2,34 +2,61 @@
 module.exports = {
   migrate:'alter',
   schema: true,
-  attributes:{
-    DocEntry:{type:'integer'},
-    folio:{type:'string'},
-    documents:{
-      type:'array'
+  attributes: {
+    DocEntry: { type: 'integer' },
+    folio: { type: 'string' },
+    documents: {
+      type: 'array',
     },
-    immediateDelivery:{type:'boolean'},
-    isSRService:{type:'boolean'},
-    ammountPaid: {type:'float'},
-    ammountPaidPg1: {type:'float'},
-    total:{type:'float'},
-    subtotal:{type:'float'},
-    discount:{type:'float'},
-    currency:{type:'string'},
-    paymentGroup:{type:'integer'},
-    appliesClientDiscount: {type:'boolean'},
-    WhsCode:{type:'string'},
-    brokerCode: {type:'string'},
-    status:{
-      type:'string',
-      enum:['paid', 'canceled']
+    immediateDelivery: {
+      type: 'boolean',
     },
-    Quotation:{
-      model:'Quotation',
-      unique:true
+    ShopDelivery: {
+      type: 'boolean',
     },
-    Client:{
-      model: 'Client'
+    isSRService: {
+      type: 'boolean',
+    },
+    ammountPaid: {
+      type: 'float',
+    },
+    ammountPaidPg1: {
+      type: 'float',
+    },
+    total: {
+      type: 'float',
+    },
+    subtotal: {
+      type: 'float',
+    },
+    discount: {
+      type: 'float',
+    },
+    currency: {
+      type: 'string',
+    },
+    paymentGroup: {
+      type: 'integer',
+    },
+    appliesClientDiscount: {
+      type: 'boolean',
+    },
+    WhsCode: {
+      type: 'string',
+    },
+    brokerCode: {
+      type: 'string',
+    },
+    status: {
+      type: 'string',
+      enum: ['paid', 'partiallyCanceled', 'canceled'],
+    },
+    Quotation: {
+      model: 'Quotation',
+      unique: true,
+    },
+    Client: {
+      model: 'Client',
     },
     Details: {
       collection:'OrderDetail',
