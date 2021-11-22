@@ -11,6 +11,9 @@ module.exports = {
     immediateDelivery: {
       type: 'boolean',
     },
+    ShopDelivery: {
+      type: 'boolean',
+    },
     isSRService: {
       type: 'boolean',
     },

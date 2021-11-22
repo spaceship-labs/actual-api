@@ -11,6 +11,7 @@ const STUDIO_MERIDA_WHS_CODE = '11';
 module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery,
+  isDateShopDelivery: isDateShopDelivery,
 };
 
 async function productShipping(product, storeWarehouse, activeQuotationId) {
@@ -137,6 +138,10 @@ async function buildShippingItem(
   if (stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery) {
     days = productDays;
   }
+  const SHOP_DELIVERY_DAYS = 2;
+  if (stockItem.ShopDelivery) {
+    days = productDays + SHOP_DELIVERY_DAYS;
+  }
 
   const todayDate = new Date();
   const date = addDays(todayDate, days);
@@ -155,6 +160,7 @@ async function buildShippingItem(
     companyFrom: stockItem.warehouseId,
     itemCode: stockItem.ItemCode,
     ImmediateDelivery: stockItem.ImmediateDelivery || false,
+    ShopDelivery: stockItem.ShopDelivery || false,
     PurchaseAfter: stockItem.PurchaseAfter,
     PurchaseDocument: stockItem.PurchaseDocument,
   };
@@ -223,6 +229,9 @@ function isDateImmediateDelivery(shipDate, immediateDeliveryFlag) {
   var currentDate = moment().format(FORMAT);
   shipDate = moment(shipDate).format(FORMAT);
   return currentDate === shipDate && immediateDeliveryFlag;
+}
+function isDateShopDelivery(shopDeliveryFlag) {
+  return shopDeliveryFlag;
 }
 
 function substractDeliveriesStockByQuotationDetails(

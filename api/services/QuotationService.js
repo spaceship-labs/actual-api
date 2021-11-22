@@ -19,6 +19,7 @@ const DEFAULT_QUOTATION_TOTALS = {
   totalProducts: 0,
   paymentGroup: 1,
   immediateDelivery: false,
+  ShopDelivery: false,
 };
 
 const statusTypes = {
@@ -204,6 +205,9 @@ function Calculator() {
       immediateDelivery: processedDetails.every(function(detail) {
         return detail.immediateDelivery && !detail.isSRService;
       }),
+      ShopDelivery: processedDetails.every(function(detail) {
+        return detail.ShopDelivery;
+      }),
       appliesClientDiscount: _.some(processedDetails, function(detail) {
         return detail.clientDiscountReference;
       }),
@@ -386,6 +390,9 @@ function Calculator() {
       immediateDelivery: Shipping.isDateImmediateDelivery(
         detail.shipDate,
         detail.immediateDelivery
+      ),
+      ShopDelivery: Shipping.isDateShopDelivery(
+        detail.ShopDelivery
       ),
       isSRService: ProductService.isSRService(product),
     };
