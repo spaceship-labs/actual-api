@@ -9,6 +9,7 @@ module.exports = {
       type:'array'
     },
     immediateDelivery:{type:'float'},
+    ShopDelivery:{type:'float'},
     ammountPaid: {type:'float'},
     ammountPaidPg1:{type:'float'},
     total:{type:'float'},
