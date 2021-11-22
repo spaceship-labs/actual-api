@@ -59,6 +59,7 @@ module.exports = {
     isClosedReason: { type: 'string' },
     isClosedNotes: { type: 'text' },
     immediateDelivery: { type: 'boolean' },
+    ShopDelivery:  { type: 'boolean' },
     clientName: { type: 'string' },
     folio: { type: 'string' },
     total: { type: 'float' },

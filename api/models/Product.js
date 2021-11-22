@@ -136,6 +136,7 @@ module.exports = {
     slowMovement: { type: 'boolean' },
     seenTimes: { type: 'integer' },
     immediateDelivery: { type: 'boolean' },
+    ShopDelivery: { type: 'boolean' },
     deliveryType: {
       type: 'string',
       enum: ['bigticket', 'softline'],
