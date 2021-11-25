@@ -28,6 +28,9 @@ module.exports = {
     ImmediateDelivery:{
       type: 'boolean'
     },
+    ShopDelivery:{
+      type: 'boolean'
+    },
     PurchaseAfter:{
       type: 'boolean'
     },
