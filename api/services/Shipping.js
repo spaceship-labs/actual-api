@@ -19,6 +19,8 @@ module.exports = {
 async function productShipping(product, storeWarehouse, activeQuotationId) {
   let shippingItems = [];
 
+  const notValidShopDelivery = ["83","10","11","22"]
+
   const deliveries = await Delivery.find({
     ToCode: storeWarehouse.WhsCode,
     Active: 'Y',
@@ -26,13 +28,23 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   const companiesCodes = deliveries.map(function (delivery) {
     return delivery.FromCode;
   });
-  const stockItemsQuery = {
+  let stockItemsQuery = {
     ItemCode: product.ItemCode,
     whsCode: companiesCodes,
     OpenCreQty: {
       '>': 0,
     },
   };
+  if(notValidShopDelivery.includes(storeWarehouse.WhsCode) ){
+    stockItemsQuery = {
+      ItemCode: product.ItemCode,
+      whsCode: companiesCodes,
+      OpenCreQty: {
+        '>': 0,
+      },
+      ShopDelivery: false
+    } 
+  }
   let stockItems = await DatesDelivery.find(stockItemsQuery);
   const pendingProductDetailSum = await getPendingProductDetailsSum(product);
   const stockItemscodes = stockItems.map(function (p) {
