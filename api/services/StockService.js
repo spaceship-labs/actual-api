@@ -88,7 +88,8 @@ function substractDeliveryStockByDetail(detail){
 		whsCode: detail.shipCompanyFrom.WhsCode,
 		ShipDate: detail.productDate,
 		ItemCode: ItemCode,
-		ImmediateDelivery: detail.immediateDelivery
+		ImmediateDelivery: detail.immediateDelivery,
+		ShopDelivery: detail.ShopDelivery
 	})
 	.then(function(dateDelivery){
 		if(detail.quantity > dateDelivery.OpenCreQty){
@@ -222,6 +223,7 @@ function findValidDelivery(detail,deliveryDates){
 				detailShipDate === deliveryDate && 
 			  detail.quantity <= delivery.available &&
 			  detail.immediateDelivery === delivery.ImmediateDelivery &&
+			  detail.ShopDelivery === delivery.ShopDelivery &&
 				detail.shipCompanyFrom === delivery.companyFrom &&
 				detail.shipCompany === delivery.company
 			){	

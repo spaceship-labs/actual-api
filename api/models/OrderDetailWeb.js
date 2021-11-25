@@ -38,6 +38,7 @@ module.exports = {
     unitPrice: 'float',
     ewallet: 'float',
     immediateDelivery: 'boolean',
+    ShopDelivery: 'boolean',
     isFreeSale: 'boolean',    
     Promotion:{
       model:'Promotion'
