@@ -482,14 +482,14 @@ function prepareItems(details, ewalletDiscount, orderTotal) {
     return {
       id: detail.id,
       name: product.ItemName,
-      price: detail.unitPrice / 1.16,
-      discount,
+      price: detail.unitPriceWithDiscount / 1.16,
+      discount:0,
       tax: [{ id: ALEGRA_IVA_ID }],
       productKey,
       quantity: detail.quantity,
       inventory: {
         unit: getUnitTypeByProduct(product),
-        unitCost: detail.unitPrice,
+        unitCost: detail.unitPriceWithDiscount,
         initialQuantity: detail.quantity,
       },
     };
