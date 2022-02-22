@@ -484,16 +484,16 @@ function prepareItems(details) {
     return {
       id: detail.id,
       name: product.ItemName,
-      price: detail.unitPrice / 1.16,
+      price: detail.unitPriceWithDiscount / 1.16,
       description: alegraDesc,
-      //discount: discount,
-      discount: parseFloat(discount.toFixed(4)),
+      discount: 0,
+      //discount: parseFloat(discount.toFixed(4)),
       tax: [{ id: ALEGRA_IVA_ID }],
       productKey,
       quantity: detail.quantity,
       inventory: {
         unit: getUnitTypeByProduct(product),
-        unitCost: detail.unitPrice,
+        unitCost: detail.unitPriceWithDiscount,
         initialQuantity: detail.quantity,
       },
     };
