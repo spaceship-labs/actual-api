@@ -43,7 +43,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
         '>': 0,
       },
       ShopDelivery: false
-    } 
+    }
   }
   let stockItems = await DatesDelivery.find(stockItemsQuery);
   const pendingProductDetailSum = await getPendingProductDetailsSum(product);
@@ -138,12 +138,12 @@ async function buildShippingItem(
     LOW_SEASON_DAYS = 8;
   } else {
     //in stores
-    MAIN_SEASON_DAYS = 6;
-    LOW_SEASON_DAYS = 6;
+    MAIN_SEASON_DAYS = 8;
+    LOW_SEASON_DAYS = 8;
     if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
       // from cedis in cancun
-      MAIN_SEASON_DAYS = 6;
-      LOW_SEASON_DAYS = 6;
+      MAIN_SEASON_DAYS = 8;
+      LOW_SEASON_DAYS = 8;
     } else if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
       // from cedis 01 to any merida
       MAIN_SEASON_DAYS = 11;
@@ -152,7 +152,7 @@ async function buildShippingItem(
       // from qroo store to any merida
       MAIN_SEASON_DAYS = 11;
       LOW_SEASON_DAYS = 11;
-    }  else { 
+    } else {
       // use minimum
       MAIN_SEASON_DAYS = 11;
       LOW_SEASON_DAYS = 11;
