@@ -311,7 +311,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
     directPayments = getDirectPayments(payments);
 
     if (directPayments.length === 0) {
-      return 'other';
+      return uniquePaymentMethod.type;
     }
     uniquePaymentMethod = getHighestPayment(directPayments);
 
