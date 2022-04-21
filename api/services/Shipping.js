@@ -171,7 +171,7 @@ async function buildShippingItem(
   if (stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery) {
     days = productDays;
   }
-  const SHOP_DELIVERY_DAYS = 2;
+  const SHOP_DELIVERY_DAYS = 4;
   if (stockItem.ShopDelivery) {
     days = productDays + SHOP_DELIVERY_DAYS;
   }
