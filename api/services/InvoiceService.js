@@ -182,7 +182,7 @@ function hasClientCreditPayment(payments) {
 
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   if (hasClientBalancePayment(payments) && !hasClientCreditPayment(payments)) {
-    return 'PUE';
+    return 'PPD';
   } else if (
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
@@ -192,7 +192,7 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
     return 'PPD';
   }
 
-  return 'PUE';
+  return 'PPD';
 }
 
 function createInvoice(data) {
