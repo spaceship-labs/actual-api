@@ -162,7 +162,7 @@ function prepareInvoice(order, payments, client, items) {
   };
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
-  if(data.paymentType == "PUE"){
+  if(data.paymentType == "PPD"){
     data.paymentMethod = "other";
   }
   return createInvoice(data);
