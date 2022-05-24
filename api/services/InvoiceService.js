@@ -188,9 +188,9 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
-    return 'PPD';
+    return 'PUE';
   } else if (hasClientCreditPayment(payments)) {
-    return 'PPD';
+    return 'PUE';
   }
 
   return 'PUE';
