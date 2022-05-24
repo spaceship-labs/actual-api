@@ -162,7 +162,7 @@ function prepareInvoice(order, payments, client, items) {
   };
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
-  if(data.paymentType == "PPD"){
+  if(data.paymentType == "PUE"){
     data.paymentMethod = "other";
   }
   return createInvoice(data);
@@ -182,17 +182,17 @@ function hasClientCreditPayment(payments) {
 
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   if (hasClientBalancePayment(payments) && !hasClientCreditPayment(payments)) {
-    return 'PPD';
+    return 'PUE';
   } else if (
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
-    return 'PPD';
+    return 'PUE';
   } else if (hasClientCreditPayment(payments)) {
-    return 'PPD';
+    return 'PUE';
   }
 
-  return 'PPD';
+  return 'PUE';
 }
 
 function createInvoice(data) {
