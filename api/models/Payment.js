@@ -15,6 +15,7 @@ module.exports = {
         'client-credit',
         'debit-card',
         'credit-card',
+        'credit-card-usd',
         'single-payment-terminal',
         'client-balance',
         '3-msi',
