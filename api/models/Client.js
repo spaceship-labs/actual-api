@@ -82,6 +82,9 @@ module.exports = {
     isMoral: {
       type: 'boolean',
     },
+    regime: {
+      type: 'string'
+    },
 
     /*----------/
       RELATIONS
