@@ -133,7 +133,7 @@ module.exports.paymentGroups = [
         terminals: [
           { label: 'Banamex', value: 'banamex' },
         ],
-        currency: 'mxn',
+        currency: 'usd',
         needsVerification: true,
         min: 0,
         group: 1,
