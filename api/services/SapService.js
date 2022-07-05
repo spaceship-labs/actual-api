@@ -91,7 +91,7 @@ const formatCancelParams = async (id, action) => {
   const productsIds = detailsBeforeFormat.map(({ productId }) => productId);
   const products = await Product.find({ id: productsIds });
   //const whsCodes = companies.map(({ WhsCode }) => WhsCode);
-  const warehouses = await getAllWarehouses(); 
+  const warehouses = await getAllWarehouses();
   const itemCodes = products.map(({ id,ItemCode }) => ({id, ItemCode}));
   const formatedParams = detailsBeforeFormat.map(
     ({ id, quantity, shipDate, companyId, productId }) => ({
@@ -137,14 +137,14 @@ const cancelOrder = async (orderId, action, cancelOrderId) => {
   if (value.length === 0) {
     console.log('Sap no regreso respuesta');
     throw new Error('SAP no regreso respuesta');
-  } 
+  }
   const everyDocumentIsCorrect = value.every(checkIfIsValidSapDocument);
   if(!everyDocumentIsCorrect){
     console.log('Error detected ', collectSapErrors(value));
     sails.log('Error detected ', collectSapErrors(value));
     throw new Error(collectSapErrors(value) || true);
   }
-  
+
   //if (value[0].type === 'NotFound' || value[0].type==="Error") {
   //  console.log("Error detected",value[0].result);
   //  sails.log('Error detected ', value[0].result);

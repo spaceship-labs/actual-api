@@ -12,6 +12,7 @@ const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
 const DEFAULT_CFDI_USE = 'P01';
+const DEFAULT_REGIME_USE = 'SIMPLIFIED_REGIME';
 const BigNumber = require('bignumber.js');
 
 module.exports = {
@@ -139,6 +140,7 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     cfdiUse: client.cfdiUse,
+    regime: client.regime,
     paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
     anotation: order.folio,
     stamp: {
@@ -174,7 +176,6 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
 function createInvoice(data) {
   var orderObject = _.clone(data.orderObject);
   delete data.orderObject;
-
   var options = {
     method: 'POST',
     uri: 'https://app.alegra.com/api/v1/invoices',
@@ -376,6 +377,7 @@ function prepareClientParams(order, client, address) {
       identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
+      regime: client.regime || DEFAULT_REGIME_USE,
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -393,6 +395,7 @@ function prepareClientParams(order, client, address) {
       name: order.CardName,
       identification: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
+      regime: DEFAULT_REGIME_USE,
       //email: order.E_Mail,
       address: {
         country: 'México',
