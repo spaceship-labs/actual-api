@@ -140,7 +140,8 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     cfdiUse: client.cfdiUse,
-    regimeClient: client.regime,
+    regime: client.regime,
+    regimeObject: [client.regime],
     paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
     anotation: order.folio,
     stamp: {
@@ -377,7 +378,8 @@ function prepareClientParams(order, client, address) {
       identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
-      regimeClient: client.regime || DEFAULT_REGIME_USE,
+      regime: client.regime || DEFAULT_REGIME_USE,
+      regimeObject: [client.regime] || [DEFAULT_REGIME_USE],
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -395,7 +397,8 @@ function prepareClientParams(order, client, address) {
       name: order.CardName,
       identification: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
-      regimeClient: DEFAULT_REGIME_USE,
+      regime: DEFAULT_REGIME_USE,
+      regimeObject: [DEFAULT_REGIME_USE],
       //email: order.E_Mail,
       address: {
         country: 'México',
