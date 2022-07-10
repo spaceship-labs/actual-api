@@ -136,6 +136,13 @@ async function addPayment(params, req) {
       params.card = 'american-express';
     }
   }
+  try {
+    if (typeof params.terminal == 'object') {
+      params.terminal = params.terminal.value
+    }
+  } catch (err) {
+    console.log('terminalchange', params)
+  }
 
   const storeCode = req.user.activeStore.code;
 
