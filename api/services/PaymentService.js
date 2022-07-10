@@ -136,7 +136,13 @@ async function addPayment(params, req) {
     }
     //throw new Error('Es necesario asignar una terminal a este tipo de pago');
   }
-
+  try {
+    if (typeof params.terminal == 'object') {
+      params.terminal = params.terminal.value
+    }
+  } catch (err) {
+    console.log('terminalchange', params)
+  }
   const storeCode = req.user.activeStore.code;
 
   params.Quotation = quotationId;
@@ -546,7 +552,7 @@ async function getPaymentGroupsForEmail(quotationId, activeStore) {
     name: '1 pago de contado',
     cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
     total: numeral(paymentGroups[0].total).format('0,0.00'),
-  }, ];
+  },];
   paymentGroups = paymentGroups.slice(1);
 
   const methodsForEmail = paymentGroups.reduce(function (acum, current) {
@@ -659,13 +665,13 @@ const SINGLE_PAYMENT_TERMINAL_METHOD = {
   ],
   cards: ['Visa', 'MasterCard', 'American Express'],
   terminals: [{
-      label: 'American Express',
-      value: 'american-express'
-    },
-    {
-      label: 'Banamex',
-      value: 'banamex'
-    },
+    label: 'American Express',
+    value: 'american-express'
+  },
+  {
+    label: 'Banamex',
+    value: 'banamex'
+  },
   ],
   currency: 'mxn',
   needsVerification: true,
@@ -680,21 +686,21 @@ const DEPOSIT_METHOD = {
   description: 'Sujeto a verificación contable',
   currency: 'mxn',
   terminals: [{
-      label: 'Banamex',
-      value: 'banamex'
-    },
-    {
-      label: 'Bancomer',
-      value: 'bancomer'
-    },
-    {
-      label: 'Banorte',
-      value: 'banorte'
-    },
-    {
-      label: 'Santander',
-      value: 'santander'
-    },
+    label: 'Banamex',
+    value: 'banamex'
+  },
+  {
+    label: 'Bancomer',
+    value: 'bancomer'
+  },
+  {
+    label: 'Banorte',
+    value: 'banorte'
+  },
+  {
+    label: 'Santander',
+    value: 'santander'
+  },
   ],
   needsVerification: false,
   group: 1,
