@@ -25,6 +25,7 @@ module.exports = {
     ewallet: 'float',
     immediateDelivery: 'boolean',
     ShopDelivery: 'boolean',
+    weekenddate: 'boolean',
     isSRService: 'boolean',
     isFreeSale: 'boolean',
     status: {

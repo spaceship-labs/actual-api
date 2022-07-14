@@ -10,6 +10,7 @@ module.exports = {
     },
     immediateDelivery:{type:'float'},
     ShopDelivery:{type:'float'},
+    weekenddate:{type:'float'},
     ammountPaid: {type:'float'},
     ammountPaidPg1:{type:'float'},
     total:{type:'float'},
@@ -44,7 +45,7 @@ module.exports = {
         'on-delivery',
         'minimum-paid',
         'paid',
-        'pending-sap', 
+        'pending-sap',
         'pending-payment',
         'completed',
         'canceled'
