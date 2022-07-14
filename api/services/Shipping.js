@@ -15,6 +15,7 @@ module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery,
   isDateShopDelivery: isDateShopDelivery,
+  isDateWeekend: isDateWeekend,
 };
 
 async function productShipping(product, storeWarehouse, activeQuotationId) {
@@ -198,6 +199,7 @@ async function buildShippingItem(
     itemCode: stockItem.ItemCode,
     ImmediateDelivery: stockItem.ImmediateDelivery || false,
     ShopDelivery: stockItem.ShopDelivery || false,
+    weekenddate: stockItem.weekenddate || false,
     PurchaseAfter: stockItem.PurchaseAfter,
     PurchaseDocument: stockItem.PurchaseDocument,
   };
@@ -269,6 +271,9 @@ function isDateImmediateDelivery(shipDate, immediateDeliveryFlag) {
 }
 function isDateShopDelivery(shopDeliveryFlag) {
   return shopDeliveryFlag;
+}
+function isDateWeekend(weekendFlag) {
+  return weekendFlag;
 }
 
 function substractDeliveriesStockByQuotationDetails(

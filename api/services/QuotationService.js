@@ -210,6 +210,9 @@ function Calculator() {
       ShopDelivery: processedDetails.every(function(detail) {
         return detail.ShopDelivery;
       }),
+      weekenddate: processedDetails.every(function(detail) {
+        return detail.weekenddate;
+      }),
       appliesClientDiscount: _.some(processedDetails, function(detail) {
         return detail.clientDiscountReference;
       }),
@@ -387,6 +390,9 @@ function Calculator() {
       ),
       ShopDelivery: Shipping.isDateShopDelivery(
         detail.ShopDelivery
+      ),
+      weekenddate: Shipping.isDateWeekend(
+        detail.weekenddate
       ),
       isSRService: ProductService.isSRService(product),
     };
