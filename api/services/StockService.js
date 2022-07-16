@@ -225,7 +225,7 @@ function findValidDelivery(detail,deliveryDates){
 			  detail.quantity <= delivery.available &&
 			  detail.immediateDelivery === delivery.ImmediateDelivery &&
 			  detail.ShopDelivery === delivery.ShopDelivery &&
-			  detail.weekenddate === delivery.weekenddate &&
+			  detail.WeekendDelivery === delivery.WeekendDelivery &&
 				detail.shipCompanyFrom === delivery.companyFrom &&
 				detail.shipCompany === delivery.company
 			){

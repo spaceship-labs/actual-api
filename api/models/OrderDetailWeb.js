@@ -39,7 +39,7 @@ module.exports = {
     ewallet: 'float',
     immediateDelivery: 'boolean',
     ShopDelivery: 'boolean',
-    weekenddate: 'boolean',
+    WeekendDelivery: 'boolean',
     isFreeSale: 'boolean',
     Promotion:{
       model:'Promotion'

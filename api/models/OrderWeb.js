@@ -10,7 +10,7 @@ module.exports = {
     },
     immediateDelivery:{type:'float'},
     ShopDelivery:{type:'float'},
-    weekenddate:{type:'float'},
+    WeekendDelivery:{type:'float'},
     ammountPaid: {type:'float'},
     ammountPaidPg1:{type:'float'},
     total:{type:'float'},
