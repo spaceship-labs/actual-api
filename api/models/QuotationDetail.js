@@ -28,6 +28,7 @@ module.exports = {
     weekenddate: 'boolean',
     isSRService: 'boolean',
     isFreeSale: 'boolean',
+    force: 'boolean',
     Promotion:{
       model:'Promotion'
     },
