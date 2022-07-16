@@ -143,7 +143,14 @@ async function buildShippingItem(
   if (stockItem.ShopDelivery) {
     days = productDays + SHOP_DELIVERY_DAYS;
   }
-
+  let WEEKEND_DELIVERY_DAYS = 3;
+  if (stockItem.WeekendDelivery) {
+    var currentDate = moment().startOf('date');
+    if (currentDate.day() >= 0 && currentDate.day() <= 4 || currentDate.day() === 7){
+      WEEKEND_DELIVERY_DAYS = 2;
+    }
+    days = productDays + WEEKEND_DELIVERY_DAYS;
+  }
   const todayDate = new Date();
   const date = addDays(todayDate, days);
   let available = stockItem.OpenCreQty;
