@@ -158,7 +158,7 @@ function validateQuotationStockById(quotationId, activeStore){
 
 function isValidStock(detailsStock){
   for(var i=0;i<detailsStock.length; i++){
-    if(!detailsStock[i].validStock){
+    if(!detailsStock[i].validStock && !detailsStock[i].force){
       return false;
     }
   }

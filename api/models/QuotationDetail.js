@@ -27,6 +27,7 @@ module.exports = {
     ShopDelivery: 'boolean',
     isSRService: 'boolean',
     isFreeSale: 'boolean',
+    force: 'boolean',
     Promotion:{
       model:'Promotion'
     },
