@@ -14,7 +14,7 @@ module.exports = {
     ShopDelivery: {
       type: 'boolean',
     },
-    weekenddate:{
+    WeekendDelivery:{
       type: 'boolean'
     },
     isSRService: {

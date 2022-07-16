@@ -162,7 +162,7 @@ async function buildShippingItem(
     itemCode: stockItem.ItemCode,
     ImmediateDelivery: stockItem.ImmediateDelivery || false,
     ShopDelivery: stockItem.ShopDelivery || false,
-    weekenddate: stockItem.weekenddate || false,
+    WeekendDelivery: stockItem.WeekendDelivery || false,
     PurchaseAfter: stockItem.PurchaseAfter,
     PurchaseDocument: stockItem.PurchaseDocument,
   };

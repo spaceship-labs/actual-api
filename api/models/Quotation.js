@@ -60,7 +60,7 @@ module.exports = {
     isClosedNotes: { type: 'text' },
     immediateDelivery: { type: 'boolean' },
     ShopDelivery:  { type: 'boolean' },
-    weekenddate:  { type: 'boolean' },
+    WeekendDelivery:  { type: 'boolean' },
     clientName: { type: 'string' },
     folio: { type: 'string' },
     total: { type: 'float' },
