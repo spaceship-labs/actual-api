@@ -137,7 +137,7 @@ module.exports = {
     seenTimes: { type: 'integer' },
     immediateDelivery: { type: 'boolean' },
     ShopDelivery: { type: 'boolean' },
-    weekenddate: { type: 'boolean' },
+    WeekendDelivery: { type: 'boolean' },
     deliveryType: {
       type: 'string',
       enum: ['bigticket', 'softline'],
