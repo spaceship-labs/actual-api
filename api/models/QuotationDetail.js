@@ -25,6 +25,7 @@ module.exports = {
     ewallet: 'float',
     immediateDelivery: 'boolean',
     ShopDelivery: 'boolean',
+    WeekendDelivery: 'boolean',
     isSRService: 'boolean',
     isFreeSale: 'boolean',
     force: 'boolean',
@@ -45,7 +46,7 @@ module.exports = {
     originalShipDate: {
       type: 'date',
       required: true
-    },       
+    },
     productDate: {
       type: 'date',
       required: true
@@ -58,7 +59,7 @@ module.exports = {
       model:'company',
       required: true
     },
-    
+
     PurchaseAfter: {type:'boolean'},
     PurchaseDocument: {type:'string'},
 

@@ -31,6 +31,9 @@ module.exports = {
     ShopDelivery:{
       type: 'boolean'
     },
+    WeekendDelivery:{
+      type: 'boolean'
+    },
     PurchaseAfter:{
       type: 'boolean'
     },

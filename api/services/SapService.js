@@ -534,6 +534,9 @@ function buildOrderRequestParams(params) {
         ShopDelivery: Shipping.isDateShopDelivery(
           detail.ShopDelivery
         ),
+        WeekendDelivery: Shipping.isDateWeekend(
+          detail.WeekendDelivery
+        ),
         DetailId: detail.id,
         //unitPrice: detail.Product.Price
       };

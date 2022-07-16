@@ -22,24 +22,25 @@ module.exports = {
     discountPg5: 'float',
 
     isSpeiOrderDetail: 'boolean',
-    speiExpirationPayment: {type:'datetime'},    
+    speiExpirationPayment: {type:'datetime'},
 
     financingCostPercentage: 'float',
-    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)    
+    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
     discountPercent: 'float', //by unit (includes big ticket discount)
-    discountName: 'string',    
-    originalDiscountPercent: 'float',   
+    discountName: 'string',
+    originalDiscountPercent: 'float',
     unitPriceWithDiscount: 'float',
     bigticketDiscountPercentage: {
       type: 'integer',
       enum:[0,1,2,3,4,5]
-    },    
+    },
     paymentGroup: 'integer',
     unitPrice: 'float',
     ewallet: 'float',
     immediateDelivery: 'boolean',
     ShopDelivery: 'boolean',
-    isFreeSale: 'boolean',    
+    WeekendDelivery: 'boolean',
+    isFreeSale: 'boolean',
     Promotion:{
       model:'Promotion'
     },
@@ -61,7 +62,7 @@ module.exports = {
     originalShipDate: {
       type: 'date',
       required: true
-    },    
+    },
     productDate: {
       type: 'date',
       required: true
@@ -75,7 +76,7 @@ module.exports = {
       required: true
     },
     PurchaseAfter: {type:'boolean'},
-    PurchaseDocument: {type:'string'}    
+    PurchaseDocument: {type:'string'}
 
   },
 
