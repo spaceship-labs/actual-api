@@ -143,8 +143,8 @@ async function buildShippingItem(
     }
   } else {
     //in stores
-    MAIN_SEASON_DAYS = 5;
-    LOW_SEASON_DAYS = 5;
+    MAIN_SEASON_DAYS = 3;
+    LOW_SEASON_DAYS = 3;
     if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
       // from cedis in cancun
       MAIN_SEASON_DAYS = 5;
@@ -184,7 +184,7 @@ async function buildShippingItem(
   if (stockItem.WeekendDelivery) {
     var currentDate = moment().startOf('date');
     if (currentDate.day() >= 0 && currentDate.day() <= 4){
-      WEEKEND_DELIVERY_DAYS = 2;
+      WEEKEND_DELIVERY_DAYS = 3;
     }
     days = productDays + WEEKEND_DELIVERY_DAYS;
   }
