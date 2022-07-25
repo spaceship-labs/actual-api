@@ -14,6 +14,9 @@ module.exports = {
     ShopDelivery: {
       type: 'boolean',
     },
+    WeekendDelivery:{
+      type: 'boolean'
+    },
     isSRService: {
       type: 'boolean',
     },

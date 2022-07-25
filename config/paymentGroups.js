@@ -121,6 +121,23 @@ module.exports.paymentGroups = [
         min: 0,
         group: 1,
       },
+      {
+        label: 'Liga Banorte USD',
+        name: 'Liga Banorte USD',
+        type: 'credit-card-usd',
+        cardsImages: [
+          '/cards/visa.png',
+          '/cards/mastercard.png',
+        ],
+        cards: ['Visa', 'MasterCard'],
+        terminals: [
+          { label: 'Banamex', value: 'banamex' },
+        ],
+        currency: 'usd',
+        needsVerification: true,
+        min: 0,
+        group: 1,
+      },
     ],
   },
   {

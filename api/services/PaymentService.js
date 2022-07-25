@@ -13,6 +13,7 @@ const DEFAULT_EXCHANGE_RATE = 18.78;
 const CURRENCY_USD = 'usd';
 const types = {
   CREDIT_CARD: 'credit-card',
+  CREDIT_CARD_USD_TYPE: 'credit-card-usd',
   DEBIT_CARD: 'debit-card',
   SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal',
   CLIENT_CREDIT: 'client-credit',
@@ -99,7 +100,8 @@ function isCardPayment(payment) {
     payment.type === types.SINGLE_PAYMENT_TERMINAL ||
     payment.type === types.CREDIT_CARD ||
     payment.type === types.DEBIT_CARD ||
-    payment.msi
+    payment.msi ||
+    payment.type === types.CREDIT_CARD_USD_TYPE
   );
 }
 
@@ -133,6 +135,13 @@ async function addPayment(params, req) {
     if (params.terminal === 'american-express' && !params.card) {
       params.card = 'american-express';
     }
+  }
+  try {
+    if (typeof params.terminal == 'object') {
+      params.terminal = params.terminal.value
+    }
+  } catch (err) {
+    console.log('terminalchange', params)
   }
 
   const storeCode = req.user.activeStore.code;
