@@ -11,7 +11,6 @@ const RFCPUBLIC = 'XAXX010101000';
 const DEFAULT_CFDI_USE = 'P01';
 const DEFAULT_REGIME_USE = 'SIMPLIFIED_REGIME';
 const DEFAULT_ZIPCODE = '77507'
-const BigNumber = require('bignumber.js');
 
 module.exports = {
   createOrderInvoice,
