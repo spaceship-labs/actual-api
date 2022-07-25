@@ -90,7 +90,7 @@ function substractDeliveryStockByDetail(detail){
 		ItemCode: ItemCode,
 		ImmediateDelivery: detail.immediateDelivery,
 		ShopDelivery: detail.ShopDelivery,
-		weekend: detail.weekend,
+		WeekendDelivery: detail.weekend,
 	})
 	.then(function(dateDelivery){
 		if(detail.quantity > dateDelivery.OpenCreQty){
