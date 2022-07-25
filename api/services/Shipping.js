@@ -15,6 +15,7 @@ module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery,
   isDateShopDelivery: isDateShopDelivery,
+  isDateWeekend: isDateWeekend,
 };
 
 async function productShipping(product, storeWarehouse, activeQuotationId) {
@@ -179,7 +180,14 @@ async function buildShippingItem(
   if (stockItem.ShopDelivery) {
     days = productDays + SHOP_DELIVERY_DAYS;
   }
-
+  let WEEKEND_DELIVERY_DAYS = 3;
+  if (stockItem.WeekendDelivery) {
+    var currentDate = moment().startOf('date');
+    if (currentDate.day() >= 0 && currentDate.day() <= 4){
+      WEEKEND_DELIVERY_DAYS = 2;
+    }
+    days = productDays + WEEKEND_DELIVERY_DAYS;
+  }
   const todayDate = new Date();
   const date = addDays(todayDate, days);
   let available = stockItem.OpenCreQty;
@@ -198,6 +206,7 @@ async function buildShippingItem(
     itemCode: stockItem.ItemCode,
     ImmediateDelivery: stockItem.ImmediateDelivery || false,
     ShopDelivery: stockItem.ShopDelivery || false,
+    WeekendDelivery: stockItem.WeekendDelivery || false,
     PurchaseAfter: stockItem.PurchaseAfter,
     PurchaseDocument: stockItem.PurchaseDocument,
   };
@@ -269,6 +278,9 @@ function isDateImmediateDelivery(shipDate, immediateDeliveryFlag) {
 }
 function isDateShopDelivery(shopDeliveryFlag) {
   return shopDeliveryFlag;
+}
+function isDateWeekend(weekendFlag) {
+  return weekendFlag;
 }
 
 function substractDeliveriesStockByQuotationDetails(

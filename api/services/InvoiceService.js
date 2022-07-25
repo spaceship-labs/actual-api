@@ -9,6 +9,9 @@ const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
 const DEFAULT_CFDI_USE = 'P01';
+const DEFAULT_REGIME_USE = 'SIMPLIFIED_REGIME';
+const DEFAULT_ZIPCODE = '77507'
+const BigNumber = require('bignumber.js');
 
 module.exports = {
   createOrderInvoice,
@@ -433,6 +436,7 @@ function prepareClientParams(order, client, address) {
       address: {
         country: 'MEX',
         state: order.U_Estado || 'Quintana Roo',
+        zipCode: DEFAULT_ZIPCODE,
         //TODO; Check default Inovice data for GENERAL PUBLIC
       },
     };
