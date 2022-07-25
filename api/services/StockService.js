@@ -3,7 +3,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
-//.startOf('day').format('DD-MM-YYYY');		
+//.startOf('day').format('DD-MM-YYYY');
 
 module.exports = {
 	getDetailsStock: getDetailsStock,
@@ -89,7 +89,8 @@ function substractDeliveryStockByDetail(detail){
 		ShipDate: detail.productDate,
 		ItemCode: ItemCode,
 		ImmediateDelivery: detail.immediateDelivery,
-		ShopDelivery: detail.ShopDelivery
+		ShopDelivery: detail.ShopDelivery,
+		WeekendDelivery: detail.WeekendDelivery,
 	})
 	.then(function(dateDelivery){
 		if(detail.quantity > dateDelivery.OpenCreQty){
@@ -147,18 +148,18 @@ function validateQuotationStockById(quotationId, activeStore){
 	    ];
 	  })
 	  .spread(function(warehouse,details){
-	    return getDetailsStock(details, warehouse);    
+	    return getDetailsStock(details, warehouse);
 	  })
 	  .then(function(detailsStock){
 	  	//console.log('detailsStock', detailsStock);
 	  	//console.log('isValidStock', isValidStock(detailsStock));
 	  	return isValidStock(detailsStock);
-	  });  
+	  });
 }
 
 function isValidStock(detailsStock){
   for(var i=0;i<detailsStock.length; i++){
-    if(!detailsStock[i].validStock){
+    if(!detailsStock[i].validStock && !detailsStock[i].force){
       return false;
     }
   }
@@ -174,7 +175,7 @@ function getDetailsStock(details, warehouse){
 	products = _.uniq(products, function(product){
 		return product.ItemCode;
 	});
-	
+
 	for(var i=0;i<products.length; i++){
 		promises.push( Shipping.product(products[i], warehouse) );
 	}
@@ -183,7 +184,7 @@ function getDetailsStock(details, warehouse){
 			var deliveryDates = results.reduce(function(arr, group){
 				arr = arr.concat(group);
 				return arr;
-			}, []);	
+			}, []);
 			var finalDetails = mapDetailsWithDeliveryDates(details, deliveryDates);
 			return finalDetails;
 		});
@@ -196,7 +197,7 @@ function mapDetailsWithDeliveryDates(details, deliveryDates){
 		if(detailDelivery && (details[i].Product.Active === 'Y' || details[i].isFreeSale ) ){
 			details[i].validStock = true;
 		}else{
-			details[i].validStock = false;			
+			details[i].validStock = false;
 		}
 	}
 
@@ -218,15 +219,16 @@ function findValidDelivery(detail,deliveryDates){
 		var isValidDelivery;
 
 
-		if( 
+		if(
 				detail.Product.ItemCode === delivery.itemCode &&
-				detailShipDate === deliveryDate && 
+				detailShipDate === deliveryDate &&
 			  detail.quantity <= delivery.available &&
 			  detail.immediateDelivery === delivery.ImmediateDelivery &&
 			  detail.ShopDelivery === delivery.ShopDelivery &&
+			  detail.WeekendDelivery === delivery.WeekendDelivery &&
 				detail.shipCompanyFrom === delivery.companyFrom &&
 				detail.shipCompany === delivery.company
-			){	
+			){
 			isValidDelivery = true;
 		}else{
 			isValidDelivery = false;
