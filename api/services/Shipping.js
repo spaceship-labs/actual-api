@@ -43,7 +43,8 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
       OpenCreQty: {
         '>': 0,
       },
-      ShopDelivery: false
+      ShopDelivery: false,
+      WeekendDelivery: false,
     }
   }
   let stockItems = await DatesDelivery.find(stockItemsQuery);
