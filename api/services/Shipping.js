@@ -185,7 +185,7 @@ async function buildShippingItem(
   if (stockItem.WeekendDelivery) {
     var currentDate = moment().startOf('date');
     if (currentDate.day() >= 0 && currentDate.day() <= 4){
-      WEEKEND_DELIVERY_DAYS = 3;
+      WEEKEND_DELIVERY_DAYS += 1;
     }
     days = productDays + WEEKEND_DELIVERY_DAYS;
   }
