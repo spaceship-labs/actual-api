@@ -167,11 +167,6 @@ function prepareInvoice(order, payments, client, items) {
   if(data.paymentType == "PPD"){
     data.paymentMethod = "other";
   }
-
-  if (data.paymentMethod == "other" && data.paymentType == "PUE"){
-    data.paymentType = "PPD"
-  }
-
   return createInvoice(data);
 }
 
