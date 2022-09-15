@@ -144,12 +144,12 @@ async function buildShippingItem(
     }
   } else {
     //in stores
-    MAIN_SEASON_DAYS = 3;
-    LOW_SEASON_DAYS = 3;
+    MAIN_SEASON_DAYS = 11;
+    LOW_SEASON_DAYS = 11;
     if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
       // from cedis in cancun
-      MAIN_SEASON_DAYS = 5;
-      LOW_SEASON_DAYS = 5;
+      MAIN_SEASON_DAYS = 11;
+      LOW_SEASON_DAYS = 11;
     } else if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
       // from cedis 01 to any merida
       MAIN_SEASON_DAYS = 11;
@@ -160,8 +160,8 @@ async function buildShippingItem(
       LOW_SEASON_DAYS = 11;
     }  else {
       // use minimum
-      MAIN_SEASON_DAYS = 3;
-      LOW_SEASON_DAYS = 3;
+      MAIN_SEASON_DAYS = 4;
+      LOW_SEASON_DAYS = 4;
     }
   }
   if (season) {
@@ -181,7 +181,7 @@ async function buildShippingItem(
   if (stockItem.ShopDelivery) {
     days = productDays + SHOP_DELIVERY_DAYS;
   }
-  let WEEKEND_DELIVERY_DAYS = 4;
+  let WEEKEND_DELIVERY_DAYS = 5;
   if (stockItem.WeekendDelivery) {
     var currentDate = moment().startOf('date');
     if (currentDate.day() >= 0 && currentDate.day() <= 4){
