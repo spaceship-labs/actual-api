@@ -135,8 +135,8 @@ async function buildShippingItem(
 
   if (isMeridaWhsCode(stockItem.whsCode)) {
     // in Merida stores
-    MAIN_SEASON_DAYS = 7;
-    LOW_SEASON_DAYS = 7;
+    MAIN_SEASON_DAYS = 11;
+    LOW_SEASON_DAYS = 11;
     if(stockItem.whsCode === CEDIS_MERIDA_WHS_CODE){
       MAIN_SEASON_DAYS = 4;
       LOW_SEASON_DAYS = 4;
