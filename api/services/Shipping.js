@@ -136,8 +136,8 @@ async function buildShippingItem(
 
   if (isMeridaWhsCode(stockItem.whsCode)) {
     // in Merida stores
-    MAIN_SEASON_DAYS = 11;
-    LOW_SEASON_DAYS = 11;
+    MAIN_SEASON_DAYS = 8;
+    LOW_SEASON_DAYS = 8;
     if(stockItem.whsCode === CEDIS_MERIDA_WHS_CODE){
       MAIN_SEASON_DAYS = 4;
       LOW_SEASON_DAYS = 4;
@@ -156,8 +156,8 @@ async function buildShippingItem(
       LOW_SEASON_DAYS = 11;
     } else if (["02","03","05","82"].includes(stockItem.whsCode) && isMeridaWhsCode(storeWarehouseId)) {
       // from qroo store to any merida
-      MAIN_SEASON_DAYS = 11;
-      LOW_SEASON_DAYS = 11;
+      MAIN_SEASON_DAYS = 13;
+      LOW_SEASON_DAYS = 13;
     }  else {
       // use minimum
       MAIN_SEASON_DAYS = 4;
