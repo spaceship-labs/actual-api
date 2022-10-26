@@ -128,6 +128,7 @@ async function buildShippingItem(
   const productDate = new Date(stockItem.ShipDate);
   const productDays = daysDiff(new Date(), productDate);
   const seasonQuery = getQueryDateRange({}, productDate);
+  const qrooStores = ["02","03","05","82","01"]
 
   const season = await Season.findOne(seasonQuery);
   let LOW_SEASON_DAYS; //Original: 7, then 8
@@ -182,7 +183,7 @@ async function buildShippingItem(
     days = productDays + SHOP_DELIVERY_DAYS;
   }
   let WEEKEND_DELIVERY_DAYS = 5;
-  if (stockItem.WeekendDelivery) {
+  if (stockItem.WeekendDelivery || (qrooStores.includes(stockItem.whsCode) && qrooStores.includes(delivery.ToCode))) {
     var currentDate = moment().startOf('date');
     if (currentDate.day() >= 0 && currentDate.day() <= 4){
       WEEKEND_DELIVERY_DAYS -=1;
