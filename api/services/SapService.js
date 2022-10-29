@@ -475,6 +475,7 @@ function buildOrderRequestParams(params) {
   var MARKETPLACES_GROUPCODE = 11;
   var MERCADOLIBRE_MARKETPLACE_GROUPCODE = 12;
   var AMAZON_MARKETPLACE_GROUPCODE = 13;
+  var ACTUAL_ATELIER_GROUPCODE = 10;
 
   if (
     params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
@@ -486,6 +487,7 @@ function buildOrderRequestParams(params) {
     params.groupCode != ACTUAL_STUDIO_MERIDA_GROUPCODE &&
     params.groupCode != MARKETPLACES_GROUPCODE &&
     params.groupCode != MERCADOLIBRE_MARKETPLACE_GROUPCODE &&
+    params.groupCode != ACTUAL_ATELIER_GROUPCODE &&
     params.groupCode != AMAZON_MARKETPLACE_GROUPCODE &&
     process.env.MODE === 'production'
   ) {

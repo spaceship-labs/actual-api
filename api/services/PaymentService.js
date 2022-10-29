@@ -46,6 +46,7 @@ const VALID_STORES_CODES = [
   'actual_puerto_cancun',
   'actual_proyect',
   'actual_marketplace', //FOR MARKET_PLACES
+  'actual_atelier',
 ];
 
 module.exports = {
