@@ -4,7 +4,7 @@ module.exports = {
 
 function transfers(group, storeCode) {
   var studio = [
-    {
+    /* {
       currency: 'Pesos',
       bank: 'Banamex',
       sucursal: '7004',
@@ -43,10 +43,26 @@ function transfers(group, storeCode) {
       account: '3416508',
       clabe: '002691000134165082',
       swift: 'BNMXMXMM',
+    }, */
+    {
+      currency: 'Pesos',
+      bank: 'Bancomer',
+      sucursal: '-',
+      account: '0194554957',
+      clabe: '012691001945549572',
+      swift: 'BCMRMXMMPYM',
+    },
+    {
+      currency: 'Dólares',
+      bank: 'Bancomer',
+      sucursal: '1807',
+      account: '0117102917',
+      clabe: '012691001171029170',
+      swift: 'BCMRMXMMPYM',
     },
   ];
   var noStudio = [
-    {
+    /* {
       currency: 'Pesos',
       bank: 'Banamex',
       sucursal: '7010',
@@ -85,6 +101,22 @@ function transfers(group, storeCode) {
       account: '9089130',
       clabe: '002691700290891309',
       swift: 'BNMXMXMM',
+    }, */
+    {
+      currency: 'Pesos',
+      bank: 'Bancomer',
+      sucursal: '-',
+      account: '0105822122',
+      clabe: '012691001058221224',
+      swift: 'BCMRMXMMPYM',
+    },
+    {
+      currency: 'Dólares',
+      bank: 'Bancomer',
+      sucursal: '1807',
+      account: '0117102917',
+      clabe: '012691001171029170',
+      swift: 'BCMRMXMMPYM',
     },
   ];
 
