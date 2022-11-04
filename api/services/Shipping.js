@@ -183,7 +183,7 @@ async function buildShippingItem(
       days = productDays + SHOP_DELIVERY_DAYS;
     }
     let WEEKEND_DELIVERY_DAYS = 5;
-    if (stockItem.WeekendDelivery || (qrooStores.includes(stockItem.whsCode) && qrooStores.includes(delivery.ToCode))) {
+    if (stockItem.WeekendDelivery /* || (qrooStores.includes(stockItem.whsCode) && qrooStores.includes(delivery.ToCode)) */) {
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4){
         WEEKEND_DELIVERY_DAYS -=1;
