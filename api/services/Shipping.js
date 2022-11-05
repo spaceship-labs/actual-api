@@ -181,14 +181,15 @@ async function buildShippingItem(
     const SHOP_DELIVERY_DAYS = 2;
     if (stockItem.ShopDelivery) {
       days = productDays + SHOP_DELIVERY_DAYS;
-    }
-    let WEEKEND_DELIVERY_DAYS = 5;
-    if (stockItem.WeekendDelivery /* || (qrooStores.includes(stockItem.whsCode) && qrooStores.includes(delivery.ToCode)) */) {
-      var currentDate = moment().startOf('date');
-      if (currentDate.day() >= 0 && currentDate.day() <= 4){
-        WEEKEND_DELIVERY_DAYS -=1;
+    }else{
+      let WEEKEND_DELIVERY_DAYS = 5;
+      if (stockItem.WeekendDelivery || (qrooStores.includes(stockItem.whsCode) && qrooStores.includes(delivery.ToCode))) {
+        var currentDate = moment().startOf('date');
+        if (currentDate.day() >= 0 && currentDate.day() <= 4){
+          WEEKEND_DELIVERY_DAYS -=1;
+        }
+        days = productDays + WEEKEND_DELIVERY_DAYS;
       }
-      days = productDays + WEEKEND_DELIVERY_DAYS;
     }
   }
   const todayDate = new Date();
