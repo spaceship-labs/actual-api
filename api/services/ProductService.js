@@ -4,12 +4,14 @@ const COMPANY_STUDIO_CODE = '001';
 const COMPANY_HOME_CODE = '002';
 const COMPANY_BOTH_CODE = '003';
 const COMPANY_KIDS_CODE = '004';
+const COMPANY_ATELIER_CODE = '005';
 
 module.exports = {
   COMPANY_STUDIO_CODE,
   COMPANY_HOME_CODE,
   COMPANY_BOTH_CODE,
   COMPANY_KIDS_CODE,
+  COMPANY_ATELIER_CODE,
   getProductSA,
   isSRService,
   cacheProductSoldCount

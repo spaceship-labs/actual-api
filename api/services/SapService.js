@@ -16,10 +16,12 @@ const COMPANY_STUDIO_CODE = '001';
 const COMPANY_HOME_CODE = '002';
 const COMPANY_BOTH_CODE = '003';
 const COMPANY_KIDS_CODE = '004';
+const COMPANY_ATELIER_CODE = '005';
 
 const STUDIO_GROUP = 'studio';
 const HOME_GROUP = 'home';
 const KIDS_GROUP = 'kids';
+const ATELIER_GROUP = 'atelier';
 const PROJECTS_GROUP = 'proyectos';
 
 var reqOptions = {
@@ -309,10 +311,16 @@ function getCompanyCode(code, storeGroup) {
       case PROJECTS_GROUP:
         companyCode = COMPANY_HOME_CODE;
         break;
+      case ATELIER_GROUP:
+        companyCode = COMPANY_ATELIER_CODE;
+        break;
     }
   } else {
     if(storeGroup == KIDS_GROUP){
       companyCode = COMPANY_KIDS_CODE;
+    }
+    if(storeGroup == ATELIER_GROUP){
+      companyCode = COMPANY_ATELIER_CODE;
     }
   }
   return companyCode;
