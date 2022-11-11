@@ -72,7 +72,7 @@ async function buildManagerCashReport(params) {
     throw new Error('No existe el usuario');
   }
   const stores = manager.Stores;
-  const storesPoulated = await Promise.mapSeries(stores, async function(store) {
+  const storesPoulated = await Promise.mapSeries(stores, async function (store) {
     const storeCashReportParams = {
       ...params,
     };
@@ -99,7 +99,7 @@ async function buildManagerCashReport(params) {
 
 async function buildGlobalCashReport(params) {
   const stores = await Store.find({});
-  const storesPoulated = await Promise.mapSeries(stores, async function(store) {
+  const storesPoulated = await Promise.mapSeries(stores, async function (store) {
     const storeCashReportParams = {
       ...params,
     };
@@ -134,7 +134,7 @@ async function buildStoreCashReport(store, params) {
 
   const storeSellers = await getStoreSellers(store.id);
 
-  const populatedSellers = await Promise.mapSeries(storeSellers, async function(
+  const populatedSellers = await Promise.mapSeries(storeSellers, async function (
     seller
   ) {
     var options = {
@@ -190,8 +190,8 @@ async function buildWebStoreCashReport(store, params) {
 }
 
 function cleanUnusedDivisions(divisions) {
-  const result = divisions.reduce(function(acum, division) {
-    division.subdivisions = division.subdivisions.filter(function(subdivision) {
+  const result = divisions.reduce(function (acum, division) {
+    division.subdivisions = division.subdivisions.filter(function (subdivision) {
       return subdivision.payments && subdivision.payments.length > 0;
     });
     if (division.subdivisions && division.subdivisions.length > 0) {
@@ -213,21 +213,21 @@ function buildPaymentDivisions(payments, options = { isWeb: false }) {
     var paymentGroups = PaymentService.getPaymentGroups(config);
   }
 
-  var divisions = paymentGroups.reduce(function(acum, group) {
+  var divisions = paymentGroups.reduce(function (acum, group) {
     if (group.group == 1) {
       var division = {};
       division.name = 'Un solo pago';
 
       //Normal subdivisions
       division.subdivisions = group.methods
-        .filter(function(method) {
+        .filter(function (method) {
           //Filter condition depending if web store or normal store
           if (options.isWeb) {
             return true;
           }
           return !method.terminals || PaymentService.isTransferMethod(method);
         })
-        .map(function(method) {
+        .map(function (method) {
           const subdivision = {
             ...method,
             payments: _.where(payments, { type: method.type }),
@@ -251,7 +251,7 @@ function buildPaymentDivisions(payments, options = { isWeb: false }) {
       division.total = getDivisionTotal(division);
       acum.push(division);
     } else {
-      var auxDivisions = group.methods.map(function(method) {
+      var auxDivisions = group.methods.map(function (method) {
         var division = { name: method.name, group: method.group };
         division.subdivisions = getArtificialSubDivisions(
           payments,
@@ -271,7 +271,7 @@ function buildPaymentDivisions(payments, options = { isWeb: false }) {
 }
 
 function getArtificialSubDivisions(payments, groupNumber, methodType) {
-  const cardPayments = payments.filter(function(payment) {
+  const cardPayments = payments.filter(function (payment) {
     if (methodType) {
       return (
         PaymentService.isCardPayment(payment) &&
@@ -284,7 +284,7 @@ function getArtificialSubDivisions(payments, groupNumber, methodType) {
     );
   });
 
-  const artificialSubdivisionsAux = _.groupBy(cardPayments, function(payment) {
+  const artificialSubdivisionsAux = _.groupBy(cardPayments, function (payment) {
     return getPaymentHash(payment);
   });
 
@@ -348,8 +348,12 @@ async function getPaymentsBySeller(seller, options) {
 async function getStoreSellers(storeId) {
   const sellerRole = await Role.findOne({ name: 'seller' });
   const sellerRoleId = sellerRole.id;
-  const sellers = await User.find({ mainStore: storeId, role: sellerRoleId });
-  return sellers;
+  const myStore = await Store.findOne({ id: storeId }).populate('users')
+  const unfilteredSellers = myStore.users;
+  const sellers = unfilteredSellers.filter(function (seller) {
+    return seller.role == sellerRoleId
+  })
+  return sellers
 }
 
 function getSubdivisionTotal(
@@ -359,7 +363,7 @@ function getSubdivisionTotal(
   if (!subdivision.payments) {
     return 0;
   }
-  var total = subdivision.payments.reduce(function(acum, payment) {
+  var total = subdivision.payments.reduce(function (acum, payment) {
     if (PaymentService.isCanceled(payment)) {
       return acum;
     }
@@ -379,7 +383,7 @@ function getSubdivisionTotal(
 }
 
 function getDivisionTotal(division) {
-  var total = division.subdivisions.reduce(function(acum, subdivision) {
+  var total = division.subdivisions.reduce(function (acum, subdivision) {
     acum += subdivision.total;
     return acum;
   }, 0);
@@ -388,7 +392,7 @@ function getDivisionTotal(division) {
 
 function getMultipleSellersTotal(sellers) {
   sellers = sellers || [];
-  var sellersTotal = sellers.reduce(function(acum, seller) {
+  var sellersTotal = sellers.reduce(function (acum, seller) {
     acum += seller.total;
     return acum;
   }, 0);
@@ -396,7 +400,7 @@ function getMultipleSellersTotal(sellers) {
 }
 
 function getSellerTotal(seller) {
-  var generalTotal = seller.divisions.reduce(function(acum, division) {
+  var generalTotal = seller.divisions.reduce(function (acum, division) {
     acum += division.total;
     return acum;
   }, 0);
@@ -408,7 +412,7 @@ function getStoreTotal(store, options = { readDivisions: false }) {
     if (!store.divisions) {
       return 0;
     }
-    var storeTotal = store.divisions.reduce(function(acum, division) {
+    var storeTotal = store.divisions.reduce(function (acum, division) {
       acum += division.total;
       return acum;
     }, 0);
@@ -416,7 +420,7 @@ function getStoreTotal(store, options = { readDivisions: false }) {
     if (!store.sellers) {
       return 0;
     }
-    var storeTotal = store.sellers.reduce(function(acum, seller) {
+    var storeTotal = store.sellers.reduce(function (acum, seller) {
       acum += seller.total;
       return acum;
     }, 0);
@@ -425,7 +429,7 @@ function getStoreTotal(store, options = { readDivisions: false }) {
 }
 
 function getMultipleStoresTotal(stores) {
-  var storesTotal = stores.reduce(function(acum, store) {
+  var storesTotal = stores.reduce(function (acum, store) {
     acum += store.total;
     return acum;
   }, 0);
