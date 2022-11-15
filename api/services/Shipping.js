@@ -128,7 +128,7 @@ async function buildShippingItem(
   const productDate = new Date(stockItem.ShipDate);
   const productDays = daysDiff(new Date(), productDate);
   const seasonQuery = getQueryDateRange({}, productDate);
-  const qrooStores = ["02","03","05","82","01"]
+  const qrooStores = ["02","03","05","82","01","152"]
 
   const season = await Season.findOne(seasonQuery);
   let LOW_SEASON_DAYS; //Original: 7, then 8
