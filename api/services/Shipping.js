@@ -20,7 +20,7 @@ module.exports = {
 
 async function productShipping(product, storeWarehouse, activeQuotationId) {
   let shippingItems = [];
-  const notValidShopDelivery = ["83","10","11","22"]
+  const notValidShopDelivery = ["83", "10", "11", "22"]
 
   const deliveries = await Delivery.find({
     ToCode: storeWarehouse.WhsCode,
@@ -36,7 +36,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
       '>': 0,
     },
   };
-  if(notValidShopDelivery.includes(storeWarehouse.WhsCode) ){
+  if (notValidShopDelivery.includes(storeWarehouse.WhsCode)) {
     stockItemsQuery = {
       ItemCode: product.ItemCode,
       whsCode: companiesCodes,
@@ -128,74 +128,116 @@ async function buildShippingItem(
   const productDate = new Date(stockItem.ShipDate);
   const productDays = daysDiff(new Date(), productDate);
   const seasonQuery = getQueryDateRange({}, productDate);
-  const qrooStores = ["02","03","05","82","01","152"]
+  const toQrooStores = ["02", "03", "05", "82", "152"]
+  const fromQrooStores = ["01", "02", "03", "05", "82", "152"]
+  const originQrooForMerida = ["03", "05", "82", "152"]
 
   const season = await Season.findOne(seasonQuery);
   let LOW_SEASON_DAYS; //Original: 7, then 8
   let MAIN_SEASON_DAYS;
   let seasonDays;
+  /*
+    if (isMeridaWhsCode(stockItem.whsCode)) {
+      // in Merida stores
+      MAIN_SEASON_DAYS = 8;
+      LOW_SEASON_DAYS = 8;
+      if(stockItem.whsCode === CEDIS_MERIDA_WHS_CODE){
+        MAIN_SEASON_DAYS = 4;
+        LOW_SEASON_DAYS = 4;
+      }
+    } else {
+      //in stores
+      MAIN_SEASON_DAYS = 11;
+      LOW_SEASON_DAYS = 11;
+      if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
+        // from cedis in cancun
+        MAIN_SEASON_DAYS = 11;
+        LOW_SEASON_DAYS = 11;
+      } else if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
+        // from cedis 01 to any merida
+        MAIN_SEASON_DAYS = 11;
+        LOW_SEASON_DAYS = 11;
+      } else if (["02","03","05","82","152"].includes(stockItem.whsCode) && isMeridaWhsCode(storeWarehouseId)) {
+        // from qroo store to any merida
+        MAIN_SEASON_DAYS = 13;
+        LOW_SEASON_DAYS = 13;
+      }  else {
+        // use minimum
+        MAIN_SEASON_DAYS = 4;
+        LOW_SEASON_DAYS = 4;
+      }
+    }
+    if (season) {
+      seasonDays = MAIN_SEASON_DAYS;
+    } else {
+      seasonDays = LOW_SEASON_DAYS;
+    }
+  */
+  // 
+  if (fromQrooStores.includes(stockItem.whsCode)) {
+    // de Qroo a Qroo 4-5 dias
+    if (toQrooStores.includes(delivery.toCode)) {
+      let WEEKEND_DELIVERY_DAYS = 5;
+      var currentDate = moment().startOf('date');
+      if (currentDate.day() >= 0 && currentDate.day() <= 4) {
+        WEEKEND_DELIVERY_DAYS -= 1;
+      }
+      seasonDays = WEEKEND_DELIVERY_DAYS;
+    } else {
+      // de Qroo a merida
+      if (stockItem.whsCode == "01") {
+        seasonDays = 11;
+      } else {
+        seasonDays = 4;
+        if (originQrooForMerida.includes(stockItem.whsCode)) {
+          seasonDays = 13;
+        }
+      }
+    }
+  } else {
+    // cedis 10 a tiendas
+    seasonDays = 4;
+    if (["11", "22"].includes(stockItem.whsCode)) {
+      seasonDays = 8;
+    }
 
-  if (isMeridaWhsCode(stockItem.whsCode)) {
-    // in Merida stores
-    MAIN_SEASON_DAYS = 8;
-    LOW_SEASON_DAYS = 8;
-    if(stockItem.whsCode === CEDIS_MERIDA_WHS_CODE){
-      MAIN_SEASON_DAYS = 4;
-      LOW_SEASON_DAYS = 4;
-    }
-  } else {
-    //in stores
-    MAIN_SEASON_DAYS = 11;
-    LOW_SEASON_DAYS = 11;
-    if (stockItem.whsCode === CEDIS_QROO_CODE && !isMeridaWhsCode(storeWarehouseId)) {
-      // from cedis in cancun
-      MAIN_SEASON_DAYS = 11;
-      LOW_SEASON_DAYS = 11;
-    } else if (stockItem.whsCode === CEDIS_QROO_CODE && isMeridaWhsCode(storeWarehouseId)) {
-      // from cedis 01 to any merida
-      MAIN_SEASON_DAYS = 11;
-      LOW_SEASON_DAYS = 11;
-    } else if (["02","03","05","82","152"].includes(stockItem.whsCode) && isMeridaWhsCode(storeWarehouseId)) {
-      // from qroo store to any merida
-      MAIN_SEASON_DAYS = 13;
-      LOW_SEASON_DAYS = 13;
-    }  else {
-      // use minimum
-      MAIN_SEASON_DAYS = 4;
-      LOW_SEASON_DAYS = 4;
-    }
   }
-  if (season) {
-    seasonDays = MAIN_SEASON_DAYS;
-  } else {
-    seasonDays = LOW_SEASON_DAYS;
-  }
+
 
   const deliveryDays = (delivery && delivery.Days) || 0;
   let days = productDays + seasonDays + deliveryDays;
 
-  //Product in same store/warehouse
+  //Product in same store/warehouse inmediatos 
   if (stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery) {
     days = productDays;
-  }else{
+  }
+  // centro de entregas sobreescribe
+  const SHOP_DELIVERY_DAYS = 2;
+  if (stockItem.ShopDelivery) {
+    days = productDays + SHOP_DELIVERY_DAYS;
+  }
+  /*
+  else {
     const SHOP_DELIVERY_DAYS = 2;
     if (stockItem.ShopDelivery) {
       days = productDays + SHOP_DELIVERY_DAYS;
-    }else{
+    } else {
       let WEEKEND_DELIVERY_DAYS = 5;
       if (stockItem.WeekendDelivery || (qrooStores.includes(stockItem.whsCode) && qrooStores.includes(delivery.ToCode))) {
         var currentDate = moment().startOf('date');
-        if (currentDate.day() >= 0 && currentDate.day() <= 4){
-          WEEKEND_DELIVERY_DAYS -=1;
+        if (currentDate.day() >= 0 && currentDate.day() <= 4) {
+          WEEKEND_DELIVERY_DAYS -= 1;
         }
         days = productDays + WEEKEND_DELIVERY_DAYS;
       }
     }
   }
+  */
+
   const todayDate = new Date();
   const date = addDays(todayDate, days);
-  let available = stockItem.OpenCreQty;
 
+  let available = stockItem.OpenCreQty;
   if (stockItem.whsCode === CEDIS_QROO_CODE) {
     available -= pendingProductDetailSum;
   }
