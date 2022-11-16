@@ -176,7 +176,7 @@ async function buildShippingItem(
   //
   if (fromQrooStores.includes(stockItem.whsCode)) {
     // de Qroo a Qroo 4-5 dias
-    let toCode = await Company.findFirst(storeWarehouseId);
+    let toCode = await Company.findOne(storeWarehouseId);
     console.log("stockItem.whsCode",stockItem.whsCode)
     console.log("toCode",toCode)
     console.log("storeWarehouseId",storeWarehouseId)
