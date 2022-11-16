@@ -180,7 +180,7 @@ async function buildShippingItem(
     console.log("stockItem.whsCode",stockItem.whsCode)
     console.log("toCode",toCode)
     console.log("storeWarehouseId",storeWarehouseId)
-    if (delivery.toCode.WhsCode){
+    if (delivery.toCode.WhsCode != undefined){
       if (toQrooStores.includes(delivery.toCode)) {
         let WEEKEND_DELIVERY_DAYS = 5;
         var currentDate = moment().startOf('date');
