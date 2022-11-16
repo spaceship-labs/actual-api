@@ -176,7 +176,10 @@ async function buildShippingItem(
   //
   if (fromQrooStores.includes(stockItem.whsCode)) {
     // de Qroo a Qroo 4-5 dias
-    if (toQrooStores.includes(delivery.toCode)) {
+    let toCode = await Warehouse.findFirst(storeWarehouseId);
+    console.log(stockItem.whsCode)
+    console.log(toCode)
+    if (toQrooStores.includes(toCode)) {
       let WEEKEND_DELIVERY_DAYS = 5;
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
