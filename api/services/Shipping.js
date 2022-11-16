@@ -126,9 +126,8 @@ async function buildShippingItem(
   const productDate = new Date(stockItem.ShipDate);
   const productDays = daysDiff(new Date(), productDate);
   const seasonQuery = getQueryDateRange({}, productDate);
-  const toQrooStores = ["02", "03", "05", "82", "152"]
+  const QrooStores = ["02", "03", "05", "82", "152"]
   const fromQrooStores = ["01", "02", "03", "05", "82", "152"]
-  const originQrooForMerida = ["03", "05", "82", "152"]
 
   const season = await Season.findOne(seasonQuery);
   let LOW_SEASON_DAYS; //Original: 7, then 8
@@ -171,10 +170,13 @@ async function buildShippingItem(
       seasonDays = LOW_SEASON_DAYS;
     }
   */
-  // 
+  //
   if (fromQrooStores.includes(stockItem.whsCode)) {
     // de Qroo a Qroo 4-5 dias
-    if (toQrooStores.includes(delivery.toCode)) {
+    let toCode = await Company.findOne(storeWarehouseId);
+    /* console.log("stockItem.whsCode",stockItem.whsCode)
+    console.log("toCodewhs",toCode.WhsCode) */
+    if (QrooStores.includes(toCode.WhsCode)) {
       let WEEKEND_DELIVERY_DAYS = 5;
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
@@ -187,7 +189,7 @@ async function buildShippingItem(
         seasonDays = 11;
       } else {
         seasonDays = 4;
-        if (originQrooForMerida.includes(stockItem.whsCode)) {
+        if (QrooStores.includes(stockItem.whsCode)) {
           seasonDays = 13;
         }
       }
@@ -195,6 +197,7 @@ async function buildShippingItem(
   } else {
     // cedis 10 a tiendas
     seasonDays = 4;
+    // tiendas merida a tiendas merida
     if (["11", "22"].includes(stockItem.whsCode)) {
       seasonDays = 8;
     }
@@ -205,7 +208,7 @@ async function buildShippingItem(
   const deliveryDays = (delivery && delivery.Days) || 0;
   let days = productDays + seasonDays + deliveryDays;
 
-  //Product in same store/warehouse inmediatos 
+  //Product in same store/warehouse inmediatos
   if (stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery) {
     days = productDays;
   }
