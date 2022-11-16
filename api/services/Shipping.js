@@ -180,21 +180,23 @@ async function buildShippingItem(
     console.log("stockItem.whsCode",stockItem.whsCode)
     console.log("toCode",toCode)
     console.log("storeWarehouseId",storeWarehouseId)
-    if (toQrooStores.includes(delivery.toCode.WhsCode)) {
-      let WEEKEND_DELIVERY_DAYS = 5;
-      var currentDate = moment().startOf('date');
-      if (currentDate.day() >= 0 && currentDate.day() <= 4) {
-        WEEKEND_DELIVERY_DAYS -= 1;
-      }
-      seasonDays = WEEKEND_DELIVERY_DAYS;
-    } else {
-      // de Qroo a merida
-      if (stockItem.whsCode == "01") {
-        seasonDays = 11;
+    if (delivery.toCode.WhsCode){
+      if (toQrooStores.includes(delivery.toCode)) {
+        let WEEKEND_DELIVERY_DAYS = 5;
+        var currentDate = moment().startOf('date');
+        if (currentDate.day() >= 0 && currentDate.day() <= 4) {
+          WEEKEND_DELIVERY_DAYS -= 1;
+        }
+        seasonDays = WEEKEND_DELIVERY_DAYS;
       } else {
-        seasonDays = 4;
-        if (originQrooForMerida.includes(stockItem.whsCode)) {
-          seasonDays = 13;
+        // de Qroo a merida
+        if (stockItem.whsCode == "01") {
+          seasonDays = 11;
+        } else {
+          seasonDays = 4;
+          if (originQrooForMerida.includes(stockItem.whsCode)) {
+            seasonDays = 13;
+          }
         }
       }
     }
