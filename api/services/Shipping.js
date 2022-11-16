@@ -176,11 +176,11 @@ async function buildShippingItem(
   //
   if (fromQrooStores.includes(stockItem.whsCode)) {
     // de Qroo a Qroo 4-5 dias
-    let toCode = await Company.findOne(storeWarehouseId);
+    /* let toCode = await Company.findOne(storeWarehouseId);
     console.log("stockItem.whsCode",stockItem.whsCode)
     console.log("toCode",toCode)
     console.log("storeWarehouseId",storeWarehouseId)
-    if (delivery.toCode.WhsCode != undefined){
+    if (delivery.toCode.WhsCode != undefined){ */
       if (toQrooStores.includes(delivery.toCode)) {
         let WEEKEND_DELIVERY_DAYS = 5;
         var currentDate = moment().startOf('date');
@@ -199,7 +199,7 @@ async function buildShippingItem(
           }
         }
       }
-    }
+    /* } */
   } else {
     // cedis 10 a tiendas
     seasonDays = 4;
