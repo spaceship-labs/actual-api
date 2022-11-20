@@ -122,13 +122,29 @@ function transfers(group, storeCode) {
 
   if (storeCode === 'actual_marketplace') {
     const marketPlace = [
-      {
+      /* {
         currency: 'Pesos',
         bank: 'Banamex',
         sucursal: '7013',
         account: '6383408',
         clabe: '002691701363834085',
         swift: 'BNMXMXMM',
+      }, */
+      {
+        currency: 'Pesos',
+        bank: 'Bancomer',
+        sucursal: '-',
+        account: '0194554957',
+        clabe: '012691001945549572',
+        swift: 'BCMRMXMMPYM',
+      },
+      {
+        currency: 'Dólares',
+        bank: 'Bancomer',
+        sucursal: '1807',
+        account: '0117102917',
+        clabe: '012691001171029170',
+        swift: 'BCMRMXMMPYM',
       },
     ];
     return marketPlace;
