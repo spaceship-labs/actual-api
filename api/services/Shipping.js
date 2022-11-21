@@ -182,24 +182,24 @@ async function buildShippingItem(
       //  WEEKEND_DELIVERY_DAYS -= 1;
       //}
       //seasonDays = WEEKEND_DELIVERY_DAYS;
-      seasonDays = 8;
+      seasonDays = 10;
     } else {
       // de Qroo a merida
       if (stockItem.whsCode == "01") {
-        seasonDays = 11;
+        seasonDays = 12;
       } else {
         seasonDays = 4;
         if (QrooStores.includes(stockItem.whsCode)) {
-          seasonDays = 13;
+          seasonDays = 14;
         }
       }
     }
   } else {
     // cedis 10 a tiendas
-    seasonDays = 4;
+    seasonDays = 8;
     // tiendas merida a tiendas merida
     if (["11", "22"].includes(stockItem.whsCode)) {
-      seasonDays = 8;
+      seasonDays = 10;
     }
 
   }
