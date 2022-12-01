@@ -49,7 +49,9 @@ module.exports = {
       defaultsTo: 0,
     },
     U_perautor: { type: 'string' },
-
+    regime: {
+      type: 'string'
+    },
     /*----------/
       RELATIONS
     /*----------*/
