@@ -136,23 +136,24 @@ function prepareInvoice(order, payments, client, items) {
     .format('YYYY-MM-DD');
 
   var data = {
+    //status: "draft",
     date: date,
     dueDate: dueDate,
     client: client,
     items: items,
     cfdiUse: client.cfdiUse,
-    regime: client.regime,
+    regimeClient: client.regime,
     regimeObject: [client.regime],
     paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
     anotation: order.folio,
     stamp: {
       generateStamp: true,
+      version: "4.0",
     },
     orderObject: order,
   };
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
-
   return createInvoice(data);
 }
 

@@ -36,7 +36,7 @@ async function updateFiscalAddress(params) {
     const fiscalAddressUpdated = fiscalAddressesUpdated[0];
     const clientsUpdated =  await Client.update(
       {CardCode: CardCode},
-      {LicTradNum: params.LicTradNum, cfdiUse: params.cfdiUse, regime:params.regime}
+      {LicTradNum: params.LicTradNum, cfdiUse: params.cfdiUse, regime: params.regime}
     );
     return fiscalAddressUpdated;
   }catch(err){
