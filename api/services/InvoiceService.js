@@ -8,7 +8,7 @@ const token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
 const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
-const DEFAULT_CFDI_USE = 'P01';
+const DEFAULT_CFDI_USE = 'S01';
 const DEFAULT_REGIME_USE = 'SIMPLIFIED_REGIME';
 const DEFAULT_ZIPCODE = '77507'
 
