@@ -8,7 +8,7 @@ const token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
 const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
-const DEFAULT_CFDI_USE = 'S01';
+const DEFAULT_CFDI_USE = 'P01';
 const DEFAULT_CFDI_USE_INVOICE = 'S01';
 const DEFAULT_REGIME_USE = 'SIMPLIFIED_REGIME';
 const DEFAULT_ZIPCODE = '77507'
@@ -151,23 +151,46 @@ function prepareInvoice(order, payments, client, items) {
     .add(7, 'days')
     .format('YYYY-MM-DD');
 
-  var data = {
-    //status: "draft",
-    date: date,
-    dueDate: dueDate,
-    client: client,
-    items: items,
-    cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE_INVOICE,
-    regimeClient: client.regime || DEFAULT_REGIME_USE,
-    regimeObject: [client.regime] || DEFAULT_REGIME_USE,
-    paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
-    anotation: order.folio,
-    stamp: {
-      generateStamp: true,
-      version: "4.0",
-    },
-    orderObject: order,
-  };
+  var generic =
+  !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
+
+  if(generic){
+    var data = {
+      //status: "draft",
+      date: date,
+      dueDate: dueDate,
+      client: client,
+      items: items,
+      cfdiUse: DEFAULT_CFDI_USE_INVOICE,
+      regimeClient: DEFAULT_REGIME_USE,
+      regimeObject: DEFAULT_REGIME_USE,
+      paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
+      anotation: order.folio,
+      stamp: {
+        generateStamp: true,
+        version: "4.0",
+      },
+      orderObject: order,
+    };
+  }else{
+    var data = {
+      //status: "draft",
+      date: date,
+      dueDate: dueDate,
+      client: client,
+      items: items,
+      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE_INVOICE,
+      regimeClient: client.regime || DEFAULT_REGIME_USE,
+      regimeObject: [client.regime] || DEFAULT_REGIME_USE,
+      paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
+      anotation: order.folio,
+      stamp: {
+        generateStamp: true,
+        version: "4.0",
+      },
+      orderObject: order,
+    };
+  }
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
   if (data.paymentType == "PPD") {
