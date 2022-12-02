@@ -38,6 +38,7 @@ function createOrderInvoice(orderId) {
       resolve({});
       return;
     }
+    sails.log.info("\n\n\nSimon cliente\n\n\n",client)
 
     Order.findOne(orderId)
       .populate('Client')
@@ -54,8 +55,9 @@ function createOrderInvoice(orderId) {
           );
           return;
         }
-
+        sails.log.info("\n\n\nSimon cliente\n\n\n",client)
         var client = order.Client;
+        sails.log.info("\n\n\nSimon cliente\n\n\n",client)
         var details = order.Details.map(function (d) {
           return d.id;
         });
@@ -72,6 +74,7 @@ function createOrderInvoice(orderId) {
         ];
       })
       .spread(function (order, payments, details, address, client) {
+        sails.log.info("\n\n\n\nimon cliente\n\n\n\n\n",client)
         return [
           order,
           payments,
@@ -80,6 +83,7 @@ function createOrderInvoice(orderId) {
         ];
       })
       .spread(function (order, payments, client, items) {
+        sails.log.info("\n\n\n\nSimon cliente\n\n\n\n\n",client)
         return prepareInvoice(order, payments, client, items);
       })
       .then(function (alegraInvoice) {
@@ -153,6 +157,8 @@ function prepareInvoice(order, payments, client, items) {
 
   var generic =
   !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
+
+  console.log("\n\ngeneric\n\n",generic)
 
   if(generic){
     var data = {
@@ -358,6 +364,8 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       return 'other';
     }
   }
+  sails.log.info("\n\n\nSimon cliente maybe\n\n\n",client)
+
   sails.log.info("Maybe is returning according to", uniquePaymentMethod.type)
   switch (uniquePaymentMethod.type) {
     case 'cash':
@@ -409,9 +417,13 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       paymentMethod = 'other';
       break;
   }
+  sails.log.info("\n\n\nSimon cliente before hasClientCreditPayment\n\n\n",client)
+
   if (hasClientCreditPayment(payments)) {
     paymentMethod = 'other'
   }
+  sails.log.info("\n\n\nSimon cliente hasClientCreditPayment\n\n\n",client)
+
   return paymentMethod;
 }
 
