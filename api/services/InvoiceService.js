@@ -72,7 +72,6 @@ function createOrderInvoice(orderId) {
         ];
       })
       .spread(function (order, payments, details, address, client) {
-        sails.log.info("\n\n\n\nimon cliente\n\n\n\n\n",client)
         return [
           order,
           payments,
@@ -81,7 +80,6 @@ function createOrderInvoice(orderId) {
         ];
       })
       .spread(function (order, payments, client, items) {
-        sails.log.info("\n\n\n\nSimon cliente\n\n\n\n\n",client)
         return prepareInvoice(order, payments, client, items);
       })
       .then(function (alegraInvoice) {
@@ -153,8 +151,7 @@ function prepareInvoice(order, payments, client, items) {
     .add(7, 'days')
     .format('YYYY-MM-DD');
 
-  var generic =
-  !client.LicTradNum || client.LicTradNum == FiscalAddressService.GENERIC_RFC;
+  var generic = !client.identification || client.identification == FiscalAddressService.GENERIC_RFC;
 
   console.log("\n\ngeneric\n\n",generic)
 
