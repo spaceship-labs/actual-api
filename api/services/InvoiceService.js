@@ -38,7 +38,6 @@ function createOrderInvoice(orderId) {
       resolve({});
       return;
     }
-    sails.log.info("\n\n\nSimon cliente\n\n\n",client)
 
     Order.findOne(orderId)
       .populate('Client')
@@ -55,7 +54,6 @@ function createOrderInvoice(orderId) {
           );
           return;
         }
-        sails.log.info("\n\n\nSimon cliente\n\n\n",client)
         var client = order.Client;
         sails.log.info("\n\n\nSimon cliente\n\n\n",client)
         var details = order.Details.map(function (d) {
