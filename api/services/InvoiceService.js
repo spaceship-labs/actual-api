@@ -362,7 +362,6 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       return 'other';
     }
   }
-  sails.log.info("\n\n\nSimon cliente maybe\n\n\n",client)
 
   sails.log.info("Maybe is returning according to", uniquePaymentMethod.type)
   switch (uniquePaymentMethod.type) {
@@ -415,12 +414,10 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       paymentMethod = 'other';
       break;
   }
-  sails.log.info("\n\n\nSimon cliente before hasClientCreditPayment\n\n\n",client)
 
   if (hasClientCreditPayment(payments)) {
     paymentMethod = 'other'
   }
-  sails.log.info("\n\n\nSimon cliente hasClientCreditPayment\n\n\n",client)
 
   return paymentMethod;
 }
