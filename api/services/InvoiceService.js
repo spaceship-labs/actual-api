@@ -475,6 +475,7 @@ function prepareClientParams(order, client, address) {
 
 function prepareClient(order, client, address) {
   const data = prepareClientParams(order, client, address);
+  console.log("before create client",data)
   return createClient(data);
 }
 
