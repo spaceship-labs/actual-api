@@ -55,7 +55,6 @@ function createOrderInvoice(orderId) {
           return;
         }
         var client = order.Client;
-        sails.log.info("\n\n\nSimon cliente\n\n\n",client)
         var details = order.Details.map(function (d) {
           return d.id;
         });
