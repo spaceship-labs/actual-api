@@ -150,15 +150,19 @@ function prepareInvoice(order, payments, client, items) {
     .format('YYYY-MM-DD');
 
   var data = {
+    //status: "draft",
     date: date,
     dueDate: dueDate,
     client: client,
     items: items,
     cfdiUse: client.cfdiUse,
+    regimeClient: client.regime,
+    regimeObject: [client.regime],
     paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
     anotation: order.folio,
     stamp: {
       generateStamp: true,
+      version: "4.0",
     },
     orderObject: order,
   };
@@ -411,6 +415,8 @@ function prepareClientParams(order, client, address) {
       identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
+      regimeClient: client.regime || DEFAULT_REGIME_USE,
+      regimeObject: [client.regime],
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -430,6 +436,8 @@ function prepareClientParams(order, client, address) {
       name: order.CardName,
       identification: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
+      regimeClient: DEFAULT_REGIME_USE,
+      regimeObject: [client.regime],
       //email: order.E_Mail,
       address: {
         country: 'MEX',
