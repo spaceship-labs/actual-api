@@ -433,8 +433,6 @@ function prepareClientParams(order, client, address) {
 
   if (!generic) {
     data = {
-      regime: "NO_REGIME",
-      regimeObject: ["NO_REGIME"],
       name: address.companyName,
       identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
@@ -455,8 +453,6 @@ function prepareClientParams(order, client, address) {
     };
   } else {
     data = {
-      regime: "NO_REGIME",
-      regimeObject: ["NO_REGIME"],
       name: order.CardName,
       identification: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
