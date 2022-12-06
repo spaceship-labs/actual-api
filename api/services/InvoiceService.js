@@ -24,6 +24,7 @@ module.exports = {
   getUnitTypeByProduct,
   RFCPUBLIC,
   DEFAULT_CFDI_USE,
+  DEFAULT_CFDI_USE_INVOICE,
   hasClientBalancePayment,
   hasClientCreditPayment,
 };
@@ -457,7 +458,7 @@ function prepareClientParams(order, client, address) {
       identification: FiscalAddressService.GENERIC_RFC,
       cfdiUse: DEFAULT_CFDI_USE,
       regimeClient: DEFAULT_REGIME_USE,
-      regimeObject: [client.regime],
+      regimeObject: [DEFAULT_REGIME_USE],
       //email: order.E_Mail,
       address: {
         country: 'MEX',
