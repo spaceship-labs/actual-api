@@ -191,6 +191,7 @@ function prepareInvoice(order, payments, client, items) {
         orderObject: order,
       };
     }
+  console.log("prepareInvoice data",data)
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
   if(data.paymentType == "PPD"){
@@ -468,6 +469,7 @@ function prepareClientParams(order, client, address) {
       },
     };
   }
+  console.log("prepareClientParams data",data)
   return data;
 }
 
