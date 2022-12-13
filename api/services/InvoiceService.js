@@ -256,8 +256,9 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
-  sails.log.info("\n\nInvoice OPTIONS (createInvoice)\n\n",options);
-  console.log.info("\n\nInvoice OPTIONS (createInvoice)\n\n",options);
+  str = JSON.stringify(options);
+  sails.log.info("\n\nInvoice OPTIONS (createInvoice)\n\n",str);
+  console.log("\n\nInvoice OPTIONS (createInvoice)\n\n",str);
 
   return new Promise(function (resolve, reject) {
     AlegraLog.create(log)
