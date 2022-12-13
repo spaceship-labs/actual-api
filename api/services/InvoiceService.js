@@ -140,8 +140,8 @@ function send(orderID) {
         },
         json: true,
       };
-      sails.log.info("\n\nInvoice OPTIONS (send)\n\n",options);
-      console.log("\n\nInvoice OPTIONS (send)\n\n",options);
+      str = JSON.stringify(options);
+      sails.log.info("\n\nInvoice OPTIONS (send)\n\n",str);
       return request(options);
     });
 }
@@ -258,7 +258,6 @@ function createInvoice(data) {
 
   str = JSON.stringify(options);
   sails.log.info("\n\nInvoice OPTIONS (createInvoice)\n\n",str);
-  console.log("\n\nInvoice OPTIONS (createInvoice)\n\n",str);
 
   return new Promise(function (resolve, reject) {
     AlegraLog.create(log)
@@ -498,8 +497,8 @@ function createClient(client) {
     },
     json: true,
   };
-  sails.log.info("\n\nContact OPTIONS\n\n",options);
-  console.log("\n\nContact OPTIONS\n\n",options);
+  str = JSON.stringify(options);
+  sails.log.info("\n\nContact OPTIONS\n\n",str);
   return request(options);
 }
 
