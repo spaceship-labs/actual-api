@@ -254,6 +254,8 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
+  console.log("\n\nInvoice OPTIONS\n\n",options)
+
   return new Promise(function (resolve, reject) {
     AlegraLog.create(log)
       .then(function (logCreated) {
