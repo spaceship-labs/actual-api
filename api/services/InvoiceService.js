@@ -140,6 +140,7 @@ function send(orderID) {
         },
         json: true,
       };
+      console.log("\n\nInvoice OPTIONS\n\n",options)
       return request(options);
     });
 }
