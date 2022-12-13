@@ -495,6 +495,7 @@ function createClient(client) {
     },
     json: true,
   };
+  sails.log.info("\n\nContact OPTIONS\n\n",options)
   return request(options);
 }
 
