@@ -140,7 +140,7 @@ function send(orderID) {
         },
         json: true,
       };
-      console.log("\n\nInvoice OPTIONS\n\n",options)
+      sails.log.info("\n\nInvoice OPTIONS\n\n",options)
       return request(options);
     });
 }
@@ -255,7 +255,7 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
-  console.log("\n\nInvoice OPTIONS\n\n",options)
+  console.log.info("\n\nInvoice OPTIONS\n\n",options)
 
   return new Promise(function (resolve, reject) {
     AlegraLog.create(log)
