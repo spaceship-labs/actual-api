@@ -156,7 +156,6 @@ function prepareInvoice(order, payments, client, items) {
 
   if(generic){
     var data = {
-      //status: "draft",
       date: date,
       dueDate: dueDate,
       client: client,
@@ -174,7 +173,6 @@ function prepareInvoice(order, payments, client, items) {
     };
   }else{
     var data = {
-      //status: "draft",
       date: date,
       dueDate: dueDate,
       client: client,
