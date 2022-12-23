@@ -181,7 +181,7 @@ function prepareInvoice(order, payments, client, items) {
       items: items,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE_INVOICE,
       regimeClient: client.regime || DEFAULT_REGIME_USE,
-      regimeObject: [client.regime] || DEFAULT_REGIME_USE,
+      regimeObject: [client.regime] || [DEFAULT_REGIME_USE],
       paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
       anotation: order.folio,
       stamp: {
