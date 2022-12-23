@@ -181,7 +181,7 @@ function prepareInvoice(order, payments, client, items) {
         items: items,
         cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE_INVOICE,
         regimeClient: client.regime || DEFAULT_REGIME_USE,
-        regimeObject: [client.regime] || DEFAULT_REGIME_USE,
+        regimeObject: [client.regime] || [DEFAULT_REGIME_USE],
         paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
         anotation: order.folio,
         stamp: {
@@ -201,7 +201,8 @@ function prepareInvoice(order, payments, client, items) {
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
     data.paymentType = "PPD"
   }
-
+  console.log("\n\nInvoice data:\n",data);
+  console.log("\n\n");
   return createInvoice(data);
 }
 
