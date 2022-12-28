@@ -159,11 +159,14 @@ async function createClient(params, req){
     if(params.LicTradNum && !isValidRFC(params.LicTradNum)){
 			throw new Error('RFC no valido');
     }
-		if(!params.regime || params.regime == null){
+		if(params.regime && params.regime == null){
 			throw new Error('Régimen no válido');
     }
-		if(!params.cfdiUse || params.cfdiUse == null){
+		if(params.cfdiUse && params.cfdiUse == null){
 			throw new Error('Uso CFDI no válido');
+    }
+		if(params.ZipCode && (params.ZipCode == null || params.ZipCode == '')){
+			throw new Error('Código postal no válido');
     }
     const createParams = mapClientFields(params);
     const filteredContacts = filterContacts(createParams.contacts);
