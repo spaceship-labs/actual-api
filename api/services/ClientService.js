@@ -21,7 +21,7 @@ module.exports = {
   PERSON_TYPE,
   ERROR_TYPE,
 	createClient,
-	updateClient,  
+	updateClient,
   areContactsRepeated,
   filterContacts,
   getContactIndex,
@@ -79,7 +79,7 @@ function isValidFiscalAddress(fiscalAddress) {
 }
 
 function isValidRFC(rfc) {
-	if(rfc === FiscalAddressService.GENERIC_RFC){ 
+	if(rfc === FiscalAddressService.GENERIC_RFC){
 		return true;
 	}
 	var result = (rfc || "").match(RFC_VALIDATION_REGEX);
@@ -101,7 +101,7 @@ function validateSapClientCreation(sapData, sapContactsParams){
 	}
 	if(sapData.type === ERROR_TYPE){
 		throw new Error(sapData.result);
-	}	
+	}
 	throw new Error('Error al crear cliente en SAP');
 }
 
@@ -111,7 +111,7 @@ function validateSapClientUpdate(sapData){
 	}
 	if(sapData.type === ERROR_TYPE){
 		throw new Error(sapData.result);
-	}	
+	}
 	throw new Error('Error al actualizar datos personales en SAP');
 }
 
@@ -150,7 +150,7 @@ async function createClient(params, req){
 	var fiscalAddressesCreated = [];
 	const email = params.E_Mail;
 	try{
-    if(!email){	
+    if(!email){
 			throw new Error('Email requerido');
 		}
     if(email && email.match(ACTUAL_EMAIL_DOMAIN)){
@@ -159,11 +159,16 @@ async function createClient(params, req){
     if(params.LicTradNum && !isValidRFC(params.LicTradNum)){
 			throw new Error('RFC no valido');
     }
-
+		if(!params.regime){
+			throw new Error('Régimen no válido');
+    }
+		if(!params.cfdiUse){
+			throw new Error('Uso CFDI no válido');
+    }
     const createParams = mapClientFields(params);
     const filteredContacts = filterContacts(createParams.contacts);
     sapContactsParams = filteredContacts.map(mapContactFields);
-    
+
     if(sapContactsParams.length > 0 && areContactsRepeated(sapContactsParams)){
 			throw new Error('Nombres de contactos repetidos');
     }
@@ -176,7 +181,7 @@ async function createClient(params, req){
     //Seller assign
 		params.User = req.user.id;
 		delete params.fiscalAddress;
-		delete params.contacts;		
+		delete params.contacts;
 
     const sapClientParams = _.clone(params);
 
@@ -190,21 +195,21 @@ async function createClient(params, req){
     const isClientEmailTaken = await Client.findOne({ E_Mail: email });
     if(isClientEmailTaken){
 			throw new Error('Email previamente utilizado');
-		}      
-		
+		}
+
 		const sapResult = await SapService.createClient(sapCreateParams);
 		sails.log.info('SAP result createClient', sapResult);
 		const sapData = JSON.parse(sapResult.value);
 		if(!sapData){
-			throw new Error('Error al crear cliente en SAP');	
+			throw new Error('Error al crear cliente en SAP');
 		}
-		
+
 		validateSapClientCreation(
-			sapData, 
-			sapContactsParams, 
+			sapData,
+			sapContactsParams,
 			sapFiscalAddressParams
 		);
-	
+
 		const clientCreateParams = Object.assign(sapClientParams,{
 			CardCode: sapData.result,
 			BirthDate: moment(sapClientParams.BirthDate).toDate()
@@ -219,7 +224,7 @@ async function createClient(params, req){
 
 		sails.log.info('contacts app', contactsParams);
 		sails.log.info('client app', clientCreateParams);
-		
+
 		const createdClient = await Client.create(clientCreateParams);
 
 		if(contactsParams && contactsParams.length > 0){
@@ -251,8 +256,8 @@ async function createClient(params, req){
 		}
 
 		return {
-			createdClient, 
-			contactsCreated, 
+			createdClient,
+			contactsCreated,
 			fiscalAddressesCreated
 		};
 	}
@@ -265,7 +270,7 @@ async function updateClient(params, req){
 	const { CardCode } = params;
 	const email = params.E_Mail;
 	const userId = req.user ? req.user.id : false;
-	
+
 	delete params.FiscalAddress;
 	delete params.Balance;
 	delete params.Orders;
@@ -280,7 +285,7 @@ async function updateClient(params, req){
 			throw new Error('No autorizado');
 		}
 		const isClientEmailTaken = await Client.findOne({E_Mail:email, id: {'!=': params.id}});
-    if(isClientEmailTaken){	
+    if(isClientEmailTaken){
 			throw new Error('Email previamente utilizado');
 		}
 		const sapResult = await SapService.updateClient(CardCode, params);
