@@ -26,6 +26,15 @@ async function updateFiscalAddress(params) {
     if(!params.LicTradNum || !ClientService.isValidRFC(params.LicTradNum)){
       throw new Error('RFC no valido');
     }
+    if(!params.regime && params.regime == null){
+      throw new Error('Régimen no válido');
+    }
+    if(!params.cfdiUse && params.cfdiUse == null){
+      throw new Error('Uso CFDI no válido');
+    }
+    if(params.ZipCode && (params.ZipCode == null || params.ZipCode == '')){
+			throw new Error('Código postal no válido');
+    }
 
     const sapResult = await SapService.updateFiscalAddress(CardCode, fiscalAddress);
     sails.log.info('updateFiscalAddress response', sapResult);
