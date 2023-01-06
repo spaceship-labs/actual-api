@@ -182,12 +182,13 @@ async function buildShippingItem(
       //  WEEKEND_DELIVERY_DAYS -= 1;
       //}
       //seasonDays = WEEKEND_DELIVERY_DAYS;
-      seasonDays = 10;
+      seasonDays = 7;
     } else {
-      // de Qroo a merida
+      // de cedis 01 Qroo a merida
       if (stockItem.whsCode == "01") {
         seasonDays = 12;
       } else {
+      // de Qroo a merida
         seasonDays = 4;
         if (QrooStores.includes(stockItem.whsCode)) {
           seasonDays = 14;
