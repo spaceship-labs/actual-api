@@ -400,8 +400,8 @@ module.exports.paymentGroups = [
         moreCards: true,
         cards: [
           'American Express',
-          'Banamex',
           'Afirme',
+          //'Banamex',
           'Bancomer',
           'Banbajio',
           'Banca Mifel',
