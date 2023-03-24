@@ -176,7 +176,7 @@ async function buildShippingItem(
     let toCode = await Company.findOne(storeWarehouseId);
     if (QrooStores.includes(toCode.WhsCode)) {
       // de Qroo a Qroo 4-5 dias
-      let WEEKEND_DELIVERY_DAYS = 6;
+      let WEEKEND_DELIVERY_DAYS = 5;
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
         WEEKEND_DELIVERY_DAYS -= 1;
