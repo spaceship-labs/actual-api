@@ -63,15 +63,15 @@ module.exports = {
     WeekendDelivery:  { type: 'boolean' },
     clientName: { type: 'string' },
     folio: { type: 'string' },
-    total: { type: 'float' },
-    totalPg1: { type: 'float' },
-    subtotal: { type: 'float' },
-    subtotal2: { type: 'float' }, // includes discounts but not big ticket neither family and friends
-    discount: { type: 'float' },
-    ammountPaid: { type: 'float' },
-    ammountPaidPg1: { type: 'float' },
+    total: { type: 'number', columnType: 'float' },
+    totalPg1: { type: 'number', columnType: 'float' },
+    subtotal: { type: 'number', columnType: 'float' },
+    subtotal2: { type: 'number', columnType: 'float' }, // includes discounts but not big ticket neither family and friends
+    discount: { type: 'number', columnType: 'float' },
+    ammountPaid: { type: 'number', columnType: 'float' },
+    ammountPaidPg1: { type: 'number', columnType: 'float' },
     totalProducts: { type: 'number' },
-    financingCostPercentage: 'float',
+    financingCostPercentage: 'number', columnType: 'float',
     paymentGroup: { type: 'number' },
     appliesClientDiscount: { type: 'boolean' },
     estimatedCloseDate: { type:'string', columnType:'datetime' },
@@ -85,7 +85,7 @@ module.exports = {
       isIn:["0","1","2","3","4","5"]
     },
     minPaidPercentage: {
-      type:'float',
+      type:'number', columnType: 'float',
       defaultsTo: 100
     },
     //TODO: Check status types

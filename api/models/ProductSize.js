@@ -1,15 +1,15 @@
 //APP COLLECTION
 module.exports = {
 	attributes:{
-    Length:{type:'float'},
+    Length:{type:'number', columnType: 'float'},
     LengthUnitMsr:{type:'string'},
-    Width:{type:'float'},
+    Width:{type:'number', columnType: 'float'},
     WidthUnitMsr:{type:'string'},
-    Height:{type:'float'},
+    Height:{type:'number', columnType: 'float'},
     HeightUnitMsr:{type:'string'},
-    Volume:{type:'float'},
+    Volume:{type:'number', columnType: 'float'},
     VolumeUnitMsr:{type:'string'},
-    Weight:{type:'float'},
+    Weight:{type:'number', columnType: 'float'},
     WeightUnitMsr:{type:'string'},
 
     Product:{

@@ -16,15 +16,15 @@ module.exports = {
       columnType:'date'
     },
     ammountPayment: {
-      type: 'float',
+      type: 'number', columnType: 'float',
       defaultsTo: 0
     },
     rate: {
-      type: 'float',
+      type: 'number', columnType: 'float',
       defaultsTo: 0
     },
     ammount: {
-      type: 'float',
+      type: 'number', columnType: 'float',
       defaultsTo: 0
     },
     status: {

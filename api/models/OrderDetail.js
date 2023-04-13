@@ -4,25 +4,25 @@ module.exports = {
   migrate: 'alter',
   attributes: {
     quantity: 'number',
-    discount: 'float',
-    subtotal: 'float',
-    subtotal2: 'float', // includes discounts but not big ticket neither family and friends
-    total: 'float',
-    totalPg1: 'float',
-    financingCostPercentage: 'float',
-    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
-    discountPercent: 'float', //by unit (includes big ticket discount)
+    discount: 'number', columnType: 'float',
+    subtotal: 'number', columnType: 'float',
+    subtotal2: 'number', columnType: 'float', // includes discounts but not big ticket neither family and friends
+    total: 'number', columnType: 'float',
+    totalPg1: 'number', columnType: 'float',
+    financingCostPercentage: 'number', columnType: 'float',
+    discountPercentPromos: 'number', columnType: 'float', //by unit (does not include big ticket or FF discount)
+    discountPercent: 'number', columnType: 'float', //by unit (includes big ticket discount)
     discountName: 'string',
-    originalDiscountPercent: 'float',
+    originalDiscountPercent: 'number', columnType: 'float',
     clientDiscountReference: 'string',
     bigticketDiscountPercentage: {
       type: 'string',
       isIn:["0","1","2","3","4","5"]
     },
     paymentGroup: 'number',
-    unitPrice: 'float',
-    unitPriceWithDiscount: 'float',
-    ewallet: 'float',
+    unitPrice: 'number', columnType: 'float',
+    unitPriceWithDiscount: 'number', columnType: 'float',
+    ewallet: 'number', columnType: 'float',
     immediateDelivery: 'boolean',
     ShopDelivery: 'boolean',
     WeekendDelivery: 'boolean',

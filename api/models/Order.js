@@ -21,19 +21,19 @@ module.exports = {
       type: 'boolean',
     },
     ammountPaid: {
-      type: 'float',
+      type: 'number', columnType: 'float',
     },
     ammountPaidPg1: {
-      type: 'float',
+      type: 'number', columnType: 'float',
     },
     total: {
-      type: 'float',
+      type: 'number', columnType: 'float',
     },
     subtotal: {
-      type: 'float',
+      type: 'number', columnType: 'float',
     },
     discount: {
-      type: 'float',
+      type: 'number', columnType: 'float',
     },
     currency: {
       type: 'string',
@@ -143,7 +143,7 @@ module.exports = {
     //APP FIELDS
 
     minPaidPercentage: {
-      type:'float',
+      type:'number', columnType: 'float',
       defaultsTo: 60
       //defaultsTo: 100
     },

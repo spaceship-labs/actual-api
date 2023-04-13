@@ -7,7 +7,7 @@ module.exports = {
     required:true,
     unique:true},
     deliveryText: {type:'text'},
-    exchangeRate: {type:'float'},
+    exchangeRate: {type:'number', columnType: 'float'},
     bannersOrder:{type:'string'},
 
     Banners:{

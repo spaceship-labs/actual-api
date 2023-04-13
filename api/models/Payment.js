@@ -32,7 +32,7 @@ module.exports = {
     },
     folio:{type:'string'},
     name:{type:'string'},
-    ammount:{type:'float'},
+    ammount:{type:'number', columnType: 'float'},
     currency:{
       type:'string',
       isIn:[
@@ -40,13 +40,13 @@ module.exports = {
         'usd'
       ]
     },
-    exchangeRate:{type:'float'},
+    exchangeRate:{type:'number', columnType: 'float'},
     verificationCode: {type:'string'},
     conektaId: {type:'string'},
     isCancelled: {type:'boolean'},
     isCancellation: {type:'boolean'},
     isRecurring: {type:'boolean'},
-    msi:{type:'float'},
+    msi:{type:'number', columnType: 'float'},
     paymentType: {type:'string'},
     terminal: {
       type:'string',

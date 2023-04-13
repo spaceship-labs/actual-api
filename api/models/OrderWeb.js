@@ -8,23 +8,23 @@ module.exports = {
     documents:{
       type:'json', columnType:'array'
     },
-    immediateDelivery:{type:'float'},
-    ShopDelivery:{type:'float'},
-    WeekendDelivery:{type:'float'},
-    ammountPaid: {type:'float'},
-    ammountPaidPg1:{type:'float'},
-    total:{type:'float'},
-    totalPg1: {type:'float'},
-    totalPg2: {type:'float'},
-    totalPg3: {type:'float'},
-    totalPg4: {type:'float'},
-    totalPg5: {type:'float'},
+    immediateDelivery:{type:'number', columnType: 'float'},
+    ShopDelivery:{type:'number', columnType: 'float'},
+    WeekendDelivery:{type:'number', columnType: 'float'},
+    ammountPaid: {type:'number', columnType: 'float'},
+    ammountPaidPg1:{type:'number', columnType: 'float'},
+    total:{type:'number', columnType: 'float'},
+    totalPg1: {type:'number', columnType: 'float'},
+    totalPg2: {type:'number', columnType: 'float'},
+    totalPg3: {type:'number', columnType: 'float'},
+    totalPg4: {type:'number', columnType: 'float'},
+    totalPg5: {type:'number', columnType: 'float'},
 
-    discountPg1: {type:'float'},
-    discountPg2: {type:'float'},
-    discountPg3: {type:'float'},
-    discountPg4: {type:'float'},
-    discountPg5: {type:'float'},
+    discountPg1: {type:'number', columnType: 'float'},
+    discountPg2: {type:'number', columnType: 'float'},
+    discountPg3: {type:'number', columnType: 'float'},
+    discountPg4: {type:'number', columnType: 'float'},
+    discountPg5: {type:'number', columnType: 'float'},
 
     isSpeiOrder: {type:'boolean'},
     speiExpirationPayment: {type:'string',columnType:'datetime'},
@@ -32,8 +32,8 @@ module.exports = {
     paymentReminderSent:{type:'boolean'},
     paymentExpirationSent:{type:'boolean'},
 
-    subtotal:{type:'float'},
-    discount:{type:'float'},
+    subtotal:{type:'number', columnType: 'float'},
+    discount:{type:'number', columnType: 'float'},
     currency:{type:'string'},
     paymentGroup:{type:'number'},
     WhsCode:{type:'string'},
@@ -61,7 +61,7 @@ module.exports = {
     conektaId:{type:'string'},
     receiving_account_bank:{type:'string'},
     receiving_account_number:{type:'string'},
-    conektaAmount: {type:'float'},
+    conektaAmount: {type:'number', columnType: 'float'},
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
 
@@ -97,7 +97,7 @@ module.exports = {
     //APP FIELDS
 
     minPaidPercentage: {
-      type:'float',
+      type:'number', columnType: 'float',
       defaultsTo: 60
       //defaultsTo: 100
     }

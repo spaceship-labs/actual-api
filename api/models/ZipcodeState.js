@@ -3,7 +3,7 @@ module.exports = {
   migrate:'alter',
   attributes: {
   	name: {type: 'string'},
-    deliveryPriceValue: {type:'float'},
+    deliveryPriceValue: {type:'number', columnType: 'float'},
     deliveryPriceMode: {
       type: 'string',
       isIn : ['percentage', 'amount']

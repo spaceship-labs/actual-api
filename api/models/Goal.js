@@ -8,7 +8,7 @@
 module.exports = {
   attributes: {
     goal: {
-      type: 'float',
+      type: 'number', columnType: 'float',
       required: true
     },
     sellers: {

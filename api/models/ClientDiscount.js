@@ -14,8 +14,8 @@ module.exports = {
     U_SocioNegocio: 'string',
     U_Sociedad: 'string',
     U_FijoMovil: 'string',
-    U_Porcentaje: 'float',
-    U_Porcentaje2: 'float',
+    U_Porcentaje: 'number', columnType: 'float',
+    U_Porcentaje2: 'number', columnType: 'float',
     U_VigDesde: { type: 'string', columnType: 'datetime' },
     U_VigHasta: { type: 'string', columnType: 'datetime' },
     lastModified: { type: 'string', columnType: 'datetime' }

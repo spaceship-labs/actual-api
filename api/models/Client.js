@@ -17,7 +17,7 @@ module.exports = {
     SlpCode: { type: 'number' },
     Gender: { type: 'string' },
     LicTradNum: { type: 'string' },
-    Balance: { type: 'float' },
+    Balance: { type: 'number', columnType: 'float' },
     Currency: { type: 'string' },
 
     /*
@@ -45,7 +45,7 @@ module.exports = {
     rfc: { type: 'string' },
     isMoral: { type: 'boolean' },
     ewallet: {
-      type: 'float',
+      type: 'number', columnType: 'float',
       defaultsTo: 0,
     },
     U_perautor: { type: 'string' },

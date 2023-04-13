@@ -7,7 +7,7 @@ module.exports = {
 			isIn:['positive', 'negative']
 		},
 		amount:{
-			type:'float',
+			type:'number', columnType: 'float',
 			required:true
 		},
     Store:{
