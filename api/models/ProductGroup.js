@@ -18,7 +18,7 @@ module.exports = {
       required:true,
       unique:true
     },
-    Description:{type:'text'},
+    Description:{type:'string'},
     startDate: {type:'string',columnType:'datetime'},
     endDate: {type:'string',columnType:'datetime'},
     HasExpiration: {type:'boolean'},

@@ -21,6 +21,6 @@ module.exports = {
     zipCode: {type:'string'},
     street: {type:'string'},
     street2: {type:'string'},
-    references:{type:'text'}
+    references:{type:'string'}
   }
 }

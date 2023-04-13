@@ -11,7 +11,7 @@ module.exports = {
     User:{
       model:'User'
     },
-    notes: {type:'text'},
+    notes: {type:'string'},
     eventType: {type:'string'},
     dateTime: {type:'string',columnType:'datetime'},
     estimatedCloseDate: {type:'string',columnType:'datetime'},

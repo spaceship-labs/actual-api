@@ -2,7 +2,7 @@
 module.exports = {
 	attributes:{
 		Name:{type:'string'},
-		Description:{type:'text'},
+		Description:{type:'string'},
     Handle:{type:'string'},
     IsMultiple: {type:'boolean'},
     ValuesOrder: {type:'string'},

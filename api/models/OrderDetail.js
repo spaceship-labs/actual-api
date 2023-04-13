@@ -3,31 +3,31 @@ module.exports = {
   schema:true,
   migrate: 'alter',
   attributes: {
-    quantity: 'number',
-    discount: 'number', columnType: 'float',
-    subtotal: 'number', columnType: 'float',
-    subtotal2: 'number', columnType: 'float', // includes discounts but not big ticket neither family and friends
-    total: 'number', columnType: 'float',
-    totalPg1: 'number', columnType: 'float',
-    financingCostPercentage: 'number', columnType: 'float',
-    discountPercentPromos: 'number', columnType: 'float', //by unit (does not include big ticket or FF discount)
-    discountPercent: 'number', columnType: 'float', //by unit (includes big ticket discount)
-    discountName: 'string',
-    originalDiscountPercent: 'number', columnType: 'float',
-    clientDiscountReference: 'string',
+    quantity: { type: 'number' },
+    discount: { type: 'number', columnType: 'float' },
+    subtotal: { type: 'number', columnType: 'float' },
+    subtotal2: { type: 'number', columnType: 'float' }, // includes discounts but not big ticket neither family and friends
+    total: { type: 'number', columnType: 'float' },
+    totalPg1: { type: 'number', columnType: 'float' },
+    financingCostPercentage: { type: 'number', columnType: 'float' },
+    discountPercentPromos: { type: 'number', columnType: 'float' }, //by unit (does not include big ticket or FF discount)
+    discountPercent: { type: 'number', columnType: 'float' }, //by unit (includes big ticket discount)
+    discountName: { type: 'string' },
+    originalDiscountPercent: { type: 'number', columnType: 'float'},
+    clientDiscountReference: { type: 'string' },
     bigticketDiscountPercentage: {
       type: 'string',
       isIn:["0","1","2","3","4","5"]
     },
-    paymentGroup: 'number',
-    unitPrice: 'number', columnType: 'float',
-    unitPriceWithDiscount: 'number', columnType: 'float',
-    ewallet: 'number', columnType: 'float',
-    immediateDelivery: 'boolean',
-    ShopDelivery: 'boolean',
-    WeekendDelivery: 'boolean',
-    isSRService: 'boolean',
-    isFreeSale: 'boolean',
+    paymentGroup: {type: 'number' },
+    unitPrice: { type: 'number', columnType: 'float' },
+    unitPriceWithDiscount: { type: 'number', columnType: 'float' },
+    ewallet: { type: 'number', columnType: 'float' },
+    immediateDelivery: {type: 'boolean' },
+    ShopDelivery: { type: 'boolean' },
+    WeekendDelivery: { type: 'boolean' },
+    isSRService: { type: 'boolean' },
+    isFreeSale: { type: 'boolean' },
     Promotion:{
       model:'Promotion'
     },

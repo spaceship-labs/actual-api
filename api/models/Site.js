@@ -6,7 +6,7 @@ module.exports = {
     handle:{type:'string',
     required:true,
     unique:true},
-    deliveryText: {type:'text'},
+    deliveryText: {type:'string'},
     exchangeRate: {type:'number', columnType: 'float'},
     bannersOrder:{type:'string'},
 
