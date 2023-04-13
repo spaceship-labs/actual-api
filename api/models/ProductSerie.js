@@ -1,4 +1,5 @@
 module.exports = {
+  schema: true,
 	attributes:{
 		OrderSap:{
 			model:'OrderSap'

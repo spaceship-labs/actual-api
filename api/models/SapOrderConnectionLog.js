@@ -1,5 +1,6 @@
 //APP COLLECTION
 module.exports = {
+  schema: true,
   attributes: {
     Quotation:{
       model: 'Quotation'

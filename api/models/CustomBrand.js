@@ -1,6 +1,7 @@
 //APP COLLECTION
 module.exports = {
   //migrate:'alter',
+  schema: true,
   attributes:{
     Name:{type:'string'},
     Description: {type:'string'},

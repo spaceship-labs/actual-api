@@ -1,5 +1,6 @@
 //SAP COLLECTION
 module.exports = {
+  schema: true,
   tableName:'Seller',
   attributes:{
     /*

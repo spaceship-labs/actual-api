@@ -2,7 +2,7 @@ var _  = require('underscore');
 var Promise = require('bluebird');
 
 module.exports = {
-  
+
   searchByFilters: function(req, res){
     var form           = req.allParams();
     var terms          = [].concat(form.keywords || []);
@@ -15,10 +15,10 @@ module.exports = {
     var sortOption     = form.sortOption;
     var societyCodes   = form.societyCodes;
     var slowMovement   = form.slowMovement;
-    
 
-    var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
-    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
+
+    var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;
+    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var productsIds    = [];
     var activeStore    = req.user.activeStore;
     var paginate     = {
@@ -32,12 +32,12 @@ module.exports = {
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query            = Search.applyBrandsQuery(query, brandsIds);
     query            = Search.applyDiscountsQuery(query, discounts);
-    query            = Search.applySocietiesQuery(query, societyCodes);            
+    query            = Search.applySocietiesQuery(query, societyCodes);
     query.Active     = 'Y';
-    
+
     if(slowMovement){
-      query = Search.applySlowMovementQuery(query);      
-    }    
+      query = Search.applySlowMovementQuery(query);
+    }
 
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
@@ -83,7 +83,7 @@ module.exports = {
         return [
           Product.count(searchQuery),
           find.paginate(paginate).sort(sortValue)
-        ];        
+        ];
       })
       .spread(function(total, products) {
         return res.json({total: total, products: products});
@@ -98,7 +98,7 @@ module.exports = {
     var form           = req.allParams();
     var handle         = [].concat(form.category);
     var filtervalues   = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
-    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;   
+    var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
     var stockRanges    = form.stockRanges;
@@ -116,11 +116,11 @@ module.exports = {
     query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query = Search.applyBrandsQuery(query, brandsIds);
     query = Search.applyDiscountsQuery(query, discounts);
-    query = Search.applySocietiesQuery(query, societyCodes);            
+    query = Search.applySocietiesQuery(query, societyCodes);
 
     if(slowMovement){
-      query = Search.applySlowMovementQuery(query);      
-    }    
+      query = Search.applySlowMovementQuery(query);
+    }
 
     var paginate       = {
       page:  form.page  || 1,
@@ -131,7 +131,7 @@ module.exports = {
       .then(function(results) {
         var categoryProducts = results;
         return [
-          categoryProducts, 
+          categoryProducts,
           Search.getProductsByFilterValue(filtervalues)
         ];
       })
@@ -148,7 +148,7 @@ module.exports = {
       })
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
-        
+
         query = _.extend(query,{
           id: productsIds,
           Active: 'Y'
@@ -156,12 +156,12 @@ module.exports = {
 
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
-        } 
+        }
 
         if(stockRanges && _.isArray(stockRanges) && stockRanges.length > 0 ){
           delete query[activeStore.code];
           query = Search.applyStockRangesQuery(query, activeStore.code, stockRanges);
-        }        
+        }
 
         var freeSaleQuery = _.clone(query);
         freeSaleQuery = _.extend(freeSaleQuery, {
@@ -219,7 +219,7 @@ module.exports = {
     var priceField         = 'Price';
     var price        = {
       '>=': form.minPrice || 0,
-      '<=': form.maxPrice || Infinity
+      '<=': form.maxPrice || Number.MAX_SAFE_INTEGER
     };
 
     var paginate     = {
@@ -241,13 +241,13 @@ module.exports = {
     ];
 
     Search.getProductsByCategories(
-      categories, 
+      categories,
       {excludedCategories: form.excludedCategories}
     )
       .then(function(catprods) {
         return [
-          catprods, 
-          Search.getProductsByFilterValue(filtervalues), 
+          catprods,
+          Search.getProductsByFilterValue(filtervalues),
           Search.getProductsByGroup(groups)
         ];
       })
@@ -279,7 +279,7 @@ module.exports = {
         }
         query = Search.applyFilters({},filters);
         query = Search.applyOrFilters(query,orFilters);
-        
+
         var freeSaleQuery = _.clone(query);
         freeSaleQuery = _.extend(freeSaleQuery, {
           freeSale: true,
@@ -294,7 +294,7 @@ module.exports = {
         };
 
         products = Product.find(searchQuery);
-        
+
         if(populateImgs){
           //products.populate('files')
         }

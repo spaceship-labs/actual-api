@@ -1,5 +1,6 @@
 //APP COLLECTION
 module.exports = {
+  schema: true,
 	attributes:{
     Length:{type:'number', columnType: 'float'},
     LengthUnitMsr:{type:'string'},

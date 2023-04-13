@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+  schema: true,
   attributes: {
     goal: {
       type: 'number', columnType: 'float',

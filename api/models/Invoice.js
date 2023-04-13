@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+  schema: true,
   attributes: {
     alegraId: {
       type:'number'

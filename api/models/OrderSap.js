@@ -1,4 +1,5 @@
 module.exports = {
+  schema: true,
 	attributes:{
 		invoiceSap: 'string',
 		document: 'string',

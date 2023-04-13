@@ -1,4 +1,5 @@
 module.exports = {
+  schema: true,
 	attributes:{
 	  User:{
 	    model: 'User'
@@ -20,6 +21,6 @@ module.exports = {
 	  },
 	  isError:{
 	  	type:'boolean'
-	  },		
+	  },
 	}
 };

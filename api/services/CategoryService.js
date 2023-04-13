@@ -12,7 +12,7 @@ module.exports = {
 async function cacheCategoriesProducts(){
   var price = {
     '>=': 0,
-    '<=': Infinity
+    '<=': Number.MAX_SAFE_INTEGER
   };
   var productsQuery = {
     Price: price,
@@ -37,7 +37,7 @@ function getProductsStoresStock(products, storesCodes){
   stock = products.reduce(function(stockAux, product){
     for(var i = 0;i < storesCodes.length;i++){
       stockAux[storesCodes[i]] = stockAux[storesCodes[i]] || 0;
-      
+
       if( isAWebStoreCode(storesCodes[i]) ){
         if(product[storesCodes[i]] > 0 && !product.excludeWeb && product.U_FAMILIA === 'SI'){
           stockAux[storesCodes[i]]++;
@@ -74,7 +74,7 @@ async function getAllStoresCodes(){
   const stores = await Store.find({select:['code']});
   const storesCodes = stores.map(function(s){
     return s.code;
-  });    
+  });
   return _.uniq(storesCodes);
 }
 
@@ -105,5 +105,5 @@ function buildCategoriesTree(categoriesLv1, categoriesLv2, categoriesLv3){
 
     categoryTree.push(mainCategory);
   });
-  return categoryTree;  
+  return categoryTree;
 }

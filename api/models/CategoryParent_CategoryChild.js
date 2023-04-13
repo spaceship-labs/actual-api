@@ -1,4 +1,5 @@
 module.exports = {
+  schema: true,
   tableName: 'productcategory_childs__productcategory_parents',
   attributes: {
     parent: {

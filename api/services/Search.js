@@ -4,7 +4,7 @@ var Promise  = require('bluebird');
 
 module.exports = {
   applyBrandsQuery        : applyBrandsQuery,
-  applyDiscountsQuery     : applyDiscountsQuery,  
+  applyDiscountsQuery     : applyDiscountsQuery,
   applyFilters            : applyFilters,
   applyOrFilters          : applyOrFilters,
   applySlowMovementQuery  : applySlowMovementQuery,
@@ -89,7 +89,7 @@ function relatePromotionsToProducts(promotions, products){
 
       products[i].Promotions = products[i].Promotions || [];
 
-      var validPromotion = promotions[j].productsIds.indexOf(products[i].id); 
+      var validPromotion = promotions[j].productsIds.indexOf(products[i].id);
       if(validPromotion >= 0){
         products[i].Promotions = products[i].Promotions.concat( promotions[j] );
       }
@@ -125,7 +125,7 @@ function queryIdsProducts(query, idProducts) {
 function getPriceQuery(query, priceField, minPrice, maxPrice) {
   var priceQuery = {
     '>=': minPrice || 0,
-    '<=': maxPrice || Infinity
+    '<=': maxPrice || Number.MAX_SAFE_INTEGER
   };
   var queryExtension = {};
   queryExtension[priceField] = priceQuery;
@@ -271,7 +271,7 @@ function getProductsByCategories(categoriesIds, options) {
       relationsHash   = getProductRelationsHash(relations, 'product', 'productCategory');
       relationsArray  = hashToArray(relationsHash);
       if(options.applyIntersection){
-        //If product has all the searching categories        
+        //If product has all the searching categories
         relationsArray = getRelationsWithCategories(relationsArray, categoriesIds);
       }
       productsIds = relationsArray.map(function(relation) {
@@ -284,15 +284,15 @@ function getProductsByCategories(categoriesIds, options) {
 
 function getProductsByFilterValue(filtervaluesIds){
   var relationsHash       = {};
-  var relationsArray      = [];  
+  var relationsArray      = [];
   return Product_ProductFilterValue.find({productfiltervalue: filtervaluesIds})
     .then(function(relations) {
       relationsHash   = getProductRelationsHash(relations, 'product', 'productfiltervalue');
       relationsArray  = hashToArray(relationsHash);
-      
+
        //Check if product has all the filter values
       //relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
-      
+
       return relationsArray.map(function(relation) {
         return relation[0]; //Product ID
       });
@@ -330,7 +330,7 @@ function promotionCronJobSearch(opts) {
   var excludedCategories  = opts.excludedCategories || [];
   var price               = {
     '>=': opts.minPrice || 0,
-    '<=': opts.maxPrice || Infinity
+    '<=': opts.maxPrice || Number.MAX_SAFE_INTEGER
   };
   var query               = {};
   var products            = [];
@@ -349,7 +349,7 @@ function promotionCronJobSearch(opts) {
   ];
 
   return getProductsByCategories(
-    categories, 
+    categories,
     {excludedCategories: opts.excludedCategories}
   )
     .then(function(catprods) {
@@ -426,17 +426,17 @@ function getProductRelationsHash(relations, productKey, relateToKey){
     var relateToId = relation[relateToKey];
     productMap[productId] = (productMap[productId] || []).concat(relateToId);
     return productMap;
-  }, {});  
+  }, {});
   return relationsHash;
 }
 
 function areFiltersApplied(categories, filtervalues, groups){
-  return (categories.length > 0 || filtervalues.length > 0 || groups.length > 0);  
+  return (categories.length > 0 || filtervalues.length > 0 || groups.length > 0);
 }
 
 /*
-* @param Array of arrays, eg: 
-* [ 
+* @param Array of arrays, eg:
+* [
 *   [ productId , [<categoryId/filterValuesIds>, <categoryId/filterValuesIds>, <categoryId/filterValuesIds>] ],
 *   [ productId , [<categoryId/filterValuesIds>, <categoryId/filterValuesIds>, <categoryId/filterValuesIds>] ]
 * ]
