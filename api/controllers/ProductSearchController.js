@@ -4,7 +4,7 @@ var Promise = require('bluebird');
 module.exports = {
   
   searchByFilters: function(req, res){
-    var form           = req.params.all();
+    var form           = req.allParams();
     var terms          = [].concat(form.keywords || []);
     var filtervalues   = [].concat(form.ids || []);
     var minPrice       = form.minPrice;
@@ -95,7 +95,7 @@ module.exports = {
 
 
   searchByCategory: function(req, res) {
-    var form           = req.params.all();
+    var form           = req.allParams();
     var handle         = [].concat(form.category);
     var filtervalues   = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;   
@@ -205,7 +205,7 @@ module.exports = {
   },
 
   advancedSearch: function(req, res) {
-    var form               = req.params.all();
+    var form               = req.allParams();
     var categories         = [].concat(form.categories);
     var filtervalues       = [].concat(form.filtervalues);
     var groups             = [].concat(form.groups);

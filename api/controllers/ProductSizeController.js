@@ -1,6 +1,6 @@
 module.exports = {
   create: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     ProductSize.create(form)
       .then(function(created){
         res.json(created);
@@ -11,7 +11,7 @@ module.exports = {
       });
   },
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductSize.update({id:id},form)
       .then(function (updated){
@@ -23,7 +23,7 @@ module.exports = {
       });      
   },
   destroy: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductSize.destroy({id:id})
       .then(function(){

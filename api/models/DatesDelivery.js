@@ -14,8 +14,8 @@ module.exports = {
       required: true
     },
     ShipDate: {
-      type: 'date',
-      required: true
+      type: 'string',
+      columnType:'date'
     },
     OpenCreQty: {
       type: 'integer',

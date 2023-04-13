@@ -6,7 +6,7 @@ module.exports = {
     DocEntry: { type: 'integer' },
     folio: { type: 'string' },
     documents: {
-      type: 'array',
+      type:'json', columnType:'array',
     },
     immediateDelivery: {
       type: 'boolean',
@@ -56,6 +56,7 @@ module.exports = {
     },
     Quotation: {
       model: 'Quotation',
+      required:true,
       unique: true,
     },
     Client: {

@@ -32,7 +32,7 @@ module.exports = {
   },
 
   list: function(req, res){
-    var form  = req.params.all();
+    var form  = req.allParams();
     var page  = form.page;
     var limit = form.limit;
     var find = ZipcodeDelivery.find();

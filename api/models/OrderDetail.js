@@ -16,8 +16,8 @@ module.exports = {
     originalDiscountPercent: 'float',    
     clientDiscountReference: 'string',
     bigticketDiscountPercentage: {
-      type: 'integer',
-      enum:[0,1,2,3,4,5]
+      type: 'string',
+      isIn:["0","1","2","3","4","5"]
     },    
     paymentGroup: 'integer',
     unitPrice: 'float',
@@ -49,15 +49,15 @@ module.exports = {
 
     //ship
     shipDate: {
-      type: 'date',
+      type:'string', columnType:'date',
       required: true
     },
     originalShipDate: {
-      type: 'date',
+      type:'string', columnType:'date',
       required: true
     },    
     productDate: {
-      type: 'date',
+      type:'string', columnType:'date',
       required: true
     },
     shipCompany: {

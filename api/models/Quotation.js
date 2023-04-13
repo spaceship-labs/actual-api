@@ -74,15 +74,15 @@ module.exports = {
     financingCostPercentage: 'float',
     paymentGroup: { type: 'integer' },
     appliesClientDiscount: { type: 'boolean' },
-    estimatedCloseDate: { type: 'datetime' },
+    estimatedCloseDate: { type:'string', columnType:'datetime' },
 
     bigticketMaxPercentage:{
-      type:'integer',
-      enum:[0,1,2,3,4,5]
+      type:'string',
+      isIn:["0","1","2","3","4","5"]
     },
     bigticketPercentage: {
-      type:'integer',
-      enum:[0,1,2,3,4,5]
+      type:'string',
+      isIn:["0","1","2","3","4","5"]
     },
     minPaidPercentage: {
       type:'float',
@@ -100,7 +100,7 @@ module.exports = {
       type:'string',
     },
     tracing: {
-      type:'datetime'
+      type:'string',columnType:'datetime'
     }
   },
 

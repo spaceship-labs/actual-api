@@ -3,7 +3,7 @@ var Promise = require('bluebird');
 
 module.exports = {
   find: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'productcategory';
     var extraParams = {
       searchFields: ['Name', 'Handle'],
@@ -82,7 +82,7 @@ module.exports = {
   },
 
   findById: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductCategory.findOne({ id: id })
       .populate('Childs')
@@ -99,7 +99,7 @@ module.exports = {
 
   //TODO: Check why .add() doesnt work for ProductCategory.Parents
   create: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var parents = form.Parents;
     var relationRecords = [];
     ProductCategory.create(form)
@@ -117,7 +117,7 @@ module.exports = {
   },
 
   destroy: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductCategory.destroy({ id: id })
       .then(function() {
@@ -131,7 +131,7 @@ module.exports = {
 
   //TODO: Check better way to add/remove ProductCategory.Parent relation
   update: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductCategory.update({ id: id }, form)
       .then(function(updatedCategory) {
@@ -144,7 +144,7 @@ module.exports = {
   },
 
   getCategory: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var handle = form.handle;
     ProductCategory.findOne({ Handle: handle })
       .populate('Products')
@@ -158,7 +158,7 @@ module.exports = {
   },
 
   findByHandle: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var handle = form.handle;
     ProductCategory.findOne({ Handle: handle })
       .populate('Childs')
@@ -202,8 +202,8 @@ module.exports = {
       const category = await ProductCategory.findOne({ id }).populate(
         'FeaturedProducts'
       );
-      category.FeaturedProducts.add(productId);
-      await category.save();
+      category.FeaturedProducts.addToCollection(productId);
+      await category.update();
       const categoryUpdated = await ProductCategory.findOne({ id })
         .populate('Childs')
         .populate('Parents')
@@ -221,13 +221,13 @@ module.exports = {
       const category = await ProductCategory.findOne({ id }).populate(
         'FeaturedProducts'
       );
-      category.FeaturedProducts.remove(productId);
+      category.FeaturedProducts.removeFromCollection(productId);
       const categoryUpdated = await ProductCategory.findOne({ id })
         .populate('Childs')
         .populate('Parents')
         .populate('FeaturedProducts');
       res.ok(categoryUpdated);
-      await category.save();
+      await category.update();
     } catch (err) {
       res.negotiate(err);
     }

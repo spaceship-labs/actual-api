@@ -13,7 +13,7 @@ module.exports = {
       type: 'string'
     },
     ShipDate: {
-      type: 'date'
+      type:'string', columnType:'date',
     },
     Dscription: {
       type: 'string'

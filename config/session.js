@@ -66,7 +66,8 @@ module.exports.session = {
   * store                                                                    *
   *                                                                          *
   ***************************************************************************/
-
+  adapter: 'connect-mongodb-session',
+  'uri': process.env.MONGODB_URL,
   //adapter: 'connect-mongo',
   //url :'',
   //stringify: false

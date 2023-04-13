@@ -16,7 +16,7 @@ module.exports = {
       required: true
     },
     date: {
-      type: 'date',
+      type:'string', columnType:'date',
       required: true
     },
     store: {

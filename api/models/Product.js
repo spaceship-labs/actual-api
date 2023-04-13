@@ -14,10 +14,9 @@ module.exports = {
     ItemName: { type: 'string' },
     ItmsGrpCod: {
       //Brand
-      type: 'integer',
       model: 'productbrand',
     },
-    SuppCatNum: { type: 'string', size: 17 },
+    SuppCatNum: { type: 'string',  },
     CodeBars: { type: 'string' },
     OnHand: { type: 'float' },
     IsCommited: { type: 'float' },
@@ -25,15 +24,15 @@ module.exports = {
     Available: { type: 'float' },
     PicturName: { type: 'string' },
     SalUnitMsr: { type: 'string' },
-    U_LINEA: { type: 'string', size: 60 },
-    U_PRODUCTO: { type: 'string', size: 60 },
-    U_COLOR: { type: 'string', size: 60 },
-    U_garantia: { type: 'string', size: 60 },
-    U_disenado_en: { type: 'string', size: 60 },
-    U_ensamblado_en: { type: 'string', size: 60 },
-    U_importador: { type: 'string', size: 60 },
+    U_LINEA: { type: 'string',  },
+    U_PRODUCTO: { type: 'string',  },
+    U_COLOR: { type: 'string',  },
+    U_garantia: { type: 'string',  },
+    U_disenado_en: { type: 'string',  },
+    U_ensamblado_en: { type: 'string',  },
+    U_importador: { type: 'string',  },
     U_pctPuntos: { type: 'float' },
-    U_FAMILIA: { type: 'string', size: 30 },
+    U_FAMILIA: { type: 'string',  },
     U_Empresa: { type: 'string' },
     nameSA: { type: 'string', columnName: 'EmpresaName' },
     Active: { type: 'string' },
@@ -41,9 +40,9 @@ module.exports = {
     U_ClaveUnidad: { type: 'string' },
 
     //FIELDS FROM PRICE TABLE
-    PriceList: { type: 'integer', size: 4 },
+    PriceList: { type: 'integer',  },
     Price: { type: 'float' },
-    Currency: { type: 'string', size: 3 },
+    Currency: { type: 'string',  },
     Discount: { type: 'float' },
     DiscountPrice: { type: 'float' },
 
@@ -57,12 +56,11 @@ module.exports = {
 
     Brand: {
       //BrandExtra
-      type: 'integer',
       model: 'productbrand',
     },
 
     Service: { type: 'string' },
-    Grouper: { type: 'string', size: 17 },
+    Grouper: { type: 'string',  },
     SA: { type: 'text' },
     MainFeatures: { type: 'text' },
     Restrictions: { type: 'text' },
@@ -70,7 +68,7 @@ module.exports = {
     DetailedColor: { type: 'string' },
     GuaranteeText: { type: 'text' },
     GuaranteeUnit: { type: 'integer' },
-    GuaranteeUnitMsr: { type: 'string', size: 30 },
+    GuaranteeUnitMsr: { type: 'string',  },
     Seats: { type: 'string' },
     DesignedInCountry: { type: 'string' },
     MadeInCountry: { type: 'string' },

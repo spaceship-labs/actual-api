@@ -7,7 +7,7 @@
 
 module.exports = {
   find: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'commission';
     var extraParams = {
       searchFields: ['user', 'rate', 'ammount'],

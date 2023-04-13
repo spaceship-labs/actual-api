@@ -2,7 +2,7 @@ var Promise = require('bluebird');
 
 module.exports = {
   create: function(req,res){
-    var form = req.params.all();
+    var form = req.allParams();
     Promotion.create(form)
       .then(function(created){
         res.json(created);
@@ -13,7 +13,7 @@ module.exports = {
       });
   },
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'promotion';
     var extraParams = {
       searchFields: ['name','code'],
@@ -29,7 +29,7 @@ module.exports = {
       });
   },
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     Promotion.findOne({id:id})
       .then(function(promo){
@@ -40,7 +40,7 @@ module.exports = {
       });
   },
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     Promotion.update({id:id}, form)
       .then(function(promo){

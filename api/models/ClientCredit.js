@@ -4,7 +4,7 @@ module.exports = {
 	attributes:{
 		Code: 'string',
 		Name: 'string',
-		U_Vigencia: 'datetime',
-		lastModified: 'datetime'
+		U_Vigencia: {type:'string',columnType:'datetime'},
+		lastModified: {type:'string',columnType:'datetime'}
 	}
 };

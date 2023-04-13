@@ -224,6 +224,7 @@ function updateIconFromBase64(product){
     }    
 
     setTimeout(function(){
+      /*
       Product.updateAvatarSap(internalFile,{
         dir : 'products',
         profile: 'avatar',
@@ -238,7 +239,7 @@ function updateIconFromBase64(product){
           resolve();
         }
       });
-
+*/
     }, waitingTime);    
   });
 }
@@ -266,6 +267,7 @@ function updateIcon(product){
       }
 
       setTimeout(function(){
+        /*
         Product.updateAvatarSap(internalFile,{
           dir : 'products',
           profile: 'avatar',
@@ -280,7 +282,7 @@ function updateIcon(product){
             resolve();
           }
         });
-
+*/
       }, waitingTime);
     }
     else if( excludes.indexOf(itemCode) > -1 ){

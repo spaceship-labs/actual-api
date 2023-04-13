@@ -7,7 +7,7 @@
 
 module.exports = {
   create: function(req, res) {
-    var form        = req.params.all();
+    var form        = req.allParams();
     var user        = req.user || form.user;
     var message     = form.message;
     var action      = form.action;
@@ -20,7 +20,7 @@ module.exports = {
   },
 
   find: function(req, res) {
-    var form         = req.params.all();
+    var form         = req.allParams();
     var query        = {};
     var paginate     = {
       page:  form.page  || 1,

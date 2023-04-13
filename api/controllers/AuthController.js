@@ -52,7 +52,7 @@ module.exports = {
   },
 
   authorizeManager: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var email = form.email;
     var password = form.password;
     User.findOne({ email: email })

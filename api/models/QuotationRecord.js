@@ -13,8 +13,8 @@ module.exports = {
     },
     notes: {type:'text'},
     eventType: {type:'string'},
-    dateTime: {type:'datetime'},
-    estimatedCloseDate: {type:'datetime'},
+    dateTime: {type:'string',columnType:'datetime'},
+    estimatedCloseDate: {type:'string',columnType:'datetime'},
     files: {
       collection: 'QuotationRecordFile',
       via:'QuotationRecord',

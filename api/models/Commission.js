@@ -12,27 +12,24 @@ module.exports = {
       required: true
     },
     datePayment: {
-      type: 'date',
+      type: 'string',
+      columnType:'date'
     },
     ammountPayment: {
       type: 'float',
-      required: true,
       defaultsTo: 0
     },
     rate: {
       type: 'float',
-      required: true,
       defaultsTo: 0
     },
     ammount: {
       type: 'float',
-      required: true,
       defaultsTo: 0
     },
-    status : {
+    status: {
       type: 'string',
       enum: ['paid', 'pending'],
-      required: true,
       defaultsTo: 'pending'
     },
     store: {
@@ -51,15 +48,15 @@ module.exports = {
       model: 'payment',
       required: true
     },
-    toJSON: function () {
-      var obj = this.toObject();
-      obj.order = obj.payment.Order;
-      obj.quotation = obj.payment.Quotation;
-      return obj;
-    }
   },
-  beforeValidate: function(val, cb){
-    Common.orderCustomAI(val, 'commissionFolio', function(val){
+  toJSON: function () {
+    var obj = this.toObject();
+    obj.order = obj.payment.Order;
+    obj.quotation = obj.payment.Quotation;
+    return obj;
+  },
+  beforeValidate: function (val, cb) {
+    Common.orderCustomAI(val, 'commissionFolio', function (val) {
       cb();
     });
   },

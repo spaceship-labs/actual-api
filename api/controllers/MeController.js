@@ -7,7 +7,7 @@
 
 module.exports = {
   update: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var user = req.user;
     delete form.password;
     delete form.email;
@@ -35,7 +35,7 @@ module.exports = {
   },
 
   generateCashReport: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var user = req.user;
     var startDate = form.startDate || new Date();
     var endDate = form.endDate || new Date();
@@ -54,7 +54,7 @@ module.exports = {
   },
 
   async managerCashReport(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var STORE_MANAGER_ROLE_NAME = 'store manager';
     form.populateOrders = true;
     form.managerId = req.user.id;

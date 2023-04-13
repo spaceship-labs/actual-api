@@ -22,7 +22,7 @@ module.exports = {
   },
 
   getPackagesByStore: function(req, res){
-    var form        = req.params.all();
+    var form        = req.allParams();
     var id          = form.id;
     var queryPromos = Search.getPromotionsQuery();
     Store.findOne({id:id})
@@ -37,7 +37,7 @@ module.exports = {
   },
 
   getSellersByStore: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     Role.findOne({name:'seller'})
       .then(function(sellerRole){
@@ -53,7 +53,7 @@ module.exports = {
   },
 
   getCommissionables: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var store = form.store;
     Role.find({name:['seller', 'store manager']})
       .then(function(auxCommissionables){
@@ -100,7 +100,7 @@ module.exports = {
   },
 
   generateGlobalCashReport: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var ADMIN_ROLE_NAME = 'admin';
 
     if(req.user.role.name !== ADMIN_ROLE_NAME){

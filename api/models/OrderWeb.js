@@ -6,7 +6,7 @@ module.exports = {
     DocEntry:{type:'integer'},
     folio:{type:'string'},
     documents:{
-      type:'array'
+      type:'json', columnType:'array'
     },
     immediateDelivery:{type:'float'},
     ShopDelivery:{type:'float'},
@@ -27,8 +27,8 @@ module.exports = {
     discountPg5: {type:'float'},
 
     isSpeiOrder: {type:'boolean'},
-    speiExpirationPayment: {type:'datetime'},
-    speiExpirationReminderStartDate: {type:'datetime'},
+    speiExpirationPayment: {type:'string',columnType:'datetime'},
+    speiExpirationReminderStartDate: {type:'string',columnType:'datetime'},
     paymentReminderSent:{type:'boolean'},
     paymentExpirationSent:{type:'boolean'},
 

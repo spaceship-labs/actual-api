@@ -1,6 +1,6 @@
 module.exports = {
   create: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var startDate = new Date(form.startDate);
     var endDate = new Date(form.endDate);
     overlapsRange(startDate, endDate).then(function(overlaps){
@@ -23,7 +23,7 @@ module.exports = {
   },
 
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var startDate = new Date(form.startDate);
     var endDate = new Date(form.endDate);
@@ -46,7 +46,7 @@ module.exports = {
   },
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'pmperiod';
     var extraParams = {
       searchFields: ['name', 'code'],
@@ -62,7 +62,7 @@ module.exports = {
       });
   },
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     PMPeriod.findOne({id:id})
       .then(function(pma){
@@ -73,7 +73,7 @@ module.exports = {
       });
   },
   getActive: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     //Today range
     var currentDate = new Date();
     var query = {

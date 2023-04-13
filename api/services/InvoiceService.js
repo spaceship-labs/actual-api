@@ -4,7 +4,7 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const ALEGRAUSER = process.env.ALEGRAUSER;
 const ALEGRATOKEN = process.env.ALEGRATOKEN;
-const token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
+const token = Buffer.from(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64')
 const promiseDelay = require('promise-delay');
 const ALEGRA_IVA_ID = 2;
 const RFCPUBLIC = 'XAXX010101000';
@@ -30,7 +30,7 @@ module.exports = {
 };
 
 function createOrderInvoice(orderId) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var orderFound;
     var errInvoice;
 
@@ -43,7 +43,7 @@ function createOrderInvoice(orderId) {
       .populate('Client')
       .populate('Details')
       .populate('Payments')
-      .then(function(order) {
+      .then(function (order) {
         orderFound = order;
 
         if (OrderService.isCanceled(order)) {
@@ -56,7 +56,7 @@ function createOrderInvoice(orderId) {
         }
 
         var client = order.Client;
-        var details = order.Details.map(function(d) {
+        var details = order.Details.map(function (d) {
           return d.id;
         });
         var payments = order.Payments;
@@ -71,7 +71,7 @@ function createOrderInvoice(orderId) {
           client,
         ];
       })
-      .spread(function(order, payments, details, address, client) {
+      .spread(function (order, payments, details, address, client) {
         return [
           order,
           payments,
@@ -79,13 +79,13 @@ function createOrderInvoice(orderId) {
           prepareItems(details),
         ];
       })
-      .spread(function(order, payments, client, items) {
+      .spread(function (order, payments, client, items) {
         return prepareInvoice(order, payments, client, items);
       })
-      .then(function(alegraInvoice) {
+      .then(function (alegraInvoice) {
         resolve(Invoice.create({ alegraId: alegraInvoice.id, order: orderId }));
       })
-      .catch(function(err) {
+      .catch(function (err) {
         errInvoice = err;
 
         var log = {
@@ -98,7 +98,7 @@ function createOrderInvoice(orderId) {
 
         return AlegraLog.create(log);
       })
-      .then(function(logCreated) {
+      .then(function (logCreated) {
         reject(errInvoice);
       });
   });
@@ -107,7 +107,7 @@ function createOrderInvoice(orderId) {
 function send(orderID) {
   return Order.findOne(orderID)
     .populate('Client')
-    .then(function(order) {
+    .then(function (order) {
       return [
         Invoice.findOne({ order: orderID }),
         FiscalAddress.findOne({
@@ -116,7 +116,7 @@ function send(orderID) {
         }),
       ];
     })
-    .spread(function(invoice, address) {
+    .spread(function (invoice, address) {
       var emails = [];
       sails.log.info('address', address.U_Correos);
 
@@ -131,7 +131,7 @@ function send(orderID) {
       var id = invoice.alegraId;
       return { id: id, emails: emails };
     })
-    .then(function(data) {
+    .then(function (data) {
       var options = {
         method: 'POST',
         uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
@@ -151,63 +151,63 @@ function prepareInvoice(order, payments, client, items) {
     .add(7, 'days')
     .format('YYYY-MM-DD');
 
-    var generic =
+  var generic =
     !client.identification || client.identification == FiscalAddressService.GENERIC_RFC;
 
-    if(generic){
-      var data = {
-        //status: "draft",
-        date: date,
-        dueDate: dueDate,
-        client: client,
-        items: items,
-        cfdiUse: DEFAULT_CFDI_USE_INVOICE,
-        regimeClient: DEFAULT_REGIME_USE,
-        regimeObject: DEFAULT_REGIME_USE,
-        paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
-        anotation: order.folio,
-        stamp: {
-          generateStamp: true,
-          version: "4.0",
-        },
-        orderObject: order,
-      };
-    }else {
-      var data = {
-        //status: "draft",
-        date: date,
-        dueDate: dueDate,
-        client: client,
-        items: items,
-        cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE_INVOICE,
-        regimeClient: client.regime || DEFAULT_REGIME_USE,
-        regimeObject: [client.regime] || [DEFAULT_REGIME_USE],
-        paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
-        anotation: order.folio,
-        stamp: {
-          generateStamp: true,
-          version: "4.0",
-        },
-        orderObject: order,
-      };
-    }
-  console.log("prepareInvoice data",data)
+  if (generic) {
+    var data = {
+      //status: "draft",
+      date: date,
+      dueDate: dueDate,
+      client: client,
+      items: items,
+      cfdiUse: DEFAULT_CFDI_USE_INVOICE,
+      regimeClient: DEFAULT_REGIME_USE,
+      regimeObject: DEFAULT_REGIME_USE,
+      paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
+      anotation: order.folio,
+      stamp: {
+        generateStamp: true,
+        version: "4.0",
+      },
+      orderObject: order,
+    };
+  } else {
+    var data = {
+      //status: "draft",
+      date: date,
+      dueDate: dueDate,
+      client: client,
+      items: items,
+      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE_INVOICE,
+      regimeClient: client.regime || DEFAULT_REGIME_USE,
+      regimeObject: [client.regime] || [DEFAULT_REGIME_USE],
+      paymentMethod: getPaymentMethodBasedOnPayments(payments, order),
+      anotation: order.folio,
+      stamp: {
+        generateStamp: true,
+        version: "4.0",
+      },
+      orderObject: order,
+    };
+  }
+  console.log("prepareInvoice data", data)
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
-  if(data.paymentType == "PPD"){
+  if (data.paymentType == "PPD") {
     data.paymentMethod = "other";
   }
 
-  if (data.paymentMethod == "other" && data.paymentType == "PUE"){
+  if (data.paymentMethod == "other" && data.paymentType == "PUE") {
     data.paymentType = "PPD"
   }
-  console.log("\n\nInvoice data:\n",data);
+  console.log("\n\nInvoice data:\n", data);
   console.log("\n\n");
   return createInvoice(data);
 }
 
 function hasClientBalancePayment(payments) {
-  return payments.some(function(payment) {
+  return payments.some(function (payment) {
     return payment.type === PaymentService.types.CLIENT_BALANCE;
   });
 }
@@ -258,23 +258,23 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     AlegraLog.create(log)
-      .then(function(logCreated) {
+      .then(function (logCreated) {
         log.id = logCreated.id;
         return request(options);
       })
-      .then(function(result) {
+      .then(function (result) {
         resultAlegra = result;
         return AlegraLog.update(
           { id: log.id },
           { responseData: JSON.stringify(result) }
         );
       })
-      .then(function(logUpdated) {
+      .then(function (logUpdated) {
         resolve(resultAlegra);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         requestError = err;
         return AlegraLog.update(
           { id: log.id },
@@ -284,14 +284,14 @@ function createInvoice(data) {
           }
         );
       })
-      .then(function(logUpdated) {
+      .then(function (logUpdated) {
         reject(requestError);
       });
   });
 }
 
 function getHighestPayment(payments) {
-  var highest = payments.reduce(function(prev, current) {
+  var highest = payments.reduce(function (prev, current) {
     var prevAmount =
       prev.currency === PaymentService.currencyTypes.USD
         ? PaymentService.calculateUSDPayment(prev, prev.exchangeRate)
@@ -330,7 +330,7 @@ function appliesForSpecialCashRule(payments, order) {
 
 //Excludes CLIENT BALANCE and CREDIT CLIENT payments
 function getDirectPayments(payments) {
-  return payments.filter(function(p) {
+  return payments.filter(function (p) {
     return (
       p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
       p.type !== PaymentService.types.CLIENT_CREDIT
@@ -349,7 +349,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
     directPayments = getDirectPayments(payments);
 
     if (directPayments.length === 0) {
-      return uniquePaymentMethod.type == 'client-balance' ? 'transfer':'other';
+      return uniquePaymentMethod.type == 'client-balance' ? 'transfer' : 'other';
     }
     uniquePaymentMethod = getHighestPayment(directPayments);
 
@@ -470,13 +470,13 @@ function prepareClientParams(order, client, address) {
       },
     };
   }
-  console.log("prepareClientParams data",data)
+  console.log("prepareClientParams data", data)
   return data;
 }
 
 function prepareClient(order, client, address) {
   const data = prepareClientParams(order, client, address);
-  console.log("before create client",data)
+  console.log("before create client", data)
   return createClient(data);
 }
 
@@ -510,7 +510,7 @@ function getUnitTypeByProduct(product) {
 }
 
 function prepareItems(details) {
-  var items = details.map(function(detail) {
+  var items = details.map(function (detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
     if (discount < 1) {
@@ -540,7 +540,7 @@ function prepareItems(details) {
     };
   });
 
-  return Promise.mapSeries(items, function(item) {
+  return Promise.mapSeries(items, function (item) {
     return createItemWithDelay(item);
   });
 
@@ -558,14 +558,14 @@ function createItemWithDelay(item) {
     },
     json: true,
   };
-  return promiseDelay(600, request(options)).then(function(ic) {
+  return promiseDelay(600, request(options)).then(function (ic) {
     //console.log('item delayed ' + item.name, new Date());
     return _.assign({}, item, { id: ic.id });
   });
 }
 
 function createItems(items) {
-  return items.map(function(item) {
+  return items.map(function (item) {
     var options = {
       method: 'POST',
       uri: 'https://app.alegra.com/api/v1/items',
@@ -575,7 +575,7 @@ function createItems(items) {
       },
       json: true,
     };
-    return request(options).then(function(ic) {
+    return request(options).then(function (ic) {
       return _.assign({}, item, { id: ic.id });
     });
   });

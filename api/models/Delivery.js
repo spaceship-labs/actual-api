@@ -11,6 +11,7 @@ module.exports = {
   attributes: {
     idDelivery: {
       type: 'integer',
+      required:true,
       unique: true
     },
     FromCode: {

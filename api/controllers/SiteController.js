@@ -2,7 +2,7 @@ var Promise = require('bluebird');
 
 module.exports = {
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var handle = form.handle;
     Site.update({handle:handle}, form).then(function(updated){
       res.json(updated);
@@ -13,7 +13,7 @@ module.exports = {
   },
 
   findByHandle: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var handle = form.handle;
     Site.findOne({handle:handle})
       .populate('Banners')
@@ -26,7 +26,7 @@ module.exports = {
   },
 
   getAll: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     Site.find({}).then(function(sites){
       res.json(sites);
     })
@@ -37,7 +37,7 @@ module.exports = {
   },
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'site';
     var extraParams = {
       searchFields: ['name']
@@ -72,7 +72,7 @@ module.exports = {
 
   addBanner : function(req,res){
     process.setMaxListeners(0);
-    var form = req.params.all();
+    var form = req.allParams();
 
     var options = {
       dir : 'sites/banners',
@@ -100,7 +100,7 @@ module.exports = {
 
   removeFiles : function(req,res){
     process.setMaxListeners(0);
-    var form = req.params.all();
+    var form = req.allParams();
     Site.findOne({id:form.id})
       .populate('Banners')
       .then(function(site){

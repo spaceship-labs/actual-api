@@ -16,9 +16,9 @@ module.exports = {
     U_FijoMovil: 'string',
     U_Porcentaje: 'float',
     U_Porcentaje2: 'float',
-    U_VigDesde: 'datetime',
-    U_VigHasta: 'datetime',
-    lastModified: 'datetime'
+    U_VigDesde: { type: 'string', columnType: 'datetime' },
+    U_VigHasta: { type: 'string', columnType: 'datetime' },
+    lastModified: { type: 'string', columnType: 'datetime' }
   }
 };
 

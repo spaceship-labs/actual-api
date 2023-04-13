@@ -9,7 +9,7 @@ var bcrypt = require('bcrypt');
 module.exports = {
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'user';
     var extraParams = {
       searchFields: ['firstName','email'],
@@ -26,7 +26,7 @@ module.exports = {
   },
 
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var quickRead = form.quickRead;
     
@@ -62,7 +62,7 @@ module.exports = {
   },
 
   update: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     delete form.password;
     User.update({id: id}, form)
@@ -78,7 +78,7 @@ module.exports = {
   },
 
   send_password_recovery: function(req, res){
-    var form  = req.params.all();
+    var form  = req.allParams();
     var email = form.email || false;
     if(email && Common.validateEmail(email) ){
       User.findOne( {email:email}, {select: ['id', 'password', 'email']} )
@@ -116,7 +116,7 @@ module.exports = {
   },
 
   update_password: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var token = form.token || false;
     var email = form.email || false;
     var password = form.password || false;

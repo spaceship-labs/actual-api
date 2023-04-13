@@ -141,7 +141,7 @@ module.exports = {
     issuer: ISSUER,
     audience: AUDIENCE
   },
-  express:{
+  http:{
     customMiddleware: function(app){
       var timeout = require('connect-timeout');
       var timeoutSeconds = 36000;

@@ -19,7 +19,7 @@
  * http://sailsjs.org/#!/documentation/reference/sails.config/sails.config.connections.html
  */
 
-module.exports.connections = {
+module.exports.datastores = {
 
   /***************************************************************************
   *                                                                          *
@@ -40,7 +40,7 @@ module.exports.connections = {
   * Run: npm install sails-mysql                                             *
   *                                                                          *
   ***************************************************************************/
-  mongodb: {
+  /*mongodb: {
     adapter: 'sails-mongo',
     /*
     host: process.env.MONGODB_HOST || 'YOUR_MONGODB_SERVER_HOSTNAME_OR_IP_ADDRESS',
@@ -48,11 +48,11 @@ module.exports.connections = {
     user: process.env.MONGODB_USER || 'YOUR_MONGODB_USER',
     password: process.env.MONGODB_PASS || 'YOUR_MONGODB_PASSWORD',
     database: process.env.MONGODB_NAME || 'YOUR_MONGODB_DB',
-    */
+    *//*
     ssl: true,
     url: process.env.MONGODB_URL || 'YOUR_MONGODB_URL'
   },
-
+*/
   /*
   sqlserver: {
     adapter: 'sails-sqlserver',
@@ -73,14 +73,14 @@ module.exports.connections = {
   * Run: npm install sails-mongo                                             *
   *                                                                          *
   ***************************************************************************/
-  someMongodbServer: {
+  /*someMongodbServer: {
     adapter: 'sails-mongo',
     host: 'localhost',
     port: 27017,
     // user: 'username',
     // password: 'password',
     // database: 'your_mongo_db_name_here'
-  },
+  },*/
 
   /***************************************************************************
   *                                                                          *
@@ -91,13 +91,13 @@ module.exports.connections = {
   *                                                                          *
   *                                                                          *
   ***************************************************************************/
-  somePostgresqlServer: {
+  /*somePostgresqlServer: {
     adapter: 'sails-postgresql',
     host: 'YOUR_POSTGRES_SERVER_HOSTNAME_OR_IP_ADDRESS',
     user: 'YOUR_POSTGRES_USER',
     password: 'YOUR_POSTGRES_PASSWORD',
     database: 'YOUR_POSTGRES_DB'
-  }
+  }*/
 
 
   /***************************************************************************

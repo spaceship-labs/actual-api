@@ -2,7 +2,7 @@ module.exports = {
   migrate:'alter',
   attributes:{
     name:{type:'string'},
-    code:{type:'string', unique:true},
+    code:{type:'string', unique:true, required:true},
     paymentGroup1: {type:'boolean'},
     paymentGroup2: {type:'boolean'},
     paymentGroup3: {type:'boolean'},
@@ -15,7 +15,7 @@ module.exports = {
     ewalletGroup4: {type:'boolean'},
     ewalletGroup5: {type:'boolean'},
 
-    startDate: {type:'datetime'},
-    endDate: {type:'datetime'},
+    startDate: {type:'string',columnType:'datetime'},
+    endDate: {type:'string',columnType:'datetime'},
   }
 }

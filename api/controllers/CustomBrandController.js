@@ -28,7 +28,7 @@ module.exports = {
   },
 
   find: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'custombrand';
     var extraParams = {
       searchFields: ['Name'],
@@ -44,7 +44,7 @@ module.exports = {
   },
 
   create: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     CustomBrand.create(form)
       .then(function(created) {
         res.json(created);

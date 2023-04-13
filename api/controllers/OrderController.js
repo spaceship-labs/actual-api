@@ -1,6 +1,6 @@
 module.exports = {
   sendOrderEmail: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var orderId = form.id;
     Email.sendOrderConfirmation(orderId)
       .then(function(){
@@ -13,7 +13,7 @@ module.exports = {
   },
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var client = form.client;
     var model = 'order';
     var extraParams = {
@@ -37,7 +37,7 @@ module.exports = {
 
 
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var order;
     if( !isNaN(id) ){
@@ -75,7 +75,7 @@ module.exports = {
   },
 
   getInvoicesLogs: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var orderId = form.orderId;
 
     AlegraLog.find({Order: orderId})
@@ -136,7 +136,7 @@ module.exports = {
   },
 
   getCountByUser: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     OrderService.getCountByUser(form)
       .then(function(result){
         res.json(result);
@@ -149,7 +149,7 @@ module.exports = {
 
 
   getTotalsByUser: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     OrderService.getTotalsByUser(form)
       .then(function(result){
         res.json(result);

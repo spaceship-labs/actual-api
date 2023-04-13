@@ -10,7 +10,7 @@ module.exports = {
 			model:'OrderDetail'
 		},
 		seriesNumbers:{
-			type:'array'
+      type:'json', columnType:'array'
 		}
 	}
 };

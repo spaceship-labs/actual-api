@@ -10,7 +10,7 @@ module.exports = {
     CardCode: { type: 'string' },
     CardName: { type: 'string' },
     Title: { type: 'string' },
-    Birthdate: { type: 'date' },
+    Birthdate: { type: 'string', columnType:'date' },
     Phone1: { type: 'string' },
     Cellular: { type: 'string' },
     E_Mail: { type: 'string' },
@@ -36,6 +36,7 @@ module.exports = {
     email: {
       type: 'string',
       unique: true,
+      required:true,
     },
 
     bussinessLegalName: { type: 'string' },
@@ -45,7 +46,6 @@ module.exports = {
     isMoral: { type: 'boolean' },
     ewallet: {
       type: 'float',
-      required: true,
       defaultsTo: 0,
     },
     U_perautor: { type: 'string' },

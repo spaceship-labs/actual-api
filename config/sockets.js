@@ -11,7 +11,7 @@
  */
 
 module.exports.sockets = {
-
+  onlyAllowOrigins: ["http://localhost:9000", "http://ventaskids.miactual.com", "https://ventaskids.miactual.com"]
 
   /***************************************************************************
   *                                                                          *

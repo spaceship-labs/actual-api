@@ -5,7 +5,7 @@ var moment            = require('moment');
 module.exports = {
 
   async create(req, res){
-    var form = req.params.all();    
+    var form = req.allParams();    
     form.Details = formatProductsIds(form.Details);
     form.Store = req.user.activeStore.id;
     form.User = req.user.id;
@@ -112,7 +112,7 @@ module.exports = {
   },
 
   closeQuotation: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = _.clone(form.id);
     var createdRecord = false;
     
@@ -251,7 +251,7 @@ module.exports = {
   },
 
   async addMultipleDetails(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
@@ -306,7 +306,7 @@ module.exports = {
   },
 
   findByClient: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var client = form.client;
     var model = 'quotation';
     var extraParams = {
@@ -324,7 +324,7 @@ module.exports = {
   },
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     form.filters = form.filters || {};
 
     var client = form.client;
@@ -362,7 +362,7 @@ module.exports = {
   },
 
   async getQuotationTotals(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     const id = form.id;
     const paymentGroup = form.paymentGroup || 1;
     var params = {
@@ -383,7 +383,7 @@ module.exports = {
   },
 
   getRecords: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     QuotationRecord.find({Quotation:id})
       .populate('User')
@@ -399,7 +399,7 @@ module.exports = {
 
 
   getCountByUser: function(req, res){
-    var form    = req.params.all();
+    var form    = req.allParams();
     var options = form;
     QuotationService.getCountByUser(options)
       .then(function(count){
@@ -413,7 +413,7 @@ module.exports = {
 
 
   getTotalsByUser: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var options = form;
     QuotationService.getTotalsByUser(options)
       .then(function(totals){
@@ -426,7 +426,7 @@ module.exports = {
   },
 
   getMultipleUsersTotals: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var options = form;
     QuotationService.getMultipleUsersTotals(options)
       .then(function(totals){
@@ -439,7 +439,7 @@ module.exports = {
   },
 
   sendEmail: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var activeStore = req.user.activeStore;
     Email
@@ -453,7 +453,7 @@ module.exports = {
   },
 
   updateSource: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var source = form.source;
     var sourceType = form.sourceType;
@@ -474,7 +474,7 @@ module.exports = {
   },
 
   updateBroker: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var brokerId = form.brokerId;
     var params = {

@@ -10,8 +10,6 @@ module.exports = {
     Product: {
       model: 'product',
       columnName: 'ItemCode',
-      type: 'string',
-      size: 20,
     },
   },
 };

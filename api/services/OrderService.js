@@ -274,9 +274,9 @@ async function create(form, currentUser) {
   quotation.Details.forEach(function(detail) {
     detail.QuotationDetail = _.clone(detail.id);
     delete detail.id;
-    orderFound.Details.add(detail);
+    orderFound.Details.addToCollection(detail);
   });
-  await orderFound.save();
+  await orderFound.update();
   const orderDetails = await OrderDetail.find({ Order: orderCreated.id })
     .populate('Product')
     .populate('shipCompanyFrom');

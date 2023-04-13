@@ -6,7 +6,7 @@ var ADDRESS_TYPE_B = 'B';
 
 module.exports = {
   find: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'client';
     var extraParams = {
       searchFields: [
@@ -30,7 +30,7 @@ module.exports = {
   },
 
   findBySeller: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'client';
     var extraParams = {
       searchFields: ['CardCode', 'CardName'],
@@ -108,7 +108,7 @@ module.exports = {
   },
 
   getContactsByClient: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var CardCode = form.CardCode;
     ClientContact.find({ CardCode: CardCode })
       .then(function(contacts) {

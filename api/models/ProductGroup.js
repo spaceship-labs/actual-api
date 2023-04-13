@@ -10,15 +10,17 @@ module.exports = {
     },
     Handle:{
       type:'string',
-      unique:true
+      unique:true,
+      required:true
     },
     code:{
       type:'string',
+      required:true,
       unique:true
     },
     Description:{type:'text'},
-    startDate: {type:'datetime'},
-    endDate: {type:'datetime'},
+    startDate: {type:'string',columnType:'datetime'},
+    endDate: {type:'string',columnType:'datetime'},
     HasExpiration: {type:'boolean'},
 
     icon_filename:{type:'string'},

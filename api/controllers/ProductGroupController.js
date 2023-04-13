@@ -3,7 +3,7 @@ var _ = require('underscore');
 module.exports = {
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'productgroup';
     var extraParams = {
       searchFields: ['Name']
@@ -19,7 +19,7 @@ module.exports = {
   },
 
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductGroup.findOne({id:id})
       .populate('Products')
@@ -33,7 +33,7 @@ module.exports = {
   },
 
   getVariantGroupProducts: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductGroup.findOne({id:id, Type:'variations'}).populate('Products')
       .then(function(group){
@@ -60,7 +60,7 @@ module.exports = {
   },
 
   create: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     ProductGroup.create(form)
       .then(function(created){
         res.json(created);
@@ -72,7 +72,7 @@ module.exports = {
   },
 
   update: function(req,res){
-    var form = req.params.all();
+    var form = req.allParams();
     delete form.Products;
     ProductGroup.update({id: form.id}, form)
       .then(function(updated){
@@ -85,7 +85,7 @@ module.exports = {
   },
 
   destroy: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     ProductGroup.destroy({id: form.id})
       .then(function(){
         res.json({destroyed:true});
@@ -97,7 +97,7 @@ module.exports = {
   },
 
   addProductToGroup: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var product = form.product;
     var group = form.group;
 
@@ -112,7 +112,7 @@ module.exports = {
   },
 
   removeProductFromGroup: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var product = form.product;
     var group = form.group;
 
@@ -127,7 +127,7 @@ module.exports = {
   },
 
   search: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model          = 'productgroup';
     var extraParams = {
       searchFields: [
@@ -145,13 +145,13 @@ module.exports = {
   },
 
   updateIcon: function(req,res){
-    var form = req.params.all();
+    var form = req.allParams();
     var options = {
       dir : 'groups',
       profile: 'avatar',
       id : form.id,
     };
-
+/*
     ProductGroup.updateAvatar(req,options)
       .then(function(productGroup){
         res.json(productGroup);
@@ -160,12 +160,12 @@ module.exports = {
         console.log('updateIcon err', err);
         res.negotiate(err);
       });      
-
+*/
   },
 
   removeIcon: function(req,res){
     process.setMaxListeners(0);
-    var form = req.params.all();
+    var form = req.allParams();
     var options = {
       dir : 'groups',
       profile: 'avatar',
@@ -183,7 +183,7 @@ module.exports = {
   },
 
   findPackages: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'productgroup';
     var extraParams = {
       searchFields: ['Name']

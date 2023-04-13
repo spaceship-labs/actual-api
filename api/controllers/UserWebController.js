@@ -3,7 +3,7 @@ var Promise = require('bluebird');
 module.exports = {
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'userweb';
     var extraParams = {
       searchFields: ['firstName','email'],
@@ -23,7 +23,7 @@ module.exports = {
   },
 
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     
     var userQuery =  UserWeb.findOne({id: id, role:'admin'});
@@ -51,7 +51,7 @@ module.exports = {
   },
 
   update: function(req, res) {
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     delete form.password;
 

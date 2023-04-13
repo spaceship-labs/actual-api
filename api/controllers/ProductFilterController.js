@@ -2,7 +2,7 @@ var _ = require('underscore');
 
 module.exports = {
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'productfilter';
     var extraParams = {
       searchFields: ['Name']
@@ -18,7 +18,7 @@ module.exports = {
   },
 
   list: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var reading;
     var query = {};
 
@@ -41,7 +41,7 @@ module.exports = {
   },
 
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductFilter.findOne({id:id}).populate('Values').populate('Categories')
       .then(function(filter){
@@ -55,7 +55,7 @@ module.exports = {
 
   //TODO: check why .add() doesnt work on categories.
   create: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     //Creating filter
     ProductFilter.create(form)
       .then(function(created){
@@ -69,7 +69,7 @@ module.exports = {
 
 
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductFilter.update({id:id},form)
       .then(function(updatedFilter){
@@ -84,7 +84,7 @@ module.exports = {
 
 
   destroy: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
 
     ProductFilter.destroy({id:id})

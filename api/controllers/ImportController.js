@@ -5,7 +5,7 @@ var Promise = require('bluebird');
 
 module.exports = {
   importImagesSap: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var limit = form.limit || 10;
     //var skip = 2477;
     var skip = 0;

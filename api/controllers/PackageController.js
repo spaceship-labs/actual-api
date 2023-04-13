@@ -3,7 +3,7 @@ var _ = require('underscore');
 
 module.exports = {
   findPackages: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var model = 'productgroup';
     var extraParams = {
       searchFields: ['Name']
@@ -19,7 +19,7 @@ module.exports = {
   },
 
   getProducts: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductGroup.findOne({id: id, Type:'packages'}).populate('Products')
       .then(function(group){
@@ -45,7 +45,7 @@ module.exports = {
   },
 
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var packageRules = form.packageRules || [];
     var updatedPackage = false;
@@ -67,7 +67,7 @@ module.exports = {
   },
 
   getDetailedPackage: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductGroup.findOne({id:id,Type:'packages'})
       .populate('Stores')

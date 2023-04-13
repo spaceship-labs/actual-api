@@ -2,6 +2,7 @@ var _ = require('underscore');
 
 module.exports = function (req, res, next) {
   var user       = req.user.id;
+  console.log(req.options)
   var controller = req.options.controller;
   var action     = req.options.action;
   Permission.find({

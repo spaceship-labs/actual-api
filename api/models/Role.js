@@ -9,8 +9,8 @@ module.exports = {
   attributes: {
     name: {
       type: 'string',
-      required: 'true',
-      unique: 'true'
+      required: true,
+      unique: true
     },
     owner: {
       collection: 'user',

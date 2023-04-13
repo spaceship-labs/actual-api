@@ -4,7 +4,7 @@ var ObjectId = require('mongodb').ObjectID;
 
 module.exports = {
   create: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     ProductFilterValue.create(form)
       .then(function(created){
         res.json(created);
@@ -15,7 +15,7 @@ module.exports = {
       });
   },
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductFilterValue.update({id:id},form)
       .then(function(updated){
@@ -27,7 +27,7 @@ module.exports = {
       });
   },
   destroy: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     ProductFilterValue.destroy({id:id})
       .then(function(){
