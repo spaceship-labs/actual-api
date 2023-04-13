@@ -10,7 +10,7 @@ module.exports = {
   schema: true,
   attributes: {
     idDates: {
-      type: 'integer',
+      type: 'number',
       required: true
     },
     StartDate: {
@@ -22,7 +22,7 @@ module.exports = {
       required: true
     },
     Days: {
-      type: 'integer'
+      type: 'number'
     },
     Active: {
       type: 'string'

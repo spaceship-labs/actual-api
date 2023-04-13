@@ -70,9 +70,9 @@ module.exports = {
     discount: { type: 'float' },
     ammountPaid: { type: 'float' },
     ammountPaidPg1: { type: 'float' },
-    totalProducts: { type: 'integer' },
+    totalProducts: { type: 'number' },
     financingCostPercentage: 'float',
-    paymentGroup: { type: 'integer' },
+    paymentGroup: { type: 'number' },
     appliesClientDiscount: { type: 'boolean' },
     estimatedCloseDate: { type:'string', columnType:'datetime' },
 
@@ -91,7 +91,7 @@ module.exports = {
     //TODO: Check status types
     status:{
       type:'string',
-      //enum:['closed','pending-payment','to-order', 'canceled']
+      //isIn:['closed','pending-payment','to-order', 'canceled']
     },
     source:{
       type:'string',

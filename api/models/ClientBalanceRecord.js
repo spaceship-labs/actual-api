@@ -4,7 +4,7 @@ module.exports = {
 	attributes:{
 		type:{
 			type:'string',
-			enum:['positive', 'negative']
+			isIn:['positive', 'negative']
 		},
 		amount:{
 			type:'float',
@@ -30,6 +30,6 @@ module.exports = {
     },
     Payment:{
       model: 'Payment'
-    }    
+    }
 	}
 };

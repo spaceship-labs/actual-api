@@ -6,7 +6,7 @@ module.exports = {
     name: { type: 'string' },
     type: { type: 'string' },
     typebase: { type: 'string' },
-    size: { type: 'integer' },
+    size: { type: 'number' },
     displayText: { type: 'string' },
     displayUrl: { type: 'string' },
     newTab: {

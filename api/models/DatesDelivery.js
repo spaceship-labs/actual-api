@@ -18,7 +18,7 @@ module.exports = {
       columnType:'date'
     },
     OpenCreQty: {
-      type: 'integer',
+      type: 'number',
       required: true
     },
     whsCode: {

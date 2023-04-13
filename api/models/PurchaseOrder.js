@@ -19,7 +19,7 @@ module.exports = {
       type: 'string'
     },
     OpenCreQty: {
-      type: 'integer'
+      type: 'number'
     },
     WhsCode: {
       type: 'string'

@@ -10,7 +10,7 @@ module.exports = {
   schema: true,
   attributes: {
     idDelivery: {
-      type: 'integer',
+      type: 'number',
       required:true,
       unique: true
     },
@@ -27,7 +27,7 @@ module.exports = {
       type: 'string'
     },
     Days: {
-      type: 'integer'
+      type: 'number'
     },
     Active: {
       type: 'string'

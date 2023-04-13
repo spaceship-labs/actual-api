@@ -8,7 +8,7 @@
 module.exports = {
   attributes: {
     alegraId: {
-      type:'integer'
+      type:'number'
     },
     order: {
       model: 'order',

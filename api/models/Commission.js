@@ -8,7 +8,7 @@
 module.exports = {
   attributes: {
     folio: {
-      type: 'integer',
+      type: 'number',
       required: true
     },
     datePayment: {
@@ -29,7 +29,7 @@ module.exports = {
     },
     status: {
       type: 'string',
-      enum: ['paid', 'pending'],
+      isIn: ['paid', 'pending'],
       defaultsTo: 'pending'
     },
     store: {
@@ -42,7 +42,7 @@ module.exports = {
     },
     role: {
       type: 'string',
-      enum: ['seller', 'store manager'],
+      isIn: ['seller', 'store manager'],
     },
     payment: {
       model: 'payment',

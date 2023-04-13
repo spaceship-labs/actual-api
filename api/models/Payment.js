@@ -4,7 +4,7 @@ module.exports = {
   attributes:{
     type: {
       type:'string',
-      enum:[
+      isIn:[
         'cash',
         'cash-usd',
         'cheque',
@@ -35,7 +35,7 @@ module.exports = {
     ammount:{type:'float'},
     currency:{
       type:'string',
-      enum:[
+      isIn:[
         'mxn',
         'usd'
       ]
@@ -50,7 +50,7 @@ module.exports = {
     paymentType: {type:'string'},
     terminal: {
       type:'string',
-      enum:[
+      isIn:[
         'american-express',
         'banamex',
         'bancomer',
@@ -61,12 +61,12 @@ module.exports = {
     card: {type:'string'},
     cardLastDigits: {type:'string'},
     cardExpDate: {type:'string'},
-    group:{type:'integer'},
+    group:{type:'number'},
     description:{type:'string'},
     isInternational: {type:'boolean'},
     status:{
       type:'string',
-      enum: ['paid','pending','canceled']
+      isIn: ['paid','pending','canceled']
     },
     sentToSap: {
       type:'boolean'

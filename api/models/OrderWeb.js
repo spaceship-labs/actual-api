@@ -3,7 +3,7 @@ module.exports = {
   migrate:'safe',
   schema: true,
   attributes:{
-    DocEntry:{type:'integer'},
+    DocEntry:{type:'number'},
     folio:{type:'string'},
     documents:{
       type:'json', columnType:'array'
@@ -35,11 +35,11 @@ module.exports = {
     subtotal:{type:'float'},
     discount:{type:'float'},
     currency:{type:'string'},
-    paymentGroup:{type:'integer'},
+    paymentGroup:{type:'number'},
     WhsCode:{type:'string'},
     status:{
       type:'string',
-      enum:[
+      isIn:[
         'lost',
         'pending',
         'on-delivery',
@@ -67,8 +67,8 @@ module.exports = {
 
 
     //SAP FIELDS
-    CntCtCode:{type:'integer'},
-    SlpCode: {type:'integer'},
+    CntCtCode:{type:'number'},
+    SlpCode: {type:'number'},
     CardCode: {type:'string'},
     CardName: {type:'string'},
 
@@ -77,7 +77,7 @@ module.exports = {
     FirstName:{type:'string'},
     LastName:{type:'string'},
 
-    CntctCode:{type:'integer'},
+    CntctCode:{type:'number'},
     Tel1:{type:'string'},
     Cellolar:{type:'string'},
     address:{type:'string'},

@@ -6,7 +6,7 @@ module.exports = {
     Name:{type:'string'},
     Type:{
       type:'string',
-      enum:['variations','environments','packages','relations']
+      isIn:['variations','environments','packages','relations']
     },
     Handle:{
       type:'string',
@@ -27,7 +27,7 @@ module.exports = {
     icon_name:{type:'string'},
     icon_type:{type:'string'},
     icon_typebase:{type:'string'},
-    icon_size:{type:'integer'},
+    icon_size:{type:'number'},
     icon_description:{type:'string'},
 
     Products: {
@@ -43,8 +43,8 @@ module.exports = {
     OnHome:{type:'boolean'},
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
-    
-    
+
+
     PackageRules: {
       collection:'PackageRule',
       via:'PromotionPackage'

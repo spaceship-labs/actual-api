@@ -3,7 +3,7 @@ module.exports = {
 	//migrate:'alter',
 	tableName:'ProductBrand',
 	attributes:{
-		ItmsGrpCod:{type:'integer'},
+		ItmsGrpCod:{type:'number'},
 		ItmsGrpNam:{type:'string'},
 
 		Products:{

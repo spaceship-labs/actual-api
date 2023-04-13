@@ -13,7 +13,7 @@ module.exports = {
     },
     group: {
       type: 'string',
-      enum: ['home', 'studio', 'kids', 'proyectos'],
+      isIn: ['home', 'studio', 'kids', 'proyectos'],
     },
     logo: {
       type: 'string',

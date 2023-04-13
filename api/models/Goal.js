@@ -12,7 +12,7 @@ module.exports = {
       required: true
     },
     sellers: {
-      type: 'integer',
+      type: 'number',
       required: true
     },
     date: {

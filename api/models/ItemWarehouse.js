@@ -16,13 +16,13 @@ module.exports = {
       type: 'string'
     },
     Available: {
-      type: 'integer'
+      type: 'number'
     },
     IsCommited: {
-      type: 'integer'
+      type: 'number'
     },
     OnOrder: {
-      type: 'integer'
+      type: 'number'
     }
   }
 };

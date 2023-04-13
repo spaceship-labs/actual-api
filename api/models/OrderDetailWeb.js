@@ -4,7 +4,7 @@ module.exports = {
   migrate: 'alter',
   attributes: {
     inSapWriteProgress: 'boolean',
-    quantity: 'integer',
+    quantity: 'number',
     discount: 'float',
     subtotal: 'float',
     subtotal2: 'float', // includes discounts but not big ticket neither family and friends
@@ -34,7 +34,7 @@ module.exports = {
       type: 'string',
       isIn:["0","1","2","3","4","5"]
     },
-    paymentGroup: 'integer',
+    paymentGroup: 'number',
     unitPrice: 'float',
     ewallet: 'float',
     immediateDelivery: 'boolean',

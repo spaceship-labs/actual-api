@@ -14,7 +14,7 @@ module.exports = {
     Phone1: { type: 'string' },
     Cellular: { type: 'string' },
     E_Mail: { type: 'string' },
-    SlpCode: { type: 'integer' },
+    SlpCode: { type: 'number' },
     Gender: { type: 'string' },
     LicTradNum: { type: 'string' },
     Balance: { type: 'float' },

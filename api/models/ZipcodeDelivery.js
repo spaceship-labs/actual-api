@@ -9,13 +9,13 @@ module.exports = {
     asentamiento:{type:'string'},
     entrega:{
         type:'string',
-        enum: ['SI', 'NO']
+        isIn: ['SI', 'NO']
     },
-    sin_armado:{type:'integer'},
-    con_armado:{type:'integer'},
-    dias_ent_bigticket:{type:'integer'},
-    entrega_pta:{type:'integer'},
-    dias_ent_softline:{type:'integer'},
+    sin_armado:{type:'number'},
+    con_armado:{type:'number'},
+    dias_ent_bigticket:{type:'number'},
+    entrega_pta:{type:'number'},
+    dias_ent_softline:{type:'number'},
 
     ZipcodeState: {model: 'ZipcodeState'}
   }

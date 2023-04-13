@@ -6,7 +6,7 @@ module.exports = {
   attributes:{
     type: {
       type:'string',
-      enum:[
+      isIn:[
         'debit-card',
         'credit-card',
         //'transfer',
@@ -22,7 +22,7 @@ module.exports = {
     ammount:{type:'float'},
     currency:{
       type:'string',
-      enum:[
+      isIn:[
         'mxn',
         'usd'
       ]
@@ -37,7 +37,7 @@ module.exports = {
     paymentType: {type:'string'},
     terminal: {
       type:'string',
-      enum:[
+      isIn:[
         'american-express',
         'banamex',
         'bancomer',
@@ -49,11 +49,11 @@ module.exports = {
     cardLastDigits: {type:'string'},
     cardName: {type:'string'},
     cardToken: {type:'string'},
-    group:{type:'integer'},
+    group:{type:'number'},
     description:{type:'string'},
     status:{
       type:'string',
-      enum: ['paid','pending','canceled']
+      isIn: ['paid','pending','canceled']
     },
     sentToSap: {
       type:'boolean'
@@ -67,7 +67,7 @@ module.exports = {
     },
     OrderWeb:{
       model:'OrderWeb'
-    }    
+    }
   },
 
   beforeCreate: function(val,cb){

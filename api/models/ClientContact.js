@@ -12,7 +12,7 @@ module.exports = {
     LastName: { type: 'string' },
     Name: { type: 'string' },
 
-    CntctCode: { type: 'integer' },
+    CntctCode: { type: 'number' },
     CardCode: { type: 'string' },
     Tel1: { type: 'string' },
     Cellolar: { type: 'string' },

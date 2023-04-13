@@ -7,8 +7,8 @@ module.exports = {
     Keywords: { type: 'string' },
     Handle: { type: 'string' },
     IsMain: { type: 'boolean' },
-    CategoryLevel: { type: 'integer' },
-    productsNum: { type: 'integer' },
+    CategoryLevel: { type: 'number' },
+    productsNum: { type: 'number' },
     customOrder: { type: 'boolean' },
     complement: {
       type: 'boolean',

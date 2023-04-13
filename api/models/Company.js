@@ -17,7 +17,7 @@ module.exports = {
       type:'string',
     },
 		IntrnalKey:{
-      type:'integer'
+      type:'number'
     },
 		U_Calle:{
       type:'string',
@@ -33,55 +33,55 @@ module.exports = {
     },
 		U_Localidad:{
       type:'string',
-      
+
     },
 		U_Municipio:{
       type:'string',
-      
+
     },
 		U_Estado:{
       type:'string',
-      
+
     },
 		U_Pais:{
       type:'string',
-      
+
     },
 		U_CodigoPostal:{
       type:'string',
-      
+
     },
 		U_Serie_FCP:{
       type:'string',
-      
+
     },
 		U_Serie_ND:{
       type:'string',
-      
+
     },
 		U_Serie_NC:{
       type:'string',
-      
+
     },
 		U_Serie_FR:{
       type:'string',
-      
+
     },
 		U_Serie_FA:{
       type:'string',
-      
+
     },
 		U_EsTransito:{
-      type:'integer'
+      type:'number'
     },
 		U_Bodega:{
-      type:'integer'
+      type:'number'
     },
 		U_InfoWhs:{
-      type:'integer'
+      type:'number'
     },
 		U_Procesado:{
-      type:'integer'
+      type:'number'
     },
 
     //relations

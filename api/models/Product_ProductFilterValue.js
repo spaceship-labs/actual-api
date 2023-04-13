@@ -2,7 +2,7 @@
 module.exports = {
   tableName: 'product_filtervalues__productfiltervalue_products',
   attributes:{
-    value : 'integer',
+    value : 'number',
     productfiltervalue : { //product filter value
       columnName:'productfiltervalue_Products',
       model : 'productfiltervalue'

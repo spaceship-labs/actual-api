@@ -18,7 +18,7 @@ module.exports = {
     },
     action: {
       type: 'string',
-      enum: ['login', 'pointer'],
+      isIn: ['login', 'pointer'],
       required: true
     },
     references: {

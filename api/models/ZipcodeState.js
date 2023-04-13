@@ -6,7 +6,7 @@ module.exports = {
     deliveryPriceValue: {type:'float'},
     deliveryPriceMode: {
       type: 'string',
-      enum : ['percentage', 'amount']
+      isIn : ['percentage', 'amount']
     },
     isActive: {type:'boolean'},
     Zipcodes:{

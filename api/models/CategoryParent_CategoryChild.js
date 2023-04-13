@@ -10,7 +10,7 @@ module.exports = {
       model: 'productCategory'
     },
     position: {
-      type: 'integer'
+      type: 'number'
     }
   }
 };

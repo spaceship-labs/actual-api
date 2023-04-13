@@ -17,7 +17,7 @@ function formatMongoRecord(record){
     }
     */
   }
-  return record;  
+  return record;
 }
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
           delete filters[key];
         }
       }
-    }  
+    }
     return filters;
   },
 
@@ -38,7 +38,7 @@ module.exports = {
       'banamex': 'Banamex',
       'bancomer': 'Bancomer',
       'banorte': 'Banorte',
-      'santander': 'Santander'       
+      'santander': 'Santander'
     };
     return mapper[code];
   },
@@ -88,7 +88,7 @@ module.exports = {
         });
       });
     });
-  },  
+  },
 
   nativeUpdateOne: function(findCriteria, params, model){
     return new Promise(function(resolve, reject){
@@ -110,7 +110,7 @@ module.exports = {
         });
       });
     });
-  },  
+  },
 
   nativeUpdate: function(findCriteria, params, model){
     return new Promise(function(resolve, reject){
@@ -132,7 +132,7 @@ module.exports = {
         });
       });
     });
-  },    
+  },
 
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
@@ -369,9 +369,9 @@ module.exports = {
 
 
   getMonthDateRange: function() {
-    return { 
-      start: moment().startOf("month").toDate(), 
-      end: moment().endOf("month").toDate(), 
+    return {
+      start: moment().startOf("month").toDate(),
+      end: moment().endOf("month").toDate(),
     };
   },
 
@@ -381,7 +381,7 @@ module.exports = {
     }
 
     var currentDay = moment(currentDate).date();
-    
+
     var range = {};
     if(currentDay <= 15){
       range = {

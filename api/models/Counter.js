@@ -2,7 +2,7 @@
 module.exports = {
   attributes: {
     name : 'string',
-    seq : 'integer'
+    seq : 'number'
   },
   migrate : "alter"
 };

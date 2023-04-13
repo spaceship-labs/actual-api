@@ -29,23 +29,23 @@ module.exports = {
     ewalletPg5:{type:'float'},
     ewalletTypePg1:{
       type:'string',
-      enum: ['ammount','percentage']
+      isIn: ['ammount','percentage']
     },
     ewalletTypePg2:{
       type:'string',
-      enum: ['ammount','percentage']
+      isIn: ['ammount','percentage']
     },
     ewalletTypePg3:{
       type:'string',
-      enum: ['ammount','percentage']
+      isIn: ['ammount','percentage']
     },
     ewalletTypePg4:{
       type:'string',
-      enum: ['ammount','percentage']
+      isIn: ['ammount','percentage']
     },
     ewalletTypePg5:{
       type:'string',
-      enum: ['ammount','percentage']
+      isIn: ['ammount','percentage']
     },
     sa: {type:'string'}, //Sociedad
     hasPriority:{type:'boolean'},
@@ -53,7 +53,7 @@ module.exports = {
     pushMoneyUnit:{type:'float'},
     pushMoneyUnitType:{
       type:'string',
-      enum:['ammount','percent']
+      isIn:['ammount','percent']
     },
 
   }

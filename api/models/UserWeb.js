@@ -5,7 +5,7 @@ module.exports = {
   attributes: {
     role: {
       type: 'string',
-      enum: ['admin', 'client']
+      isIn: ['admin', 'client']
     },
     password: {
       type: 'string'

@@ -3,7 +3,7 @@ module.exports = {
   migrate:'alter',
   schema: true,
   attributes: {
-    DocEntry: { type: 'integer' },
+    DocEntry: { type: 'number' },
     folio: { type: 'string' },
     documents: {
       type:'json', columnType:'array',
@@ -39,7 +39,7 @@ module.exports = {
       type: 'string',
     },
     paymentGroup: {
-      type: 'integer',
+      type: 'number',
     },
     appliesClientDiscount: {
       type: 'boolean',
@@ -52,7 +52,7 @@ module.exports = {
     },
     status: {
       type: 'string',
-      enum: ['paid', 'partiallyCanceled', 'canceled'],
+      isIn: ['paid', 'partiallyCanceled', 'canceled'],
     },
     Quotation: {
       model: 'Quotation',
@@ -113,8 +113,8 @@ module.exports = {
 
 
     //SAP FIELDS
-    CntCtCode:{type:'integer'},
-    SlpCode: {type:'integer'},
+    CntCtCode:{type:'number'},
+    SlpCode: {type:'number'},
     CardCode: {type:'string'},
     CardName: {type:'string'},
 
@@ -123,7 +123,7 @@ module.exports = {
     FirstName:{type:'string'},
     LastName:{type:'string'},
 
-    CntctCode:{type:'integer'},
+    CntctCode:{type:'number'},
     Tel1:{type:'string'},
     Cellolar:{type:'string'},
     address:{type:'string'},

@@ -4,12 +4,12 @@ module.exports = {
   attributes:{
     /*
     id : {
-      type:'integer',
+      type:'number',
       primaryKey: true,
       columnName: 'SlpCode'
     }*/
     SlpCode:{
-      type:'integer'
+      type:'number'
     },
     SlpName: {
       type:'string'
