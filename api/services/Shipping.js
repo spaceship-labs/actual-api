@@ -179,7 +179,7 @@ async function buildShippingItem(
       let WEEKEND_DELIVERY_DAYS = 5;
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
-        WEEKEND_DELIVERY_DAYS -= 1;
+        WEEKEND_DELIVERY_DAYS -= 2;
       }
       seasonDays = WEEKEND_DELIVERY_DAYS;
       //seasonDays = 7;
