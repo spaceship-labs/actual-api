@@ -344,20 +344,27 @@ function getPaymentMethodBasedOnPayments(payments, order) {
   var directPayments = [];
 
   if (payments.length > 1) {
+    sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is more than one payment")
+
     //Taking the highest payment as main, except the
     //client-credit and client balance payment type
     directPayments = getDirectPayments(payments);
 
     if (directPayments.length === 0) {
+      sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is returning 'directPayments.length === 0'")
       return uniquePaymentMethod.type == 'client-balance' ? 'transfer':'other';
     }
-    uniquePaymentMethod = getHighestPayment(directPayments);
 
     if (appliesForSpecialCashRule(payments, order)) {
+      sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is applying for appliesForSpecialCashRule")
       return 'other';
     }
+
+    uniquePaymentMethod = getHighestPayment(directPayments);
+    sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is passing here", uniquePaymentMethod)
   }
 
+  sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Maybe is returning according to", uniquePaymentMethod.type)
   switch (uniquePaymentMethod.type) {
     case 'cash':
     case 'cash-usd':
@@ -403,7 +410,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       paymentMethod = 'transfer';
       break;
     case 'client-credit':
-      paymentMethod = 'other';
+      paymentMethod = 'credit';
       break;
     default:
       paymentMethod = 'other';
