@@ -193,6 +193,7 @@ function prepareInvoice(order, payments, client, items) {
   }
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
+  sails.log.info("\n\ndata.paymentType: ",data.paymentType);
   if (data.paymentType == "PPD") {
     data.paymentMethod = "other";
   }
@@ -200,6 +201,7 @@ function prepareInvoice(order, payments, client, items) {
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
     data.paymentType = "PUE";
   }
+  sails.log.info("\n\ndata.paymentType: ",data.paymentType);
   console.log("\n\nInvoice data:\n",data);
   console.log("\n\n");
   return createInvoice(data);
