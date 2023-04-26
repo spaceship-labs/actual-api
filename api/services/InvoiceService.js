@@ -376,6 +376,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
 
     case 'single-payment-terminal':
     case 'credit-card':
+    case 'credit-card-usd':
     case '3-msi':
     case '3-msi-banamex':
     case '6-msi':
