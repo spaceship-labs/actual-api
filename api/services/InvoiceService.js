@@ -198,7 +198,7 @@ function prepareInvoice(order, payments, client, items) {
   }
 
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
-    data.paymentType = "PUE"
+    data.paymentType = "PUE";
   }
   console.log("\n\nInvoice data:\n",data);
   console.log("\n\n");
@@ -382,6 +382,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
 
     case 'single-payment-terminal':
     case 'credit-card':
+    case 'credit-card-usd':
     case '3-msi':
     case '3-msi-banamex':
     case '6-msi':
