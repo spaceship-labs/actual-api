@@ -200,8 +200,8 @@ function prepareInvoice(order, payments, client, items) {
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
     data.paymentType = "PUE";
   }
-
-  if ( getHighestPayment(getDirectPayments(payments)) == 'client-credit' && data.paymentType == "PUE" ){
+  var directPayments =getDirectPayments(payments)
+  if ( getHighestPayment(directPayments) == 'client-credit' && data.paymentType == "PUE" ){
     data.paymentType = "PPD";
   }
 
