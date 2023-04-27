@@ -200,7 +200,9 @@ function prepareInvoice(order, payments, client, items) {
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
     data.paymentType = "PUE";
   }
-  var directPayments =getDirectPayments(payments)
+  sails.log.info("payments",payments);
+  var directPayments = [];
+  directPayments = getDirectPayments(payments);
   if ( getHighestPayment(directPayments) == 'client-credit' && data.paymentType == "PUE" ){
     data.paymentType = "PPD";
   }
