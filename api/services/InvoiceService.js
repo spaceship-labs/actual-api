@@ -420,7 +420,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       paymentMethod = 'transfer';
       break;
     case 'client-credit':
-      paymentMethod = 'credit';
+      paymentMethod = 'other';
       break;
     default:
       paymentMethod = 'other';
