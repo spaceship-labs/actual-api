@@ -111,12 +111,20 @@ function Calculator() {
     options = { paymentGroup: 1, updateDetails: true }
   ) {
     const promos = await getActivePromos();
+    console.log({ promos })
     setLoadedActivePromotions(promos);
 
     const quotation = await Quotation.findOne({ id: quotationId })
       .populate('Details')
       .populate('Payments');
     const details = quotation.Details;
+
+    const sumOfDetailsWithoutDiscountAtelier = _.reduce(details, function (acc, detail) {
+      return Number(acc) + (Number(detail.unitPrice) * Number(detail.quantity));
+    }, 0)
+    console.log({ sumOfDetailsWithoutDiscount });
+
+
     const packagesIds = getQuotationDetailsPackagesIds(details);
 
     if (packagesIds.length > 0) {
@@ -130,8 +138,8 @@ function Calculator() {
 
     var processedDetails = await processQuotationDetails(details, options);
     var totals = sumProcessedDetails(processedDetails, options);
+    console.log({ totals })
     const ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
-
     if (ammountPaidPg1 > 0 && options.financingTotals) {
       processedDetails = mapDetailsWithFinancingCost(
         processedDetails,
@@ -149,6 +157,17 @@ function Calculator() {
       ...totals,
       paymentGroup: getGroupByQuotationPayments(quotation.Payments),
     };
+    //if (por tipo de producto) {
+    //}else {
+      // por monto
+      if (promos[0].discountRange1) {
+        if (sumOfDetailsWithoutDiscount > promos[0].discountRange1) {
+          totals.discount = sumOfDetailsWithoutDiscount / 100 * promos[0].discountRangePercent1
+          totals.total = totals.total - totals.discount
+          totals.totalPg1 = totals.total - totals.discount
+        }
+      }
+   // }
 
     return totals;
   }
