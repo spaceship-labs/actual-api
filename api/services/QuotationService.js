@@ -38,7 +38,7 @@ module.exports = {
 
 function getGroupByQuotationPayments(payments = []) {
   var group = 1;
-  const auxPayments = payments.filter(function(payment) {
+  const auxPayments = payments.filter(function (payment) {
     return !PaymentService.isCanceled(payment);
   });
 
@@ -158,7 +158,7 @@ function Calculator() {
     ammountPaidPg1,
     quotationPlainTotals
   ) {
-    return details.map(function(detail) {
+    return details.map(function (detail) {
       var proportionalPaymentPg1 =
         detail.totalPg1 / quotationPlainTotals.totalPg1 * ammountPaidPg1;
       var proportionalPayment =
@@ -191,7 +191,7 @@ function Calculator() {
       totalProducts: 0,
     };
 
-    var totals = processedDetails.reduce(function(acum, detail) {
+    var totals = processedDetails.reduce(function (acum, detail) {
       acum.totalPg1 += detail.totalPg1;
       acum.total += detail.total;
       acum.subtotal += detail.subtotal;
@@ -204,16 +204,16 @@ function Calculator() {
     totals = {
       ...totals,
       paymentGroup: options.paymentGroup,
-      immediateDelivery: processedDetails.every(function(detail) {
+      immediateDelivery: processedDetails.every(function (detail) {
         return detail.immediateDelivery && !detail.isSRService;
       }),
-      ShopDelivery: processedDetails.every(function(detail) {
+      ShopDelivery: processedDetails.every(function (detail) {
         return detail.ShopDelivery;
       }),
-      WeekendDelivery: processedDetails.every(function(detail) {
+      WeekendDelivery: processedDetails.every(function (detail) {
         return detail.WeekendDelivery;
       }),
-      appliesClientDiscount: _.some(processedDetails, function(detail) {
+      appliesClientDiscount: _.some(processedDetails, function (detail) {
         return detail.clientDiscountReference;
       }),
       financingCostPercentage: calculateFinancingCostPercentage(
@@ -231,7 +231,7 @@ function Calculator() {
   }
 
   function getQuotationDetailsPackagesIds(details) {
-    var ids = details.reduce(function(acum, detail) {
+    var ids = details.reduce(function (acum, detail) {
       if (detail.PromotionPackage) {
         acum.push(detail.PromotionPackage);
       }
@@ -254,7 +254,7 @@ function Calculator() {
 
   function getAllPackagesRules(promotionPackages, details) {
     var filteredPackages = filterPromotionPackages(promotionPackages, details);
-    var rules = filteredPackages.reduce(function(acum, package) {
+    var rules = filteredPackages.reduce(function (acum, package) {
       acum = acum.concat(package.PackageRules);
       return acum;
     }, []);
@@ -262,7 +262,7 @@ function Calculator() {
   }
 
   function filterPromotionPackages(promotionPackages, details) {
-    return promotionPackages.filter(function(package) {
+    return promotionPackages.filter(function (package) {
       return isValidPromotionPackage(package, details);
     });
   }
@@ -301,9 +301,9 @@ function Calculator() {
   //@param details {Array <QuotationDetail>}:
   //Every detail must contain a Product object populated
   function processQuotationDetails(details, options = { paymentGroup: 1 }) {
-    return Promise.mapSeries(details, function(detail) {
+    return Promise.mapSeries(details, function (detail) {
       return getDetailTotals(detail, options);
-    }).then(function(pDetails) {
+    }).then(function (pDetails) {
       if (options.updateDetails) {
         return updateDetails(pDetails);
       } else {
@@ -473,7 +473,7 @@ function Calculator() {
       };
       var packageRuleMatch = false;
       var matches = _.where(loadedPackagesRules, query);
-      var matchesNotValidated = matches.filter(function(m) {
+      var matchesNotValidated = matches.filter(function (m) {
         return !m.validated;
       });
       packageRuleMatch = matchesNotValidated[0] || false;
@@ -487,8 +487,8 @@ function Calculator() {
   }
 
   function updateDetails(details) {
-    return Promise.mapSeries(details, function(d) {
-      return updateDetail(d).then(function(updated) {
+    return Promise.mapSeries(details, function (d) {
+      return updateDetail(d).then(function (updated) {
         if (updated && updated.length > 0) {
           return updated[0];
         }
@@ -506,7 +506,7 @@ function Calculator() {
   }
 
   function isValidPackageRule(rule, details) {
-    var validRule = _.find(details, function(detail) {
+    var validRule = _.find(details, function (detail) {
       if (
         detail.Product === rule.Product &&
         detail.quantity === rule.quantity &&
@@ -676,7 +676,7 @@ function getCountByUser(options) {
     countUntilToday: Quotation.count(queryUntilToday),
     countByDateRange: Quotation.count(queryByDateRange),
     countAllByDateRange: Quotation.count(queryAllByDateRange),
-  }).then(function(result) {
+  }).then(function (result) {
     return {
       untilToday: result.countUntilToday,
       byDateRange: result.countByDateRange,
