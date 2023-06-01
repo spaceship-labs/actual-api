@@ -10,6 +10,14 @@ module.exports = {
     type:{type:'string'},
     startDate:{type:'datetime'},
     endDate:{type:'datetime'},
+    sa: {type:'string'}, //Sociedad
+    hasPriority:{type:'boolean'},
+    hasLM:{type:'boolean'},
+    pushMoneyUnit:{type:'float'},
+    pushMoneyUnitType:{
+      type:'string',
+      enum:['ammount','percent']
+    },
     discountPg1:{type:'float'},
     discountPg2:{type:'float'},
     discountPg3:{type:'float'},
@@ -65,14 +73,6 @@ module.exports = {
     discountRangePercent8:{ type:'integer' },
     discountRangePercent9:{ type:'integer' },
     discountRangePercent10:{ type:'integer' },
-    sa: {type:'string'}, //Sociedad
-    hasPriority:{type:'boolean'},
-    hasLM:{type:'boolean'},
-    pushMoneyUnit:{type:'float'},
-    pushMoneyUnitType:{
-      type:'string',
-      enum:['ammount','percent']
-    },
-
+    productTypeDiscounts:{ type:'json' },
   }
 };
