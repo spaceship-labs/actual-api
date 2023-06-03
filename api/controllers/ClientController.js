@@ -144,6 +144,7 @@ module.exports = {
 
   async updateFiscalAddress(req, res){
     var form = req.allParams();
+    console.log("\nupdateFiscalAddress",form);
     try{
       const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(form);
       res.json(updatedFiscalAddress);
