@@ -136,7 +136,6 @@ function Calculator() {
       }).populate('PackageRules');
       setLoadedPackagesRules(getAllPackagesRules(promotionPackages, details));
     }
-
     var processedDetails = await processQuotationDetails(details, options);
     var totals = sumProcessedDetails(processedDetails, options);
     const ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
@@ -162,12 +161,13 @@ function Calculator() {
     // Descuentos predefinidos
     if(promos.length > 0){
       // Por rangos de monto
-
       var isPredefinedDiscount = itIsPredefinedDiscount(promos[0]);
       var isProductTypeDiscount = itIsProductTypeDiscount(promos[0]);
       
       if (isPredefinedDiscount === true) {
-        discountRanges = [];
+        console.log("------------------------------\n  USING PREDEFINED DISCOUNT\n------------------------------");
+        var discountRanges = [];
+        var discountRangesPercent = [];
         for (var key in promos[0]) {
           if (
             key.indexOf("discountRange") === 0 && /\d$/.test(key)
@@ -197,16 +197,17 @@ function Calculator() {
         var discount = discountRangesWithPercent[closestNumber];
 
         if(discount && discount > 0 && discount != null && discount != undefined){
-          console.log("\nDiscount applied: ",discount);
           totals.discount = sumOfDetailsWithoutDiscount / 100 * discount;
           totals.total = totals.total - totals.discount;
         }
 
       }else if(isProductTypeDiscount === true) {
         // Por tipo de producto
-        
-
-
+        console.log("--------------------------------\n  USING PRODUCT TYPE DISCOUNT\n--------------------------------");
+        options = _.extend(options, {
+          productTypeDiscount: true,
+        });
+        processedDetails = await processQuotationDetails(details, options);
       }
       console.log({totals})
       /* if (promos.length > 0  && promos[0].discountRange1) {
@@ -391,13 +392,15 @@ function Calculator() {
   }
 
   //@params: detail Object from model Detail
-  async function getDetailTotals(detail, options = {}) {    
+  async function getDetailTotals(detail, options = {}) {   
     const productId = detail.Product;
     const quantity = detail.quantity;
     const quotationId = detail.Quotation;
     const product = await Product.findOne({ id: productId }).populate("Categories");
     const mainPromo = await getProductMainPromo(product, quantity, quotationId);
-    const productCategories = product.Categories;
+    const productCategories = _.extend(product.Categories);
+    delete productCategories.add;
+    delete productCategories.remove;
     const unitPrice = product.Price;
     const discountKey = getDiscountKeyByGroup(options.paymentGroup);
     const discountPercent = mainPromo ? Math.abs(mainPromo[discountKey]) : 0;
@@ -484,6 +487,36 @@ function Calculator() {
       detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
     }
 
+    if ( options.productTypeDiscount == true ) {
+      var promo = await getActivePromos();
+      productDiscounts = promo[0].productTypeDiscounts;
+      for ( elem of productDiscounts ){
+        var percentage = elem.value;
+        var category = elem.option;
+        for ( i = 0; i <= productCategories.length-1; i++ ){
+          if( category.toLowerCase() === productCategories[i].Handle.toLowerCase() ) {
+            var detailTmp = _.extend(detailTotals);
+            detailTmp.discountPercent = percentage;
+            detailTmp.discountPercentPromos = percentage;
+            detailTmp.discount = detailTmp.subtotal / 100 * percentage;
+            detailTmp.unitPriceWithDiscount = detailTmp.unitPrice - detailTmp.discount;
+            detailTmp.subtotal2 = detailTmp.subtotal - detailTmp.discount;
+            detailTmp.total = detailTmp.subtotal2;
+            detailTmp.subtotal = detailTmp.quantity * detailTmp.unitPrice;
+            detailTmp.subtotal2 = detailTmp.quantity * detailTmp.unitPriceWithDiscount;
+            detailTmp.total = detailTmp.quantity * detailTmp.unitPriceWithDiscount;
+            if ( detailTotals < detailTmp ){
+              detailTotals = _.extend(detailTmp);
+              console.log("\x1b[32m");
+              console.log(detailTotals);
+              console.log("\x1b[0m");
+            }
+          }
+        }
+      }
+    }
+
+    delete detailTotals.productCategories;
     return detailTotals;
   }
 
@@ -778,9 +811,8 @@ function itIsPredefinedDiscount(promo){
   var obj = promo;
   var elements = {};
   for (var key in obj) {
-
     if (key && key != undefined && key.indexOf("discountRange") === 0 && /\d$/.test(key)) {
-      if (!key.includes("Percent")) {
+      if (key.includes("Percent")) {
         var value = obj[key];
         if (value > 0 && value !== null && value !== 0) {
           elements[key] = value;
