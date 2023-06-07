@@ -113,8 +113,13 @@ function Calculator() {
     const promos = await getActivePromos();
     setLoadedActivePromotions(promos);
 
-    const quotation = await Quotation.findOne({id:quotationId}).populate('Details').populate('Payments');
-    const details = quotation.Details;
+    const quotation = await Quotation.findOne({id:quotationId}).populate('Details').populate('Payments').populate('Store');
+      const details = quotation.Details;
+    const sumOfDetailsWithoutDiscountAtelier = _.reduce(details, function (acc, detail) {
+      return Number(acc) + (Number(detail.unitPrice) * Number(detail.quantity));
+    }, 0)
+    console.log({ sumOfDetailsWithoutDiscount });
+
     const packagesIds = getQuotationDetailsPackagesIds(details);
 
     if (packagesIds.length > 0) {
@@ -128,6 +133,8 @@ function Calculator() {
 
     var processedDetails = await processQuotationDetails(details, options);
     var totals = sumProcessedDetails(processedDetails, options);
+    console.log({ totals })
+
     const ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
 
     if (ammountPaidPg1 > 0 && options.financingTotals) {
@@ -147,6 +154,76 @@ function Calculator() {
       ...totals,
       paymentGroup: getGroupByQuotationPayments(quotation.Payments),
     };
+        
+
+    // Descuentos predefinidos
+    if(promos.length > 0){
+      // Por rangos de monto
+
+      var isPredefinedDiscount = itIsPredefinedDiscount(promos[0]);
+      var isProductTypeDiscount = itIsProductTypeDiscount(promos[0]);
+      
+      if (isPredefinedDiscount === true) {
+        console.log("------------------------------\n  USING PREDEFINED DISCOUNT\n------------------------------");
+        var discountRanges = [];
+        var discountRangesPercent = [];
+        for (var key in promos[0]) {
+          if (
+            key.indexOf("discountRange") === 0 && /\d$/.test(key)
+          ) {
+            //discountRanges[key] = promos[0][key];
+            if (!key.includes("Percent")) {
+              discountRanges.push(promos[0][key]);
+            }
+          }
+          if (
+            key.indexOf("discountRangePercent") === 0 && /\d$/.test(key)
+          ) {
+            //discountRangesPercent[key] = promos[0][key];
+            discountRangesPercent.push(promos[0][key]);
+          }
+        }
+        var discountRangesWithPercent = {};
+        for (var i = 0; i < discountRanges.length; i++) {
+          var key = discountRanges[i];
+          var value = discountRangesPercent[i];
+          discountRangesWithPercent[key] = value;
+          
+        }
+        console.log("\n\ndiscountRangesWithPercent",discountRangesWithPercent);
+        var keys = Object.keys(discountRangesWithPercent);
+        var closestNumber = findClosestNumber(totals.total, keys);
+        var discount = discountRangesWithPercent[closestNumber];
+
+        if(discount && discount > 0 && discount != null && discount != undefined){
+          totals.discount = sumOfDetailsWithoutDiscount / 100 * discount;
+          totals.total = totals.total - totals.discount;
+        }
+
+      }else if(isProductTypeDiscount === true) {
+        // Por tipo de producto
+        console.log("--------------------------------\n  USING PRODUCT TYPE DISCOUNT\n--------------------------------");
+        options = _.extend(options, {
+          productTypeDiscount: true,
+        });
+        processedDetails = await processQuotationDetails(details, options);
+
+      }
+      console.log({totals})
+      /* if (promos.length > 0  && promos[0].discountRange1) {
+        if (promos[0].discountRange1 && 
+            promos[0].discountRange1 > 0 && 
+            promos[0].discountRange1 != null && 
+            sumOfDetailsWithoutDiscount > promos[0].discountRange1 && 
+            promos[0].discountRange1 > 0 && 
+            promos[0].discountRange1 != null
+          ) {
+          totals.discount = sumOfDetailsWithoutDiscount / 100 * promos[0].discountRangePercent1
+          totals.total = totals.total - totals.discount
+          totals.totalPg1 = totals.total - totals.discount
+        }
+      } */
+    }
 
     return totals;
   }
@@ -329,9 +406,11 @@ function Calculator() {
     const productId = detail.Product;
     const quantity = detail.quantity;
     const quotationId = detail.Quotation;
-    const product = await Product.findOne({ id: productId });
+    const product = await Product.findOne({ id: productId }).populate("Categories");;
     const mainPromo = await getProductMainPromo(product, quantity, quotationId);
-    const {paymentGroup} = options;
+    const productCategories = _.extend(product.Categories);
+    delete productCategories.add;
+    delete productCategories.remove;    const {paymentGroup} = options;
     const unitPrice = product.Price;
     const discountKey = getDiscountKeyByGroup(paymentGroup);
     const discountPercent = mainPromo ? mainPromo[discountKey] : 0;
@@ -401,6 +480,7 @@ function Calculator() {
         detail.WeekendDelivery
       ),
       isSRService: ProductService.isSRService(product),
+      productCategories,
     };
 
     if (
@@ -415,7 +495,36 @@ function Calculator() {
     } else if (mainPromo.clientDiscountReference) {
       detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
     }
+    if ( options.productTypeDiscount == true ) {
+      var promo = await getActivePromos();
+      productDiscounts = promo[0].productTypeDiscounts;
+      for ( elem of productDiscounts ){
+        var percentage = elem.value;
+        var category = elem.option;
+        for ( i = 0; i <= productCategories.length-1; i++ ){
+          if( category.toLowerCase() === productCategories[i].Handle.toLowerCase() ) {
+            var detailTmp = _.extend(detailTotals);
+            detailTmp.discountPercent = percentage;
+            detailTmp.discountPercentPromos = percentage;
+            detailTmp.discount = detailTmp.subtotal / 100 * percentage;
+            detailTmp.unitPriceWithDiscount = detailTmp.unitPrice - detailTmp.discount;
+            detailTmp.subtotal2 = detailTmp.subtotal - detailTmp.discount;
+            detailTmp.total = detailTmp.subtotal2;
+            detailTmp.subtotal = detailTmp.quantity * detailTmp.unitPrice;
+            detailTmp.subtotal2 = detailTmp.quantity * detailTmp.unitPriceWithDiscount;
+            detailTmp.total = detailTmp.quantity * detailTmp.unitPriceWithDiscount;
+            if ( detailTotals < detailTmp ){
+              detailTotals = _.extend(detailTmp);
+              console.log("\x1b[32m");
+              console.log(detailTotals);
+              console.log("\x1b[0m");
+            }
+          }
+        }
+      }
+    }
 
+    delete detailTotals.productCategories;
     return detailTotals;
   }
 
@@ -696,4 +805,41 @@ function getCountByUser(options) {
       allByDateRange: result.countAllByDateRange,
     };
   });
+
+  function findClosestNumber(target, numbers) {
+    var closestNumber = null;
+    var minDifference = Infinity;
+  
+    for (var i = 0; i < numbers.length; i++) {
+      var difference = target - parseInt(numbers[i]);
+      if (difference >= 0 && difference < minDifference && numbers[i] < target) {
+        closestNumber = numbers[i];
+        minDifference = difference;
+      }
+    }
+  
+    return closestNumber;
+  }
+  
+  function itIsPredefinedDiscount(promo){
+    var obj = promo;
+    var elements = {};
+    for (var key in obj) {
+      if (key && key != undefined && key.indexOf("discountRange") === 0 && /\d$/.test(key)) {
+        if (key.includes("Percent")) {
+          var value = obj[key];
+          if (value > 0 && value !== null && value !== 0) {
+            elements[key] = value;
+          }
+        }
+      }
+    }
+    return Object.keys(elements).length > 0 ? true : false;
+  }
+  
+  function itIsProductTypeDiscount(promo){
+    var productTypeDiscounts = promo.productTypeDiscounts;
+    var isValid = productTypeDiscounts && Array.isArray(productTypeDiscounts) && productTypeDiscounts.length > 0;
+    return isValid;
+  }
 }
