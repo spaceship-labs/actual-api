@@ -809,40 +809,41 @@ function getCountByUser(options) {
     };
   });
 
-  function findClosestNumber(target, numbers) {
-    var closestNumber = null;
-    var minDifference = Infinity;
-  
-    for (var i = 0; i < numbers.length; i++) {
-      var difference = target - parseInt(numbers[i]);
-      if (difference >= 0 && difference < minDifference && numbers[i] < target) {
-        closestNumber = numbers[i];
-        minDifference = difference;
-      }
+}
+
+function findClosestNumber(target, numbers) {
+  var closestNumber = null;
+  var minDifference = Infinity;
+
+  for (var i = 0; i < numbers.length; i++) {
+    var difference = target - parseInt(numbers[i]);
+    if (difference >= 0 && difference < minDifference && numbers[i] < target) {
+      closestNumber = numbers[i];
+      minDifference = difference;
     }
-  
-    return closestNumber;
   }
-  
-  function itIsPredefinedDiscount(promo){
-    var obj = promo;
-    var elements = {};
-    for (var key in obj) {
-      if (key && key != undefined && key.indexOf("discountRange") === 0 && /\d$/.test(key)) {
-        if (key.includes("Percent")) {
-          var value = obj[key];
-          if (value > 0 && value !== null && value !== 0) {
-            elements[key] = value;
-          }
+
+  return closestNumber;
+}
+
+function itIsPredefinedDiscount(promo){
+  var obj = promo;
+  var elements = {};
+  for (var key in obj) {
+    if (key && key != undefined && key.indexOf("discountRange") === 0 && /\d$/.test(key)) {
+      if (key.includes("Percent")) {
+        var value = obj[key];
+        if (value > 0 && value !== null && value !== 0) {
+          elements[key] = value;
         }
       }
     }
-    return Object.keys(elements).length > 0 ? true : false;
   }
-  
-  function itIsProductTypeDiscount(promo){
-    var productTypeDiscounts = promo.productTypeDiscounts;
-    var isValid = productTypeDiscounts && Array.isArray(productTypeDiscounts) && productTypeDiscounts.length > 0;
-    return isValid;
-  }
+  return Object.keys(elements).length > 0 ? true : false;
+}
+
+function itIsProductTypeDiscount(promo){
+  var productTypeDiscounts = promo.productTypeDiscounts;
+  var isValid = productTypeDiscounts && Array.isArray(productTypeDiscounts) && productTypeDiscounts.length > 0;
+  return isValid;
 }
