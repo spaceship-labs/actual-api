@@ -113,12 +113,15 @@ function Calculator() {
     const promos = await getActivePromos();
     setLoadedActivePromotions(promos);
 
-    const quotation = await Quotation.findOne({id:quotationId}).populate('Details').populate('Payments').populate('Store');
+    const quotation = await Quotation.findOne({id:quotationId})
+      .populate('Details')
+      .populate('Payments')
+      .populate('Store');
       const details = quotation.Details;
-    const sumOfDetailsWithoutDiscountAtelier = _.reduce(details, function (acc, detail) {
+    const sumOfDetailsWithoutDiscount = _.reduce(details, function (acc, detail) {
       return Number(acc) + (Number(detail.unitPrice) * Number(detail.quantity));
     }, 0)
-    console.log({ sumOfDetailsWithoutDiscount });
+    console.log("sumOfDetailsWithoutDiscount",{ sumOfDetailsWithoutDiscount });
 
     const packagesIds = getQuotationDetailsPackagesIds(details);
 
