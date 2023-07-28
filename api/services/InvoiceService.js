@@ -342,7 +342,8 @@ function appliesForSpecialCashRule(payments, order) {
 function getDirectPayments(payments) {
   return payments.filter(function(p) {
     return (
-      p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
+      //28/jul/2023 client-balance gets "compensation" payment method
+      //p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
       p.type !== PaymentService.types.CLIENT_CREDIT
     );
   });
@@ -358,6 +359,8 @@ function getPaymentMethodBasedOnPayments(payments, order) {
 
     //Taking the highest payment as main, except the
     //client-credit and client balance payment type
+
+    //28/jul/2023 client-balance gets "compensation" payment method
     directPayments = getDirectPayments(payments);
 
     if (directPayments.length === 0) {
@@ -417,7 +420,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
 
     case 'client-balance':
       //paymentMethod = 'other';
-      paymentMethod = 'transfer';
+      paymentMethod = 'compensation';
       break;
     case 'client-credit':
       paymentMethod = 'other';
