@@ -192,6 +192,9 @@ function prepareInvoice(order, payments, client, items) {
     };
   }
 
+  sails.log.info("\n\ndata.paymentType: ",data.paymentType);
+  sails.log.info("\n\ndata.paymentMethod: ",data.paymentMethod);
+
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
   if (data.paymentType == "PPD") {
     data.paymentMethod = "other";
