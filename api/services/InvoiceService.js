@@ -208,8 +208,9 @@ function prepareInvoice(order, payments, client, items) {
   sails.log.info("\n\nhighestPayment: ",highestPayment);
 
   //If payment method is credit, either credit card or client credit sends PPD (Por diferir)
-  if ( highestPayment.type == 'client-credit' || highestPayment.type == 'credit-card' && data.paymentType == "PUE" ){
+  if ( highestPayment.type == 'client-credit' || highestPayment.type == 'credit-card'){
     data.paymentType = "PPD";
+    data.paymentMethod = "other";
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
