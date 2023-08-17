@@ -215,7 +215,7 @@ function prepareInvoice(order, payments, client, items) {
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
   sails.log.info("\n\ndata.paymentMethod: ",data.paymentMethod);
-  console.log("\n\nInvoice data:\n",data);
+  //console.log("\n\nInvoice data:\n",data);
   console.log("\n\n");
   return createInvoice(data);
 }
@@ -381,7 +381,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
     }
 
     uniquePaymentMethod = getHighestPayment(directPayments);
-    sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is passing here", uniquePaymentMethod)
+    sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is passing here", uniquePaymentMethod.type)
 
   }
 
