@@ -441,7 +441,13 @@ function getPaymentMethodBasedOnPayments(payments, order) {
 
   if (hasClientCreditPayment(payments)) {
     sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is returning hasClientCreditPayment")
-    paymentMethod = 'other'
+    var highestPayment = getHighestPayment(payments);
+    if (highestPayment.type == PaymentService.types.CLIENT_CREDIT ||
+        highestPayment.type == PaymentService.types.CREDIT_CARD
+      ){
+      sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Client credit is the highest payment")
+      paymentMethod = 'other';
+    }
   }
 
   return paymentMethod;
