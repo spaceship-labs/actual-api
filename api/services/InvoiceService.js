@@ -207,10 +207,11 @@ function prepareInvoice(order, payments, client, items) {
   var highestPayment = getHighestPayment(payments);
   sails.log.info("\n\nhighestPayment: ",highestPayment);
 
-  //If payment method is credit, either credit card or client credit sends PPD (Por diferir)
-  if ( highestPayment.type == 'client-credit' || highestPayment.type == 'credit-card'){
-    data.paymentType = "PPD";
-    data.paymentMethod = "other";
+  //If payment method is credit, either credit card sends PPD (Por diferir)
+  if ( highestPayment.type == 'credit-card'){
+    sails.log.info("Entering highest payment 'credit card'");
+    data.paymentType = "PUE";
+    data.paymentMethod = "credit-card";
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
