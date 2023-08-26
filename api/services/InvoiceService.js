@@ -351,8 +351,8 @@ function getDirectPayments(payments) {
   return payments.filter(function (p) {
     return (
       //28/jul/2023 client-balance gets "compensation" payment method
-      //p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
-      p.type !== PaymentService.types.CLIENT_CREDIT
+      p.type !== PaymentService.CLIENT_BALANCE_TYPE
+      //p.type !== PaymentService.types.CLIENT_CREDIT
     );
   });
 }
