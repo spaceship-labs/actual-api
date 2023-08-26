@@ -236,15 +236,19 @@ function hasClientCreditPayment(payments) {
 
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   if (hasClientBalancePayment(payments) && !hasClientCreditPayment(payments)) {
+    sails.log.info("1 if on getAlegraPaymentType")
     return 'PUE';
   } else if (
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
+    sails.log.info("2 if on getAlegraPaymentType")
     return 'PUE';
   } else if (hasClientCreditPayment(payments)) {
+    sails.log.info("3 if on getAlegraPaymentType")
     return 'PUE';
   }
+  sails.log.info("Not enter if getAlegraPaymentType")
 
   return 'PUE';
 }
