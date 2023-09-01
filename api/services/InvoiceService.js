@@ -193,9 +193,12 @@ function prepareInvoice(order, payments, client, items) {
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
-  sails.log.info("\n\ndata.paymentMethod: ",data.paymentMethod);
+  sails.log.info("data.paymentMethod: ",data.paymentMethod);
 
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
+
+  sails.log.info("\n\ndata.paymentType: ",data.paymentType);
+  
   if (data.paymentType == "PPD") {
     sails.log.info("Enter here");
     data.paymentMethod = "other";
@@ -203,7 +206,7 @@ function prepareInvoice(order, payments, client, items) {
 
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
     sails.log.info("Or here");
-    data.paymentType = "PUE";
+    data.paymentType = "PPD";
   }
 
   var highestPayment = getHighestPayment(payments);
@@ -216,7 +219,7 @@ function prepareInvoice(order, payments, client, items) {
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
-  sails.log.info("\n\ndata.paymentMethod: ",data.paymentMethod);
+  sails.log.info("data.paymentMethod: ",data.paymentMethod);
   //console.log("\n\nInvoice data:\n",data);
   console.log("\n\n");
   return createInvoice(data);
@@ -337,7 +340,9 @@ function appliesForSpecialCashRule(payments, order) {
   //If cash is the main payment method
   //and the total is 100k or above
 
-  const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
+  // 31-ago-2023 regla cancelada
+
+  /* const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
 
   if (payments.length > 1 && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT) {
     var highestPayment = getHighestPayment(payments);
@@ -348,7 +353,8 @@ function appliesForSpecialCashRule(payments, order) {
       return true;
     }
   }
-  return false;
+  return false; */
+  return;
 }
 
 //Excludes CLIENT BALANCE and CREDIT CLIENT payments
