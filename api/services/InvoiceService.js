@@ -193,25 +193,37 @@ function prepareInvoice(order, payments, client, items) {
     }
   console.log("prepareInvoice data",data)
 
+  sails.log.info("\n\ndata.paymentType: ",data.paymentType);
+  sails.log.info("data.paymentMethod: ",data.paymentMethod);
+
   data.paymentType = getAlegraPaymentType(data.paymentMethod, payments, order);
+
+  sails.log.info("\n\ndata.paymentType: ",data.paymentType);
+
   if(data.paymentType == "PPD"){
+    sails.log.info("Enter here");
     data.paymentMethod = "other";
   }
 
   if (data.paymentMethod == "other" && data.paymentType == "PUE"){
-    data.paymentType = "PUE"
+    sails.log.info("Or here");
+    data.paymentType = "PPD"
   }
 
   var highestPayment = getHighestPayment(payments);
+  sails.log.info("\n\nhighestPayment: ",highestPayment);
 
-  if ( highestPayment.type == 'client-credit' && data.paymentType == "PUE" ){
-    data.paymentType = "PPD";
+  //If payment method is credit, either credit card or client credit sends PPD (Por diferir)
+
+  if ( highestPayment.type == 'client-credit' || highestPayment.type == 'credit-card'){
+    sails.log.info("Entering highest payment 'credit card'");
+    data.paymentType = "PUE";
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
-  sails.log.info("\n\ndata.paymentMethod: ",data.paymentMethod);
+  sails.log.info("data.paymentMethod: ",data.paymentMethod);
 
-  console.log("\n\nInvoice data:\n",data);
+  //console.log("\n\nInvoice data:\n",data);
   console.log("\n\n");
   return createInvoice(data);
 }
@@ -230,16 +242,20 @@ function hasClientCreditPayment(payments) {
 
 function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
   if (hasClientBalancePayment(payments) && !hasClientCreditPayment(payments)) {
+    sails.log.info("1 if on getAlegraPaymentType");
     return 'PUE';
   } else if (
     alegraPaymentMethod === 'other' ||
     appliesForSpecialCashRule(payments, order)
   ) {
+    sails.log.info("2 if on getAlegraPaymentType");
     return 'PUE';
   } else if (hasClientCreditPayment(payments)) {
+    sails.log.info("3 if on getAlegraPaymentType")
     return 'PUE';
   }
-
+  
+  sails.log.info("Not enter if getAlegraPaymentType")
   return 'PUE';
 }
 
@@ -324,7 +340,9 @@ function appliesForSpecialCashRule(payments, order) {
   //If cash is the main payment method
   //and the total is 100k or above
 
-  const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
+  // 31-ago-2023 regla cancelada
+
+/*   const INVOICE_AMOUNT_LIMIT_CONSTRAINT = 100000;
 
   if (payments.length > 1 && order.total >= INVOICE_AMOUNT_LIMIT_CONSTRAINT) {
     var highestPayment = getHighestPayment(payments);
@@ -335,7 +353,8 @@ function appliesForSpecialCashRule(payments, order) {
       return true;
     }
   }
-  return false;
+  return false; */
+  return;
 }
 
 //Excludes CLIENT BALANCE and CREDIT CLIENT payments
@@ -343,8 +362,8 @@ function getDirectPayments(payments) {
   return payments.filter(function(p) {
     return (
       //28/jul/2023 client-balance gets "compensation" payment method
-      //p.type !== PaymentService.CLIENT_BALANCE_TYPE &&
-      p.type !== PaymentService.types.CLIENT_CREDIT
+      p.type !== PaymentService.CLIENT_BALANCE_TYPE
+      //p.type !== PaymentService.types.CLIENT_CREDIT
     );
   });
 }
@@ -374,7 +393,7 @@ function getPaymentMethodBasedOnPayments(payments, order) {
     }
 
     uniquePaymentMethod = getHighestPayment(directPayments);
-    sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is passing here", uniquePaymentMethod)
+    sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Is passing here", uniquePaymentMethod.type)
   }
 
   sails.log.info("\n\ngetPaymentMethodBasedOnPayments: Maybe is returning according to", uniquePaymentMethod.type)
