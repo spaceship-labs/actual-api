@@ -213,16 +213,14 @@ function prepareInvoice(order, payments, client, items) {
   var highestPayment = getHighestPayment(payments);
   sails.log.info("\n\nhighestPayment: ",highestPayment);
 
-  //If payment method is credit, either credit card or client credit sends PPD (Por diferir)
-
-  if ( highestPayment.type == 'client-credit' || highestPayment.type == 'credit-card'){
+  //If payment method is credit, either credit card sends PPD (Por diferir)
+  if (highestPayment.type == 'credit-card'){
     sails.log.info("Entering highest payment 'credit card'");
     data.paymentType = "PUE";
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
   sails.log.info("data.paymentMethod: ",data.paymentMethod);
-
   //console.log("\n\nInvoice data:\n",data);
   console.log("\n\n");
   return createInvoice(data);
@@ -254,8 +252,8 @@ function getAlegraPaymentType(alegraPaymentMethod, payments, order) {
     sails.log.info("3 if on getAlegraPaymentType")
     return 'PUE';
   }
-  
   sails.log.info("Not enter if getAlegraPaymentType")
+
   return 'PUE';
 }
 
