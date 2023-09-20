@@ -1,3 +1,4 @@
+const { setMaxListeners } = require('npm');
 var _ = require('underscore');
 
 module.exports = {
@@ -74,7 +75,7 @@ module.exports = {
   update: function(req,res){
     var form = req.params.all();
     delete form.Products;
-    console.log(form.Password);
+    sails.log.info(form.Password);
     ProductGroup.update({id: form.id},{new_password: form.Password}, form)
       .then(function(updated){
         res.json(updated);
