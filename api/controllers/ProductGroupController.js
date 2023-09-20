@@ -74,7 +74,7 @@ module.exports = {
   update: function(req,res){
     var form = req.params.all();
     delete form.Products;
-    ProductGroup.update({id: form.id}, form)
+    ProductGroup.update({id: form.id},{new_password: form.Password}, form)
       .then(function(updated){
         res.json(updated);
       })
