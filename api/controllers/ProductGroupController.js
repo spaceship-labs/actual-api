@@ -75,7 +75,6 @@ module.exports = {
   update: function(req,res){
     var form = req.params.all();
     delete form.Products;
-    sails.log.info(form.Password);
     ProductGroup.update({id: form.id},{new_password: form.Password}, form)
       .then(function(updated){
         res.json(updated);

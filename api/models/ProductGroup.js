@@ -55,10 +55,8 @@ module.exports = {
     }
   },
   beforeUpdate: function (values, next) {
-    sails.log.info(values);
     if (values.new_password) {
       values.password = CipherService.hashPassword(values.new_password);
-      sails.log.info(values.password);
     }
     next();
   },
