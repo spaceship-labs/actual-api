@@ -4,6 +4,7 @@ module.exports = {
   migrate:'alter',
   attributes:{
     Name:{type:'string'},
+    password:{type: 'string'},
     Type:{
       type:'string',
       enum:['variations','environments','packages','relations']
@@ -52,5 +53,17 @@ module.exports = {
       //collection:'Company',
       via:'PromotionPackages'
     }
-  }
+  },
+  beforeUpdate: function (values, next) {
+    if (values.new_password) {
+      values.password = CipherService.hashPassword(values.new_password);
+    }
+    next();
+  },
+  beforeCreate: function (values, next) {
+      if (values.Password) {
+        values.password = CipherService.hashPassword(values.Password);
+      }
+      next();
+  },
 };
