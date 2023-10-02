@@ -1,4 +1,3 @@
-const { setMaxListeners } = require('npm');
 var _ = require('underscore');
 
 module.exports = {
