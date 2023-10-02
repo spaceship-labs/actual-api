@@ -216,7 +216,7 @@ function prepareInvoice(order, payments, client, items) {
   if ( highestPayment.type == 'credit-card'){
     sails.log.info("Entering highest payment 'credit card'");
     data.paymentType = "PUE";
-    data.paymentType = "credit-card";
+    data.paymentMethod = "credit-card";
   }
 
   sails.log.info("\n\ndata.paymentType: ",data.paymentType);
