@@ -21,6 +21,7 @@ module.exports = {
     startDate: {type:'datetime'},
     endDate: {type:'datetime'},
     HasExpiration: {type:'boolean'},
+    IsPublic:{type:'boolean'},
 
     icon_filename:{type:'string'},
     icon_name:{type:'string'},
