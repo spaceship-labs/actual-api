@@ -20,8 +20,8 @@ module.exports = {
     Description:{type:'text'},
     startDate: {type:'datetime'},
     endDate: {type:'datetime'},
-    HasExpiration: {type:'boolean'},
     IsPublic:{type:'boolean'},
+    HasExpiration: {type:'boolean'},
 
     icon_filename:{type:'string'},
     icon_name:{type:'string'},
@@ -56,8 +56,8 @@ module.exports = {
     }
   },
   beforeUpdate: function (values, next) {
-    if (values.new_password) {
-      values.password = CipherService.hashPassword(values.new_password);
+    if (values.Password) {
+      values.password = CipherService.hashPassword(values.Password);
     }
     next();
   },
