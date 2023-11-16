@@ -147,7 +147,7 @@ async function buildShippingItem(
       seasonDays = WEEKEND_DELIVERY_DAYS;
 
       // Fixed number
-      //seasonDays = 5;
+      seasonDays = 7;
     } else {
       // de cedis 01 Qroo a merida
       if (stockItem.whsCode == "01") {
