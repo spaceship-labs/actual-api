@@ -146,6 +146,7 @@ async function buildShippingItem(
         WEEKEND_DELIVERY_DAYS -= 2;
       }
       seasonDays = WEEKEND_DELIVERY_DAYS;
+      
       // Fixed number
       seasonDays = 10;
     } else {
