@@ -445,8 +445,8 @@ async function getQuotationTotalsByMethod(
       //Extra discount for credit and debit card and amex
       paymentGroup.extraDiscount2 = paymentGroup.total * ( 2 / 100);
       paymentGroup.extraDiscount4 = paymentGroup.total * ( 4 / 100);
-      paymentGroup.totalExtra2PercentDiscount = paymentGroup.total - paymentGroup.extraDiscount2;
-      paymentGroup.totalExtra4PercentDiscount = paymentGroup.total - paymentGroup.extraDiscount4;
+      paymentGroup.totalExtra2PercentDiscount = paymentGroup.total + paymentGroup.extraDiscount2;
+      paymentGroup.totalExtra4PercentDiscount = paymentGroup.total + paymentGroup.extraDiscount4;
     }
     paymentGroup.methods = paymentGroup.methods.map(function (method) {
       const discountKey = discountKeys[paymentGroup.group - 1];
@@ -459,7 +459,7 @@ async function getQuotationTotalsByMethod(
       if ( method.extraDiscount ){
         const extraDiscount = method.total * ( method.extraDiscount / 100 );
         method.discount = method.discount + extraDiscount;
-        method.total = paymentGroup.total - extraDiscount;
+        method.total = paymentGroup.total + extraDiscount;
       }
 
       if (method.type === CASH_USD_TYPE) {
