@@ -189,10 +189,6 @@ function Calculator() {
       totalPg1: 0,
       discount: 0,
       totalProducts: 0,
-      //extraDiscount2: 0,
-      //extraDiscount4: 0,
-      //totalExtra2PercentDiscount: 0,
-      //totalExtra4PercentDiscount: 0,
     };
 
     var totals = processedDetails.reduce(function(acum, detail) {
@@ -202,10 +198,6 @@ function Calculator() {
       acum.subtotal2 += detail.subtotal2;
       acum.discount += detail.subtotal - detail.total;
       acum.totalProducts += detail.quantity;
-      //acum.extraDiscount2 += detail.extraDiscount2;
-      //acum.extraDiscount4 += detail.extraDiscount4;
-      //acum.totalExtra2PercentDiscount += detail.total - detail.extraDiscount2;
-      //acum.totalExtra4PercentDiscount += detail.total - detail.extraDiscount4;
       return acum;
     }, defaultTotals);
 
@@ -344,10 +336,6 @@ function Calculator() {
     const subtotal = quantity * unitPrice;
     const subtotal2 = quantity * unitPriceWithDiscount;
     const total = quantity * unitPriceWithDiscount;
-    const extraDiscount2 = total * ( 2 / 100 );
-    const totalExtra2PercentDiscount = total - extraDiscount2;
-    const extraDiscount4 = total * ( 4 / 100 );
-    const totalExtra4PercentDiscount = total - extraDiscount4;
     var totalPg1 = total;
     var financingCostPercentage = 0;
     const discountName = mainPromo
@@ -393,10 +381,6 @@ function Calculator() {
       subtotal2,
       total,
       totalPg1,
-      extraDiscount2,
-      totalExtra2PercentDiscount,
-      extraDiscount4,
-      totalExtra4PercentDiscount,
       financingCostPercentage,
       unitPrice,
       unitPriceWithDiscount,

@@ -13,9 +13,7 @@ const DEFAULT_EXCHANGE_RATE = 18.78;
 const CURRENCY_USD = 'usd';
 const types = {
   CREDIT_CARD: 'credit-card',
-  CREDIT_CARD_AMEX: 'credit-card-amex',
   CREDIT_CARD_USD_TYPE: 'credit-card-usd',
-  DEBIT_CARD_AMEX: 'debit-card-amex',
   DEBIT_CARD: 'debit-card',
   SINGLE_PAYMENT_TERMINAL: 'single-payment-terminal',
   CLIENT_CREDIT: 'client-credit',
@@ -104,8 +102,6 @@ function isCardPayment(payment) {
     payment.type === types.SINGLE_PAYMENT_TERMINAL ||
     payment.type === types.CREDIT_CARD ||
     payment.type === types.DEBIT_CARD ||
-    payment.type === types.DEBIT_CARD_AMEX ||
-    payment.type === types.CREDIT_CARD_AMEX ||
     payment.msi ||
     payment.type === types.CREDIT_CARD_USD_TYPE
   );
@@ -441,13 +437,6 @@ async function getQuotationTotalsByMethod(
     paymentGroup.total = totalsByGroup[index].total || 0;
     paymentGroup.subtotal = totalsByGroup[index].subtotal || 0;
     paymentGroup.discount = totalsByGroup[index].discount || 0;
-    if( paymentGroup.group == 1 ){
-      //Extra discount for credit and debit card and amex
-      paymentGroup.extraDiscount2 = paymentGroup.total * ( 2 / 100);
-      paymentGroup.extraDiscount4 = paymentGroup.total * ( 4 / 100);
-      paymentGroup.totalExtra2PercentDiscount = paymentGroup.total + paymentGroup.extraDiscount2;
-      paymentGroup.totalExtra4PercentDiscount = paymentGroup.total + paymentGroup.extraDiscount4;
-    }
     paymentGroup.methods = paymentGroup.methods.map(function (method) {
       const discountKey = discountKeys[paymentGroup.group - 1];
       method.discountKey = discountKey;
@@ -455,12 +444,6 @@ async function getQuotationTotalsByMethod(
       method.subtotal = paymentGroup.subtotal;
       method.discount = paymentGroup.discount;
       method.exchangeRate = exchangeRate;
-
-      if ( method.extraDiscount ){
-        const extraDiscount = method.total * ( method.extraDiscount / 100 );
-        method.discount = method.discount + extraDiscount;
-        method.total = paymentGroup.total + extraDiscount;
-      }
 
       if (method.type === CASH_USD_TYPE) {
         const exchangeRateString = numeral(exchangeRate).format(

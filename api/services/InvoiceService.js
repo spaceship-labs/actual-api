@@ -418,7 +418,6 @@ function getPaymentMethodBasedOnPayments(payments, order) {
     case 'single-payment-terminal':
     case 'credit-card':
     case 'credit-card-usd':
-    case 'credit-card-amex':
     case '3-msi':
     case '3-msi-banamex':
     case '6-msi':
@@ -432,7 +431,6 @@ function getPaymentMethodBasedOnPayments(payments, order) {
       paymentMethod = 'credit-card';
       break;
 
-    case 'debit-card-amex':
     case 'debit-card':
       paymentMethod = 'debit-card';
       break;
