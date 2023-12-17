@@ -65,6 +65,12 @@ module.exports = {
     folio: { type: 'string' },
     total: { type: 'float' },
     totalPg1: { type: 'float' },
+    totalExtra2PercentDiscount: { type: 'float' },
+    totalExtra4PercentDiscount: { type: 'float' },
+    extraDiscount2: { type: 'float' },
+    extraDiscount4: { type: 'float' },
+    applied2PercentDiscount: { type: 'boolean' },
+    applied4PercentDiscount: { type: 'boolean' },
     subtotal: { type: 'float' },
     subtotal2: { type: 'float' }, // includes discounts but not big ticket neither family and friends
     discount: { type: 'float' },
