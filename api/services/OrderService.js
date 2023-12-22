@@ -10,21 +10,6 @@ const statusTypes = {
   PAID: 'paid',
 };
 
-const extraDiscountTypes = [
-  'debit-card-amex', 'credit-card-amex', 'debit-card', 'credit-card', 'credit-card-usd'
-];
-
-const extra4PercentDiscountTypes = [
-  "debit-card-amex", 
-  "credit-card-amex"
-];
-
-const extra2PercentDiscountTypes = [
-  "debit-card", 
-  "credit-card",
-  "credit-card-usd"
-];
-
 module.exports = {
   create,
   cancel,
@@ -132,7 +117,7 @@ async function getTotalsByUser(form) {
 }
 
 async function create(form, currentUser) {
-  const { quotationId, VMquotation } = form;
+  const { quotationId } = form;
   var opts = {
     //paymentGroup: form.paymentGroup || 1,
     updateDetails: true,
@@ -165,7 +150,7 @@ async function create(form, currentUser) {
 
   const calculator = QuotationService.Calculator();
   await calculator.updateQuotationTotals(quotationId, opts);
-  var quotation = await Quotation.findOne({ id: quotationId })
+  const quotation = await Quotation.findOne({ id: quotationId })
     .populate('Payments')
     .populate('Details')
     .populate('Address')
@@ -206,50 +191,12 @@ async function create(form, currentUser) {
   }
 
   const minPaidPercentage = quotation.minPaidPercentage || 100;
-
-  const hasExtraDiscount = _.find(quotation.Payments, function(payment) {
-    return extraDiscountTypes.includes(payment.type) && payment.status !== 'canceled';
-  });
-
-  if ( hasExtraDiscount ) {
-    var discountType = hasExtraDiscount.type;
-    if ( 
-        //Check for 4% discount 
-        (_.contains(extra4PercentDiscountTypes,hasExtraDiscount)) &&
-        (getPaidPercentage(quotation.ammountPaid, quotation.totalExtra4PercentDiscount) < minPaidPercentage)
-      ){
-        throw new Error('No se ha pagado la cantidad minima de la orden');
-    }else if ( 
-        //Check for 2% discount 
-        (_.contains(extra2PercentDiscountTypes,hasExtraDiscount)) &&
-        (getPaidPercentage(quotation.ammountPaid, quotation.totalExtra2PercentDiscount) < minPaidPercentage)
-      ) {
-      throw new Error('No se ha pagado la cantidad minima de la orden');
-    }
-  }else if (
-    getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage
-  ){
+  if (
+    getPaidPercentage(quotation.ammountPaid, quotation.total) <
+    minPaidPercentage
+  ) {
     throw new Error('No se ha pagado la cantidad minima de la orden');
   }
-
-  if ( _.contains(extra4PercentDiscountTypes,discountType) ){
-    sails.log.info("\x1b[35mExtra 4% discount applied:", hasExtraDiscount.type,"\x1b[0m")
-    quotation.total = VMquotation.total;
-    quotation.subtotal = VMquotation.subtotal;
-    quotation.discount = VMquotation.discount;
-    quotation.applied4PercentDiscount = true;
-  }else if ( _.contains(extra2PercentDiscountTypes,discountType) ){
-    sails.log.info("\x1b[35mExtra 2% discount applied:", hasExtraDiscount.type,"\x1b[0m")
-    quotation.total = VMquotation.total;
-    quotation.subtotal = VMquotation.subtotal;
-    quotation.discount = VMquotation.discount;
-    quotation.applied2PercentDiscount = true;
-  }
-
-
-  console.log("FN1",quotation.total)
-  console.log("FN2",quotation.subtotal)
-  console.log("FN3",quotation.discount)
 
   const user = await User.findOne({ id: quotation.User.id }).populate('Seller');
 
@@ -613,9 +560,9 @@ function createEwalletRecord(record) {
 
 function getPaidPercentage(amountPaid, total) {
   var percentage = amountPaid / (total / 100);
-  sails.log.info('total', total);
-  sails.log.info('amountPaid', amountPaid);
-  sails.log.info('percentage', percentage);
+  console.log('total', total);
+  console.log('amountPaid', amountPaid);
+  console.log('percentage', percentage);
   //Floating point issue precision with JS
   //TODO find fix to precision
   //Problem: sometimes ammount paid and total is equal, but percentage throws: 99.99999999999999

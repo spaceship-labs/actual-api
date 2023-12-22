@@ -613,9 +613,7 @@ function paymentMethod(payment) {
       payment_name = 'Monedero electrónico';
       break;
     case 'credit-card':
-    case 'credit-card-amex':
     case 'debit-card':
-    case 'debit-card-amex':
     case 'single-payment-terminal':
     case '3-msi':
     case '3-msi-banamex':
@@ -660,11 +658,9 @@ function paymentType(payment) {
       payment_name = 'Transferencia';
       break;
     case 'credit-card':
-    case 'credit-card-amex':
       payment_name = 'Crédito, terminal ' + payment.terminal;
       break;
     case 'debit-card':
-    case 'debit-card-amex':
       payment_name = 'Débito, terminal ' + payment.terminal;
       break;
     case 'single-payment-terminal':
