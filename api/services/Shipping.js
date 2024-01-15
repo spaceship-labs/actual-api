@@ -9,7 +9,7 @@ const ISLA_MERIDA_ID = '5fa2357f45f52fb4325ab3f2';
 const STUDIO_MERIDA_ID = '576acfee5280c21ef87ea5bc';
 const CEDIS_MERIDA_WHS_CODE = '10';
 const STUDIO_MERIDA_WHS_CODE = '11';
-const STUDIO_ISLA_MERIDA_WHS_CODE = '22';
+const ISLA_MERIDA_WHS_CODE = '22';
 
 module.exports = {
   product: productShipping,
@@ -44,7 +44,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
         '>': 0,
       },
       ShopDelivery: false,
-      WeekendDelivery: false,
+      WeekendDelivery: false
     }
   }
   let stockItems = await DatesDelivery.find(stockItemsQuery);
@@ -52,6 +52,7 @@ async function productShipping(product, storeWarehouse, activeQuotationId) {
   const stockItemscodes = stockItems.map(function (p) {
     return p.whsCode;
   });
+
   const whsCodes = await Company.find({ WhsCode: stockItemscodes });
 
   stockItems = stockItems.map(function (stockItem) {
@@ -138,7 +139,7 @@ async function buildShippingItem(
   if (fromQrooStores.includes(stockItem.whsCode)) {
     let toCode = await Company.findOne(storeWarehouseId);
     if (QrooStores.includes(toCode.WhsCode)) {
-      // de Qroo a Qroo 4-5 dias
+      // de Qroo a Qroo 3 o 5 dias
       let WEEKEND_DELIVERY_DAYS = 5;
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
@@ -147,25 +148,25 @@ async function buildShippingItem(
       seasonDays = WEEKEND_DELIVERY_DAYS;
 
       // Fixed number
-      seasonDays = 5;
+      // seasonDays = 5;
     } else {
       // de cedis 01 Qroo a merida
       if (stockItem.whsCode == "01") {
-        seasonDays = 11;
+        seasonDays = 9;
       } else {
       // de Qroo a merida
         seasonDays = 4;
         if (QrooStores.includes(stockItem.whsCode)) {
-          seasonDays = 11;
+          seasonDays = 9;
         }
       }
     }
   } else {
-    // cedis 10 a tiendas merida
+    // cedis merida 10 a tiendas merida
     seasonDays = 5;
     // tiendas merida a tiendas merida
     if (["11", "22"].includes(stockItem.whsCode)) {
-      seasonDays = 7;
+      seasonDays = 5;
     }
 
   }
@@ -197,7 +198,6 @@ async function buildShippingItem(
         }
         days = productDays + WEEKEND_DELIVERY_DAYS;
       }
-      days = productDays + WEEKEND_DELIVERY_DAYS;
     }
   }
   */
@@ -228,7 +228,7 @@ async function buildShippingItem(
 
 function isMeridaWhsCode(whsCode) {
   return (
-    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === STUDIO_ISLA_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_ID || whsCode === STUDIO_MERIDA_ID
+    whsCode === CEDIS_MERIDA_WHS_CODE || whsCode === STUDIO_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_WHS_CODE || whsCode === ISLA_MERIDA_ID || whsCode === STUDIO_MERIDA_ID
   );
 }
 
