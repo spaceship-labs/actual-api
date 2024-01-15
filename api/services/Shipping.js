@@ -152,7 +152,7 @@ async function buildShippingItem(
     } else {
       // de cedis 01 Qroo a merida
       if (stockItem.whsCode == "01") {
-        seasonDays = 11;
+        seasonDays = 9;
       } else {
       // de Qroo a merida
         seasonDays = 4;
