@@ -139,7 +139,7 @@ async function buildShippingItem(
   if (fromQrooStores.includes(stockItem.whsCode)) {
     let toCode = await Company.findOne(storeWarehouseId);
     if (QrooStores.includes(toCode.WhsCode)) {
-      // de Qroo a Qroo 6 o 6 dias
+      // de Qroo a Qroo 3 o 5 dias
       let WEEKEND_DELIVERY_DAYS = 5;
       var currentDate = moment().startOf('date');
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
@@ -148,7 +148,7 @@ async function buildShippingItem(
       seasonDays = WEEKEND_DELIVERY_DAYS;
 
       // Fixed number
-      seasonDays = 5;
+      // seasonDays = 5;
     } else {
       // de cedis 01 Qroo a merida
       if (stockItem.whsCode == "01") {
@@ -157,7 +157,7 @@ async function buildShippingItem(
       // de Qroo a merida
         seasonDays = 4;
         if (QrooStores.includes(stockItem.whsCode)) {
-          seasonDays = 11;
+          seasonDays = 9;
         }
       }
     }
@@ -166,7 +166,7 @@ async function buildShippingItem(
     seasonDays = 5;
     // tiendas merida a tiendas merida
     if (["11", "22"].includes(stockItem.whsCode)) {
-      seasonDays = 7;
+      seasonDays = 5;
     }
 
   }
