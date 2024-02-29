@@ -145,6 +145,12 @@ async function buildShippingItem(
       if (currentDate.day() >= 0 && currentDate.day() <= 4) {
         WEEKEND_DELIVERY_DAYS -= 2;
       }
+
+      // de 05 a qroo stores
+      if(toCode.WhsCode == "05"){
+        WEEKEND_DELIVERY_DAYS = 7;
+      }
+      
       seasonDays = WEEKEND_DELIVERY_DAYS;
 
       // Fixed number
