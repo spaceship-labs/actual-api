@@ -146,6 +146,9 @@ async function buildShippingItem(
         WEEKEND_DELIVERY_DAYS -= 2;
       }
 
+      // Fixed number
+      seasonDays = 5;
+      
       // de 05 a qroo stores
       if(toCode.WhsCode == "05"){
         WEEKEND_DELIVERY_DAYS = 7;
@@ -153,8 +156,7 @@ async function buildShippingItem(
       
       seasonDays = WEEKEND_DELIVERY_DAYS;
 
-      // Fixed number
-      // seasonDays = 5;
+
     } else {
       // de cedis 01 Qroo a merida
       if (stockItem.whsCode == "01") {
