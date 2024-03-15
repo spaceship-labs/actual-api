@@ -157,6 +157,8 @@ module.exports = {
     actual_kids: { type: 'integer' },
     actual_puerto_cancun: { type: 'integer' },
     actual_marketplace: { type: 'integer' },
+    actual_business_cancun: { type: 'integer' },
+    actual_business_merida: { type: 'integer' },
 
     proyectos: { type: 'integer' },
     actual_proyect: { type: 'integer' },
@@ -175,6 +177,8 @@ module.exports = {
     discountPrice_proyectos: { type: 'float' },
     discountPrice_actual_proyect: { type: 'float' },
     discountPrice_actual_marketplace: { type: 'float' },
+    actual_business_cancun: { type: 'float' },
+    actual_business_merida: { type: 'float' },
 
     //RELATIONS
     files: {
