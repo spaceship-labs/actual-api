@@ -7,7 +7,7 @@ module.exports.init = function(){
       fn: function(d){
         CategoryService.cacheCategoriesProducts();
       },
-      time:'0 */30 * * * *'
+      time:'*/30 * * * * *'
     },
     {
       fn: function(d){

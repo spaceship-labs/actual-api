@@ -21,9 +21,12 @@ async function cacheCategoriesProducts(){
   //sails.log.info('cache categories stock start: ' + new Date());
   const storesCodes = await getAllStoresCodes();
   const categories = await ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
+  console.log("START cacheCategoriesProducts")
+
   const result = await Promise.each(categories, function(category){
     return updateCategory(category, storesCodes);
   });
+  console.log("END cacheCategoriesProducts")
   return true;
 }
 
