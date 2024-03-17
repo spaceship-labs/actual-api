@@ -32,9 +32,7 @@ async function cacheCategoriesProducts(){
 }
 
 function updateCategory(category, storesCodes){
-  categoryWithoutProduct.toJSON = function () {
-    return _.omit(category, "Product");
-  };
+  var categoryWithoutProduct = _.omit(category, "Product");
   console.log("\x1b[31m category ", JSON.stringify(categoryWithoutProduct, null, 4))
   var categoryStock = getProductsStoresStock(category.Products, storesCodes);
   return ProductCategory.update({id:category.id}, categoryStock);
