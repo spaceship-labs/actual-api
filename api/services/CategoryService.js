@@ -22,6 +22,7 @@ async function cacheCategoriesProducts(){
   const storesCodes = await getAllStoresCodes();
   const categories = await ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
   console.log("START cacheCategoriesProducts")
+  console.log("\x1b[36m%s\x1b[31m categories  ", {categories})
 
   const result = await Promise.each(categories, function(category){
     return updateCategory(category, storesCodes);
@@ -31,9 +32,9 @@ async function cacheCategoriesProducts(){
 }
 
 function updateCategory(category, storesCodes){
-  console.log("category ", category)
+  console.log("\x1b[36m%s\x1b[31m categorycategory ", {category})
   var categoryStock = getProductsStoresStock(category.Products, storesCodes);
-  console.log("categoryStock ",categoryStock)
+  console.log("\x1b[36m%s\x1b[32m categoryStock ",{categoryStock})
   return ProductCategory.update({id:category.id}, categoryStock);
 }
 
@@ -80,7 +81,6 @@ async function getAllStoresCodes(){
   const storesCodes = stores.map(function(s){
     return s.code;
   });    
-  console.log(storesCodes)
   return _.uniq(storesCodes);
 }
 
