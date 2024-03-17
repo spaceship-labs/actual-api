@@ -34,7 +34,6 @@ async function cacheCategoriesProducts(){
 function updateCategory(category, storesCodes){
   console.log("\x1b[36m%s\x1b[31m categorycategory ", JSON.stringify(category))
   var categoryStock = getProductsStoresStock(category.Products, storesCodes);
-  console.log("\x1b[36m%s\x1b[32m categoryStock ", JSON.stringify(categoryStock))
   return ProductCategory.update({id:category.id}, categoryStock);
 }
 
