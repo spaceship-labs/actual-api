@@ -31,7 +31,9 @@ async function cacheCategoriesProducts(){
 }
 
 function updateCategory(category, storesCodes){
+  console.log("category ", category)
   var categoryStock = getProductsStoresStock(category.Products, storesCodes);
+  console.log("categoryStock ",categoryStock)
   return ProductCategory.update({id:category.id}, categoryStock);
 }
 
@@ -78,6 +80,7 @@ async function getAllStoresCodes(){
   const storesCodes = stores.map(function(s){
     return s.code;
   });    
+  console.log(storesCodes)
   return _.uniq(storesCodes);
 }
 
