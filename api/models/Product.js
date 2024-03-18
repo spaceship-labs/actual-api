@@ -177,8 +177,8 @@ module.exports = {
     discountPrice_proyectos: { type: 'float' },
     discountPrice_actual_proyect: { type: 'float' },
     discountPrice_actual_marketplace: { type: 'float' },
-    actual_business_cancun: { type: 'float' },
-    actual_business_merida: { type: 'float' },
+    discountPrice_actual_business_cancun: { type: 'float' },
+    discountPrice_actual_business_merida: { type: 'float' },
 
     //RELATIONS
     files: {
