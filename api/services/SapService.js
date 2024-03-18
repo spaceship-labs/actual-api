@@ -23,6 +23,8 @@ const HOME_GROUP = 'home';
 const KIDS_GROUP = 'kids';
 const ATELIER_GROUP = 'atelier';
 const PROJECTS_GROUP = 'proyectos';
+const BUSINESS_CANCUN = 'actual_business_cancun';
+const BUSINESS_MERIDA = 'actual_business_merida';
 
 var reqOptions = {
   method: 'POST',
@@ -314,6 +316,12 @@ function getCompanyCode(code, storeGroup) {
         break;
       case PROJECTS_GROUP:
         companyCode = COMPANY_HOME_CODE;
+        break;
+      case BUSINESS_CANCUN:
+        companyCode = COMPANY_STUDIO_CODE;
+        break;
+      case BUSINESS_MERIDA:
+        companyCode = COMPANY_STUDIO_CODE;
         break;
       case ATELIER_GROUP:
         companyCode = COMPANY_ATELIER_CODE;
