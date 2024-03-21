@@ -7,13 +7,7 @@ module.exports.init = function(){
       fn: function(d){
         CategoryService.cacheCategoriesProducts();
       },
-      time:'00 51 23 * * *'
-    },
-    {
-      fn: function(d){
-        CategoryService.cacheCategoriesProductsBusiness();
-      },
-      time:'30 53 23 * * *'
+      time:'00 00 03 * * *'
     },
     {
       fn: function(d){
