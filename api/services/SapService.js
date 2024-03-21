@@ -23,8 +23,8 @@ const HOME_GROUP = 'home';
 const KIDS_GROUP = 'kids';
 const ATELIER_GROUP = 'atelier';
 const PROJECTS_GROUP = 'proyectos';
-const BUSINESS_CANCUN = 'actual_business_cancun';
-const BUSINESS_MERIDA = 'actual_business_merida';
+const BUSINESS_CANCUN = 'actual_bussiness_cancun';
+const BUSINESS_MERIDA = 'actual_bussiness_merida';
 
 var reqOptions = {
   method: 'POST',
