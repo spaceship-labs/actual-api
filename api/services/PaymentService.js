@@ -50,6 +50,8 @@ const VALID_STORES_CODES = [
   'actual_proyect_playa',
   'actual_isla_merida',
   'actual_atelier',
+  'actual_business_cancun',
+  'actual_business_merida',
 ];
 
 module.exports = {

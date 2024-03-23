@@ -23,6 +23,8 @@ const HOME_GROUP = 'home';
 const KIDS_GROUP = 'kids';
 const ATELIER_GROUP = 'atelier';
 const PROJECTS_GROUP = 'proyectos';
+const BUSINESS_CANCUN = 'actual_business_cancun';
+const BUSINESS_MERIDA = 'actual_business_merida';
 
 var reqOptions = {
   method: 'POST',
@@ -197,34 +199,38 @@ function createSaleOrder(params) {
 
 function buildOrderRequestParams(params) {
   var products = [];
-  var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
-  var ACTUAL_HOME_XCARET_GROUPCODE = 8;
-  var PROJECTS_GROUPCODE = 6;
-  var ACTUAL_STUDIO_CUMBRES_GROUPCODE = 4;
   var ACTUAL_STUDIO_MALECON_GROUPCODE = 1;
   var ACTUAL_STUDIO_PLAYA_GROUPCODE = 2;
   var ACTUAL_STUDIO_MERIDA_GROUPCODE = 3;
+  var ACTUAL_STUDIO_CUMBRES_GROUPCODE = 4;
+  var PROJECTS_GROUPCODE = 6;
+  var ACTUAL_HOME_XCARET_GROUPCODE = 8;
+  var ACTUAL_PUERTO_CANCUN_GROUPCODE = 10;
   var MARKETPLACES_GROUPCODE = 11;
   var MERCADOLIBRE_MARKETPLACE_GROUPCODE = 12;
   var AMAZON_MARKETPLACE_GROUPCODE = 13;
   var PROJECTS_PLAYA_GROUPCODE = 14;
   var ACTUAL_STUDIO_ISLA_MERIDA_GROUPCODE = 15;
   var ACTUAL_ATELIER_GROUPCODE = 16;
+  var ACTUAL_BUSINESS_CANCUN_GROUPCODE = 17;
+  var ACTUAL_BUSINESS_MERIDA_GROUPCODE = 18;
 
   if (
-    params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
-    params.groupCode != ACTUAL_PUERTO_CANCUN_GROUPCODE &&
-    params.groupCode != PROJECTS_GROUPCODE &&
-    params.groupCode != ACTUAL_STUDIO_CUMBRES_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_MALECON_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_PLAYA_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_MERIDA_GROUPCODE &&
+    params.groupCode != ACTUAL_STUDIO_CUMBRES_GROUPCODE &&
+    params.groupCode != PROJECTS_GROUPCODE &&
+    params.groupCode != ACTUAL_HOME_XCARET_GROUPCODE &&
+    params.groupCode != ACTUAL_PUERTO_CANCUN_GROUPCODE &&
     params.groupCode != MARKETPLACES_GROUPCODE &&
     params.groupCode != MERCADOLIBRE_MARKETPLACE_GROUPCODE &&
     params.groupCode != AMAZON_MARKETPLACE_GROUPCODE &&
     params.groupCode != PROJECTS_PLAYA_GROUPCODE &&
     params.groupCode != ACTUAL_STUDIO_ISLA_MERIDA_GROUPCODE &&
     params.groupCode != ACTUAL_ATELIER_GROUPCODE &&
+    params.groupCode != ACTUAL_BUSINESS_CANCUN_GROUPCODE &&
+    params.groupCode != ACTUAL_BUSINESS_MERIDA_GROUPCODE &&
     process.env.MODE === 'production'
   ) {
     return Promise.reject(
@@ -310,6 +316,12 @@ function getCompanyCode(code, storeGroup) {
         break;
       case PROJECTS_GROUP:
         companyCode = COMPANY_HOME_CODE;
+        break;
+      case BUSINESS_CANCUN:
+        companyCode = COMPANY_STUDIO_CODE;
+        break;
+      case BUSINESS_MERIDA:
+        companyCode = COMPANY_STUDIO_CODE;
         break;
       case ATELIER_GROUP:
         companyCode = COMPANY_ATELIER_CODE;
